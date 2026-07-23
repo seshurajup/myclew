@@ -1,0 +1,10 @@
+name: trackA_gbm
+track: A                 # residual-dtvt GBM via fleet tab-autobaseline (well-disjoint GroupKFold)
+goal_rmse: 6.39           # updated bar: evansussex/rogii-public-score-frontier-lab-visuals (public 6.390)
+baseline_rmse: 15.91    # const-continuation (dtvt=0), pooled
+params:
+  folds: 5
+  gpu: true
+  limit: null           # null = all 773 wells; set N for a smoke test
+  bits: 8               # GBM feature-quantization precision: 8 -> max_bin=255, 4 -> max_bin=15 (train low-bit only)
+  make_submission: true

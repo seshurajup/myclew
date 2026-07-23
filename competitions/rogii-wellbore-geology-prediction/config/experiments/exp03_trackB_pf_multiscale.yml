@@ -1,0 +1,13 @@
+name: exp03_trackB_pf_multiscale
+track: B
+goal_rmse: 6.39
+baseline_rmse: 12.02
+params:
+  gpu: true
+  n_particles: 768
+  n_seeds: 384
+  scale: 5.0
+  multiscale: true
+  limit: null
+  make_submission: true
+  _agents: geology_trackB (GPU batched particle filter, multi-scale NCC typewell correlation)

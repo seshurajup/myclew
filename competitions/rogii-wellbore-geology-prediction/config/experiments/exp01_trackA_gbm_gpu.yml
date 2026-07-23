@@ -1,0 +1,13 @@
+name: exp01_trackA_gbm_gpu
+track: A
+goal_rmse: 6.39
+baseline_rmse: 15.91
+params:
+  folds: 5
+  gpu: true
+  limit: null
+  bits: 8
+  fe: true
+  make_submission: true
+  _agents: tab_train(lightgbm 4.7 CUDA device=cuda,max_bin=255)+tab_autobaseline;
+    well-disjoint GroupKFold

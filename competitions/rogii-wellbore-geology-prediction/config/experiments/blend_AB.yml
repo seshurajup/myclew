@@ -1,0 +1,8 @@
+name: blend_AB
+track: blend             # convex blend of Track-A (GBM) + Track-B (particle filter) OOF, weight tuned on shared wells
+goal_rmse: 6.39           # updated bar: evansussex/rogii-public-score-frontier-lab-visuals (public 6.390)
+params:
+  inputs:               # OOF ledgers produced by the A / B experiments
+    - trackA_oof
+    - trackB_oof
+  make_submission: true

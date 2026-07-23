@@ -1,0 +1,13 @@
+name: exp07_trackD_tabfm
+track: D
+goal_rmse: 6.39
+baseline_rmse: 12.02
+params:
+  backend: pytorch
+  folds: 5
+  max_context: 2000
+  seed: 42
+  limit_rows: null
+  make_submission: true
+  _agents: tabfm (Google TabFM in-context tabular foundation model over the Track-A
+    flat table)

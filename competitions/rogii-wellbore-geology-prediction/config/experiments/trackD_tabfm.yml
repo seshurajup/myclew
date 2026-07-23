@@ -1,0 +1,11 @@
+name: trackD_tabfm
+track: D                 # Google TabFM (in-context tabular foundation model, no training) over the Track-A flat table
+goal_rmse: 6.39
+baseline_rmse: 12.02
+params:
+  backend: pytorch
+  folds: 5               # well-disjoint GroupKFold
+  max_context: 2000      # in-context row cap — quadratic attention; calibrate empirically before raising
+  seed: 42
+  limit_rows: null       # set e.g. 20000 for a smoke test (subsamples the already-assembled table)
+  make_submission: true

@@ -1,0 +1,10 @@
+name: exp09_blend_conf
+track: blend_conf
+goal_rmse: 6.39
+baseline_rmse: 10.4308
+params:
+  inputs:
+  - trackA_oof
+  - trackB_oof
+  make_submission: true
+  _agents: blend_optimize confidence-weighted (wB=lo+(hi-lo)*trackB_conf, fit on OOF)

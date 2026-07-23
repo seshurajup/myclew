@@ -1,0 +1,26 @@
+name: trackC_seq_fp8
+track: C                 # neural sequence model (HF) over GR+geometry, predicts residual dTVT; FP8-trained
+goal_rmse: 6.39           # updated bar: evansussex/rogii-public-score-frontier-lab-visuals (public 6.390)
+# Knobs are DATA-DERIVED (measured over 200 wells, math/xai-governed), not hand-guessed:
+#  eval_len p50=4801/p99=7644 · known_len p50=1691 · |dtvt| p99≈75 · step_drift≈0 (near-piecewise-const)
+#  GR_autocorr_len p99≈348 · EFFECTIVE samples = 773 WELLS (rows are autocorrelated) -> small+regularized.
+params:
+  gpu: true
+  precision: bf16        # fp8 measured 10-12x slower on sm_120 (torchao + HF-kernels both); bf16 is the honest fast choice
+                          # MEASURED sm_120 (2026-07-23): kernel loads+correct fwd, but NO autograd backward and
+                          # ~10x SLOWER than bf16 matmul even at 512-dim -> preflight rejects it, falls back to bf16.
+  fp8_fallback: bf16
+  arch: gru              # GRU: fewer params, better small-data generalization than Transformer here
+  hidden: 256            # capacity cap: 773 effective samples -> big model overfits under well-disjoint CV
+  layers: 2
+  dropout: 0.25
+  weight_decay: 0.01
+  seq_window: 512        # chunk size for stateful full-well carry (receptive field > GR_autocorr p99≈348)
+  full_well: true        # process each well as ONE sequence with stateful hidden carry (don't truncate)
+  tv_lambda: 0.05        # total-variation smoothness prior: mean(|Δpred|); target is near-piecewise-const
+  target_std: true       # standardize residual dtvt by per-fold std (~20-30); linear head (no saturating act)
+  folds: 5               # well-disjoint GroupKFold
+  epochs: 25
+  batch_size: 8          # wells per batch (padded/packed)
+  limit: null
+  make_submission: true

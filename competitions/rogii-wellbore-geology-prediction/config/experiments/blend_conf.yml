@@ -1,0 +1,9 @@
+name: blend_conf
+track: blend_conf         # confidence-weighted A+B blend: wB = lo + (hi-lo)*trackB_conf, fit on OOF
+goal_rmse: 6.39
+baseline_rmse: 10.4308    # fixed-weight blend_AB result, to beat
+params:
+  inputs:
+    - trackA_oof
+    - trackB_oof           # must include trackB_conf column (rerun trackB_particle_filter after the code update)
+  make_submission: true

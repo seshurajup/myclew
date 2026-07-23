@@ -1,0 +1,25 @@
+name: exp04_trackC_muon_bf16
+track: C
+goal_rmse: 6.39
+baseline_rmse: 12.02
+params:
+  gpu: true
+  precision: bf16
+  fp8_fallback: bf16
+  arch: gru
+  hidden: 256
+  layers: 2
+  dropout: 0.25
+  weight_decay: 0.01
+  seq_window: 512
+  full_well: true
+  tv_lambda: 0.05
+  target_std: true
+  folds: 5
+  epochs: 25
+  batch_size: 8
+  limit: null
+  make_submission: true
+  optimizer: muon
+  _agents: muon_optimizer (Newton-Schulz on GRU 2D weights) + lightning_tricks (bf16-mixed
+    on sm_120)

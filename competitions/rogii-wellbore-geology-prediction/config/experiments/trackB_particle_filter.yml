@@ -1,0 +1,11 @@
+name: trackB_particle_filter
+track: B                 # 128-seed likelihood-weighted particle filter over typewell GR signature
+goal_rmse: 6.39           # updated bar: evansussex/rogii-public-score-frontier-lab-visuals (public 6.390)
+baseline_rmse: 12.02     # const-continuation on Track-B validation wells
+params:
+  gpu: true              # batched-seed particle filter on RTX 5090 (~5x faster, >=accuracy of CPU@128)
+  n_particles: 500
+  n_seeds: 256           # GPU is cheap -> more seeds recover/exceed CPU@128 accuracy
+  scale: 5.0
+  limit: null            # null = all 773 wells (~15 min GPU); set N for a smoke test
+  make_submission: true

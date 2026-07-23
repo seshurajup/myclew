@@ -1,0 +1,26 @@
+name: exp05_trackC_muon_mup
+track: C
+goal_rmse: 6.39
+baseline_rmse: 12.02
+params:
+  gpu: true
+  precision: bf16
+  arch: gru
+  hidden: 512
+  layers: 2
+  dropout: 0.3
+  weight_decay: 0.01
+  seq_window: 512
+  full_well: true
+  tv_lambda: 0.05
+  target_std: true
+  folds: 5
+  epochs: 25
+  batch_size: 8
+  limit: null
+  make_submission: true
+  optimizer: muon
+  mup: true
+  base_width: 256
+  _agents: mup_scaling (readout LR x base/width so hidden=256 LR transfers to 512)
+    + muon_optimizer

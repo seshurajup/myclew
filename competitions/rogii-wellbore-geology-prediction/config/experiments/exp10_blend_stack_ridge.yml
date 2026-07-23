@@ -1,0 +1,14 @@
+name: exp10_blend_stack_ridge
+track: blend_stack
+goal_rmse: 6.39
+baseline_rmse: 10.4308
+params:
+  inputs:
+  - trackA_oof
+  - trackB_oof
+  - trackC_oof
+  - trackD_oof
+  alpha: 1.0
+  make_submission: true
+  _agents: blend_optimize ridge-stack meta-learner over all track OOF (well-disjoint),
+    beats AmgedAlfaqih ridge stack
