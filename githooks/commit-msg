@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+# Strip every AI/assistant attribution from the commit message, always.
+#
+# Why this exists: the trailer kept coming back. It was hardcoded in
+# sync_and_commit.sh, and assistant tooling adds it by default — so relying on
+# whoever writes the commit to remember is not a control. This runs on EVERY
+# commit path (manual, script, cron) and cannot be forgotten.
+#
+# Scope: message only. Author/committer identity is enforced by `git config
+# user.email` per repo, plus the pre-commit hook's check.
+set -uo pipefail
+MSG_FILE="$1"
+[ -f "$MSG_FILE" ] || exit 0
+
+# Drop attribution trailers and the "Generated with" advert line; then collapse
+# any blank lines left dangling at the end of the message.
+grep -viE '^[[:space:]]*(Co-Authored-By:[[:space:]]*(Claude|Anthropic)|🤖[[:space:]]*Generated with|Generated with \[?Claude)' \
+  "$MSG_FILE" > "$MSG_FILE.tmp" 2>/dev/null || cp "$MSG_FILE" "$MSG_FILE.tmp"
+
+# strip trailing blank lines
+awk 'BEGIN{n=0} {lines[n++]=$0} END{while(n>0 && lines[n-1] ~ /^[[:space:]]*$/) n--; for(i=0;i<n;i++) print lines[i]}' \
+  "$MSG_FILE.tmp" > "$MSG_FILE"
+rm -f "$MSG_FILE.tmp"
+exit 0

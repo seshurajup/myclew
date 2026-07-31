@@ -107,9 +107,7 @@ if git diff --cached --quiet; then
   echo "[myclew] no pending changes — nothing to commit ($(date '+%F %T'))"; exit 0
 fi
 N=$(git diff --cached --name-only | wc -l)
-git -c user.name="seshurajup" -c user.email="seshuraju.p@ipauthor.com" \
-  commit -q -m "stable snapshot $(date '+%F %H:%M') — ${N} files
-
-Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>"
+git -c user.name="SeshurajuP" -c user.email="seshurajup@gmail.com" \
+  commit -q -m "stable snapshot $(date '+%F %H:%M') — ${N} files"
 git push -q origin HEAD 2>&1 | tail -2 || { echo "[myclew] push failed"; exit 3; }
 echo "[myclew] committed + pushed ${N} changed files ($(date '+%F %T'))"

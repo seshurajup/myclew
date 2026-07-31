@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+# Two hard blocks before any commit lands:
+#   1. the committing identity must be the owner's gmail — never the ipauthor
+#      address and never an assistant;
+#   2. no credential-shaped file may be staged. GitHub push protection already
+#      caught a live Google OAuth token (access + refresh + client_secret) that a
+#      sync had swept in; this stops it one step earlier, before it is in history.
+set -uo pipefail
+EMAIL="$(git config user.email || true)"
+if [ "$EMAIL" != "seshurajup@gmail.com" ]; then
+  echo "[pre-commit] BLOCKED: user.email is '$EMAIL', expected seshurajup@gmail.com"
+  echo "             fix: git config user.email seshurajup@gmail.com"
+  exit 1
+fi
+
+STAGED="$(git diff --cached --name-only --diff-filter=ACM || true)"
+BAD="$(printf '%s\n' "$STAGED" | grep -Ei '(^|/)(\.env|kaggle\.json)$|token.*\.json$|secret|credential|\.pem$|\.key$' || true)"
+if [ -n "$BAD" ]; then
+  echo "[pre-commit] BLOCKED: credential-shaped files staged:"; printf '  %s\n' $BAD
+  echo "             remove them (git rm --cached <f>) and add to .gitignore"
+  exit 1
+fi
+
+# content scan of staged text files — a secret does not need a suspicious NAME
+for f in $STAGED; do
+  [ -f "$f" ] || continue
+  # skip the hooks themselves: this file NAMES the markers it searches for, so it
+  # matched itself and blocked its own commit (the classic self-match trap).
+  case "$f" in .githooks/*|githooks/*) continue ;; esac
+  if head -c 8000 "$f" 2>/dev/null | grep -qE '"refresh_token"|"client_secret"|BEGIN (RSA|OPENSSH) PRIVATE KEY|ghp_[A-Za-z0-9]{30}|AKIA[0-9A-Z]{16}'; then
+    echo "[pre-commit] BLOCKED: '$f' contains a credential marker (refresh_token/client_secret/private key)"
+    exit 1
+  fi
+done
+exit 0
