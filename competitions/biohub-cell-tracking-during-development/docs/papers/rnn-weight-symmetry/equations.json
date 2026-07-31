@@ -1,0 +1,578 @@
+[
+  {
+    "n": null,
+    "page": 2,
+    "latex": "\\alphamodeln_{R}full-T_{CC}-T_{C\\to R}",
+    "raw": "\u03b1 model nR full \u2212TCC \u2212TC\u2192R",
+    "image": "assets/eq/eq_p02_000.png",
+    "y0": 108.18782806396484,
+    "y1": 119.34049224853516
+  },
+  {
+    "n": "1",
+    "page": 2,
+    "latex": "h_{t} = tanh(W_{xh}x_{t} + W_{hh}h_{t-1}),h_{0} = 0, \\tag{1}",
+    "raw": "ht = tanh(Wxhxt + Whhht\u22121), h0 = 0, (1)",
+    "image": "assets/eq/eq_p02_001.png",
+    "y0": 121.38584899902344,
+    "y1": 132.84246826171875
+  },
+  {
+    "n": "2",
+    "page": 2,
+    "latex": "y\u02c6_{t} = W_{hy}h_{t}, \\tag{2}",
+    "raw": "\u02c6yt = Whyht, (2)",
+    "image": "assets/eq/eq_p02_002.png",
+    "y0": 136.3298797607422,
+    "y1": 147.7864990234375
+  },
+  {
+    "n": "3",
+    "page": 2,
+    "latex": "W = QTQ^{^{\\top}}, \\tag{3}",
+    "raw": "W = QTQ\u22a4, (3)",
+    "image": "assets/eq/eq_p02_003.png",
+    "y0": 230.90939331054688,
+    "y1": 242.97006225585938
+  },
+  {
+    "n": "4",
+    "page": 2,
+    "latex": "T = B + N, \\tag{4}",
+    "raw": "T = B + N, (4)",
+    "image": "assets/eq/eq_p02_004.png",
+    "y0": 286.3729248046875,
+    "y1": 296.5660705566406
+  },
+  {
+    "n": null,
+    "page": 2,
+    "latex": "E\\|y\u02c6 -y\\|^{2} FVU =",
+    "raw": "FVU = E\u2225\u02c6y \u2212y\u22252",
+    "image": "assets/eq/eq_p02_005.png",
+    "y0": 381.2374267578125,
+    "y1": 400.11651611328125
+  },
+  {
+    "n": "7",
+    "page": 2,
+    "latex": "(7) E\\|y -y \u0304\\|^{2} . \\tag{7}",
+    "raw": "E\u2225y \u2212 \u0304y\u22252 . (7)",
+    "image": "assets/eq/eq_p02_006.png",
+    "y0": 390.1539306640625,
+    "y1": 406.95050048828125
+  },
+  {
+    "n": null,
+    "page": 2,
+    "latex": "R = {i : |\\lambda_{i}| \\ge \\alpha\\rho(W)},C = {1, . . . , N_{h}} \\ R.",
+    "raw": "R = {i : |\u03bbi| \u2265\u03b1\u03c1(W)}, C = {1, . . . , Nh} \\ R.",
+    "image": "assets/eq/eq_p02_007.png",
+    "y0": 405.5928039550781,
+    "y1": 416.7464294433594
+  },
+  {
+    "n": "8",
+    "page": 2,
+    "latex": "\u2206FVU = FVU(Wf_{hh}) -FVU(W_{hh}), \\tag{8}",
+    "raw": "\u2206FVU = FVU(f Whh) \u2212FVU(Whh), (8)",
+    "image": "assets/eq/eq_p02_008.png",
+    "y0": 472.23980712890625,
+    "y1": 486.9759216308594
+  },
+  {
+    "n": null,
+    "page": 2,
+    "latex": "\u2206FVU S_{\u2206T} = \\|\u2206T\\|_{F} /\\|T\\|_{F}",
+    "raw": "S\u2206T = \u2206FVU \u2225\u2206T\u2225F /\u2225T\u2225F",
+    "image": "assets/eq/eq_p02_009.png",
+    "y0": 486.7479248046875,
+    "y1": 511.77850341796875
+  },
+  {
+    "n": null,
+    "page": 2,
+    "latex": "B_{R}0 0B_{C}",
+    "raw": "\u0012BR 0 0 BC",
+    "image": "assets/eq/eq_p02_010.png",
+    "y0": 505.8983459472656,
+    "y1": 529.6844482421875
+  },
+  {
+    "n": null,
+    "page": 2,
+    "latex": "",
+    "raw": "\u0013",
+    "image": "assets/eq/eq_p02_011.png",
+    "y0": 505.8983154296875,
+    "y1": 515.8609008789062
+  },
+  {
+    "n": null,
+    "page": 2,
+    "latex": "T_{RR}T_{C\\to R} 0T_{CC}",
+    "raw": "\u0012TRR TC\u2192R 0 TCC",
+    "image": "assets/eq/eq_p02_012.png",
+    "y0": 505.8983154296875,
+    "y1": 529.6843872070312
+  },
+  {
+    "n": null,
+    "page": 2,
+    "latex": "",
+    "raw": "\u0013",
+    "image": "assets/eq/eq_p02_013.png",
+    "y0": 505.8982849121094,
+    "y1": 515.8609008789062
+  },
+  {
+    "n": null,
+    "page": 2,
+    "latex": "B =",
+    "raw": "B =",
+    "image": "assets/eq/eq_p02_014.png",
+    "y0": 512.7828979492188,
+    "y1": 522.7454833984375
+  },
+  {
+    "n": null,
+    "page": 2,
+    "latex": ",N =",
+    "raw": ", N =",
+    "image": "assets/eq/eq_p02_015.png",
+    "y0": 512.7828979492188,
+    "y1": 522.7454833984375
+  },
+  {
+    "n": "6",
+    "page": 2,
+    "latex": "Wf_{hh}(S) = QT e(S)Q^{^{\\top}}, \\tag{6}",
+    "raw": "f Whh(S) = Q eT(S)Q\u22a4, (6)",
+    "image": "assets/eq/eq_p02_016.png",
+    "y0": 636.765380859375,
+    "y1": 655.7599487304688
+  },
+  {
+    "n": null,
+    "page": 3,
+    "latex": "^{1.0}",
+    "raw": "1.0",
+    "image": "assets/eq/eq_p03_017.png",
+    "y0": 89.01346588134766,
+    "y1": 95.07725524902344
+  },
+  {
+    "n": null,
+    "page": 3,
+    "latex": "^{0.8}",
+    "raw": "0.8",
+    "image": "assets/eq/eq_p03_018.png",
+    "y0": 107.0871353149414,
+    "y1": 113.15092468261719
+  },
+  {
+    "n": null,
+    "page": 3,
+    "latex": "^{0.6}",
+    "raw": "0.6",
+    "image": "assets/eq/eq_p03_019.png",
+    "y0": 125.16080474853516,
+    "y1": 131.22459411621094
+  },
+  {
+    "n": null,
+    "page": 3,
+    "latex": "^{none-T}_{RR}^{-T}_{C\\to R}^{-T}_{RR}",
+    "raw": "none \u2212TRR \u2212TC\u2192R \u2212TRR",
+    "image": "assets/eq/eq_p03_020.png",
+    "y0": 139.40406799316406,
+    "y1": 150.7504425048828
+  },
+  {
+    "n": null,
+    "page": 3,
+    "latex": "^{none-T}_{RR}^{-T}_{C\\to R}^{-T}_{RR}",
+    "raw": "none \u2212TRR \u2212TC\u2192R \u2212TRR",
+    "image": "assets/eq/eq_p03_021.png",
+    "y0": 139.40406799316406,
+    "y1": 150.7504425048828
+  },
+  {
+    "n": null,
+    "page": 3,
+    "latex": "^{-T}_{C\\to R}",
+    "raw": "\u2212TC\u2192R",
+    "image": "assets/eq/eq_p03_022.png",
+    "y0": 146.05923461914062,
+    "y1": 155.44692993164062
+  },
+  {
+    "n": null,
+    "page": 3,
+    "latex": "^{-T}_{C\\to R}",
+    "raw": "\u2212TC\u2192R",
+    "image": "assets/eq/eq_p03_023.png",
+    "y0": 146.05923461914062,
+    "y1": 155.44692993164062
+  },
+  {
+    "n": null,
+    "page": 3,
+    "latex": "{T_{RR}, T_{C\\to R}, T_{CC}} and S \\subseteq \\mathcal{Z}, the intervention is",
+    "raw": "{TRR, TC\u2192R, TCC} and S \u2286Z, the intervention is",
+    "image": "assets/eq/eq_p03_024.png",
+    "y0": 262.8197937011719,
+    "y1": 273.9734191894531
+  },
+  {
+    "n": null,
+    "page": 3,
+    "latex": "Wf_{hh}(S) = QZ_{S}(T)Q^{^{\\top}},",
+    "raw": "f Whh(S) = QZS(T)Q\u22a4,",
+    "image": "assets/eq/eq_p03_025.png",
+    "y0": 285.62738037109375,
+    "y1": 302.1029357910156
+  },
+  {
+    "n": null,
+    "page": 3,
+    "latex": "(",
+    "raw": "(",
+    "image": "assets/eq/eq_p03_026.png",
+    "y0": 302.6293640136719,
+    "y1": 312.5919494628906
+  },
+  {
+    "n": null,
+    "page": 3,
+    "latex": "0,B \\in S, B \\in \\mathcal{Z}. T_{B},B \\in /S,",
+    "raw": "0, B \u2208S, TB, B /\u2208S, B \u2208Z.",
+    "image": "assets/eq/eq_p03_027.png",
+    "y0": 305.57781982421875,
+    "y1": 331.07745361328125
+  },
+  {
+    "n": null,
+    "page": 3,
+    "latex": "",
+    "raw": "\u0000",
+    "image": "assets/eq/eq_p03_028.png",
+    "y0": 311.5953674316406,
+    "y1": 321.5579528808594
+  },
+  {
+    "n": null,
+    "page": 3,
+    "latex": "",
+    "raw": "\u0001",
+    "image": "assets/eq/eq_p03_029.png",
+    "y0": 311.5953674316406,
+    "y1": 321.5579528808594
+  },
+  {
+    "n": null,
+    "page": 3,
+    "latex": "Z_{S}(T)",
+    "raw": "ZS(T)",
+    "image": "assets/eq/eq_p03_030.png",
+    "y0": 312.501953125,
+    "y1": 323.52545166015625
+  },
+  {
+    "n": null,
+    "page": 3,
+    "latex": "= ^{B}",
+    "raw": "B =",
+    "image": "assets/eq/eq_p03_031.png",
+    "y0": 312.501953125,
+    "y1": 326.44952392578125
+  },
+  {
+    "n": null,
+    "page": 3,
+    "latex": "Entries outside {T_{RR}, T_{C\\to R}, T_{CC}} are unchanged. For \\mathcal{D}_{rc} and \\mathcal{L} = {1, . . . , 128},",
+    "raw": "Entries outside {TRR, TC\u2192R, TCC} are unchanged. For Drc and L = {1, . . . , 128},",
+    "image": "assets/eq/eq_p03_032.png",
+    "y0": 344.3638000488281,
+    "y1": 368.13507080078125
+  },
+  {
+    "n": null,
+    "page": 3,
+    "latex": "_{hh} :",
+    "raw": "hh :",
+    "image": "assets/eq/eq_p03_033.png",
+    "y0": 372.0044860839844,
+    "y1": 384.9731140136719
+  },
+  {
+    "n": null,
+    "page": 3,
+    "latex": "y\u02c6^{S}",
+    "raw": "\u02c6yS",
+    "image": "assets/eq/eq_p03_034.png",
+    "y0": 379.4356384277344,
+    "y1": 390.9565124511719
+  },
+  {
+    "n": null,
+    "page": 3,
+    "latex": "_{lj}(x) := y\u02c6_{lj}(x; fW_{hh}(S)),",
+    "raw": "lj(x) := \u02c6ylj(x; f Whh(S)),",
+    "image": "assets/eq/eq_p03_035.png",
+    "y0": 380.993896484375,
+    "y1": 398.1199035644531
+  },
+  {
+    "n": null,
+    "page": 3,
+    "latex": "_{hh,ij} \\sim Unif[-m, m],",
+    "raw": "hh,ij \u223cUnif[\u2212m, m],",
+    "image": "assets/eq/eq_p03_036.png",
+    "y0": 394.5108337402344,
+    "y1": 407.47943115234375
+  },
+  {
+    "n": null,
+    "page": 3,
+    "latex": "1 Acc_{rc} = |\\mathcal{D}_{rc}| |\\mathcal{L}| d",
+    "raw": "Accrc = 1 |Drc| |L| d",
+    "image": "assets/eq/eq_p03_037.png",
+    "y0": 404.9579162597656,
+    "y1": 429.555419921875
+  },
+  {
+    "n": null,
+    "page": 3,
+    "latex": "X",
+    "raw": "X",
+    "image": "assets/eq/eq_p03_038.png",
+    "y0": 409.3963317871094,
+    "y1": 419.3589172363281
+  },
+  {
+    "n": null,
+    "page": 3,
+    "latex": "1{sgn(\u02c6y_{lj}^{S}(x)) = y_{lj}}.",
+    "raw": "1{sgn(\u02c6yS lj(x)) = ylj}.",
+    "image": "assets/eq/eq_p03_039.png",
+    "y0": 410.13958740234375,
+    "y1": 423.6893615722656
+  },
+  {
+    "n": null,
+    "page": 3,
+    "latex": "_{hh} = Q,Q^{^{\\top}}Q = I,",
+    "raw": "hh = Q, Q\u22a4Q = I,",
+    "image": "assets/eq/eq_p03_040.png",
+    "y0": 411.5244140625,
+    "y1": 426.35955810546875
+  },
+  {
+    "n": null,
+    "page": 3,
+    "latex": "_{l}^{(}_{\\in \\mathcal{L}}^{x,y}_{,}^{)}^{\\in \\mathcal{D}}_{j\\in [rcd]}",
+    "raw": "(x,y)\u2208Drc l\u2208L, j\u2208[d]",
+    "image": "assets/eq/eq_p03_041.png",
+    "y0": 426.3133544921875,
+    "y1": 441.58740234375
+  },
+  {
+    "n": null,
+    "page": 3,
+    "latex": "_{hh} = QD_{norm}Q^{^{\\top}},",
+    "raw": "hh = QDnormQ\u22a4,",
+    "image": "assets/eq/eq_p03_042.png",
+    "y0": 429.50140380859375,
+    "y1": 444.3365478515625
+  },
+  {
+    "n": null,
+    "page": 3,
+    "latex": "D_{norm} = blockdiag(B_{1}, . . . , B_{Nh/2}),",
+    "raw": "Dnorm = blockdiag(B1, . . . , BNh/2),",
+    "image": "assets/eq/eq_p03_043.png",
+    "y0": 469.16796875,
+    "y1": 481.0553894042969
+  },
+  {
+    "n": null,
+    "page": 3,
+    "latex": "",
+    "raw": "\u0012",
+    "image": "assets/eq/eq_p03_044.png",
+    "y0": 484.3013916015625,
+    "y1": 494.26397705078125
+  },
+  {
+    "n": null,
+    "page": 3,
+    "latex": "",
+    "raw": "\u0013",
+    "image": "assets/eq/eq_p03_045.png",
+    "y0": 484.3013610839844,
+    "y1": 494.2639465332031
+  },
+  {
+    "n": null,
+    "page": 3,
+    "latex": "a_{i}-b_{i} b_{i}a_{i}",
+    "raw": "ai \u2212bi bi ai",
+    "image": "assets/eq/eq_p03_046.png",
+    "y0": 484.9798583984375,
+    "y1": 508.08746337890625
+  },
+  {
+    "n": null,
+    "page": 3,
+    "latex": "B_{i} =",
+    "raw": "Bi =",
+    "image": "assets/eq/eq_p03_047.png",
+    "y0": 491.18597412109375,
+    "y1": 502.6425476074219
+  },
+  {
+    "n": null,
+    "page": 3,
+    "latex": ",",
+    "raw": ",",
+    "image": "assets/eq/eq_p03_048.png",
+    "y0": 491.1859436035156,
+    "y1": 501.1485290527344
+  },
+  {
+    "n": null,
+    "page": 3,
+    "latex": "a_{i}, b_{i} \\sim \\mathcal{N}(0, 1/6).",
+    "raw": "ai, bi \u223cN(0, 1/6).",
+    "image": "assets/eq/eq_p03_049.png",
+    "y0": 512.8748168945312,
+    "y1": 524.3314208984375
+  },
+  {
+    "n": null,
+    "page": 3,
+    "latex": "_{hh} = O(A^{(k)})D^{(k)}O(A^{(k)})^{^{\\top}}, where (A^{(k)})^{^{\\top}}= ^{(k)} -Aand",
+    "raw": "hh = O(A(k))D(k)O(A(k))\u22a4, where (A(k))\u22a4= \u2212A(k) and",
+    "image": "assets/eq/eq_p03_050.png",
+    "y0": 545.0283203125,
+    "y1": 568.5470581054688
+  },
+  {
+    "n": null,
+    "page": 3,
+    "latex": "O(A) = (I -A)(I + A)^{-1}.",
+    "raw": "O(A) = (I \u2212A)(I + A)\u22121.",
+    "image": "assets/eq/eq_p03_051.png",
+    "y0": 576.9003295898438,
+    "y1": 588.7305297851562
+  },
+  {
+    "n": null,
+    "page": 3,
+    "latex": "U_{ij} \\sim Unif[-m, m],",
+    "raw": "Uij \u223cUnif[\u2212m, m],",
+    "image": "assets/eq/eq_p03_052.png",
+    "y0": 618.28076171875,
+    "y1": 629.7384033203125
+  },
+  {
+    "n": null,
+    "page": 3,
+    "latex": "^{(0)} ^{^{\\top}} A= (U -U)/2,",
+    "raw": "A(0) = (U \u2212U \u22a4)/2,",
+    "image": "assets/eq/eq_p03_053.png",
+    "y0": 631.2119140625,
+    "y1": 645.2885131835938
+  },
+  {
+    "n": null,
+    "page": 3,
+    "latex": "f W^{ij} \\sim Unif[-m, m],",
+    "raw": "f Wij \u223cUnif[\u2212m, m],",
+    "image": "assets/eq/eq_p03_054.png",
+    "y0": 652.7587890625,
+    "y1": 667.4959716796875
+  },
+  {
+    "n": null,
+    "page": 3,
+    "latex": "",
+    "raw": "\u0010",
+    "image": "assets/eq/eq_p03_055.png",
+    "y0": 668.0213623046875,
+    "y1": 677.9840087890625
+  },
+  {
+    "n": null,
+    "page": 3,
+    "latex": "",
+    "raw": "\u0011",
+    "image": "assets/eq/eq_p03_056.png",
+    "y0": 668.0213623046875,
+    "y1": 677.9840087890625
+  },
+  {
+    "n": null,
+    "page": 3,
+    "latex": ",",
+    "raw": ",",
+    "image": "assets/eq/eq_p03_057.png",
+    "y0": 671.9169311523438,
+    "y1": 681.8795166015625
+  },
+  {
+    "n": null,
+    "page": 4,
+    "latex": "^{T}_{RR}^{T}_{C\\to R}^{T}_{CC}",
+    "raw": "TRR TC\u2192R TCC",
+    "image": "assets/eq/eq_p04_058.png",
+    "y0": 71.34048461914062,
+    "y1": 84.1429672241211
+  },
+  {
+    "n": null,
+    "page": 4,
+    "latex": "^{2.0}",
+    "raw": "2.0",
+    "image": "assets/eq/eq_p04_059.png",
+    "y0": 105.73359680175781,
+    "y1": 113.59244537353516
+  },
+  {
+    "n": null,
+    "page": 4,
+    "latex": "^{1.5}",
+    "raw": "1.5",
+    "image": "assets/eq/eq_p04_060.png",
+    "y0": 125.9893798828125,
+    "y1": 133.8482208251953
+  },
+  {
+    "n": null,
+    "page": 4,
+    "latex": "^{1.0}",
+    "raw": "1.0",
+    "image": "assets/eq/eq_p04_061.png",
+    "y0": 146.2451629638672,
+    "y1": 154.10400390625
+  },
+  {
+    "n": null,
+    "page": 4,
+    "latex": "^{0.5}",
+    "raw": "0.5",
+    "image": "assets/eq/eq_p04_062.png",
+    "y0": 166.50094604492188,
+    "y1": 174.3597869873047
+  },
+  {
+    "n": null,
+    "page": 4,
+    "latex": "^{0.0}",
+    "raw": "0.0",
+    "image": "assets/eq/eq_p04_063.png",
+    "y0": 186.75672912597656,
+    "y1": 194.61557006835938
+  }
+]

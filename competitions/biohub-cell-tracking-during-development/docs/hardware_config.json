@@ -1,0 +1,45 @@
+{
+ "device": "cuda",
+ "gpu": "NVIDIA GeForce RTX 5090",
+ "cc": "12.0",
+ "vram_gb": 33.7,
+ "amp_dtype": "bf16",
+ "allow_tf32": true,
+ "matmul_precision": "high",
+ "channels_last": true,
+ "torch_compile": true,
+ "batch_scale": 2.11,
+ "grad_checkpoint": false,
+ "recommended_optimizer": "muon",
+ "measured_matmul_ms": {
+  "fp32": 1.402,
+  "fp16": 0.679,
+  "bf16": 0.763,
+  "tf32": 1.404,
+  "fp8": 0.364
+ },
+ "dtype_speedup_vs_fp32": 1.84,
+ "fp8_supported_hw": true,
+ "fp8_fused_backend": true,
+ "fp8_matmul_speedup_vs_bf16": 2.1,
+ "fp8_min_matmul_dim": 1024,
+ "fp8_requires": "transformer/matmul-heavy + matmul dim \u22651024 + torch.compile (eager or small matmul \u2192 bf16)",
+ "fp8_conv_supported": false,
+ "fp8_train_backend": "torchao.float8 tensorwise + torch.compile",
+ "fp8_mxfp8_usable": false,
+ "fp8_dead_on_sm120": [
+  "grouped-fp8 MoE (_scaled_grouped_mm, cc==9.0)",
+  "DeepGEMM/DeepSeek-V3 (no sm_120 kernels)",
+  "Machete-fp8",
+  "SGLang block-fp8",
+  "TE-MXFP8 (blocked 12.0+)",
+  "TE-NVFP4 (buggy)"
+ ],
+ "int8_inference_backend": "TensorRT INT8 PTQ",
+ "train_precision_policy": {
+  "matmul_or_transformer": "fp8",
+  "conv_or_mixed": "bf16",
+  "fallback": "bf16",
+  "_fp8_note": "fp8 candidate (compile on) \u2014 gated on matmul dim \u22651024 per-model; MXFP8 2.92\u00d7 if torchao present"
+ }
+}

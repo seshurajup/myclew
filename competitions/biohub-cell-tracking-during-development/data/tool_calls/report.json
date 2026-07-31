@@ -1,0 +1,29 @@
+{
+ "n": 1372,
+ "rejected": 53,
+ "verified_frac": 0.9628,
+ "by_kind": {
+  "search": 186,
+  "execute": 812,
+  "recover_unknown": 121,
+  "recover_args": 253
+ },
+ "capabilities_covered": 206,
+ "index_size": 321,
+ "routable": 293,
+ "with_schema": 49,
+ "unroutable_no_summary": 28,
+ "mean_request_summary_overlap": 0.6979,
+ "overlap_hard": 0.6166,
+ "overlap_easy": 0.7766,
+ "hard_frac_actual": 0.492,
+ "low_overlap_frac": 0.016,
+ "idf_top1_disagrees_frac": 0.1348,
+ "gold_rank1_frac": 0.1293,
+ "shortlisted_examples": 812,
+ "reject_reasons": {
+  "target not retrieved by its own gold query": 6,
+  "not in its own shortlist": 40,
+  "error reproduced + recovery query retrieves the target": 7
+ }
+}

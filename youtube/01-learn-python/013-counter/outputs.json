@@ -1,0 +1,5 @@
+[
+  {"after_line": 6, "text": ">>> Counter({'red': 3, 'blue': 2, 'green': 1})", "caption": "counts every item in one call"},
+  {"after_line": 8, "text": ">>> 3\n>>> [('red', 3)]", "caption": "lookup + most_common"},
+  {"after_line": 11, "text": ">>> 4", "caption": "update adds more tallies"}
+]

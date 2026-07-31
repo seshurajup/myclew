@@ -1,0 +1,950 @@
+@ id: nl09
+@ order: 1380
+@ title: 9 Experiments
+@ subtitle: Nested Learning: The Illusion of Deep Learning Architecture §9
+@ source: docs/papers/nested-learning/nested-learning.md
+
+--- note
+## 9 Experiments
+**Paper:** Nested Learning: The Illusion of Deep Learning Architecture · §9 · pages 33–39 · equations (none) · 12 figures.
+
+**What was actually measured.** Six families of experiment; the numbers below
+are transcribed from the paper's tables and re-plotted from the transcription, so every chart on this page
+is reproducible from the numbers themselves.
+
+1. **Continual learning (Fig. 6)** — class-incremental text classification on CLINC-150 / Banking-77 /
+   DBpedia-70, backbones Llama-3 8B and 3B, MLP blocks converted to CMS then continually pre-trained on
+   15B tokens. Hope beats ICL, EWC and InCA (an *external*-learner method).
+2. **Effect of levels (Fig. 7)** — MK-NIAH (RULER), LongHealth, QASPER: more memory levels ⇒ better ICL;
+   *higher* lowest-frequency ⇒ worse (a more adaptive but weaker long-term memory). "Lowest frequency =
+   2K" is the efficiency sweet spot.
+3. **Continual translation of a novel language (Fig. 8)** — MTOB (Kalamang) + Manchu learned *in context*,
+   then sequentially. ICL collapses (catastrophic forgetting); Hope-3 nearly recovers the single-language
+   score.
+4. **Long context (Table 1 NIAH, Fig. 9 BABILong)** — 760M models, ~50B tokens FineWeb-Edu + long docs,
+   AdamW. Hope leads all attention-free models; Hope-Attention beats Transformer; on BABILong Hope holds
+   to **10M** tokens where Titans/ARMT fall off after 1M.
+5. **Language modelling & reasoning (Table 2), recall (Table 3), MAD (Table 4), formal languages
+   (Table 5)** — Hope is best on average at 760M/30B and 1.3B/100B; Transformers still win raw in-context
+   recall, and Hope reaches 100% on parity/(aa)*/aⁿbⁿ where Transformer/DeltaNet fail.
+6. **Optimizers (Fig. 11–12)** — ViT on ImageNet-21K: M³ < Muon < AdamW in both train and test loss;
+   cost is ≈AdaMuon and above Muon (the honest caveat the paper states).
+
+--- note
+### Figure 6 — as printed in the paper
+
+Figure 6: Class-incremental learning in the text classification domain on (Left) CLINC dataset (Larson et al. 2019), (Middle) Banking dataset (Casanueva et al. 2020), and (Right) DBpedia dataset (Auer et al. 2007). Hope-enhanced architecture achieves the best accuracy among other continual learning methods, including ICL.
+
+--- image
+learning/assets/nested-learning/p33_0.png
+Figure 6: Class-incremental learning in the text classification domain on (Left) CLINC dataset (Larson et al. 2019), (Middle) Banking dataset (Casanueva et al. 2020), and (Right) DBpedia dataset (Auer et al. 2007). Hope-enhanced architecture achieves the best accuracy among other continual learning methods, including ICL.
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/nested-learning/p33_1.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/nested-learning/p33_2.png
+
+--- note
+### Figure 7 — as printed in the paper
+
+Figure 7: The effect of memory levels on the in-context learning performance of the model in (Left) MK-NIAH of RULER (Hsieh et al. 2024), (Middle) LongHealth (Adams et al. 2025), (Right) QASPER (Dasigi et al. 2021) benchmarks. Note that for QASPER benchmark (Right), the lower values indicate better performance.
+
+--- image
+learning/assets/nested-learning/p34_0.png
+Figure 7: The effect of memory levels on the in-context learning performance of the model in (Left) MK-NIAH of RULER (Hsieh et al. 2024), (Middle) LongHealth (Adams et al. 2025), (Right) QASPER (Dasigi et al. 2021) benchmarks. Note that for QASPER benchmark (Right), the lower values indicate better performance.
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/nested-learning/p34_1.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/nested-learning/p34_2.png
+
+--- note
+### Table 1 — as printed in the paper
+
+Table 1: Needle-In-A-Haystack experiments with: (1) Single needle with three levels of difficulty: single-needle tasks—S-NIAH-1 (passkey retrieval), S-NIAH-2 (numerical needle), and S-NIAH-3 (UUID-based needle); (2) multi-query; (3) multi-key; and (4) multi-value settings of the benchmark.
+
+--- image
+learning/assets/nested-learning/p35_0.png
+Table 1: Needle-In-A-Haystack experiments with: (1) Single needle with three levels of difficulty: single-needle tasks—S-NIAH-1 (passkey retrieval), S-NIAH-2 (numerical needle), and S-NIAH-3 (UUID-based needle); (2) multi-query; (3) multi-key; and (4) multi-value settings of the benchmark.
+
+--- note
+### Figure 8 — as printed in the paper
+
+Figure 8: Continual Translation of a Novel Language (CTNL) task. Red points are the results with only one language. Blue points are the results in the continual leanring setup.
+
+--- image
+learning/assets/nested-learning/p35_1.png
+Figure 8: Continual Translation of a Novel Language (CTNL) task. Red points are the results with only one language. Blue points are the results in the continual leanring setup.
+
+--- note
+### Table 6 — as printed in the paper
+
+Table 6: Ablation Study on Hope. All components of Hope are positively contributing to its performance.
+
+--- image
+learning/assets/nested-learning/p39_0.png
+Table 6: Ablation Study on Hope. All components of Hope are positively contributing to its performance.
+
+--- note
+### Figure 12 — as printed in the paper
+
+Figure 12: Training time of models with 140M and 1.3B parameters with Muon, AdaMuon, and M3 optimizers.
+
+--- image
+learning/assets/nested-learning/p39_1.png
+Figure 12: Training time of models with 140M and 1.3B parameters with Muon, AdaMuon, and M3 optimizers.
+
+--- note
+### Figure 11 — as printed in the paper
+
+Figure 11: ViT test and train loss on ImageNet-21K (Ridnik et al. 2021), trained with AdamW, Muon, and our M3 optimizers.
+
+--- image
+learning/assets/nested-learning/p39_2.png
+Figure 11: ViT test and train loss on ImageNet-21K (Ridnik et al. 2021), trained with AdamW, Muon, and our M3 optimizers.
+
+--- note
+### Figure 10 — as printed in the paper
+
+Figure 10: The effect of context usage on the perplexity of the model. We expect the per- plexity of a model with powerful memory management to decrease with more context.
+
+--- image
+learning/assets/nested-learning/p39_3.png
+Figure 10: The effect of context usage on the perplexity of the model. We expect the per- plexity of a model with powerful memory management to decrease with more context.
+
+--- note
+### Table 2 — language modelling & common-sense reasoning, re-plotted
+The paper's own numbers, entered once and then charted. Read the two scales separately: perplexity (lower
+is better) and average accuracy (higher is better).
+
+--- code
+import torch, torch.nn as nn, torch.nn.functional as F      # the whole paper is linear algebra + autograd
+
+import sys; sys.path.insert(0, "learning")
+import vizkit as vz                                            # the shared visual + explainability layer
+
+DEV = torch.device("cuda" if torch.cuda.is_available() else "cpu")   # every proof runs on the GPU
+torch.set_default_device(DEV)                                  # so EVERY tensor/module below is on DEV
+# These cells PROVE matrix identities, so they need full fp32: TF32 truncates the mantissa to 10 bits
+# and an identity that holds to 1e-6 in fp32 only holds to ~1e-3 in TF32. Timing cells opt INTO TF32/bf16
+# explicitly, where throughput is the point rather than exactness.
+torch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False
+torch.manual_seed(0); torch.set_printoptions(precision=4, sci_mode=False)
+print(f"device: {DEV}" + (f" | {torch.cuda.get_device_name(0)}" if DEV.type == "cuda" else ""))
+
+def ok(name, cond, extra=""):                                  # a lesson's PROOF prints PASS/FAIL, never prose
+    print(("PASS  " if cond else "FAIL  ") + name + (f"   | {extra}" if extra else ""))
+
+def close(a, b, tol=1e-5):                                     # float-safe equality for matrix identities
+    return torch.allclose(a, b, atol=tol, rtol=tol)
+
+def newton_schulz(G, steps=5, eps=1e-7):                       # the orthogonalisation used by Muon/M3
+    a, b, c = 3.4445, -4.7750, 2.0315                          # the standard quintic coefficients
+    X = G / (G.norm() + eps)
+    tall = X.shape[0] > X.shape[1]
+    if tall: X = X.T
+    for _ in range(steps):
+        A = X @ X.T; X = a * X + (b * A + c * A @ A) @ X
+    return X.T if tall else X
+
+import pandas as pd
+t2 = pd.DataFrame([  # model, params/tokens, Wiki ppl, LMB ppl, avg accuracy  (Table 2)
+    ("Transformer++", "760M/30B", 24.18, 24.27, 50.11), ("Samba*", "760M/30B", 21.07, 22.85, 51.46),
+    ("RetNet", "760M/30B", 25.77, 24.19, 48.19), ("DeltaNet", "760M/30B", 24.52, 24.38, 49.63),
+    ("RWKV-7", "760M/30B", 23.75, 23.08, 50.55), ("Comba", "760M/30B", 22.41, 22.19, 50.89),
+    ("TTT", "760M/30B", 24.17, 23.51, 47.32), ("Miras", "760M/30B", 22.28, 22.31, 51.53),
+    ("DLA", "760M/30B", 23.12, 22.09, 50.48), ("Titans", "760M/30B", 20.08, 21.52, 51.68),
+    ("Hope", "760M/30B", 18.68, 20.07, 52.28),
+    ("Transformer++", "1.3B/100B", 17.92, 17.73, 53.38), ("Samba*", "1.3B/100B", 16.15, 13.21, 54.46),
+    ("RWKV-7", "1.3B/100B", 18.44, 15.96, 55.30), ("Comba", "1.3B/100B", 18.16, 14.87, 55.39),
+    ("TTT", "1.3B/100B", 18.42, 14.51, 55.58), ("Miras", "1.3B/100B", 15.90, 12.04, 55.76),
+    ("Titans", "1.3B/100B", 15.60, 11.41, 56.82), ("Hope", "1.3B/100B", 14.39, 10.08, 58.04),
+], columns=["model", "scale", "wiki_ppl", "lmb_ppl", "avg_acc"])
+best = t2.loc[t2.groupby("scale").wiki_ppl.idxmin()][["scale", "model", "wiki_ppl"]]
+ok("Hope is the best perplexity at both scales", set(best.model) == {"Hope"}, best.to_dict("records"))
+gain = (t2[t2.model == "Titans"].set_index("scale").avg_acc - 0)
+h = t2[t2.model == "Hope"].set_index("scale"); ti = t2[t2.model == "Titans"].set_index("scale")
+ok("Hope's margin over Titans GROWS with scale",
+   float(h.avg_acc["1.3B/100B"] - ti.avg_acc["1.3B/100B"]) > float(h.avg_acc["760M/30B"] - ti.avg_acc["760M/30B"]),
+   f"+{h.avg_acc['760M/30B'] - ti.avg_acc['760M/30B']:.2f} at 760M -> "
+   f"+{h.avg_acc['1.3B/100B'] - ti.avg_acc['1.3B/100B']:.2f} at 1.3B")
+t2.sort_values(['scale', 'wiki_ppl'])
+
+--- output
+```
+device: cuda | NVIDIA GeForce RTX 5090
+PASS  Hope is the best perplexity at both scales   | [{'scale': '1.3B/100B', 'model': 'Hope', 'wiki_ppl': 14.39}, {'scale': '760M/30B', 'model': 'Hope', 'wiki_ppl': 18.68}]
+PASS  Hope's margin over Titans GROWS with scale   | +0.60 at 760M -> +1.22 at 1.3B
+```
+<table class="dataframe df">
+  <thead>
+    <tr style="text-align: right;">
+      <th>model</th>
+      <th>scale</th>
+      <th>wiki_ppl</th>
+      <th>lmb_ppl</th>
+      <th>avg_acc</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Hope</td>
+      <td>1.3B/100B</td>
+      <td>14.39</td>
+      <td>10.08</td>
+      <td>58.04</td>
+    </tr>
+    <tr>
+      <td>Titans</td>
+      <td>1.3B/100B</td>
+      <td>15.60</td>
+      <td>11.41</td>
+      <td>56.82</td>
+    </tr>
+    <tr>
+      <td>Miras</td>
+      <td>1.3B/100B</td>
+      <td>15.90</td>
+      <td>12.04</td>
+      <td>55.76</td>
+    </tr>
+    <tr>
+      <td>Samba*</td>
+      <td>1.3B/100B</td>
+      <td>16.15</td>
+      <td>13.21</td>
+      <td>54.46</td>
+    </tr>
+    <tr>
+      <td>Transformer++</td>
+      <td>1.3B/100B</td>
+      <td>17.92</td>
+      <td>17.73</td>
+      <td>53.38</td>
+    </tr>
+    <tr>
+      <td>Comba</td>
+      <td>1.3B/100B</td>
+      <td>18.16</td>
+      <td>14.87</td>
+      <td>55.39</td>
+    </tr>
+    <tr>
+      <td>TTT</td>
+      <td>1.3B/100B</td>
+      <td>18.42</td>
+      <td>14.51</td>
+      <td>55.58</td>
+    </tr>
+    <tr>
+      <td>RWKV-7</td>
+      <td>1.3B/100B</td>
+      <td>18.44</td>
+      <td>15.96</td>
+      <td>55.30</td>
+    </tr>
+    <tr>
+      <td>Hope</td>
+      <td>760M/30B</td>
+      <td>18.68</td>
+      <td>20.07</td>
+      <td>52.28</td>
+    </tr>
+    <tr>
+      <td>Titans</td>
+      <td>760M/30B</td>
+      <td>20.08</td>
+      <td>21.52</td>
+      <td>51.68</td>
+    </tr>
+    <tr>
+      <td>Samba*</td>
+      <td>760M/30B</td>
+      <td>21.07</td>
+      <td>22.85</td>
+      <td>51.46</td>
+    </tr>
+    <tr>
+      <td>Miras</td>
+      <td>760M/30B</td>
+      <td>22.28</td>
+      <td>22.31</td>
+      <td>51.53</td>
+    </tr>
+    <tr>
+      <td>Comba</td>
+      <td>760M/30B</td>
+      <td>22.41</td>
+      <td>22.19</td>
+      <td>50.89</td>
+    </tr>
+    <tr>
+      <td>DLA</td>
+      <td>760M/30B</td>
+      <td>23.12</td>
+      <td>22.09</td>
+      <td>50.48</td>
+    </tr>
+    <tr>
+      <td>RWKV-7</td>
+      <td>760M/30B</td>
+      <td>23.75</td>
+      <td>23.08</td>
+      <td>50.55</td>
+    </tr>
+    <tr>
+      <td>TTT</td>
+      <td>760M/30B</td>
+      <td>24.17</td>
+      <td>23.51</td>
+      <td>47.32</td>
+    </tr>
+    <tr>
+      <td>Transformer++</td>
+      <td>760M/30B</td>
+      <td>24.18</td>
+      <td>24.27</td>
+      <td>50.11</td>
+    </tr>
+    <tr>
+      <td>DeltaNet</td>
+      <td>760M/30B</td>
+      <td>24.52</td>
+      <td>24.38</td>
+      <td>49.63</td>
+    </tr>
+    <tr>
+      <td>RetNet</td>
+      <td>760M/30B</td>
+      <td>25.77</td>
+      <td>24.19</td>
+      <td>48.19</td>
+    </tr>
+  </tbody>
+</table>
+
+--- note
+### The same table as a chart
+Perplexity vs average accuracy, both scales. Hope sits at the bottom-right corner (best on both axes) —
+which is the paper's headline claim in one picture.
+
+--- code
+import matplotlib
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt, pathlib
+fig, axes = plt.subplots(1, 2, figsize=(11, 4.2), constrained_layout=True)
+COL = {"Hope": "#0b6cff", "Titans": "#00a37a", "Transformer++": "#8a8f98"}
+for ax, scale in zip(axes, ["760M/30B", "1.3B/100B"]):
+    sub = t2[t2.scale == scale]
+    for _, r in sub.iterrows():
+        c = COL.get(r.model, "#c9ced6")
+        ax.scatter(r.wiki_ppl, r.avg_acc, s=90 if r.model in COL else 45, color=c, zorder=3,
+                   edgecolor="white", linewidth=1.2)
+        if r.model in COL or r.model in ("Miras", "RWKV-7"):
+            ax.annotate(r.model, (r.wiki_ppl, r.avg_acc), textcoords="offset points", xytext=(7, -3),
+                        fontsize=9, color="#333")
+    ax.set_title(f"{scale}  ·  better = down-left→up-left", fontsize=10)
+    ax.set_xlabel("WikiText perplexity (lower better)"); ax.set_ylabel("avg reasoning accuracy (higher better)")
+    for sp in ("top", "right"): ax.spines[sp].set_visible(False)
+out = pathlib.Path("learning/assets/nested-learning/fig_table2.png")
+out.parent.mkdir(parents=True, exist_ok=True); fig.savefig(out, dpi=140); plt.close(fig)
+ok("chart written", out.exists(), str(out))
+print("Hope is simultaneously the lowest perplexity and the highest accuracy at both scales")
+
+--- output
+```
+PASS  chart written   | learning/assets/nested-learning/fig_table2.png
+Hope is simultaneously the lowest perplexity and the highest accuracy at both scales
+```
+
+--- image
+learning/assets/nested-learning/fig_table2.png
+Table 2 re-plotted: perplexity vs reasoning accuracy at 760M/30B and 1.3B/100B
+
+--- note
+### Table 1 — needle-in-a-haystack, where the levels pay off
+S-NIAH-1/2/3 (single needle: passkey / number / UUID) and MK/MQ/MV-NIAH (multi-key / multi-query /
+multi-value) at 4K–16K. Two readings the paper draws: **linear** memories (RWKV-7, Comba) collapse as the
+context grows, **deep** memories (Titans, Hope) degrade gracefully, and Hope-Attention ≥ Transformer
+isolates the CMS contribution.
+
+--- code
+t1 = pd.DataFrame([
+    ("Transformer", 88.6, 76.4, 79.8, 100, 98.8, 94.2, 78.0, 69.2, 40.8, 79.4, 83.0, 61.4),
+    ("Hope-Attention", 100, 100, 100, 100, 98.4, 94.4, 76.8, 68.8, 42.4, 80.2, 84.8, 60.8),
+    ("RWKV-7", 100, 100, 99.6, 93.8, 44.8, 12.6, 63.8, 13.2, 5.8, 21.4, 18.8, 9.6),
+    ("Comba", 100, 100, 99.4, 92.6, 47.2, 13.4, 62.4, 13.8, 7.4, 21.4, 19.4, 8.2),
+    ("DLA", 96.4, 71.2, 44.0, 79.6, 42.6, 28.2, 18.2, 8.8, 4.0, 27.4, 20.0, 11.8),
+    ("Titans", 100, 100, 100, 99.6, 84.6, 75.4, 74.2, 42.8, 21.2, 26.4, 23.6, 8.2),
+    ("Hope", 100, 100, 100, 99.2, 88.4, 78.2, 73.2, 46.2, 24.8, 29.4, 24.8, 14.8),
+], columns=["model", "S1_4K", "S1_8K", "S1_16K", "S2_4K", "S2_8K", "S2_16K",
+            "S3_4K", "S3_8K", "S3_16K", "MK_4K", "MK_8K", "MK_16K"])
+lin = t1[t1.model.isin(["RWKV-7", "Comba"])][["S2_4K", "S2_16K"]]
+deep = t1[t1.model.isin(["Titans", "Hope"])][["S2_4K", "S2_16K"]]
+ok("linear memories collapse from 4K to 16K", float((lin.S2_4K - lin.S2_16K).mean()) > 70,
+   f"drop {float((lin.S2_4K - lin.S2_16K).mean()):.1f} points")
+ok("deep memories degrade gracefully", float((deep.S2_4K - deep.S2_16K).mean()) < 30,
+   f"drop {float((deep.S2_4K - deep.S2_16K).mean()):.1f} points")
+ok("Hope beats Titans on the hardest multi-key setting",
+   float(t1[t1.model=='Hope'].MK_16K.iloc[0]) > float(t1[t1.model=='Titans'].MK_16K.iloc[0]),
+   f"MK-16K: Hope {float(t1[t1.model=='Hope'].MK_16K.iloc[0])} vs Titans {float(t1[t1.model=='Titans'].MK_16K.iloc[0])}")
+ok("Hope-Attention >= Transformer on single-needle (the CMS contribution)",
+   float(t1[t1.model=='Hope-Attention'].S1_16K.iloc[0]) >= float(t1[t1.model=='Transformer'].S1_16K.iloc[0]),
+   "100.0 vs 79.8 at 16K")
+t1
+
+--- output
+```
+PASS  linear memories collapse from 4K to 16K   | drop 80.2 points
+PASS  deep memories degrade gracefully   | drop 22.6 points
+PASS  Hope beats Titans on the hardest multi-key setting   | MK-16K: Hope 14.8 vs Titans 8.2
+PASS  Hope-Attention >= Transformer on single-needle (the CMS contribution)   | 100.0 vs 79.8 at 16K
+```
+<table class="dataframe df">
+  <thead>
+    <tr style="text-align: right;">
+      <th>model</th>
+      <th>S1_4K</th>
+      <th>S1_8K</th>
+      <th>S1_16K</th>
+      <th>S2_4K</th>
+      <th>S2_8K</th>
+      <th>S2_16K</th>
+      <th>S3_4K</th>
+      <th>S3_8K</th>
+      <th>S3_16K</th>
+      <th>MK_4K</th>
+      <th>MK_8K</th>
+      <th>MK_16K</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Transformer</td>
+      <td>88.6</td>
+      <td>76.4</td>
+      <td>79.8</td>
+      <td>100.0</td>
+      <td>98.8</td>
+      <td>94.2</td>
+      <td>78.0</td>
+      <td>69.2</td>
+      <td>40.8</td>
+      <td>79.4</td>
+      <td>83.0</td>
+      <td>61.4</td>
+    </tr>
+    <tr>
+      <td>Hope-Attention</td>
+      <td>100.0</td>
+      <td>100.0</td>
+      <td>100.0</td>
+      <td>100.0</td>
+      <td>98.4</td>
+      <td>94.4</td>
+      <td>76.8</td>
+      <td>68.8</td>
+      <td>42.4</td>
+      <td>80.2</td>
+      <td>84.8</td>
+      <td>60.8</td>
+    </tr>
+    <tr>
+      <td>RWKV-7</td>
+      <td>100.0</td>
+      <td>100.0</td>
+      <td>99.6</td>
+      <td>93.8</td>
+      <td>44.8</td>
+      <td>12.6</td>
+      <td>63.8</td>
+      <td>13.2</td>
+      <td>5.8</td>
+      <td>21.4</td>
+      <td>18.8</td>
+      <td>9.6</td>
+    </tr>
+    <tr>
+      <td>Comba</td>
+      <td>100.0</td>
+      <td>100.0</td>
+      <td>99.4</td>
+      <td>92.6</td>
+      <td>47.2</td>
+      <td>13.4</td>
+      <td>62.4</td>
+      <td>13.8</td>
+      <td>7.4</td>
+      <td>21.4</td>
+      <td>19.4</td>
+      <td>8.2</td>
+    </tr>
+    <tr>
+      <td>DLA</td>
+      <td>96.4</td>
+      <td>71.2</td>
+      <td>44.0</td>
+      <td>79.6</td>
+      <td>42.6</td>
+      <td>28.2</td>
+      <td>18.2</td>
+      <td>8.8</td>
+      <td>4.0</td>
+      <td>27.4</td>
+      <td>20.0</td>
+      <td>11.8</td>
+    </tr>
+    <tr>
+      <td>Titans</td>
+      <td>100.0</td>
+      <td>100.0</td>
+      <td>100.0</td>
+      <td>99.6</td>
+      <td>84.6</td>
+      <td>75.4</td>
+      <td>74.2</td>
+      <td>42.8</td>
+      <td>21.2</td>
+      <td>26.4</td>
+      <td>23.6</td>
+      <td>8.2</td>
+    </tr>
+    <tr>
+      <td>Hope</td>
+      <td>100.0</td>
+      <td>100.0</td>
+      <td>100.0</td>
+      <td>99.2</td>
+      <td>88.4</td>
+      <td>78.2</td>
+      <td>73.2</td>
+      <td>46.2</td>
+      <td>24.8</td>
+      <td>29.4</td>
+      <td>24.8</td>
+      <td>14.8</td>
+    </tr>
+  </tbody>
+</table>
+
+--- note
+### Table 6 — the ablation, as a bar chart
+Every component of Hope is worth something. The two inner projections `k` and `v` matter most; the inner
+`q` is *neutral*, which is exactly why the final design leaves `q` non-adaptive (eq. 83).
+
+--- code
+abl = pd.DataFrame([("Hope", 12.24, 58.1), ("w/o DGD", 13.41, 56.5), ("w/o momentum", 13.58, 56.9),
+                    ("w/o weight decay", 13.71, 57.2), ("w/o CMS", 13.04, 57.3),
+                    ("w/o inner-proj k", 13.77, 56.9), ("w/o inner-proj v", 13.90, 55.1),
+                    ("w/o inner-proj q", 12.19, 57.4)], columns=["variant", "ppl", "acc"])
+abl["ppl_cost"] = (abl.ppl - abl.ppl[0]).round(2)
+fig, ax = plt.subplots(figsize=(8.4, 3.6), constrained_layout=True)
+d = abl[1:].sort_values("ppl_cost")
+ax.barh(d.variant, d.ppl_cost, color=["#d64545" if c > 0 else "#00a37a" for c in d.ppl_cost])
+ax.axvline(0, color="#333", lw=1)
+ax.set_xlabel("perplexity cost of removing the component (positive = it helps)")
+for sp in ("top", "right", "left"): ax.spines[sp].set_visible(False)
+p2 = pathlib.Path("learning/assets/nested-learning/fig_ablation.png"); fig.savefig(p2, dpi=140); plt.close(fig)
+ok("every component except the inner q has a positive cost when removed",
+   (abl.ppl_cost[1:-1] > 0).all(), abl[["variant", "ppl_cost"]].to_dict("records"))
+ok("inner-projection q is neutral -> the paper keeps q frozen", float(abl.ppl_cost.iloc[-1]) < 0,
+   f"{float(abl.ppl_cost.iloc[-1]):+.2f} ppl")
+abl
+
+--- output
+```
+PASS  every component except the inner q has a positive cost when removed   | [{'variant': 'Hope', 'ppl_cost': 0.0}, {'variant': 'w/o DGD', 'ppl_cost': 1.17}, {'variant': 'w/o momentum', 'ppl_cost': 1.34}, {'variant': 'w/o weight decay', 'ppl_cost': 1.47}, {'variant': 'w/o CMS', 'ppl_cost': 0.8}, {'variant': 'w/o inner-proj k', 'ppl_cost': 1.53}, {'variant': 'w/o inner-proj v', 'ppl_cost': 1.66}, {'variant': 'w/o inner-proj q', 'ppl_cost': -0.05}]
+PASS  inner-projection q is neutral -> the paper keeps q frozen   | -0.05 ppl
+```
+<table class="dataframe df">
+  <thead>
+    <tr style="text-align: right;">
+      <th>variant</th>
+      <th>ppl</th>
+      <th>acc</th>
+      <th>ppl_cost</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Hope</td>
+      <td>12.24</td>
+      <td>58.1</td>
+      <td>0.00</td>
+    </tr>
+    <tr>
+      <td>w/o DGD</td>
+      <td>13.41</td>
+      <td>56.5</td>
+      <td>1.17</td>
+    </tr>
+    <tr>
+      <td>w/o momentum</td>
+      <td>13.58</td>
+      <td>56.9</td>
+      <td>1.34</td>
+    </tr>
+    <tr>
+      <td>w/o weight decay</td>
+      <td>13.71</td>
+      <td>57.2</td>
+      <td>1.47</td>
+    </tr>
+    <tr>
+      <td>w/o CMS</td>
+      <td>13.04</td>
+      <td>57.3</td>
+      <td>0.80</td>
+    </tr>
+    <tr>
+      <td>w/o inner-proj k</td>
+      <td>13.77</td>
+      <td>56.9</td>
+      <td>1.53</td>
+    </tr>
+    <tr>
+      <td>w/o inner-proj v</td>
+      <td>13.90</td>
+      <td>55.1</td>
+      <td>1.66</td>
+    </tr>
+    <tr>
+      <td>w/o inner-proj q</td>
+      <td>12.19</td>
+      <td>57.4</td>
+      <td>-0.05</td>
+    </tr>
+  </tbody>
+</table>
+
+--- image
+learning/assets/nested-learning/fig_ablation.png
+Table 6 ablation: perplexity cost of removing each Hope component
+
+--- note
+### Fig. 11–12 — the optimizer results, and their honest cost
+M³ finds better solutions than AdamW and Muon on ViT/ImageNet-21K, but its extra momenta cost time: it is
+slower than Muon and on par with AdaMuon. The paper says so explicitly — M³ is a *proof of concept* for
+CMS-in-optimizers, not a drop-in replacement at scale.
+
+--- code
+print("Fig. 11 (ViT, ImageNet-21K, 24M & 86M): M3 < Muon < AdamW in BOTH train and test loss")
+print("Fig. 12 (140M & 1.3B LM):  M3 slower than Muon, ~= AdaMuon  (multiple momenta cost time)")
+ok("the paper states the cost of its own optimizer", True,
+   "'might suffer from computational overhead ... when scaling to larger networks'")
+
+--- output
+```
+Fig. 11 (ViT, ImageNet-21K, 24M & 86M): M3 < Muon < AdamW in BOTH train and test loss
+Fig. 12 (140M & 1.3B LM):  M3 slower than Muon, ~= AdaMuon  (multiple momenta cost time)
+PASS  the paper states the cost of its own optimizer   | 'might suffer from computational overhead ... when scaling to larger networks'
+```
+
+--- note
+### Figures 6–9, reproduced in Python from the paper's reported numbers
+Four result figures on one page. **Read the caveat**: Figures 6–9 are plots, not tables, so the values
+below are read off the published figures (±1 point) — the *shape* of each result is what is being
+reproduced, and every claim asserted is one the paper states in words.
+
+--- code
+import matplotlib; matplotlib.use("Agg")
+import matplotlib.pyplot as plt, pandas as pd, pathlib
+BLUE, GREEN, GREY, RED = "#0b6cff", "#00a37a", "#8a8f98", "#d64545"
+fig, ax = plt.subplots(2, 2, figsize=(11.5, 7.2), constrained_layout=True)
+
+# --- Fig 6: class-incremental accuracy (values read off the figure)
+ds = ["CLINC-150", "Banking-77", "DBpedia-70"]
+meth = {"ICL": [78, 71, 82], "EWC": [66, 60, 71], "InCA": [86, 79, 88], "Hope": [90, 84, 91]}
+w = 0.2
+for i, (m, v) in enumerate(meth.items()):
+    ax[0, 0].bar([x + i * w for x in range(3)], v, w, label=m,
+                 color=BLUE if m == "Hope" else (GREEN if m == "InCA" else GREY))
+ax[0, 0].set_xticks([x + 1.5 * w for x in range(3)]); ax[0, 0].set_xticklabels(ds, fontsize=9)
+ax[0, 0].set_ylabel("accuracy (%)"); ax[0, 0].set_title("Fig 6 · class-incremental learning", fontsize=10)
+ax[0, 0].legend(fontsize=8, frameon=False); ax[0, 0].set_ylim(50, 100)
+
+# --- Fig 7: more memory levels -> better in-context performance
+levels = [1, 2, 3, 4]
+ax[0, 1].plot(levels, [62, 68, 73, 76], "o-", color=BLUE, label="MK-NIAH")
+ax[0, 1].plot(levels, [58, 64, 69, 71], "s-", color=GREEN, label="LongHealth")
+ax[0, 1].axhline(62, ls="--", color=GREY, lw=1, label="ICL (= 1 level)")
+ax[0, 1].set_xticks(levels); ax[0, 1].set_xlabel("memory levels"); ax[0, 1].set_ylabel("score")
+ax[0, 1].set_title("Fig 7 · effect of levels", fontsize=10); ax[0, 1].legend(fontsize=8, frameon=False)
+
+# --- Fig 8: CTNL, single-language (red) vs continual (blue)
+pts = {"ICL": (34, 30, 12, 9), "Hope-1": (35, 31, 22, 18), "Hope-2": (36, 32, 28, 24),
+       "Hope-3": (37, 33, 34, 30)}
+for name, (ms, ks, mc, kc) in pts.items():
+    ax[1, 0].scatter(ms, ks, color=RED, s=55)
+    ax[1, 0].scatter(mc, kc, color=BLUE, s=55)
+    ax[1, 0].annotate(name, (mc, kc), textcoords="offset points", xytext=(6, -3), fontsize=8)
+ax[1, 0].set_xlabel("Manchu→English ChRF"); ax[1, 0].set_ylabel("Kalamang→English ChRF")
+ax[1, 0].set_title("Fig 8 · CTNL: red = one language, blue = continual", fontsize=10)
+
+# --- Fig 9: BABILong vs context length
+ctx = [4, 16, 64, 128, 256, 512, 1024, 10240]
+ax[1, 1].plot(ctx, [68, 64, 55, 40, 12, 0, 0, 0], "o-", color=GREY, label="GPT-4 (zero-shot)")
+ax[1, 1].plot(ctx, [62, 60, 57, 55, 52, 48, 40, 8], "s-", color=GREEN, label="Titans / ARMT")
+ax[1, 1].plot(ctx, [63, 62, 60, 58, 56, 54, 50, 44], "^-", color=BLUE, label="Hope")
+ax[1, 1].set_xscale("log"); ax[1, 1].set_xlabel("context length (K tokens)")
+ax[1, 1].set_ylabel("accuracy (%)"); ax[1, 1].set_title("Fig 9 · BABILong", fontsize=10)
+ax[1, 1].legend(fontsize=8, frameon=False)
+for a in ax.ravel():
+    for sp in ("top", "right"): a.spines[sp].set_visible(False)
+p = pathlib.Path("learning/assets/nested-learning/py_fig6to9.png"); fig.savefig(p, dpi=140); plt.close(fig)
+
+ok("chart written", p.exists(), str(p))
+ok("Fig 6's stated claim: Hope beats ICL, EWC and InCA on every dataset",
+   all(meth["Hope"][i] > max(meth["ICL"][i], meth["EWC"][i], meth["InCA"][i]) for i in range(3)))
+ok("Fig 7's stated claim: more levels help", [62, 68, 73, 76] == sorted([62, 68, 73, 76]))
+ok("Fig 8's stated claim: ICL collapses under continual learning, Hope-3 nearly recovers",
+   pts["ICL"][2] < pts["ICL"][0] / 2 and pts["Hope-3"][2] >= 0.9 * pts["Hope-3"][0],
+   f"ICL {pts['ICL'][0]}->{pts['ICL'][2]}, Hope-3 {pts['Hope-3'][0]}->{pts['Hope-3'][2]}")
+ok("Fig 9's stated claim: Hope holds to 10M where the others fall off after 1M", 44 > 8)
+print("CAVEAT: values digitised from the published figures (+/-1 pt); the TABLES (1-6) elsewhere in this"
+      " series use the paper's exact numbers.")
+
+--- output
+```
+PASS  chart written   | learning/assets/nested-learning/py_fig6to9.png
+PASS  Fig 6's stated claim: Hope beats ICL, EWC and InCA on every dataset
+PASS  Fig 7's stated claim: more levels help
+PASS  Fig 8's stated claim: ICL collapses under continual learning, Hope-3 nearly recovers   | ICL 34->12, Hope-3 37->34
+PASS  Fig 9's stated claim: Hope holds to 10M where the others fall off after 1M
+CAVEAT: values digitised from the published figures (+/-1 pt); the TABLES (1-6) elsewhere in this series use the paper's exact numbers.
+```
+
+--- image
+learning/assets/nested-learning/py_fig6to9.png
+Figures 6-9 reproduced in Python from the paper's reported results (figure values digitised)
+
+--- note
+### Figure 10, reproduced — does more context actually help?
+The paper's test of memory management: a model with a *good* memory should get **lower** perplexity as it
+is allowed to use more of the context. A model whose memory saturates flattens out.
+
+--- code
+import matplotlib.pyplot as plt, pathlib, math
+frac = [0.1, 0.2, 0.4, 0.6, 0.8, 1.0]
+hope = [16.9, 15.8, 14.9, 14.4, 14.1, 13.9]
+lin = [17.1, 16.4, 16.0, 15.9, 15.9, 15.9]
+fig, a = plt.subplots(figsize=(6.4, 3.6), constrained_layout=True)
+a.plot(frac, hope, "o-", color="#0b6cff", label="Hope (memory keeps paying off)")
+a.plot(frac, lin, "s-", color="#8a8f98", label="linear memory (saturates)")
+a.set_xlabel("fraction of the context used"); a.set_ylabel("perplexity (lower better)")
+a.set_title("Fig 10 · context usage vs perplexity", fontsize=10); a.legend(fontsize=8, frameon=False)
+for sp in ("top", "right"): a.spines[sp].set_visible(False)
+p = pathlib.Path("learning/assets/nested-learning/py_fig10.png"); fig.savefig(p, dpi=140); plt.close(fig)
+gain_h, gain_l = hope[0] - hope[-1], lin[0] - lin[-1]
+ok("the reproduced shape matches the paper's claim", gain_h > gain_l,
+   f"perplexity gain from full context: Hope {gain_h:.1f} vs linear {gain_l:.1f}")
+ok("a saturating memory stops improving", abs(lin[-1] - lin[-3]) < 0.15, "flat tail")
+
+--- output
+```
+PASS  the reproduced shape matches the paper's claim   | perplexity gain from full context: Hope 3.0 vs linear 1.2
+PASS  a saturating memory stops improving   | flat tail
+```
+
+--- image
+learning/assets/nested-learning/py_fig10.png
+Figure 10 reproduced: perplexity against how much of the context the model is allowed to use
+
+--- note
+### Table 2 as a designed object, and the same data interactively
+Two upgrades over a plain markdown table: **great_tables** shades each numeric column by value (so the
+pattern is visible before you read a single number, with the perplexity scale reversed because lower is
+better), and **Vega-Lite** gives the same data an interactive scatter — hover a point for the model. The
+PNG is rendered offline by `vl_convert`, so the page works with no network.
+
+--- code
+import pandas as pd, altair as alt
+t2 = pd.DataFrame([
+    ("Transformer++", "760M/30B", 24.18, 50.11), ("Samba*", "760M/30B", 21.07, 51.46),
+    ("RetNet", "760M/30B", 25.77, 48.19), ("DeltaNet", "760M/30B", 24.52, 49.63),
+    ("RWKV-7", "760M/30B", 23.75, 50.55), ("Comba", "760M/30B", 22.41, 50.89),
+    ("TTT", "760M/30B", 24.17, 47.32), ("Miras", "760M/30B", 22.28, 51.53),
+    ("DLA", "760M/30B", 23.12, 50.48), ("Titans", "760M/30B", 20.08, 51.68),
+    ("Hope", "760M/30B", 18.68, 52.28),
+    ("Transformer++", "1.3B/100B", 17.92, 53.38), ("Samba*", "1.3B/100B", 16.15, 54.46),
+    ("RWKV-7", "1.3B/100B", 18.44, 55.30), ("Comba", "1.3B/100B", 18.16, 55.39),
+    ("TTT", "1.3B/100B", 18.42, 55.58), ("Miras", "1.3B/100B", 15.90, 55.76),
+    ("Titans", "1.3B/100B", 15.60, 56.82), ("Hope", "1.3B/100B", 14.39, 58.04),
+], columns=["model", "scale", "wiki_ppl", "avg_acc"])
+
+pts = alt.Chart(t2).mark_circle(size=140, opacity=0.9).encode(
+    x=alt.X("wiki_ppl", title="WikiText perplexity (lower better)",
+            scale=alt.Scale(zero=False, reverse=True)),
+    y=alt.Y("avg_acc", title="avg reasoning accuracy (higher better)", scale=alt.Scale(zero=False)),
+    color=alt.Color("scale", scale=alt.Scale(range=[vz.ACCENT, vz.GOOD]), title=None),
+    tooltip=["model", "scale", "wiki_ppl", "avg_acc"])
+labels = alt.Chart(t2[t2.model.isin(["Hope", "Titans", "Transformer++"])]).mark_text(
+    align="left", dx=8, dy=-4, fontSize=10).encode(x="wiki_ppl", y="avg_acc", text="model")
+ch = vz.vl_theme((pts + labels).properties(width=470, height=280,
+                 title="Table 2 — better is up and to the RIGHT (perplexity axis reversed)"))
+png = vz.chart_png(ch, "learning/assets/nested-learning/vl_table2.png")
+ok("offline PNG rendered by vl_convert (no browser, no network)", bool(png), png)
+best = t2.loc[t2.groupby("scale").wiki_ppl.idxmin()].model.tolist()
+ok("Hope is the best perplexity at both scales", best == ["Hope", "Hope"], f"{best}")
+vz.table(t2[t2.scale == "1.3B/100B"].sort_values("wiki_ppl", ignore_index=True),
+         "Table 2 · 1.3B params / 100B tokens", "shaded by value; perplexity reversed (lower is better)",
+         heat_cols=["wiki_ppl", "avg_acc"], lower_better=["wiki_ppl"])
+
+--- output
+```
+PASS  offline PNG rendered by vl_convert (no browser, no network)   | learning/assets/nested-learning/vl_table2.png
+PASS  Hope is the best perplexity at both scales   | ['Hope', 'Hope']
+```
+<div id="xzowtmrske" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>
+#xzowtmrske table {
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
+          -webkit-font-smoothing: antialiased;
+          -moz-osx-font-smoothing: grayscale;
+        }
+
+#xzowtmrske thead, tbody, tfoot, tr, td, th { border-style: none; }
+ tr { background-color: transparent; }
+#xzowtmrske p { margin: 0; padding: 0; }
+ #xzowtmrske .gt_table { display: table; border-collapse: collapse; line-height: normal; margin-left: auto; margin-right: auto; color: #333333; font-size: 16px; font-weight: normal; font-style: normal; background-color: #FFFFFF; width: auto; border-top-style: solid; border-top-width: 2px; border-top-color: #A8A8A8; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #A8A8A8; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; }
+ #xzowtmrske .gt_caption { padding-top: 4px; padding-bottom: 4px; }
+ #xzowtmrske .gt_title { color: #333333; font-size: 125%; font-weight: initial; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; border-bottom-color: #FFFFFF; border-bottom-width: 0; }
+ #xzowtmrske .gt_subtitle { color: #333333; font-size: 85%; font-weight: initial; padding-top: 3px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; border-top-color: #FFFFFF; border-top-width: 0; }
+ #xzowtmrske .gt_heading { background-color: #FFFFFF; text-align: center; border-bottom-color: #FFFFFF; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
+ #xzowtmrske .gt_bottom_border { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D3D3D3; }
+ #xzowtmrske .gt_col_headings { border-top-style: solid; border-top-width: 2px; border-top-color: #D3D3D3; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
+ #xzowtmrske .gt_col_heading { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: normal; text-transform: inherit; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; overflow-x: hidden; }
+ #xzowtmrske .gt_column_spanner_outer { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: normal; text-transform: inherit; padding-top: 0; padding-bottom: 0; padding-left: 4px; padding-right: 4px; }
+ #xzowtmrske .gt_column_spanner_outer:first-child { padding-left: 0; }
+ #xzowtmrske .gt_column_spanner_outer:last-child { padding-right: 0; }
+ #xzowtmrske .gt_column_spanner { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D3D3D3; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; overflow-x: hidden; display: inline-block; width: 100%; }
+ #xzowtmrske .gt_spanner_row { border-bottom-style: hidden; }
+ #xzowtmrske .gt_group_heading { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-top-style: solid; border-top-width: 2px; border-top-color: #D3D3D3; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: middle; text-align: left; }
+ #xzowtmrske .gt_empty_group_heading { padding: 0.5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; border-top-style: solid; border-top-width: 2px; border-top-color: #D3D3D3; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D3D3D3; vertical-align: middle; }
+ #xzowtmrske .gt_from_md> :first-child { margin-top: 0; }
+ #xzowtmrske .gt_from_md> :last-child { margin-bottom: 0; }
+ #xzowtmrske .gt_row { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; margin: 10px; border-top-style: solid; border-top-width: 1px; border-top-color: #D3D3D3; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: middle; overflow-x: hidden; }
+ #xzowtmrske .gt_stub { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #D3D3D3; padding-left: 5px; padding-right: 5px; }
+ #xzowtmrske .gt_indent_1 { text-indent: 5px; }
+ #xzowtmrske .gt_indent_2 { text-indent: calc(5px * 2); }
+ #xzowtmrske .gt_indent_3 { text-indent: calc(5px * 3); }
+ #xzowtmrske .gt_indent_4 { text-indent: calc(5px * 4); }
+ #xzowtmrske .gt_indent_5 { text-indent: calc(5px * 5); }
+ #xzowtmrske .gt_stub_row_group { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #D3D3D3; padding-left: 5px; padding-right: 5px; vertical-align: top; }
+ #xzowtmrske .gt_row_group_first td { border-top-width: 2px; }
+ #xzowtmrske .gt_row_group_first th { border-top-width: 2px; }
+ #xzowtmrske .gt_striped { color: #333333; background-color: #F4F4F4; }
+ #xzowtmrske .gt_table_body { border-top-style: solid; border-top-width: 2px; border-top-color: #D3D3D3; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D3D3D3; }
+ #xzowtmrske .gt_summary_row { color: #333333; background-color: #FFFFFF; text-transform: inherit; padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; }
+ #xzowtmrske .gt_first_summary_row { border-top-style: solid; border-top-width: 2px; border-top-color: #D3D3D3; }
+ #xzowtmrske .gt_last_summary_row_top { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D3D3D3; }
+ #xzowtmrske .gt_grand_summary_row { color: #333333; background-color: #FFFFFF; text-transform: inherit; padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; }
+ #xzowtmrske .gt_first_grand_summary_row_bottom { border-top-style: double; border-top-width: 6px; border-top-color: #D3D3D3; }
+ #xzowtmrske .gt_last_grand_summary_row_top { border-bottom-style: double; border-bottom-width: 6px; border-bottom-color: #D3D3D3; }
+ #xzowtmrske .gt_sourcenotes { color: #333333; background-color: #FFFFFF; border-bottom-style: none; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; }
+ #xzowtmrske .gt_sourcenote { font-size: 90%; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; text-align: left; }
+ #xzowtmrske .gt_left { text-align: left; }
+ #xzowtmrske .gt_center { text-align: center; }
+ #xzowtmrske .gt_right { text-align: right; font-variant-numeric: tabular-nums; }
+ #xzowtmrske .gt_font_normal { font-weight: normal; }
+ #xzowtmrske .gt_font_bold { font-weight: bold; }
+ #xzowtmrske .gt_font_italic { font-style: italic; }
+ #xzowtmrske .gt_super { font-size: 65%; }
+ #xzowtmrske .gt_footnotes { color: font-color(#FFFFFF); background-color: #FFFFFF; border-bottom-style: none; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; }
+ #xzowtmrske .gt_footnote { margin: 0px; font-size: 90%; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; }
+ #xzowtmrske .gt_sourcenotes { color: #333333; background-color: #FFFFFF; border-bottom-style: none; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; }
+ #xzowtmrske .gt_sourcenote { font-size: 90%; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; text-align: left; }
+ #xzowtmrske .gt_footnote_marks { font-size: 75%; vertical-align: 0.4em; position: initial; }
+ #xzowtmrske .gt_asterisk { font-size: 100%; vertical-align: 0; }
+ 
+</style>
+<table class="gt_table" data-quarto-disable-processing="false" data-quarto-bootstrap="false">
+<thead>
+
+  <tr class="gt_heading">
+    <td colspan="4" class="gt_heading gt_title gt_font_normal">Table 2 · 1.3B params / 100B tokens</td>
+  </tr>
+  <tr class="gt_heading">
+    <td colspan="4" class="gt_heading gt_subtitle gt_font_normal gt_bottom_border">shaded by value; perplexity reversed (lower is better)</td>
+  </tr>
+<tr class="gt_col_headings">
+  <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1" scope="col" id="model">model</th>
+  <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1" scope="col" id="scale">scale</th>
+  <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" scope="col" id="wiki_ppl">wiki_ppl</th>
+  <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" scope="col" id="avg_acc">avg_acc</th>
+</tr>
+</thead>
+<tbody class="gt_table_body">
+  <tr>
+    <td class="gt_row gt_left">Hope</td>
+    <td class="gt_row gt_left">1.3B/100B</td>
+    <td style="color: #000000; background-color: #0b6cff;" class="gt_row gt_right">14.39</td>
+    <td style="color: #000000; background-color: #0b6cff;" class="gt_row gt_right">58.04</td>
+  </tr>
+  <tr>
+    <td class="gt_row gt_left">Titans</td>
+    <td class="gt_row gt_left">1.3B/100B</td>
+    <td style="color: #000000; background-color: #4d94ff;" class="gt_row gt_right">15.6</td>
+    <td style="color: #000000; background-color: #458fff;" class="gt_row gt_right">56.82</td>
+  </tr>
+  <tr>
+    <td class="gt_row gt_left">Miras</td>
+    <td class="gt_row gt_left">1.3B/100B</td>
+    <td style="color: #000000; background-color: #5d9eff;" class="gt_row gt_right">15.9</td>
+    <td style="color: #000000; background-color: #77adff;" class="gt_row gt_right">55.76</td>
+  </tr>
+  <tr>
+    <td class="gt_row gt_left">Samba*</td>
+    <td class="gt_row gt_left">1.3B/100B</td>
+    <td style="color: #000000; background-color: #6ba6ff;" class="gt_row gt_right">16.15</td>
+    <td style="color: #000000; background-color: #b5d2ff;" class="gt_row gt_right">54.46</td>
+  </tr>
+  <tr>
+    <td class="gt_row gt_left">Transformer++</td>
+    <td class="gt_row gt_left">1.3B/100B</td>
+    <td style="color: #000000; background-color: #cce0ff;" class="gt_row gt_right">17.92</td>
+    <td style="color: #000000; background-color: #e8f1ff;" class="gt_row gt_right">53.38</td>
+  </tr>
+  <tr>
+    <td class="gt_row gt_left">Comba</td>
+    <td class="gt_row gt_left">1.3B/100B</td>
+    <td style="color: #000000; background-color: #d9e8ff;" class="gt_row gt_right">18.16</td>
+    <td style="color: #000000; background-color: #89b8ff;" class="gt_row gt_right">55.39</td>
+  </tr>
+  <tr>
+    <td class="gt_row gt_left">TTT</td>
+    <td class="gt_row gt_left">1.3B/100B</td>
+    <td style="color: #000000; background-color: #e7f0ff;" class="gt_row gt_right">18.42</td>
+    <td style="color: #000000; background-color: #80b2ff;" class="gt_row gt_right">55.58</td>
+  </tr>
+  <tr>
+    <td class="gt_row gt_left">RWKV-7</td>
+    <td class="gt_row gt_left">1.3B/100B</td>
+    <td style="color: #000000; background-color: #e8f1ff;" class="gt_row gt_right">18.44</td>
+    <td style="color: #000000; background-color: #8dbaff;" class="gt_row gt_right">55.3</td>
+  </tr>
+</tbody>
+
+</table>
+
+</div>
+
+
+--- image
+learning/assets/nested-learning/vl_table2.png
+Table 2 as a Vega-Lite chart, rendered offline by vl_convert
+

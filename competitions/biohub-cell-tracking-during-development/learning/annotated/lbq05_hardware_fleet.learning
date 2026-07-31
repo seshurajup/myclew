@@ -1,0 +1,68 @@
+@ id: lbq05
+@ order: 605
+@ title: Hardware implications & how it maps to our fleet
+@ subtitle: adds-only compute, memory bandwidth, new hardware — and the lowbit-qat agent / Bonsai / g405 links
+@ source: arxiv 2402.17764
+
+--- note
+## The physics: adds are ~cheap, muls and DRAM are expensive
+Two hardware facts drive everything. **(1) Multiplies cost far more energy than adds**, and low-precision
+integer ops cost far less than floating-point ones — the original BitNet tabulates it: at **7nm**, an FP16
+**multiply** costs 0.34 pJ vs an INT8 **add** at 0.007 pJ (roughly **50×**), and FP16 add is 0.16 pJ.
+Since ternary weights turn the matmul into INT8 adds with **no multiplies**, the arithmetic bill nearly
+vanishes. **(2) Moving weights from DRAM to on-chip SRAM is itself expensive** and a bandwidth bottleneck;
+a ternary model has a **much smaller memory footprint**, so it loads faster and cheaper. Adds-only compute
++ tiny footprint = the latency/energy/throughput wins of lbq04.
+
+--- image
+learning/assets/bitnet/bitnet_energy_perbit.png
+Table 2 (2310.11453): measured ADD vs MUL energy per operation at 45nm / 7nm. At 7nm — FP32: add 0.38 / mul 1.31 pJ; FP16: add 0.16 / mul 0.34 pJ; **INT8: add 0.007 / mul 0.07 pJ**. A vanilla matmul pays `m·n·p` multiplies; BitNet's ternary matmul pays essentially only additions, so multiply energy — the dominant term — is eliminated.
+
+--- note
+## The "new hardware" call to action
+Because the ternary matmul is a **different primitive** (integer accumulate, not float multiply-add),
+today's GPUs — built to multiply — leave savings on the table. The paper explicitly "**calls for actions
+to design new hardware and systems** specifically optimized for 1-bit LLMs," pointing to LPU-style
+accelerators (e.g. Groq) as evidence that specialized inference silicon is viable. It also sketches the
+knock-on wins: **1-bit MoE** (less memory + less inter-chip activation transfer), **native long context**
+(activations 16→8 bit doubles the context that fits, with 4-bit or lower left as future work), and
+**edge/mobile** deployment (CPU-friendly, low energy).
+
+--- note
+## How this maps to our `lowbit-qat` fleet agent
+Our `fleet_agents/lowbit_qat.py` (test 56/56 green) is a **direct implementation** of this paper's
+training recipe, not a PTQ tool:
+
+- **Ternary {-1,0,+1} weights via absmean** — the Eq (1)–(3) RoundClip rule from lbq02.
+- **INT4/INT8 fake-quant activations** with a **straight-through estimator** so gradients flow through
+  the round during **training** — the BitNet b1.58 mechanism (STE + latent high-precision weights).
+- It is **quantization-aware TRAINING** (BitNet b1.58), the capability our survey found the PTQ agents
+  lacked — "the QAT fine-tune lever PTQ agents lacked."
+
+So these two papers are the **ground truth** the agent is built on: when the agent quantizes weights to
+ternary and trains through the STE, it is running the BitLinear forward/backward described in lbq02.
+
+--- note
+## Cross-links: Bonsai (PTQ ≠ training) and g405 (Gemma's post-hoc QAT)
+Two contrasts sharpen what BitNet b1.58 uniquely is:
+
+- **Bonsai (our debunk, `docs/bonsai_ternary_lowbit_findings.md`).** Marketed as low-bit *training*, it
+  is actually **PTQ** of pretrained Qwen3 into a ternary *format* + kernels — **no STE, no from-scratch
+  training**. Its reusable idea (group-wise ternary format) is real, but its *training* claim is not; the
+  reproducible training method is BitNet b1.58. This paper is the thing Bonsai only *looked* like.
+- **Gemma 4 QAT (lesson g405).** Gemma releases **QAT'd checkpoints** in real inference formats (mobile
+  int2/int4 + int8 activations; Q4_0 blockwise; W8A8 encoders). But Gemma's QAT **starts from a trained
+  full-precision model** and fine-tunes it to be quantization-robust — a *format/recipe* choice on an
+  existing model. BitNet b1.58 is **native ternary training from scratch**: the model is 1.58-bit **from
+  the first step**, which is what lets it reach a bit-width (1.58) that post-hoc QAT of a normal model
+  cannot. Same STE toolkit, opposite end of the spectrum — post-hoc robustness (g405) vs native low-bit
+  training (this paper).
+
+--- note
+## Honest scope
+This is **LLM-infra knowledge**. It has **no direct biohub cell-tracking application** — the biohub
+detector/linker are small vision/graph models, not ternary LLMs. Its value is (a) grounding our
+`lowbit-qat` primitive so we can compress/deploy LLM-scale models on constrained hardware (e.g. the fleet's
+leader/researcher/trainer agents, or a future LLM competition), and (b) giving us the exact vocabulary to
+tell **real low-bit training** (BitNet b1.58) from **PTQ dressed up as training** (Bonsai) — a distinction
+that already saved us from adopting a false lever.

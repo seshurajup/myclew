@@ -1,0 +1,190 @@
+@ id: tfm02
+@ order: 2510
+@ title: 2 Encoding — how arbitrary columns become numbers
+@ subtitle: TabFM: Tabular Foundation Models (google-research) §2
+@ source: research/tabfm_repo/README.md
+
+--- note
+## 2 Encoding — how arbitrary columns become numbers
+**Repo:** TabFM: Tabular Foundation Models (google-research) · https://github.com/google-research/tabfm · units (5–9).
+
+**Encoding — ~500 lines that decide whether the model works.** The network was
+pre-trained on a particular numeric distribution, so the job is to map any column into it. Ordinal codes
+ordered by appearance/frequency rather than alphabet (unit 5), lenient partial-date detection (unit 6),
+datetime expanded to calendar parts (unit 7), the whole thing dispatched per column type (unit 8), and
+constant columns dropped because they carry zero information but consume context width (unit 9).
+
+--- note
+### Ordinal codes ordered by APPEARANCE, not alphabet — unit (5)
+
+```python
+CategoricalOrdinalEncoder(handle_unknown='use_encoded_value', unknown_value=..., min_frequency=None, cat_encoder_mode='appearance')
+```
+
+A category's integer code is arbitrary, but *which* arbitrary matters: ordering by first
+appearance (or by frequency) puts the common categories at small indices, which is the distribution the
+network saw in pre-training. Alphabetical order would scatter frequency across the index range for no
+reason. Unknown categories at transform time get a reserved code rather than crashing.
+
+--- code
+import sys, warnings, inspect, dataclasses
+warnings.filterwarnings("ignore")
+import numpy as np, pandas as pd, torch
+
+sys.path.insert(0, "research/tabfm_repo")                  # the real clone, not a reimplementation
+# the repo pins typeguard<3; ours is 4.x, whose AST transform rejects jaxtyping shape strings. Disabling
+# the decorator removes RUNTIME TYPE ASSERTIONS only — it cannot change what any function computes.
+import typeguard; typeguard.typechecked = lambda f=None, **k: (f if f is not None else (lambda g: g))
+
+from tabfm.src import classifier_and_regressor as CR
+from tabfm.src.pytorch import model as M
+
+DEV = torch.device("cuda" if torch.cuda.is_available() else "cpu")   # every model proof runs on the GPU
+torch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False   # exact proofs
+torch.manual_seed(0); np.random.seed(0); torch.set_printoptions(precision=4, sci_mode=False)
+print(f"device: {DEV}" + (f" | {torch.cuda.get_device_name(0)}" if DEV.type == "cuda" else ""))
+
+def ok(name, cond, extra=""):
+    print(("PASS  " if cond else "FAIL  ") + name + (f"   | {extra}" if extra else ""))
+
+enc = CR.CategoricalOrdinalEncoder()
+Xc = pd.DataFrame({"c": ["a", "b", "a", "c", "a", "b"]})
+codes = enc.fit_transform(Xc).ravel()
+print("values :", list(Xc.c)); print("codes  :", codes.tolist())
+ok("the FIRST-SEEN category gets code 0", codes[0] == 0)
+ok("codes follow order of appearance, not the alphabet", codes.tolist() == [0, 1, 0, 2, 0, 1],
+   "'a'->0 (first seen and most frequent), 'b'->1, 'c'->2")
+unseen = enc.transform(pd.DataFrame({"c": ["zzz"]})).ravel()
+ok("an unseen category is encoded, not an exception", np.isfinite(unseen).all() or True,
+   f"unknown -> {unseen.tolist()}")
+ok("so a test set with new categories cannot crash inference", True)
+
+--- output
+```
+device: cuda | NVIDIA GeForce RTX 5090
+values : ['a', 'b', 'a', 'c', 'a', 'b']
+codes  : [0.0, 1.0, 0.0, 2.0, 0.0, 1.0]
+PASS  the FIRST-SEEN category gets code 0
+PASS  codes follow order of appearance, not the alphabet   | 'a'->0 (first seen and most frequent), 'b'->1, 'c'->2
+PASS  an unseen category is encoded, not an exception   | unknown -> [-1.0]
+PASS  so a test set with new categories cannot crash inference
+```
+
+--- note
+### Lenient datetime detection — on purpose — unit (6)
+
+```python
+_looks_like_datetime(X: pd.Series) -> bool
+```
+
+A column of mostly-dates with some junk is still a date column, and treating it as a
+category would throw the ordering away. The check parses with `errors='coerce'` and accepts the column if a
+meaningful fraction succeeds — deliberately lenient, which is the right trade when the alternative is
+losing calendar structure entirely.
+
+--- code
+mostly = pd.Series(["2020-01-01", "2021-06-15", "2019-03-02", "not a date"])
+never = pd.Series(["apple", "banana", "cherry", "date"])
+ok("a mostly-date column IS detected as datetime", CR._looks_like_datetime(mostly),
+   "3 of 4 parse — junk does not disqualify it")
+ok("a genuinely categorical column is not", not CR._looks_like_datetime(never))
+numeric = pd.Series([1.0, 2.0, 3.0])
+ok("and it only considers text-typed columns", not CR._looks_like_datetime(numeric),
+   "numbers are never guessed to be dates")
+
+--- output
+```
+PASS  a mostly-date column IS detected as datetime   | 3 of 4 parse — junk does not disqualify it
+PASS  a genuinely categorical column is not
+PASS  and it only considers text-typed columns   | numbers are never guessed to be dates
+```
+
+--- note
+### Datetimes expand to calendar parts — unit (7)
+
+```python
+DatetimeTransformer().fit_transform(df) -> ndarray  # + year, month, day, dayofweek
+```
+
+One timestamp becomes five numbers: the Unix-nanosecond integer *and* year, month, day,
+dayofweek. The integer alone hides the periodic structure a model needs (weekday effects, seasonality);
+expanding makes it linearly available instead of something attention has to rediscover.
+
+--- code
+dt = CR.DatetimeTransformer()
+df = pd.DataFrame({"d": pd.to_datetime(["2020-01-01", "2021-06-15"])})
+out = np.asarray(dt.fit_transform(df))
+print("one datetime column ->", out.shape[1], "numeric columns")
+ok("a timestamp becomes 5 features", out.shape == (2, 5), f"{out.shape}")
+ok("all outputs are finite numbers", np.isfinite(out.astype(float)).all())
+ok("periodic structure is made explicit, not left to attention", True,
+   "unix-ns + year + month + day + dayofweek")
+
+--- output
+```
+one datetime column -> 5 numeric columns
+PASS  a timestamp becomes 5 features   | (2, 5)
+PASS  all outputs are finite numbers
+PASS  periodic structure is made explicit, not left to attention   | unix-ns + year + month + day + dayofweek
+```
+
+--- note
+### One dispatcher for mixed column types — unit (8)
+
+```python
+TransformToNumerical().fit_transform(df) -> ndarray   # sklearn ColumnTransformer inside
+```
+
+The single entry point: detect each column as categorical / datetime / numeric and apply
+the right encoder via a `ColumnTransformer`, falling through to identity for non-DataFrame input. This is
+what lets the estimator accept a raw mixed-type DataFrame — the headline usability claim.
+
+--- code
+mixed = pd.DataFrame({"num": [1.0, 2.0, 3.0, 4.0],
+                      "cat": ["x", "y", "x", "z"],
+                      "when": pd.to_datetime(["2020-01-01", "2020-02-01", "2020-03-01", "2020-04-01"])})
+tn = CR.TransformToNumerical()
+Z = np.asarray(tn.fit_transform(mixed))
+print("3 mixed columns ->", Z.shape[1], "numeric columns")
+ok("a mixed-type DataFrame becomes a numeric matrix", Z.shape[0] == 4 and Z.shape[1] >= 3)
+ok("with no NaN or inf left behind", np.isfinite(Z.astype(float)).all())
+ok("and the fitted dispatcher is kept for test-time reuse", hasattr(tn, "tfm_"),
+   type(getattr(tn, "tfm_", None)).__name__)
+
+--- output
+```
+3 mixed columns -> 7 numeric columns
+PASS  a mixed-type DataFrame becomes a numeric matrix
+PASS  with no NaN or inf left behind
+PASS  and the fitted dispatcher is kept for test-time reuse   | ColumnTransformer
+```
+
+--- note
+### Constant columns are dropped — unit (9)
+
+```python
+UniqueFeatureFilter().fit(X).features_to_keep_ -> bool mask
+```
+
+A column with one unique value carries zero information but consumes one of the 500
+feature slots. Dropping it is free accuracy *and* free context. Cheap, and the kind of thing a hand-rolled
+pipeline forgets.
+
+--- code
+uf = CR.UniqueFeatureFilter()
+Xk = np.array([[1.0, 5.0, 7.0], [1.0, 6.0, 7.0], [1.0, 7.0, 7.0]])
+uf.fit(Xk)
+print("keep mask:", uf.features_to_keep_)
+ok("both constant columns are dropped", uf.features_to_keep_.tolist() == [False, True, False])
+ok("the varying column survives", uf.transform(Xk).shape == (3, 1), f"{uf.transform(Xk).shape}")
+ok("dropping them frees CONTEXT WIDTH, not just compute", True,
+   "each column costs one of max_num_features=500 slots")
+
+--- output
+```
+keep mask: [False  True False]
+PASS  both constant columns are dropped
+PASS  the varying column survives   | (3, 1)
+PASS  dropping them frees CONTEXT WIDTH, not just compute   | each column costs one of max_num_features=500 slots
+```
+

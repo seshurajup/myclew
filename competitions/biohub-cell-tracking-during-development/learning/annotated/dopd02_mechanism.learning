@@ -1,0 +1,61 @@
+@ id: dopd02
+@ order: 621
+@ title: The mechanism — Δ_T token-level implicit reward, on-policy
+@ subtitle: the teacher's log-ratio scores the student's own token choices
+@ source: verl/verl/workers/actor/dp_actor.py::_compute_delta_opd_rm_scores
+
+--- note
+## The teacher's RL shift as a dense token-level reward
+Direct-OPD needs two frozen teacher models: the **post-RL teacher** πT and the **pre-RL reference teacher**
+πT_ref (the same model *before* its RL). Their log-prob gap on any token y given context x is the
+**token-level implicit reward**:
+
+    Δ_T(y | x) = log πT(y | x) − log πT_ref(y | x)
+
+Read literally: **"how much more (or less) likely did the teacher make this token during its RL."** Δ_T > 0 on
+tokens RL taught the teacher to prefer; Δ_T < 0 on tokens it learned to avoid. It is a *dense* signal — a value
+at **every token position**, not a single end-of-sequence scalar — which is why it can carry the teacher's
+credit assignment.
+
+--- note
+## On-policy: the student generates, the teacher scores
+The crucial word is **on-policy**. The rollouts come from the **current student**, not the teacher:
+
+- the student autoregressively generates a response (its own trajectory);
+- at each position the two teachers are evaluated on the tokens the **student** actually considered (its
+  top-k candidate ids), giving Δ_T on the student's own choices;
+- the student is trained to move toward the tokens where Δ_T is positive.
+
+So the student is never asked to reproduce the teacher's *sequences* or its *endpoint distribution*. It is asked
+to **replicate the teacher's directional shift, evaluated on its own behaviour**. This is what lets a stronger
+student exceed the teacher: the direction is applied from the student's better base, sharpened by the student's
+own capacity, on the student's own trajectory distribution.
+
+--- note
+## Student-weighted, so it stays on-policy where it matters
+The dense reward is not raw Δ_T — it is Δ_T **weighted by the student's own (detached) probability** over its
+top-k candidates:
+
+    weights   = softmax( student_logp.detach() )      # the student's own distribution, no gradient
+    rm(y)     = weights(y) · Δ_T(y)
+
+So candidates the student would actually emit dominate the reward, and candidates it already ignores contribute
+little. The teacher's log-ratio and the weights are all **detached** — they form a *reward*, not a
+differentiable target. The student's gradient enters only through the policy update that this reward drives
+(dopd03). This is the exact function `_compute_delta_opd_rm_scores` in the cloned code; we reproduce its unit
+vectors bit-for-bit in dopd06.
+
+--- image
+learning/assets/direct-opd/dopd_schematic.png
+Same schematic as dopd01. The GREEN arrow is Direct-OPD: the student rolls out, the teacher log-ratio Δ_T
+scores the student's tokens, and the student moves in that direction from its stronger base — replicate the
+SHIFT, not the endpoint.
+
+--- note
+## Two reward modes in the code
+The repo ships two forms of the same idea (`reward_mode`):
+- **`delta_opd`** (dense top-k): the student-weighted Δ_T over the student's top-k candidate ids at each
+  position (`log_prob_top_k=16` in the launch script). This is the default and the richest signal.
+- **`delta_opd_sampled`** (single realised token): Δ_T on just the token the student actually sampled,
+  `rm = (logπT(y_t) − logπT_ref(y_t)) · response_mask`. Cheaper, no top-k log-probs needed.
+Both are token-level and detached, and both feed the same advantage estimator in dopd03.

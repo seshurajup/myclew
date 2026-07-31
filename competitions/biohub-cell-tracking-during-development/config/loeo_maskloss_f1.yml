@@ -1,0 +1,68 @@
+# =====================================================================
+# [A] SPARSE-ANNOTATION MASKED DETECTION LOSS — fold1 (train 44b6 -> test UNSEEN 6bba)
+# The fold1 half of the [A] 2-fold gate. Mirror of loeo_maskloss_f0 with fold1 specifics;
+# clean A/B vs the fold1 v2 (loeo_conv_f1_clean = 0.7091) and the fold1 baseline (0.7322).
+# ONLY change vs loeo_conv_f1_clean = det_fg_ignore:98 (ignore bright unlabelled voxels from
+# the negative term — see docs/detector_maskloss_v3_design.md). PARKED until [A] fold0 wins;
+# PROMOTE GATE = 2-fold MEAN over the honest 150it floor (fold0 0.7152 + fold1 0.7322 -> 0.7237),
+# NOT a single fold (convergence taught us single-fold LOEO wins can be test-overfit artifacts).
+# Run:  bash start_train.sh config/loeo_maskloss_f1.yml
+# =====================================================================
+name: loeo_maskloss_f1
+
+purpose: >
+  Fold1 half of the sparse-annotation masked-loss 2-fold gate (train 44b6 -> test UNSEEN 6bba).
+  Identical to loeo_conv_f1_clean (v2 convergence + E50 aug, leak-clean 44b6-val-holdout) except
+  the detection loss ignores bright unlabelled voxels (CELLMOT_DET_FG_IGNORE=98) so the ~99% of
+  true nuclei that are unlabelled are no longer taught as background. Judged on the 2-fold MEAN
+  vs the honest 150it floor, never a single fold.
+
+paths:
+  python:  research/cellmot_venv/bin/python
+  trainer: research/official_repo/scripts/train_unet_transformer.py
+  pythonpath:
+    - research/official_repo/src
+    - research/official_repo/scripts
+    - .
+  data_dir: input/biohub-cell-tracking-during-development/train
+  splits:   research/student/loeo_valheldout_f1.json    # fold1: train 44b6 / val 44b6 (leak-clean)
+  cache_dir: research/cache/ds1x4x4
+
+mlflow:
+  tracking_uri: http://localhost:5000
+  experiment:   kaggle-biohub-loeo
+  run_name:     loeo_maskloss_f1_train44b6_test6bba
+  log_artifacts: false
+
+gpu:
+  power_limit_w: 400
+
+train:
+  method:          loeo_maskloss_f1
+  split:           0              # the single fold in loeo_valheldout_f1.json (train/val 44b6)
+  downsample:      "1,4,4"
+  epochs:          12             # FAST-SCREEN 150it/12ep (convergence refuted -> 150it is faster AND the fair
+  lr:              1e-4           #   mask-vs-baseline A/B: matches the honest 150it FLOOR budget 0.7237)
+  batch_size:      8
+  num_workers:     0              # hang-fix default
+  det_loss_weight: 10.0
+  det_neg_weight:  0.01           # UNCHANGED — the mask, not the weight, is the lever
+  det_fg_ignore:   98             # [A] LEVER: ignore image>=98th-pct non-GT voxels from the negative term
+  early_stop_patience: 4
+  window_size:     2
+  pool_kernel_um:  5.0
+  max_iters:       150            # FAST-SCREEN (was 300) — matches the 150it baseline for a clean floor A/B
+
+# Domain-invariant augmentation — IDENTICAL to loeo_conv_f1_clean / loeo_maskloss_f0 (E50-grounded).
+augment:
+  - {name: flip,       pz: 0.0, py: 0.5, px: 0.5}
+  - {name: rot90_xy}
+  - {name: scale,      p: 0.3, range: 0.12}
+  - {name: crop,       p: 0.2, min_frac: 0.65}
+  - {name: cutout,     p: 0.2, n: 1, max_frac: 0.2}
+  - {name: brightness, p: 0.5, shift_range: 0.08}
+  - {name: contrast,   p: 0.5, range: 0.15}
+  - {name: gamma,      p: 0.3, range: 0.25}
+  - {name: bias_field, p: 0.3, strength: 0.2}
+  - {name: blur,       p: 0.2, sigma: 0.6}
+  - {name: noise,      p: 0.2, sigma: 0.02}

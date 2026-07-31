@@ -1,0 +1,46 @@
+[
+  {
+    "text": "A dataclass writes the boring parts of a class for you.",
+    "until_line": 1
+  },
+  {
+    "text": "We import the decorator from the dataclasses module in the standard library.",
+    "until_line": 1
+  },
+  {
+    "text": "At-dataclass sits above the class, and that single line is doing all the work.",
+    "until_line": 4
+  },
+  {
+    "text": "You just declare the fields with type annotations — x is an int, y is an int.",
+    "until_line": 7
+  },
+  {
+    "text": "From those two lines Python generates the constructor, plus equality and a readable repr.",
+    "until_line": 7
+  },
+  {
+    "text": "You can still add your own methods; a dataclass is a completely normal class underneath.",
+    "until_line": 9
+  },
+  {
+    "text": "Dist computes the distance from the origin, squaring both fields and taking the square root.",
+    "until_line": 10
+  },
+  {
+    "text": "Now we build a Point with three and four, positionally, thanks to the generated init.",
+    "until_line": 13
+  },
+  {
+    "text": "Printing it gives Point x equals three, y equals four — not an ugly memory address.",
+    "until_line": 14
+  },
+  {
+    "text": "And dist returns five point zero, the three four five triangle, from a class we barely wrote.",
+    "until_line": 15
+  },
+  {
+    "text": "Next video: error handling. Which one do you already use? Comment below.",
+    "until_line": 15
+  }
+]

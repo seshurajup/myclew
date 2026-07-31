@@ -1,0 +1,832 @@
+@ id: hp18
+@ order: 1170
+@ title: D Derivation of Physical BN Parameters
+@ subtitle: Hilbert Operator for Progressive Encoding (HOPE) §D
+@ source: docs/papers/hope-hilbert/hope-hilbert.md
+
+--- note
+## D Derivation of Physical BN Parameters
+**Paper:** Hilbert Operator for Progressive Encoding (HOPE) · §D · pages 50–51 · 1 numbered equation(s), 0 figure(s).
+
+> TODO(author): the *why* of this section in 3–5 lines, then teach each formula below.
+> Source markdown: `docs/papers/hope-hilbert/hope-hilbert.md`
+
+--- note
+### Unnumbered formula
+
+$$
+\sum^{Ni}
+$$
+
+> TODO(author): what each symbol is, what it *does*, and why the paper needs it.
+
+--- code
+# TODO(author): the unnumbered formula in runnable PyTorch, then assert it matches the paper.
+
+--- image
+learning/assets/hope-hilbert/eq/eq_p50_421.png
+Unnumbered formula as rendered in the PDF
+
+--- note
+### Unnumbered formula
+
+$$
+\sum^{n}
+$$
+
+> TODO(author): what each symbol is, what it *does*, and why the paper needs it.
+
+--- code
+# TODO(author): the unnumbered formula in runnable PyTorch, then assert it matches the paper.
+
+--- image
+learning/assets/hope-hilbert/eq/eq_p50_422.png
+Unnumbered formula as rendered in the PDF
+
+--- note
+### Unnumbered formula
+
+$$
+\sum^{n}
+$$
+
+> TODO(author): what each symbol is, what it *does*, and why the paper needs it.
+
+--- code
+# TODO(author): the unnumbered formula in runnable PyTorch, then assert it matches the paper.
+
+--- image
+learning/assets/hope-hilbert/eq/eq_p50_423.png
+Unnumbered formula as rendered in the PDF
+
+--- note
+### Unnumbered formula
+
+$$
+E(\Omega) =
+$$
+
+> TODO(author): what each symbol is, what it *does*, and why the paper needs it.
+
+--- code
+# TODO(author): the unnumbered formula in runnable PyTorch, then assert it matches the paper.
+
+--- image
+learning/assets/hope-hilbert/eq/eq_p50_424.png
+Unnumbered formula as rendered in the PDF
+
+--- note
+### Unnumbered formula
+
+$$
+E(\Phi_{i}) =
+$$
+
+> TODO(author): what each symbol is, what it *does*, and why the paper needs it.
+
+--- code
+# TODO(author): the unnumbered formula in runnable PyTorch, then assert it matches the paper.
+
+--- image
+learning/assets/hope-hilbert/eq/eq_p50_425.png
+Unnumbered formula as rendered in the PDF
+
+--- note
+### Unnumbered formula
+
+$$
+^{i=1}
+$$
+
+> TODO(author): what each symbol is, what it *does*, and why the paper needs it.
+
+--- code
+# TODO(author): the unnumbered formula in runnable PyTorch, then assert it matches the paper.
+
+--- image
+learning/assets/hope-hilbert/eq/eq_p50_426.png
+Unnumbered formula as rendered in the PDF
+
+--- note
+### Unnumbered formula
+
+$$
+^{i=1}
+$$
+
+> TODO(author): what each symbol is, what it *does*, and why the paper needs it.
+
+--- code
+# TODO(author): the unnumbered formula in runnable PyTorch, then assert it matches the paper.
+
+--- image
+learning/assets/hope-hilbert/eq/eq_p50_427.png
+Unnumbered formula as rendered in the PDF
+
+--- note
+### Unnumbered formula
+
+$$
+^{j=1}
+$$
+
+> TODO(author): what each symbol is, what it *does*, and why the paper needs it.
+
+--- code
+# TODO(author): the unnumbered formula in runnable PyTorch, then assert it matches the paper.
+
+--- image
+learning/assets/hope-hilbert/eq/eq_p50_428.png
+Unnumbered formula as rendered in the PDF
+
+--- note
+### Unnumbered formula
+
+$$
+\sum^{Ni}
+$$
+
+> TODO(author): what each symbol is, what it *does*, and why the paper needs it.
+
+--- code
+# TODO(author): the unnumbered formula in runnable PyTorch, then assert it matches the paper.
+
+--- image
+learning/assets/hope-hilbert/eq/eq_p50_429.png
+Unnumbered formula as rendered in the PDF
+
+--- note
+### Unnumbered formula
+
+$$
+\sum^{n}
+$$
+
+> TODO(author): what each symbol is, what it *does*, and why the paper needs it.
+
+--- code
+# TODO(author): the unnumbered formula in runnable PyTorch, then assert it matches the paper.
+
+--- image
+learning/assets/hope-hilbert/eq/eq_p50_430.png
+Unnumbered formula as rendered in the PDF
+
+--- note
+### Unnumbered formula
+
+$$
+_{p}
+$$
+
+> TODO(author): what each symbol is, what it *does*, and why the paper needs it.
+
+--- code
+# TODO(author): the unnumbered formula in runnable PyTorch, then assert it matches the paper.
+
+--- image
+learning/assets/hope-hilbert/eq/eq_p50_431.png
+Unnumbered formula as rendered in the PDF
+
+--- note
+### Unnumbered formula
+
+$$
+© E(\Omega) = ­
+$$
+
+> TODO(author): what each symbol is, what it *does*, and why the paper needs it.
+
+--- code
+# TODO(author): the unnumbered formula in runnable PyTorch, then assert it matches the paper.
+
+--- image
+learning/assets/hope-hilbert/eq/eq_p50_432.png
+Unnumbered formula as rendered in the PDF
+
+--- note
+### Unnumbered formula
+
+$$
+® ¬
+$$
+
+> TODO(author): what each symbol is, what it *does*, and why the paper needs it.
+
+--- code
+# TODO(author): the unnumbered formula in runnable PyTorch, then assert it matches the paper.
+
+--- image
+learning/assets/hope-hilbert/eq/eq_p50_433.png
+Unnumbered formula as rendered in the PDF
+
+--- note
+### Unnumbered formula
+
+$$
+^{\mathcal{H}}_{i}
+$$
+
+> TODO(author): what each symbol is, what it *does*, and why the paper needs it.
+
+--- code
+# TODO(author): the unnumbered formula in runnable PyTorch, then assert it matches the paper.
+
+--- image
+learning/assets/hope-hilbert/eq/eq_p50_434.png
+Unnumbered formula as rendered in the PDF
+
+--- note
+### Unnumbered formula
+
+$$
+^{i=1}
+$$
+
+> TODO(author): what each symbol is, what it *does*, and why the paper needs it.
+
+--- code
+# TODO(author): the unnumbered formula in runnable PyTorch, then assert it matches the paper.
+
+--- image
+learning/assets/hope-hilbert/eq/eq_p50_435.png
+Unnumbered formula as rendered in the PDF
+
+--- note
+### Unnumbered formula
+
+$$
+^{j=1}
+$$
+
+> TODO(author): what each symbol is, what it *does*, and why the paper needs it.
+
+--- code
+# TODO(author): the unnumbered formula in runnable PyTorch, then assert it matches the paper.
+
+--- image
+learning/assets/hope-hilbert/eq/eq_p50_436.png
+Unnumbered formula as rendered in the PDF
+
+--- note
+### Unnumbered formula
+
+$$
+«
+$$
+
+> TODO(author): what each symbol is, what it *does*, and why the paper needs it.
+
+--- code
+# TODO(author): the unnumbered formula in runnable PyTorch, then assert it matches the paper.
+
+--- image
+learning/assets/hope-hilbert/eq/eq_p50_437.png
+Unnumbered formula as rendered in the PDF
+
+--- note
+### Unnumbered formula
+
+$$
+_{M}\|f_{0}\|_{\mathcal{H}}.
+$$
+
+> TODO(author): what each symbol is, what it *does*, and why the paper needs it.
+
+--- code
+# TODO(author): the unnumbered formula in runnable PyTorch, then assert it matches the paper.
+
+--- image
+learning/assets/hope-hilbert/eq/eq_p50_438.png
+Unnumbered formula as rendered in the PDF
+
+--- note
+### Unnumbered formula
+
+$$
+1
+$$
+
+> TODO(author): what each symbol is, what it *does*, and why the paper needs it.
+
+--- code
+# TODO(author): the unnumbered formula in runnable PyTorch, then assert it matches the paper.
+
+--- image
+learning/assets/hope-hilbert/eq/eq_p50_439.png
+Unnumbered formula as rendered in the PDF
+
+--- note
+### Unnumbered formula
+
+$$
+!^{1}
+$$
+
+> TODO(author): what each symbol is, what it *does*, and why the paper needs it.
+
+--- code
+# TODO(author): the unnumbered formula in runnable PyTorch, then assert it matches the paper.
+
+--- image
+learning/assets/hope-hilbert/eq/eq_p50_440.png
+Unnumbered formula as rendered in the PDF
+
+--- note
+### Unnumbered formula
+
+$$
+^{p}^{1}
+$$
+
+> TODO(author): what each symbol is, what it *does*, and why the paper needs it.
+
+--- code
+# TODO(author): the unnumbered formula in runnable PyTorch, then assert it matches the paper.
+
+--- image
+learning/assets/hope-hilbert/eq/eq_p50_441.png
+Unnumbered formula as rendered in the PDF
+
+--- note
+### Unnumbered formula
+
+$$
+\sum^{M}
+$$
+
+> TODO(author): what each symbol is, what it *does*, and why the paper needs it.
+
+--- code
+# TODO(author): the unnumbered formula in runnable PyTorch, then assert it matches the paper.
+
+--- image
+learning/assets/hope-hilbert/eq/eq_p50_442.png
+Unnumbered formula as rendered in the PDF
+
+--- note
+### Unnumbered formula
+
+$$
+
+$$
+
+> TODO(author): what each symbol is, what it *does*, and why the paper needs it.
+
+--- code
+# TODO(author): the unnumbered formula in runnable PyTorch, then assert it matches the paper.
+
+--- image
+learning/assets/hope-hilbert/eq/eq_p50_443.png
+Unnumbered formula as rendered in the PDF
+
+--- note
+### Unnumbered formula
+
+$$
+\|f_{0}\|_{\mathcal{H}} M
+$$
+
+> TODO(author): what each symbol is, what it *does*, and why the paper needs it.
+
+--- code
+# TODO(author): the unnumbered formula in runnable PyTorch, then assert it matches the paper.
+
+--- image
+learning/assets/hope-hilbert/eq/eq_p50_444.png
+Unnumbered formula as rendered in the PDF
+
+--- note
+### Unnumbered formula
+
+$$
+= M
+$$
+
+> TODO(author): what each symbol is, what it *does*, and why the paper needs it.
+
+--- code
+# TODO(author): the unnumbered formula in runnable PyTorch, then assert it matches the paper.
+
+--- image
+learning/assets/hope-hilbert/eq/eq_p50_445.png
+Unnumbered formula as rendered in the PDF
+
+--- note
+### Unnumbered formula
+
+$$
+=
+$$
+
+> TODO(author): what each symbol is, what it *does*, and why the paper needs it.
+
+--- code
+# TODO(author): the unnumbered formula in runnable PyTorch, then assert it matches the paper.
+
+--- image
+learning/assets/hope-hilbert/eq/eq_p50_446.png
+Unnumbered formula as rendered in the PDF
+
+--- note
+### Unnumbered formula
+
+$$
+^{\mathcal{H}}
+$$
+
+> TODO(author): what each symbol is, what it *does*, and why the paper needs it.
+
+--- code
+# TODO(author): the unnumbered formula in runnable PyTorch, then assert it matches the paper.
+
+--- image
+learning/assets/hope-hilbert/eq/eq_p50_447.png
+Unnumbered formula as rendered in the PDF
+
+--- note
+### Unnumbered formula
+
+$$
+^{m=1}
+$$
+
+> TODO(author): what each symbol is, what it *does*, and why the paper needs it.
+
+--- code
+# TODO(author): the unnumbered formula in runnable PyTorch, then assert it matches the paper.
+
+--- image
+learning/assets/hope-hilbert/eq/eq_p50_448.png
+Unnumbered formula as rendered in the PDF
+
+--- note
+### Unnumbered formula
+
+$$
+\sum_{Ni}
+$$
+
+> TODO(author): what each symbol is, what it *does*, and why the paper needs it.
+
+--- code
+# TODO(author): the unnumbered formula in runnable PyTorch, then assert it matches the paper.
+
+--- image
+learning/assets/hope-hilbert/eq/eq_p50_449.png
+Unnumbered formula as rendered in the PDF
+
+--- note
+### Unnumbered formula
+
+$$
+_{\mathcal{H}i}. \square
+$$
+
+> TODO(author): what each symbol is, what it *does*, and why the paper needs it.
+
+--- code
+# TODO(author): the unnumbered formula in runnable PyTorch, then assert it matches the paper.
+
+--- image
+learning/assets/hope-hilbert/eq/eq_p50_450.png
+Unnumbered formula as rendered in the PDF
+
+--- note
+### Unnumbered formula
+
+$$
+^{i=1}
+$$
+
+> TODO(author): what each symbol is, what it *does*, and why the paper needs it.
+
+--- code
+# TODO(author): the unnumbered formula in runnable PyTorch, then assert it matches the paper.
+
+--- image
+learning/assets/hope-hilbert/eq/eq_p50_451.png
+Unnumbered formula as rendered in the PDF
+
+--- note
+### Unnumbered formula
+
+$$
+^{j=1}
+$$
+
+> TODO(author): what each symbol is, what it *does*, and why the paper needs it.
+
+--- code
+# TODO(author): the unnumbered formula in runnable PyTorch, then assert it matches the paper.
+
+--- image
+learning/assets/hope-hilbert/eq/eq_p50_452.png
+Unnumbered formula as rendered in the PDF
+
+--- note
+### Equation (63)
+
+$$
+\beta_{p}= E[y_{p}] = c_{1}E[y_{i}] + c_{2}E[y_{j}] = c_{1}\beta_{i}+ c_{2}\beta_{j} \tag{63}
+$$
+
+> TODO(author): what each symbol is, what it *does*, and why the paper needs it.
+
+--- code
+# TODO(author): the equation (63) in runnable PyTorch, then assert it matches the paper.
+
+--- image
+learning/assets/hope-hilbert/eq/eq_p51_453.png
+Equation (63) as rendered in the PDF
+
+--- note
+### Unnumbered formula
+
+$$
+_{p}= Var[y_{p}] = c^{2}
+$$
+
+> TODO(author): what each symbol is, what it *does*, and why the paper needs it.
+
+--- code
+# TODO(author): the unnumbered formula in runnable PyTorch, then assert it matches the paper.
+
+--- image
+learning/assets/hope-hilbert/eq/eq_p51_454.png
+Unnumbered formula as rendered in the PDF
+
+--- note
+### Unnumbered formula
+
+$$
+\sqrt
+$$
+
+> TODO(author): what each symbol is, what it *does*, and why the paper needs it.
+
+--- code
+# TODO(author): the unnumbered formula in runnable PyTorch, then assert it matches the paper.
+
+--- image
+learning/assets/hope-hilbert/eq/eq_p51_455.png
+Unnumbered formula as rendered in the PDF
+
+--- note
+### Unnumbered formula
+
+$$
+\gamma_{p}= \pm
+$$
+
+> TODO(author): what each symbol is, what it *does*, and why the paper needs it.
+
+--- code
+# TODO(author): the unnumbered formula in runnable PyTorch, then assert it matches the paper.
+
+--- image
+learning/assets/hope-hilbert/eq/eq_p51_456.png
+Unnumbered formula as rendered in the PDF
+
+--- note
+### Unnumbered formula
+
+$$
+\gamma_{p} \sqrt
+$$
+
+> TODO(author): what each symbol is, what it *does*, and why the paper needs it.
+
+--- code
+# TODO(author): the unnumbered formula in runnable PyTorch, then assert it matches the paper.
+
+--- image
+learning/assets/hope-hilbert/eq/eq_p51_457.png
+Unnumbered formula as rendered in the PDF
+
+--- note
+### Unnumbered formula
+
+$$
+\gamma_{p} \sqrt
+$$
+
+> TODO(author): what each symbol is, what it *does*, and why the paper needs it.
+
+--- code
+# TODO(author): the unnumbered formula in runnable PyTorch, then assert it matches the paper.
+
+--- image
+learning/assets/hope-hilbert/eq/eq_p51_458.png
+Unnumbered formula as rendered in the PDF
+
+--- note
+### Unnumbered formula
+
+$$
+\gamma_{p} \sqrt
+$$
+
+> TODO(author): what each symbol is, what it *does*, and why the paper needs it.
+
+--- code
+# TODO(author): the unnumbered formula in runnable PyTorch, then assert it matches the paper.
+
+--- image
+learning/assets/hope-hilbert/eq/eq_p51_459.png
+Unnumbered formula as rendered in the PDF
+
+--- note
+### Unnumbered formula
+
+$$
+=
+$$
+
+> TODO(author): what each symbol is, what it *does*, and why the paper needs it.
+
+--- code
+# TODO(author): the unnumbered formula in runnable PyTorch, then assert it matches the paper.
+
+--- image
+learning/assets/hope-hilbert/eq/eq_p51_460.png
+Unnumbered formula as rendered in the PDF
+
+--- note
+### Unnumbered formula
+
+$$
+\sqrt
+$$
+
+> TODO(author): what each symbol is, what it *does*, and why the paper needs it.
+
+--- code
+# TODO(author): the unnumbered formula in runnable PyTorch, then assert it matches the paper.
+
+--- image
+learning/assets/hope-hilbert/eq/eq_p51_461.png
+Unnumbered formula as rendered in the PDF
+
+--- note
+### Unnumbered formula
+
+$$
+\gamma_{p} \sqrt
+$$
+
+> TODO(author): what each symbol is, what it *does*, and why the paper needs it.
+
+--- code
+# TODO(author): the unnumbered formula in runnable PyTorch, then assert it matches the paper.
+
+--- image
+learning/assets/hope-hilbert/eq/eq_p51_462.png
+Unnumbered formula as rendered in the PDF
+
+--- note
+### Unnumbered formula
+
+$$
+
+$$
+
+> TODO(author): what each symbol is, what it *does*, and why the paper needs it.
+
+--- code
+# TODO(author): the unnumbered formula in runnable PyTorch, then assert it matches the paper.
+
+--- image
+learning/assets/hope-hilbert/eq/eq_p51_463.png
+Unnumbered formula as rendered in the PDF
+
+--- note
+### Unnumbered formula
+
+$$
+
+$$
+
+> TODO(author): what each symbol is, what it *does*, and why the paper needs it.
+
+--- code
+# TODO(author): the unnumbered formula in runnable PyTorch, then assert it matches the paper.
+
+--- image
+learning/assets/hope-hilbert/eq/eq_p51_464.png
+Unnumbered formula as rendered in the PDF
+
+--- note
+### Unnumbered formula
+
+$$
+y_{p}=
+$$
+
+> TODO(author): what each symbol is, what it *does*, and why the paper needs it.
+
+--- code
+# TODO(author): the unnumbered formula in runnable PyTorch, then assert it matches the paper.
+
+--- image
+learning/assets/hope-hilbert/eq/eq_p51_465.png
+Unnumbered formula as rendered in the PDF
+
+--- note
+### Unnumbered formula
+
+$$
+_{T} x-sign(\gamma_{p})(\beta_{p}-b_{p})
+$$
+
+> TODO(author): what each symbol is, what it *does*, and why the paper needs it.
+
+--- code
+# TODO(author): the unnumbered formula in runnable PyTorch, then assert it matches the paper.
+
+--- image
+learning/assets/hope-hilbert/eq/eq_p51_466.png
+Unnumbered formula as rendered in the PDF
+
+--- note
+### Unnumbered formula
+
+$$
+
+$$
+
+> TODO(author): what each symbol is, what it *does*, and why the paper needs it.
+
+--- code
+# TODO(author): the unnumbered formula in runnable PyTorch, then assert it matches the paper.
+
+--- image
+learning/assets/hope-hilbert/eq/eq_p51_467.png
+Unnumbered formula as rendered in the PDF
+
+--- note
+### Unnumbered formula
+
+$$
+= sign(\gamma_{p})^{2}
+$$
+
+> TODO(author): what each symbol is, what it *does*, and why the paper needs it.
+
+--- code
+# TODO(author): the unnumbered formula in runnable PyTorch, then assert it matches the paper.
+
+--- image
+learning/assets/hope-hilbert/eq/eq_p51_468.png
+Unnumbered formula as rendered in the PDF
+
+--- note
+### Unnumbered formula
+
+$$
+
+$$
+
+> TODO(author): what each symbol is, what it *does*, and why the paper needs it.
+
+--- code
+# TODO(author): the unnumbered formula in runnable PyTorch, then assert it matches the paper.
+
+--- image
+learning/assets/hope-hilbert/eq/eq_p51_469.png
+Unnumbered formula as rendered in the PDF
+
+--- note
+### Unnumbered formula
+
+$$
+_{in,p})^{T}x-(\beta_{p}-b_{p})
+$$
+
+> TODO(author): what each symbol is, what it *does*, and why the paper needs it.
+
+--- code
+# TODO(author): the unnumbered formula in runnable PyTorch, then assert it matches the paper.
+
+--- image
+learning/assets/hope-hilbert/eq/eq_p51_470.png
+Unnumbered formula as rendered in the PDF
+
+--- note
+### Unnumbered formula
+
+$$
+y_{p}= (w^{eff}
+$$
+
+> TODO(author): what each symbol is, what it *does*, and why the paper needs it.
+
+--- code
+# TODO(author): the unnumbered formula in runnable PyTorch, then assert it matches the paper.
+
+--- image
+learning/assets/hope-hilbert/eq/eq_p51_471.png
+Unnumbered formula as rendered in the PDF
+
+--- note
+**[Recap]** TODO(author): 3 bullets — the claim, the mechanism, the consequence for our own models.
+

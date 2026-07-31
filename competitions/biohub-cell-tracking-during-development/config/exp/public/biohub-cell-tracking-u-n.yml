@@ -1,0 +1,10 @@
+# PUBLIC notebook config — biohack44/biohub-cell-tracking-u-net-gap-closing
+name: pub_biohub-cell-tracking-u-n
+source: biohack44/biohub-cell-tracking-u-net-gap-closing
+family: rule-based-DoG
+base: dog_hungarian
+lb: None
+golden_cv: None
+mined_params: "gap_um=['6.0']; augs=['flip', 'noise']"
+run: rule-based-dog
+score: golden-12 (adj_edge_J + 0.1*div_J), by_embryo

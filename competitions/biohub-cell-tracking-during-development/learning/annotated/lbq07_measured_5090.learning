@@ -1,0 +1,99 @@
+@ id: lbq07
+@ order: 607
+@ title: We RAN it — low-bit training + every method, measured on our RTX 5090
+@ subtitle: not literature: a real char-LM trained under ternary/int STE, and GPTQ/AWQ/HQQ/FP4/int2 all scored on the same toy task
+@ source: experiments/lowbit_qat_toy_train.py + experiments/lowbit_qat_ptq_5090.py
+
+--- note
+## Why this lesson exists (proof, not citation)
+lbq01–lbq06 explain the BitNet papers. This lesson is **our own measured proof on the RTX 5090** that (a)
+low-bit **training** with our `lowbit-qat` agent actually works, and (b) the "alternative" low-bit methods
+(GPTQ, AWQ, HQQ, FP4/NVFP4-format, int2/int3) — which are easy to just *cite* — were **run as real
+algorithms on the same toy model and scored**. Every number below came off our GPU, deterministic seed.
+The task is a tiny char-level Transformer LM (`TinyGPT`, d96·h6·L2) trained to predict the next character
+of an **order-2 Markov source** whose irreducible entropy floor is **≈4.64 perplexity** — a clean,
+non-degenerate task where a model can approach but never beat the floor, so quantization error shows up as
+a small, honest increase over it.
+
+--- note
+## Part A — low-bit TRAINING converges (the core claim)
+Ternary weights {-1,0,+1} with a straight-through estimator (lbq02) and a `quant_lambda` 0→1 warmup ramp
+trained the char-LM to essentially the FP result:
+
+- **FP (bf16 master): 4.841 ppl.  Ternary STE QAT: 4.867 ppl (+0.5%).  int4 STE QAT: 4.836 ppl (≈FP).**
+- The ternary loss curve is a **real** descent (validation ppl **31.0 → 4.86**, train loss 3.90 → 1.58 over
+  900 steps) — not a one-step artifact. `ternary_learned = fp_learned = True`.
+- **Size win is real, not simulated:** ternary packs at **1.71 bits/weight → 9.28× smaller than fp16**,
+  verified by the agent's exact trit-packing (`pack_ternary` round-trip **exact = True**).
+
+So the STE + FP-master-weight recipe from the papers **actually trains** in our stack (pure torch, bf16
+autocast, fused AdamW; ABI numpy 2.2.6 / torch 2.8.0+cu128 untouched).
+
+--- image
+learning/assets/bitnet/lbq07_measured_bench.png
+Measured on the RTX 5090, same toy char-LM. Blue = QAT (retrain with STE); green = PTQ (no retrain); red = sub-2-bit PTQ round-to-nearest. Dashed line = FP bf16 baseline (4.84); dotted line = the source's entropy floor (≈4.64). Read the shape, not just the bars: every W4 PTQ method and every QAT method sits in a tight band just above FP, while the two sub-2-bit *no-retrain* bars (ternary-RTN, int2-RTN) blow up — the single most important low-bit fact.
+
+--- note
+## Part B — the head-to-head, all methods measured (no "literature only")
+Same trained model, same calibration batches, real algorithm implementations (HQQ = the real `hqq` lib;
+GPTQ = Hessian + Cholesky OBQ error-propagation; AWQ = activation-scale grid-search; FP4 = the E2M1
+{0,.5,1,1.5,2,3,4,6} element grid with per-group absmax scale):
+
+| method | kind | bits/wt | val ppl | Δ vs FP |
+|---|---|---|---|---|
+| GPTQ int4 | PTQ (no retrain) | 4.12 | **4.778** | −1.3% |
+| HQQ int4 (real lib) | PTQ | 4.25 | 4.787 | −1.1% |
+| FP4 E2M1 | PTQ | 4.50 | 4.798 | −0.9% |
+| AWQ int4 | PTQ | 4.12 | 4.809 | −0.7% |
+| int8 PTQ (bnb / ours) | PTQ | 8.12 | 4.84 | ≈0% |
+| NF4 (bitsandbytes) | PTQ | 4.50 | 4.872 | +0.6% |
+| int4 PTQ (ours, g128) | PTQ | 4.12 | 4.906 | +1.3% |
+| **FP (bf16)** | baseline | 16 | **4.841** | — |
+| int4 STE | QAT (retrain) | 4.12 | 4.836 | −0.1% |
+| int3 STE | QAT | 3.00 | 4.832 | −0.2% |
+| FP4 E2M1 STE | QAT | 4.50 | 4.834 | −0.1% |
+| **ternary STE** | QAT | **1.71** | 4.867 | +0.5% |
+| int2 STE | QAT | 2.00 | 4.958 | +2.4% |
+| ternary PTQ (RTN) | PTQ | 1.71 | **12.44** | +157% |
+| int2 PTQ (RTN) | PTQ | 2.12 | **18.06** | +273% |
+
+(Deltas below zero are quantization acting as a mild regularizer near the entropy floor — within noise of FP.)
+
+--- note
+## What the numbers actually teach (grounded verdict)
+1. **At 4 bits, no-retrain PTQ is basically free.** GPTQ / AWQ / HQQ / FP4 / int8 all land within ~1% of
+   FP. On our measured task **GPTQ was the best no-retrain W4** (4.778) — matching the papers' ordering.
+   If we have a trained model and just want it smaller for the offline **T4**, a **W4 PTQ (GPTQ/AWQ)** is
+   the right default and needs no training.
+2. **Below ~2 bits, PTQ dies and QAT is mandatory.** Round-to-nearest ternary and int2 **collapse**
+   (12.4, 18.1 ppl) — but the **same bit-widths trained with STE recover** (ternary 4.87, int2 4.96).
+   This is exactly BitNet's headline (lbq06's "every PTQ method collapses") reproduced on our own GPU, and
+   it is the reason our fleet needs a QAT lever (`lowbit-qat`) and not just PTQ.
+3. **b1.58 ternary is the right QAT default when you want maximum shrink** (9.28×, +0.5%). If you can spare
+   a bit, **int3/int4 STE is essentially lossless**. FP4 (E2M1) is fine too — but see the honesty note.
+
+--- note
+## FP4 / NVFP4 honesty (don't oversell the format)
+We measured FP4 **quality** with a faithful E2M1 fake-quant on the 5090 (PTQ 4.798 / QAT 4.834 — good). But
+true **NVFP4 tensor-core throughput** needs Blackwell 5th-gen tensor cores **plus** TransformerEngine
+kernels we did **not** install, and it gives **zero** benefit on a Kaggle **T4** (Turing sm_75 has no FP4
+units). So for our deploy target FP4's value is quality-vs-size only — no free speed — and it is **not** a
+reason to prefer it over int4 PTQ/QAT for the T4.
+
+--- note
+## Fleet takeaways (what to build only when a comp needs it)
+- **Have + proven:** `lowbit-qat` (ternary/int2/int3/int4 STE QAT, + int8/int4 fake-quant PTQ, packing).
+- **Measured-good but NOT yet a reusable agent:** **GPTQ** and **AWQ** (we ran real implementations here;
+  a calibration-based W4 **PTQ agent** with Turing-compatible kernels is the cleanest "shrink-for-T4"
+  gap). **HQQ** works via the real lib (data-free, no calibration) — a thin wrapper would be cheap.
+- **Not worth building for us:** an NVFP4-**training** agent — Blackwell-only, no T4 payoff.
+- Reward-aligned caveat: these are **candidates**, built when a real competition actually needs the lever,
+  not speculatively.
+
+--- note
+## Reproduce it
+`PYTHONPATH=tools/researchpapers python experiments/lowbit_qat_toy_train.py`  → docs/lowbit_train_proof.json
+(+ docs/lowbit_method_bench.json); `... experiments/lowbit_qat_ptq_5090.py` → docs/lowbit_ptq_bench_5090.json.
+Both run in ~1–2 min on the 5090 (bf16 + tf32 + torch.compile from hardware_tune; GPU hit 97–99% util on the
+larger variant, honestly ~48% mean on this deliberately-tiny model — a small model is partly launch-bound,
+but the config is the same one that saturates at real scale).

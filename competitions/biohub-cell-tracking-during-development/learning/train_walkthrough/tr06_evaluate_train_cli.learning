@@ -1,0 +1,119 @@
+@ id: tr06
+@ order: 166
+@ title: train_unet_transformer.py — evaluate, train(), and the CLI
+@ subtitle: lines 918–1279: node-recall eval, fold loop, checkpointing, argparse
+@ source: research/pilkwang_support_pack/repo/scripts/train_unet_transformer.py
+
+--- note
+## `evaluate` (918–994) — same path as training, plus node recall
+`@torch.no_grad()`, `model.eval()`. It runs the identical **encode → detect_and_match → predict**
+path, but instead of backprop it accumulates three numbers: link **accuracy** (`_evaluate_pair`),
+link **loss**, and **node recall** — the fraction of GT nodes a detection matched:
+```python
+for b in range(B):
+    n_gt = int(masks[b, i].sum())                            # GT nodes in this frame
+    n_matched = (matches[b] >= 0).sum()                      # detections that hit a GT node
+    gt_total += n_gt; gt_matched += n_matched                # accumulate
+...
+node_recall = gt_matched / max(gt_total, 1)                  # the recall lever (our #1 metric proxy)
+return total_loss / n_pairs, correct / total, node_recall    # (loss, accuracy, node_recall)
+```
+**[Domain]** node recall is exactly the lever our research found dominates the score (adjJ ≈
+node_recall² · edge_precision) — so it's the right thing to watch during training.
+
+--- note
+### `train()` setup (1001–1145) — folds, config.json, loaders, model
+The real entry point. Highlights, in order:
+```python
+folds = json.loads(splits_file.read_text()); fold_data = folds[fold]    # pick the CV fold
+train_files = [data_dir / n for n in fold_data["train"]]                 # embryo files (embryo-disjoint)
+(output_dir / "config.json").write_text(json.dumps(model_config, ...))   # arch → so predict can rebuild
+max_nodes = max(max(w.node_counts) for w in all_windows)                 # pad size across train+test
+pos_feat_dim = 4 * _POS_EMBED_DIM                                        # 4 axes × 8 = 32
+train_loader = DataLoader(train_ds, batch_size, shuffle=True,
+    num_workers=num_workers, prefetch_factor=2, persistent_workers=True, pin_memory=False)  # streaming
+unet  = TemporalUNet3D(in_channels=1, out_channels=unet_out_channels, layers=unet_layers)   # backbone
+model = UNetNodeTransformer(unet, unet_out_channels, pos_feat_dim).to(device)                # full model
+if data_parallel and n_visible > 1: model.unet = nn.DataParallel(model.unet)  # split UNet across GPUs
+optimizer = torch.optim.AdamW(model.parameters(), lr=lr)                       # AdamW
+```
+Below we load the **real** CV splits file and show fold-0's embryo-disjoint train/test membership, and
+confirm `pos_feat_dim = 32`.
+
+--- code
+import json                                                   # read the splits json
+ROOT = "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development"  # root
+splits = None                                                 # find a real splits file
+import glob                                                   # search
+cands = glob.glob(f"{ROOT}/**/our_splits.json", recursive=True) + glob.glob(f"{ROOT}/**/splits*.json", recursive=True)  # candidates
+cands = [c for c in cands if "cellmot_venv" not in c and ".venv" not in c]  # skip venvs
+info = {}                                                     # result holder
+if cands:                                                     # if we found one
+    folds = json.loads(open(cands[0]).read())                # load it
+    f0 = folds[0] if isinstance(folds, list) else folds      # fold 0
+    tr = f0.get("train", []); te = f0.get("test", [])        # train/test lists
+    emb = lambda n: n.split("_")[0]                           # embryo = 1st path segment
+    info = {"splits_file": cands[0].split("/")[-1],           # filename
+            "n_train": len(tr), "n_test": len(te),           # counts
+            "train_embryos": sorted({emb(x) for x in tr}),   # which embryos train
+            "test_embryos": sorted({emb(x) for x in te})}    # which embryos test (disjoint!)
+info["pos_feat_dim"] = 4 * 8                                  # 4 axes × _POS_EMBED_DIM(8) = 32
+info                                                          # real fold membership + pos dim
+
+--- output
+```
+{'splits_file': 'our_splits.json', 'n_train': 187, 'n_test': 12, 'train_embryos': ['44b6', '6bba'], 'test_embryos': ['44b6', '6bba'], 'pos_feat_dim': 32}
+```
+
+--- note
+### The epoch loop + checkpoint metric (1153–1195)
+Each epoch: `train_epoch` then `evaluate`, and the **checkpoint rule** — save when `acc·recall`
+improves. (Our repo variant swaps this for the official **division/edge metric**; pilkwang's original
+selects on `acc·recall`, which correlates with it.) DataParallel prefixes are stripped on save so the
+weights load on a single GPU at inference:
+```python
+score = test_acc * test_recall                               # selection metric (link acc × node recall)
+is_best = score >= best_score                                # keep the best
+if is_best:
+    best_score = score
+    torch.save({k.replace("unet.module.", "unet.", 1): v      # strip DataParallel prefix
+                for k, v in model.state_dict().items()}, save_path)  # → edge_predictor_best.pth
+```
+Below we read the **real** shipped `config.json` (written by this exact code path) that lets the
+predictor rebuild the architecture.
+
+--- code
+import json, glob                                             # read config
+ROOT = "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development"  # root
+cfgs = glob.glob(f"{ROOT}/research/pilkwang_support_pack/**/config.json", recursive=True)  # shipped cfg
+cfg = json.loads(open(cfgs[0]).read()) if cfgs else {}       # load it
+cfg                                                          # the real arch config the trainer saved
+
+--- output
+```
+{'unet_out_channels': 32, 'unet_layers': [32, 64, 128], 'downsample': [1, 4, 4], 'window_size': 2, 'pool_kernel_um': 5.0}
+```
+
+--- note
+### `main()` + CLI (1198–1279) — the flags you actually type
+`argparse` exposes every knob covered above. The important ones:
+```
+--split 0            CV fold                --epochs 50          training length
+--lr 1e-4            AdamW learning rate     --batch-size 16      windows per step
+--unet-out-channels 32   UNet feature width  --unet-layers 32,64,128   encoder stages
+--downsample 1,4,4   Z,Y,X strides (I/O)     --det-loss-weight 1.0     weight of det vs edge loss
+--det-neg-weight 1e-2   recall tilt          --window-size 2      frames per window (W)
+--pool-kernel-um 5.0    NMS radius (µm)       --data-parallel / --single-gpu   multi-GPU UNet
+--unet-weights PATH  warm-start the UNet      --max-iters N        cap iters (smoke run)
+```
+`main()` parses these, resolves `data_dir`/`splits`, and calls `train(...)`. Run it exactly as the
+docstring shows: `uv run scripts/train_unet_transformer.py --split 0 --epochs 50`. **This completes
+the full line-by-line walkthrough of the main trainer** — from imports (tr01) through the CLI (tr06).
+
+--- shape
+evaluate → (loss, accuracy, node_recall)<br>
+checkpoint on acc·recall (best)<br>
+pos_feat_dim = 4×8 = 32<br>
+save → edge_predictor_best.pth + config.json<br>
+CLI: --split --epochs --downsample --det-neg-weight
+

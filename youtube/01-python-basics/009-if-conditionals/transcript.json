@@ -1,0 +1,42 @@
+[
+  {
+    "text": "If statements let your program make decisions, running code only when a condition is true.",
+    "until_line": 4
+  },
+  {
+    "text": "Age is twenty, which is greater than or equal to eighteen, so that condition is true and we print Adult.",
+    "until_line": 6
+  },
+  {
+    "text": "The else block is the fallback — it runs only when the if condition turns out false.",
+    "until_line": 6
+  },
+  {
+    "text": "When you have more than two paths, use elif to add extra branches, [shush] checked one at a time, top to bottom.",
+    "until_line": 14
+  },
+  {
+    "text": "The moment one condition matches, Python runs that block and skips all the rest entirely.",
+    "until_line": 14
+  },
+  {
+    "text": "You can combine conditions with and, or — here both temperature over seventy and sunny must be true.",
+    "until_line": 20
+  },
+  {
+    "text": "And is strict, needing every part true, while or is generous, needing just one.",
+    "until_line": 20
+  },
+  {
+    "text": "[sigh] If statements can also nest inside each other, checking a second condition only after the first one passes.",
+    "until_line": 29
+  },
+  {
+    "text": "[chuckle] And for the simplest either-or choices, the ternary expression squeezes a full if-else onto one tidy line.",
+    "until_line": 33
+  },
+  {
+    "text": "boolean logic is next, video number 10. Save this one for when you need it.",
+    "until_line": 33
+  }
+]

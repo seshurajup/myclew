@@ -1,0 +1,14 @@
+{
+  "language": "python",
+  "title": "any_all.py",
+  "hook": "Test an entire list in one line",
+  "playlist": "Learn Python",
+  "target_seconds": 90,
+  "max_seconds": 120,
+  "tts_engine": "chatterbox",
+  "music_prompt": "evaluating, sweeping, decisive",
+  "code_path": "code.py",
+  "transcript_path": "transcript.json",
+  "outputs_path": "outputs.json",
+  "accent": "teal"
+}

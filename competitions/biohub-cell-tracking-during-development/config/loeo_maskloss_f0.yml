@@ -1,0 +1,75 @@
+# =====================================================================
+# [A] SPARSE-ANNOTATION MASKED DETECTION LOSS — fold0 (train 6bba -> test UNSEEN 44b6)
+# Clean A/B vs EXP_162 (loeo_conv_f0_clean = v2 CONVERGENCE, 0.7322). The ONLY change is
+# CELLMOT_DET_FG_IGNORE=98: the detection loss stops teaching BRIGHT unlabelled voxels as
+# background (the GT labels only ~1/frame in 44b6, ~8/frame in 6bba while volumes hold
+# dozens-to-1000+ true nuclei — so ~99% of real cells were being supervised as NEGATIVES).
+# Bright non-GT voxels (image >= per-sample 98th pct) are IGNORED; only dark background stays
+# negative. Per-sample percentile = self-calibrating -> embryo-agnostic (transfer-friendly).
+# Everything else (data, fold, aug, convergence grid) is IDENTICAL to EXP_162 -> the delta
+# isolates the masked loss. Design: docs/detector_maskloss_v3_design.md
+# Run:  bash start_train.sh config/loeo_maskloss_f0.yml
+# Success = higher canonical LOEO fold0 than EXP_162=0.7322 (recall AND precision, frontier-push).
+# =====================================================================
+name: loeo_maskloss_f0
+
+purpose: >
+  [A] Sparse-annotation masked detection loss. The default detection BCE marks GT node voxels
+  positive and ALL other voxels negative; but the GT is sparse (~1 cell/frame 44b6, ~8/frame
+  6bba) so the vast majority of true nuclei are unlabelled and were taught as background — a
+  systematic downward bias on real cells that pins the recall x precision frontier (raising
+  det_neg_weight in v1/EXP_158 only slid along it, -0.008). This run ignores bright unlabelled
+  voxels (likely cells) from the negative term (CELLMOT_DET_FG_IGNORE=98, per-sample 98th-pct),
+  keeping only dark background as negatives. Matched to EXP_162 (v2 convergence + E50 aug) so it
+  is a clean one-variable A/B; the mask is the frontier-PUSH that neg_weight tuning cannot give.
+
+paths:
+  python:  research/cellmot_venv/bin/python
+  trainer: research/official_repo/scripts/train_unet_transformer.py
+  pythonpath:
+    - research/official_repo/src
+    - research/official_repo/scripts
+    - .
+  data_dir: input/biohub-cell-tracking-during-development/train
+  splits:   research/student/loeo_valheldout_f0.json    # embryo-disjoint, val-holdout (leak-clean)
+  cache_dir: research/cache/ds1x4x4
+
+mlflow:
+  tracking_uri: http://localhost:5000
+  experiment:   kaggle-biohub-loeo
+  run_name:     loeo_maskloss_f0_train6bba_test44b6
+  log_artifacts: false
+
+gpu:
+  power_limit_w: 400
+
+train:
+  method:          loeo_maskloss_f0
+  split:           0              # fold 0: train 6bba -> test UNSEEN 44b6 (matches EXP_162)
+  downsample:      "1,4,4"
+  epochs:          12             # FAST-SCREEN 150it/12ep (this config now = the 150it promote-gate fold0;
+  lr:              1e-4           #   the ORIGINAL run train-b7d36cedfd used 300it in-memory, unaffected by this edit)
+  batch_size:      8
+  num_workers:     0              # HANG-FIX default (matches fold1 configs; safe on dense batches)
+  det_loss_weight: 10.0
+  det_neg_weight:  0.01           # UNCHANGED — the mask, not the weight, is the lever
+  det_fg_ignore:   98             # [A] LEVER: ignore image>=98th-pct non-GT voxels from the negative term
+  early_stop_patience: 4
+  window_size:     2
+  pool_kernel_um:  5.0
+  max_iters:       150            # FAST-SCREEN (was 300) — matches the 150it baseline 0.7152 for a clean floor A/B
+
+# Domain-invariant augmentation — IDENTICAL to EXP_162 (E50-grounded). Kept verbatim so the
+# only difference from the 0.7322 baseline is the masked detection loss.
+augment:
+  - {name: flip,       pz: 0.0, py: 0.5, px: 0.5}   # Y/X only — Z-flip unphysical (depth attenuation)
+  - {name: rot90_xy}                                # in-plane isotropic across all 5 embryos
+  - {name: scale,      p: 0.3, range: 0.12}
+  - {name: crop,       p: 0.2, min_frac: 0.65}
+  - {name: cutout,     p: 0.2, n: 1, max_frac: 0.2}
+  - {name: brightness, p: 0.5, shift_range: 0.08}
+  - {name: contrast,   p: 0.5, range: 0.15}
+  - {name: gamma,      p: 0.3, range: 0.25}
+  - {name: bias_field, p: 0.3, strength: 0.2}
+  - {name: blur,       p: 0.2, sigma: 0.6}
+  - {name: noise,      p: 0.2, sigma: 0.02}

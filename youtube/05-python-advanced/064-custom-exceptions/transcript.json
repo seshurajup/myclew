@@ -1,0 +1,42 @@
+[
+  {
+    "text": "Beyond Python's built-in errors, you can define your own exception types for your program's specific problems.",
+    "until_line": 5
+  },
+  {
+    "text": "A custom exception is just a class that inherits from Exception.",
+    "until_line": 5
+  },
+  {
+    "text": "Here InsufficientFunds stores extra details — how much was needed and how much was available.",
+    "until_line": 5
+  },
+  {
+    "text": "[chuckle] It calls super with a clear message, so it prints nicely like any built-in error.",
+    "until_line": 5
+  },
+  {
+    "text": "[sniff] Your code raises it exactly when the specific bad situation happens, with the relevant data attached.",
+    "until_line": 10
+  },
+  {
+    "text": "So withdraw refuses to overdraw the account, raising the custom error with the exact numbers.",
+    "until_line": 10
+  },
+  {
+    "text": "[sigh] The handler catches your specific type, ignoring unrelated errors, and reads the attached details.",
+    "until_line": 16
+  },
+  {
+    "text": "We can even compute how far short the withdrawal was, using the data the exception carried along.",
+    "until_line": 16
+  },
+  {
+    "text": "[groan] Custom exceptions make your error handling precise and self-documenting — callers know exactly what went wrong.",
+    "until_line": 16
+  },
+  {
+    "text": "yield from is next, video number 65. Tell me in the comments if this clicked.",
+    "until_line": 16
+  }
+]

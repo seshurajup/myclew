@@ -1,0 +1,64 @@
+@ id: lbq04
+@ order: 604
+@ title: Results & scaling — where 1.58-bit matches (and beats) FP16
+@ subtitle: perplexity, downstream accuracy, and the memory / latency / energy / throughput tables
+@ source: arxiv 2402.17764
+
+--- note
+## Setup (so the numbers are comparable)
+BitNet b1.58 is compared against a **reproduced FP16 LLaMA** trained on the **same data** (RedPajama,
+**100 billion tokens**) at matched sizes. Zero-shot accuracy is measured on ARC-Easy, ARC-Challenge,
+HellaSwag, WinoGrande, PIQA, OpenbookQA, and BoolQ; validation perplexity on WikiText2 and C4. Runtime
+memory and latency are measured with **FasterTransformer** plus a **2-bit kernel from Ladder**, reported
+as **time-per-output-token**. The key phrase throughout: **"same model size and training tokens."**
+
+--- note
+## The crossover: b1.58 matches FP16 at 3B
+- At **700M** and **1.3B**, ternary trails FP16 slightly in perplexity (12.87 vs 12.33; 11.29 vs 11.25)
+  but is already **2.6–2.9× smaller** and **1.2–1.7× faster**.
+- At **3B** the lines **cross**: BitNet b1.58 **3B** reaches **9.91 perplexity vs LLaMA's 10.04** — i.e.
+  it is **better** — while being **3.55× less memory** and **2.71× faster**.
+- **BitNet b1.58 3.9B** pushes further: **9.62 perplexity**, **3.32× less memory**, **2.4× faster**, and
+  it **outperforms the 3B FP16 LLaMA at lower cost**.
+
+--- image
+learning/assets/bitnet/b158_tables12_ppl_acc.png
+Tables 1 & 2 (2402.17764). TABLE 1 (perplexity + cost): at 3B, LLaMA = 7.89 GB / 5.07 ms / 10.04 PPL vs BitNet b1.58 = 2.22 GB (3.55×) / 1.87 ms (2.71×) / 9.91 PPL; BitNet 3.9B = 2.38 GB / 2.11 ms / 9.62 PPL. TABLE 2 (zero-shot avg): the ternary–FP16 gap closes with scale — 700M 44.3 vs 45.5, 1.3B 45.4 vs 46.2, and at 3B **BitNet 50.2 > LLaMA 49.7**, with BitNet 3.9B at **51.2**.
+
+--- note
+## Memory & latency scale in b1.58's favor
+The advantage **grows with model size** — because the ternary `nn.Linear` cost grows slower than FP16's.
+Extending to 7B, 13B, 70B: the **latency** speed-up rises **1.67× (1.3B) → 4.10× (70B)** and the
+**memory** reduction rises **2.93× (1.3B) → 7.16× (70B)**. So the bigger the model, the bigger the win —
+the opposite of what you'd want if the method were a hack that only worked small.
+
+--- image
+learning/assets/bitnet/b158_fig2_latency_mem.png
+Figure 2 (2402.17764). LEFT: decoding **latency** vs model size — BitNet b1.58 (orange) below LLaMA (blue), the gap widening from 1.67× at 1.3B to **4.10× at 70B**. RIGHT: **memory** vs model size — gap widening from 2.93× to **7.16× at 70B**. Both measured with a 2-bit kernel, so the authors note there is "still room to further reduce the cost."
+
+--- note
+## Energy: multiplications were the whole bill
+Because the ternary matmul is dominated by **INT8 additions** (LLaMA needs both FP16 add *and* FP16
+multiply), BitNet b1.58 saves **71.4× the arithmetic energy of matrix multiplication** on **7nm** chips.
+End-to-end (512 tokens) the saving grows with scale, **18.6× (1.3B) → 41.2× (70B)** — again, larger
+models benefit more, since the linear layers' share of total cost rises with size.
+
+--- image
+learning/assets/bitnet/b158_fig3_energy.png
+Figure 3 (2402.17764). LEFT: the arithmetic-energy breakdown at 7nm — LLaMA's bar is dominated by **FP16 Mul** (pink) + FP16 Add (grey); BitNet's is essentially just **INT8 Add** (a sliver), a **71.4×** gap. RIGHT: end-to-end energy vs model size, the multiplier growing **18.6× → 41.2×** from 1.3B to 70B.
+
+--- note
+## Throughput and a new scaling equivalence
+On **two 80GB A100s** (pipeline parallel, seq len 512), a **70B** BitNet b1.58 supports a **max batch of
+176 vs LLaMA's 16 (11×)**, giving **2977 tokens/s vs 333 (8.9×)** — because it fits so much more in
+memory. The paper distills this into a **new scaling equivalence** (from the latency/memory/energy
+trends): a **13B** b1.58 is more efficient than a **3B** FP16 model; **30B** b1.58 beats **7B** FP16; and
+**70B** b1.58 beats **13B** FP16. In other words, ternary shifts the entire cost/quality frontier.
+
+--- note
+## Generalization holds at 2 trillion tokens
+To rule out "it only works at 100B tokens," they trained a b1.58 model for **2T tokens** using the
+StableLM-3B data recipe and compared to StableLM-3B itself. BitNet b1.58 **wins on every task** —
+WinoGrande 66.37 vs 64.56, PIQA 78.40 vs 76.93, SciQ 91.20 vs 90.75, LAMBADA 67.63 vs 66.09, ARC-easy
+68.12 vs 67.78 (avg **74.34 vs 73.22**) — evidence that 1.58-bit LLMs have "strong generalization
+capabilities" at production token counts.

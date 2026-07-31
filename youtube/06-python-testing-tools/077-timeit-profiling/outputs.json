@@ -1,0 +1,23 @@
+[
+  {
+    "after_line": 5,
+    "text": ">>> 0.01...s for 10k runs",
+    "caption": "timeit measures accurately",
+    "volatile": true
+  },
+  {
+    "after_line": 10,
+    "text": ">>> loop: 0.9  comprehension: 0.5",
+    "caption": "compare approaches with data",
+    "volatile": true
+  },
+  {
+    "after_line": 16,
+    "text": ">>> (per-function timing table)",
+    "caption": "cProfile finds real bottlenecks"
+  },
+  {
+    "after_line": 16,
+    "image": "artifacts/terminal.png"
+  }
+]

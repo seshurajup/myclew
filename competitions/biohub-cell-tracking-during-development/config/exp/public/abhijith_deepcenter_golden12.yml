@@ -1,0 +1,10 @@
+# PUBLIC notebook config — scratchpad/run_abhijith.py (support50 repo + 50ep weights) -> score_golden12_official --pred-dir
+name: pub_abhijith_deepcenter_golden12
+source: scratchpad/run_abhijith.py (support50 repo + 50ep weights) -> score_golden12_official --pred-dir
+family: other
+base: unknown
+lb: 0.9
+golden_cv: 0.9257
+mined_params: ""
+run: manual
+score: golden-12 (adj_edge_J + 0.1*div_J), by_embryo

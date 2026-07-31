@@ -1,0 +1,51 @@
+# =====================================================================
+# LOEO detector training — EMBRYO-DISJOINT validation (the honest way to
+# validate a TRAINED model, mimicking the real embryo-disjoint Kaggle test).
+# Run:  bash start_train.sh config/loeo_detector.yml            # fold 0: train 6bba -> test 44b6
+#       bash start_train.sh config/loeo_detector.yml --split 1   # fold 1: train 44b6 -> test 6bba
+# =====================================================================
+name: loeo_detector
+
+purpose: >
+  LESSON (2026-07-02): our neural ensemble scored 0.8739 on the SAME-EMBRYO golden
+  CV but only 0.839 on the embryo-DISJOINT LB (below the 0.842 rule-based) — the
+  trained detector overfit the 2 training embryos. The golden CV can't see this
+  because it's same-embryo. FIX: validate any TRAINED model on LEAVE-ONE-EMBRYO-OUT
+  (train on one embryo, test on the other) — this reproduces how the real test is
+  generated. A detector is only trustworthy if it holds up on LOEO. Success = high
+  detection score on the DISJOINT test embryo (generalizes) — not on same-embryo.
+  RULE: no-train methods -> golden CV (valid); trained methods -> LOEO (valid).
+
+paths:
+  python:  research/cellmot_venv/bin/python
+  trainer: research/official_repo/scripts/train_unet_transformer.py
+  pythonpath:
+    - research/official_repo/src
+    - research/official_repo/scripts
+    - .
+  data_dir: input/biohub-cell-tracking-during-development/train
+  splits:   learning/ensemble_work/finetune/fleet_loeo_mini.json   # Stage-0 FROZEN embryo-disjoint LOEO mini split (train+score parity; leak-assert clean). open_dataset resolves suffix-less ids -> .zarr/.geff
+  cache_dir: research/cache/ds1x4x4                # fast pre-downsampled+normalized fp16 cache (build_cache.py)
+
+mlflow:
+  tracking_uri: http://localhost:5000
+  experiment:   kaggle-biohub-loeo               # separate experiment: LOEO = the trustworthy trained-model metric
+  run_name:     loeo_detector_f0_train6bba_test44b6
+  log_artifacts: false
+
+gpu:
+  power_limit_w: 400
+
+train:
+  method:          loeo_detector
+  split:           0              # 0 = train 6bba/test 44b6 ; SPLIT=1 -> train 44b6/test 6bba
+  downsample:      "1,4,4"        # fast/deployable
+  epochs:          12             # watch MLflow score; early-stop
+  lr:              1e-4
+  batch_size:      8       # 8 not 16: bs=16 OOMs the DENSE 44b6 fold (fold1, max_nodes~33) on the 32GB GPU (~30GB peak); bs=8 fits both folds (~14GB). Verified by Stage-1 dry-run.
+  num_workers:     6
+  det_loss_weight: 10.0
+  det_neg_weight:  0.01
+  window_size:     2
+  pool_kernel_um:  5.0
+  max_iters:       150      # cap iters/epoch for fast signal (cache makes epochs GPU-bound ~3min)

@@ -1,0 +1,160 @@
+@ id: tr02
+@ order: 162
+@ title: train_unet_transformer.py — the data pipeline
+@ subtitle: lines 120–406: pos-embeddings, windows, padding, the zarr-streaming Dataset
+@ source: research/pilkwang_support_pack/repo/scripts/train_unet_transformer.py
+
+--- note
+## Two frozen metadata containers (lines 124–154)
+No image tensor is ever kept in RAM. Instead, two `@dataclass(frozen=True)` records describe *where*
+to read from at batch time:
+```python
+@dataclass(frozen=True)
+class FrameWindowData:                 # one window of W consecutive frames (metadata only)
+    t_start: int                       # first frame index → read image[t_start : t_start+W]
+    n_frames: int                      # W (window size, default 2)
+    pos_feats: list[torch.Tensor]      # W tensors, each (N_i, 32) sinusoidal codes
+    coords:    list[torch.Tensor]      # W tensors, each (N_i, 3) = z,y,x on the downsampled grid
+    node_counts: list[int]             # GT nodes per frame
+    targets:   list[torch.Tensor]      # W-1 transition matrices (from tr01)
+
+@dataclass(frozen=True)
+class VideoMeta:                       # per-video info enabling on-demand frame loading
+    zarr_path: Path                    # the image zarr
+    image_shape: tuple                 # (T, Z_ds, Y_ds, X_ds) AFTER downsampling
+    downsample: tuple                  # (Z,Y,X) strides applied at I/O time
+    voxel_size: tuple                  # physical size = scale × downsample
+    q_low: float                       # 0.1% intensity quantile (normalisation)
+    q_high: float                      # 99.9% intensity quantile
+```
+**[Craft]** frozen dataclasses = immutable, hashable, self-documenting. The whole design goal is in
+the docstring: *"Workers open the zarr file themselves and load only the two frames they need per
+batch item. No full video tensor is kept in RAM during training."*
+
+--- note
+### `extract_pos_features` (161–190) — sinusoidal position codes, no intensity
+Each node's `(t,z,y,x)` is normalised to `[0,1]` by the image shape, then embedded with a bank of
+`2**k · π` frequencies (sin ⊕ cos). With `pos_embed_dim=8` per axis and 4 axes → a **32-dim** code:
+```python
+def extract_pos_features(coords, image_shape, pos_embed_dim=8):
+    t, z, y, x = coords[:,0], coords[:,1], coords[:,2], coords[:,3]   # (N,) each
+    norms = [c / max(s, 1) for c, s in zip([t,z,y,x], image_shape)]  # normalise each axis to ~[0,1]
+    def _embed(vals):                                                # sinusoidal bank per axis
+        freqs = 2 ** np.arange(pos_embed_dim // 2)                   # [1,2,4,8] → 4 freqs
+        angles = vals[:, None] * freqs * np.pi                       # (N,4) angles
+        return np.concatenate([np.sin(angles), np.cos(angles)], 1)  # (N,8) = sin⊕cos
+    return np.concatenate([_embed(n) for n in norms], 1).astype(np.float32)  # (N, 32)
+```
+Below: run it on **real** frame-0 node coordinates and confirm the `(N, 32)` shape.
+
+--- code
+import numpy as np, zarr                                          # arrays + zarr IO
+ROOT = "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development"  # project root
+TRAIN = f"{ROOT}/input/biohub-cell-tracking-during-development/train"     # labelled embryos
+G = f"{TRAIN}/6bba_062c8d37.geff"                                 # one real embryo graph
+nt = np.asarray(zarr.open(f"{G}/nodes/props/t/values")[:])       # frame index per node
+z  = np.asarray(zarr.open(f"{G}/nodes/props/z/values")[:])       # z per node
+y  = np.asarray(zarr.open(f"{G}/nodes/props/y/values")[:])       # y per node
+x  = np.asarray(zarr.open(f"{G}/nodes/props/x/values")[:])       # x per node
+m0 = nt == 0                                                      # nodes in frame 0
+coords = np.column_stack([nt[m0], z[m0], y[m0], x[m0]]).astype(np.float32)  # (N,4) t,z,y,x
+image_shape = (100, 200, 2048, 2048)                             # (T,Z,Y,X) for normalisation
+def extract_pos_features(coords, image_shape, pos_embed_dim=8):  # the file's exact function
+    t,z,y,x = coords[:,0], coords[:,1], coords[:,2], coords[:,3] # split axes
+    norms = [c / max(s,1) for c,s in zip([t,z,y,x], image_shape)]# normalise per axis
+    def _embed(v):                                               # sinusoidal bank
+        f = 2 ** np.arange(pos_embed_dim//2)                     # frequencies [1,2,4,8]
+        a = v[:,None]*f*np.pi                                    # angles (N,4)
+        return np.concatenate([np.sin(a), np.cos(a)], 1)        # (N,8)
+    return np.concatenate([_embed(n) for n in norms], 1).astype(np.float32)  # (N,32)
+pf = extract_pos_features(coords, image_shape)                   # real embeddings
+{"n_nodes_frame0": coords.shape[0], "pos_feat_dim": pf.shape[1]} # → dim = 4 axes × 8 = 32
+
+--- output
+```
+{'n_nodes_frame0': 5, 'pos_feat_dim': 32}
+```
+
+--- note
+### `get_window_data` (193–248) & `pad_window` (251–290)
+`get_window_data` reads the GT graph for `W` consecutive frames, divides coords by `downsample` to
+match the image grid, builds each frame's pos-features, and calls `compute_gt_transition_matrix`
+(tr01) for each adjacent pair — returning `None` if any frame is empty (so empty windows are skipped).
+`pad_window` then pads every frame to a fixed `max_nodes` so windows can be **batched**:
+```python
+pos_feats = torch.zeros(W, M, D)          # (W, max_nodes, 32)   padded
+coords    = torch.zeros(W, M, 3)          # (W, max_nodes, 3)
+masks     = torch.zeros(W, M, bool)       # True only for the n real nodes
+targets   = torch.zeros(W-1, M, M)        # (W-1, max_nodes, max_nodes)  padded link matrices
+for i in range(W):
+    n = window.node_counts[i]             # real node count of frame i
+    pos_feats[i, :n] = window.pos_feats[i]# fill the real prefix; rest stays zero
+    masks[i, :n] = True                   # mark the real nodes (padding is masked out in loss)
+```
+The `masks` are exactly what `compute_batch_loss` (tr01) uses to slice padding back out.
+
+--- note
+### `FrameWindowDataset.__getitem__` (323–355) — stream + normalise a real frame
+This is the heart of the input pipeline. It opens the zarr, does a **strided read** (spatial
+downsample happens at I/O — cheap), percentile-normalises with `(raw - q_low)/(q_high - q_low)`,
+optionally `trilinear`-resizes to the target shape, applies augmentations, and returns `imgs.half()`:
+```python
+raw  = z[t_start:t_start+W, ::dz, ::dy, ::dx].astype(np.float32)      # strided (W,Zds,Yds,Xds)
+imgs = torch.from_numpy((raw - q_low)/(q_high - q_low + 1e-6)).clamp(0.0)  # percentile-normalise
+if list(imgs.shape[1:]) != target_shape:                             # shape drifted?
+    imgs = F.interpolate(imgs[:,None], size=target_shape, mode="trilinear", align_corners=False)[:,0]
+```
+Below we reproduce that exact strided read + normalisation on a **real** frame and show the
+resulting shape and value range (should land in ~[0, a few]).
+
+--- code
+import numpy as np, zarr                                          # arrays + zarr IO
+zpath = f"{TRAIN}/6bba_062c8d37.zarr"                             # the image volume
+zg = zarr.open_group(zpath, mode="r")["0"]                        # the (T,Z,Y,X) array
+dz, dy, dx = 1, 4, 4                                              # downsample strides (Z,Y,X)
+raw = zg[0:2, ::dz, ::dy, ::dx].astype(np.float32)               # strided read of frames 0,1
+q_low, q_high = float(np.quantile(raw, 0.001)), float(np.quantile(raw, 0.999))  # intensity quantiles
+imgs = ((raw - q_low) / (q_high - q_low + 1e-6)).clip(0.0)        # percentile normalisation
+{"read_shape": tuple(imgs.shape), "vmin": round(float(imgs.min()),3), "vmax": round(float(imgs.max()),3)}
+
+--- output
+```
+{'read_shape': (2, 64, 64, 64), 'vmin': 0.0, 'vmax': 2.46}
+```
+
+--- note
+### `load_dataset_windows` (358–406) — assemble all windows for one embryo
+Uses `open_dataset(load_image=False)` (io lesson) to get shape + quantiles + tracks **without** the
+image, optionally inverts time or caps frames, then slides a window across the movie:
+```python
+windows = []
+for t in range(image_shape[0] - window_size + 1):                # every start position
+    data = get_window_data(tracks, image_shape, t, window_size, downsample=downsample)
+    if data is not None:                                         # skip empty windows
+        windows.append(data)
+return video_meta, windows                                       # metadata only — no image tensor
+```
+So a `T`-frame movie yields `T - W + 1` windows. Below we count windows the same way on a real
+embryo's frame count. **Next → tr03: the UNet + transformer model.**
+
+--- code
+import numpy as np, zarr                                          # arrays + zarr IO
+nt = np.asarray(zarr.open(f"{G}/nodes/props/t/values")[:])       # frame per node
+T = int(nt.max()) + 1                                            # number of labelled frames
+window_size = 2                                                  # W
+n_windows = max(0, T - window_size + 1)                          # sliding-window count
+{"labelled_frames": T, "window_size": window_size, "n_windows": n_windows}  # T - W + 1
+
+--- output
+```
+{'labelled_frames': 100, 'window_size': 2, 'n_windows': 99}
+```
+
+--- shape
+pos code: (N, 32) = 4 axes × 8<br>
+pad → (W, max_nodes, 32)<br>
+masks (W, max_nodes) bool<br>
+targets (W-1, M, M)<br>
+imgs (W, Zds, Yds, Xds) half<br>
+windows/movie = T − W + 1
+

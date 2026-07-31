@@ -1,0 +1,68 @@
+# Learning curriculum — the ONE place that defines section order and lesson order.
+# The hub renders sections top-to-bottom, lessons left-to-right as listed here.
+# Any .learning file not listed here is appended (by its @ order) under "More".
+sections:
+  - title: Data & timing
+    lessons: [da01, da02, da03]
+  - title: Detector architecture
+    lessons: [img01, pt01, pt02, pt03, pt04, pt04b, ff01]
+  - title: Linking & loss
+    lessons: [pt05, pt05b, pt06, pt06b, pt06c]
+  - title: Training
+    lessons: [pt07, pt08]
+  - title: "The training script, line by line (pilkwang train_unet_transformer.py)"
+    lessons: [tr01, tr02, tr03, tr04, tr05, tr06]
+  - title: Augmentation
+    lessons: [aug01, aug02]
+  - title: Inference & post-processing
+    lessons: [inf01, pp01, io01, mc01]
+  - title: Metric
+    lessons: [me01, me02]
+  - title: Fast experiments (don't waste GPU)
+    lessons: [fx01]
+  - title: How the author chose the labels
+    lessons: [lb01, lb02, lb03]
+  - title: Our research journey
+    lessons: [rs01, rs02, rs03, rs04, rs05, rs06, rs07]
+  - title: Our own code
+    lessons: [ours01, ours02]
+  - title: Gemma 4 (LLM technical report)
+    lessons: [g401, g402, g403, g404, g405, g406, g407, g408, g409, g410, g411, g412, g413, g414, g4demo]
+  - title: "Low-bit LLMs (BitNet b1.58 — QAT training)"
+    lessons: [lbq01, lbq02, lbq03, lbq04, lbq05, lbq06, lbq07]
+  - title: "Direct-OPD (weak-to-strong on-policy distillation)"
+    lessons: [dopd01, dopd02, dopd03, dopd04, dopd05, dopd06]
+  - title: Nested Learning (Behrouz et al., NeurIPS 2025) — every formula, proved in PyTorch
+    lessons: [nlb1, nlb2, nlb3, nlb4, nlb5, nlb6, nl01, nl02, nl03, nl04, nl05, nl06, nl07, nl08, nl09, nl10, nl12, nl13, nl14, nlz1, nlz2]
+  - title: Kimi K3 (Kimi Team, 2026) — architecture and maths, proved in PyTorch
+    lessons: [k3b1, k301, k302, k303, k304, k305, k306, k307, k308, k311, k312, k313, k314, k315, k3cfg, k3z1]
+  - title: HOPE — Hilbert Operator for Progressive Encoding (Mobahi & Bartlett, 2026) — scaffold
+    lessons: [hp01, hp02, hp03, hp04, hp05, hp06, hp07, hp08, hp09, hp10, hp11, hp12, hp13, hp14, hp15, hp16, hp17, hp18, hp19, hp20, hp21, hp22, hp23]
+  - title: Erase-then-Delta Attention (2026) — decoupling erase from write, proved in PyTorch
+    lessons: [edab1, eda02, eda03, eda04, eda05, eda06, eda07, edaz1]
+  - title: Federated Nested Learning (2026) — the third level, proved in PyTorch
+    lessons: [fnlb1, fnl01, fnl03, fnl04, fnl05, fnl06, fnl10, fnlz1]
+  - title: RateQuant (2026) — optimal mixed-precision by rate–distortion, proved in PyTorch
+    lessons: [rqb1, rq02, rq04, rq05, rq07, rq10, rq11, rq12, rq13, rq14, rq15, rq16, rq17, rq18, rq19, rq20, rq21, rq22, rq23, rq24, rq25, rq26, rq27, rq28, rq29, rq30, rq31, rq32, rq33, rqz1]
+  - title: GradMem (2026) — writing a context into memory by test-time GD, proved in PyTorch
+    lessons: [gmb1, gm01, gm03, gm04, gm05, gm12, gm13, gm14, gm15, gm16, gm17, gm18, gm19, gm20, gm21, gmz1]
+  - title: Task-Restricted Symmetries in Recurrent Weight Space (2026) — proved in PyTorch
+    lessons: [rwsb1, rws02, rws03, rws04, rws05, rwsz1]
+  - title: Routing-Free MoE (2026) — deleting the router, proved in PyTorch
+    lessons: [rfmb1, rfm02, rfm03, rfm04, rfm05, rfm08, rfm13, rfm14, rfm15, rfm17, rfmz1]
+  - title: TabFM (google-research) — a tabular foundation model, read as invariants
+    lessons: [tfmb1, tfm01, tfm02, tfm03, tfm04, tfm05, tfm06, tfm07, tfmz1]
+  - title: LFM2.5-Encoders (2026) — why replacing attention beats optimising it
+    lessons: [lfmb1, lfm01, lfm02, lfm03, lfm04, lfm05, lfmz1]
+  - title: HOPE (2026) — neurons as functions, compression as projection
+    lessons: [hpeb1, hpe01, hpe03, hpe04, hpe05, hpe06, hpe07, hpe08, hpe09, hpe10, hpe11, hpez1]
+  - title: COT-FM (2026) — who gets paired with whom decides how straight the flow is
+    lessons: [cfmb1, cfm02, cfm03, cfm04, cfm05, cfm06, cfm10, cfmz1]
+  - title: Transformers are Inherently Succinct (2026) — the theory, executed
+    lessons: [tscb1, tsc01, tsc02, tsc03, tsc04, tsc05, tsc06, tscz1]
+  - title: AI-Driven Formal Proof Search (2026) — search with a perfect verifier
+    lessons: [afpb1, afp01, afp02, afp03, afp04, afp05, afp06, afp07, afp08, afp09, afp10, afpz1]
+  - title: EmbeddingGemma (2025) — a 300M embedder, its losses run and its claims measured live
+    lessons: [egmb1, egm01, egm02, egm03, egm04, egmz1]
+  - title: MetaSkill-Evolve (2026) — improving the improver, two timescales, measured
+    lessons: [mseb1, mse02, mse04, mse06, mse07, mse08, msez1]

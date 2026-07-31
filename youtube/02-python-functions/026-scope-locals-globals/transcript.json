@@ -1,0 +1,42 @@
+[
+  {
+    "text": "Scope is the rulebook for where a variable exists and which code can see it.",
+    "until_line": 1
+  },
+  {
+    "text": "Here x is global, defined at the top level of the file, visible everywhere below.",
+    "until_line": 1
+  },
+  {
+    "text": "But inside show, we assign x again — that creates a separate local variable, living only in the function.",
+    "until_line": 5
+  },
+  {
+    "text": "[chuckle] So inside prints local, while outside still prints global — they never touched each other.",
+    "until_line": 8
+  },
+  {
+    "text": "To actually change a global from inside a function, you must declare it with the global keyword.",
+    "until_line": 14
+  },
+  {
+    "text": "[sniff] Now bump really does increment the module-level counter, and the change sticks after it returns.",
+    "until_line": 18
+  },
+  {
+    "text": "Python resolves every name using a rule called LEGB — Local, then Enclosing, then Global, then Built-in.",
+    "until_line": 26
+  },
+  {
+    "text": "Here inner finds msg in the enclosing function's scope, one level out, and prints it.",
+    "until_line": 27
+  },
+  {
+    "text": "[groan] Understanding scope saves you from the confusing bugs where a variable mysteriously isn't what you expected.",
+    "until_line": 27
+  },
+  {
+    "text": "Next video: type hints. Follow so you don't miss it.",
+    "until_line": 27
+  }
+]

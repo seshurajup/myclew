@@ -1,0 +1,12 @@
+@ id: rq13
+@ order: 2220
+@ title: D Component Ablation Waterfall
+@ subtitle: RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory §D
+@ source: docs/papers/ratequant/ratequant.md
+
+--- note
+## D Component Ablation Waterfall
+**Paper:** RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory · §D · pages 15–15 · equations (none) · 0 figures.
+
+> TODO(author): the *why* of §D in 3–5 lines.
+

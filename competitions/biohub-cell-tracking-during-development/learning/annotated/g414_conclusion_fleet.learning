@@ -1,0 +1,46 @@
+@ id: g414
+@ order: 414
+@ title: Conclusion — and how Gemma 4 maps to our fleet
+@ subtitle: the report's own summary, plus the LLM-infra agents it inspired us to build
+@ source: arxiv 2607.02770
+
+--- note
+## The report's own conclusion
+Gemma 4 is an open-weight family of **multimodal dense and MoE** architectures for varied hardware. Its
+contributions: a **thinking mode** (reasoning traces), a **unified encoder-free architecture** for raw
+audio/image, **long-context memory relief** (better local:global ratios, p-RoPE, KV-cache sharing),
+**compute efficiency via MTP drafters**, and **memory efficiency via QAT**. The result is "a leap in
+performance compared to Gemma 3," and human evaluations show it performing "comparably to significantly
+larger open models" — a scalable foundation for edge deployment and reasoning.
+
+--- note
+## What is NOT in scope (honesty)
+This is an **LLM technical report**. It does not touch biohub cell-tracking, microscopy, or our
+detection/linking pipeline. Its relevance to us is entirely **infra**: the LLM agents that *drive* our
+fleet, and the deployment levers (speculative decoding, KV-cache, MoE routing, QAT) that decide whether
+a model is fast and small enough to run under our compute limits.
+
+--- note
+## The mapping to fleet agents (Part B)
+Each Gemma-4 efficiency lever maps to a reusable, offline-testable fleet agent — built only where a
+genuine gap existed, extended (not duplicated) where we already had coverage:
+
+- **MTP drafter (g404)** → new **`mtp-speculative-decode`** agent: given draft length and per-token
+  acceptance probability, compute expected accepted tokens per verify pass and the decode **speedup**
+  vs a target/draft cost ratio (Leviathan-style bound). Pure arithmetic, no model needed.
+- **Long-context KV cache (g403)** → new **`kv-cache-longctx`** agent: model KV-cache memory vs context
+  length under a local:global ratio, sliding-window size, KV-sharing and **keys-as-values** reuse —
+  and report the **% reduction** (the report's 37.5% figure is reproducible from the formula).
+- **MoE (g411)** → new **`moe-inference-cost`** agent: active-vs-total parameter accounting, per-token
+  expert FLOPs, and the compute/memory trade a router buys (26B total for ~4B active).
+- **QAT (g405)** → **extend the existing `lowbit-qat` agent**, not duplicate it: add a Gemma-4-style
+  **format/footprint profiler** (mobile int2/int4+int8, Q4_0 blockwise, W8A8 encoders, per-block fp16
+  scale) that estimates the quantized memory footprint like Table 3.
+
+--- note
+## Why this is the right way to use the paper
+We did not adopt any Gemma-4 *result* as a cell-tracking claim — that would be dishonest. We adopted its
+**engineering recipes** as tools, each grounded in a specific section/figure of the report and each
+verifiable offline (a memory formula, an acceptance-rate calculation, a parameter count). That keeps the
+fleet's LLM-infra layer honest and current, and the learning hub documents exactly where each tool comes
+from.

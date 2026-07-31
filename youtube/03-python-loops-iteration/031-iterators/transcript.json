@@ -1,0 +1,42 @@
+[
+  {
+    "text": "Every time you write a for loop, Python is quietly using two functions: iter and next.",
+    "until_line": 3
+  },
+  {
+    "text": "iter turns a list into an iterator — an object that knows how to hand out items one at a time.",
+    "until_line": 3
+  },
+  {
+    "text": "Then next pulls the values in order, one call at a time, until they run out.",
+    "until_line": 6
+  },
+  {
+    "text": "[chuckle] So a for loop is really just iter, then next over and over, catching the end automatically.",
+    "until_line": 16
+  },
+  {
+    "text": "When the iterator is exhausted, next raises StopIteration, which is the loop's signal to stop.",
+    "until_line": 16
+  },
+  {
+    "text": "[sniff] The powerful part is you can make your own iterables — any object with dunder iter and dunder next.",
+    "until_line": 29
+  },
+  {
+    "text": "This Countdown class defines both, yielding numbers until it hits zero, then raising StopIteration.",
+    "until_line": 29
+  },
+  {
+    "text": "So Python's own for loops and list function work on it, exactly like a built-in sequence.",
+    "until_line": 29
+  },
+  {
+    "text": "[groan] Understanding iterators reveals what's really happening every time you loop over anything in Python.",
+    "until_line": 29
+  },
+  {
+    "text": "Next video: itertools. Comment the topic you want after that.",
+    "until_line": 29
+  }
+]

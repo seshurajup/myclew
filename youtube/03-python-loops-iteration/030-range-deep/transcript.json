@@ -1,0 +1,42 @@
+[
+  {
+    "text": "Range looks simple, but it has three forms that unlock a lot of control.",
+    "until_line": 2
+  },
+  {
+    "text": "With one argument, it counts from zero up to, but not including, that number.",
+    "until_line": 2
+  },
+  {
+    "text": "[chuckle] Give it two arguments and you set both the start and the stop yourself.",
+    "until_line": 5
+  },
+  {
+    "text": "So two to eight gives you two, three, four, five, six, and seven — stopping just before eight.",
+    "until_line": 5
+  },
+  {
+    "text": "[sniff] A third argument is the step, the size of each jump — here we count up by fives.",
+    "until_line": 8
+  },
+  {
+    "text": "And a negative step counts backwards, letting you walk from ten down to zero by twos.",
+    "until_line": 11
+  },
+  {
+    "text": "[sigh] Here's the beautiful part — range is lazy, it never actually stores all those numbers.",
+    "until_line": 15
+  },
+  {
+    "text": "A range of a million takes almost no memory, yet you can still index it or ask its length instantly.",
+    "until_line": 16
+  },
+  {
+    "text": "[groan] So range isn't a list, it's a smart recipe for numbers, generated only as you need them.",
+    "until_line": 16
+  },
+  {
+    "text": "Video 31 tackles iterators. Which one do you already use? Comment below.",
+    "until_line": 16
+  }
+]

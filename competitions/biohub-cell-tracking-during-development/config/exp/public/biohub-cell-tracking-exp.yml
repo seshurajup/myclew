@@ -1,0 +1,10 @@
+# PUBLIC notebook config — beicicc/biohub-cell-tracking-exp021-hosen-cv6-gap525
+name: pub_biohub-cell-tracking-exp
+source: beicicc/biohub-cell-tracking-exp021-hosen-cv6-gap525
+family: other
+base: unknown
+lb: 0.525
+golden_cv: None
+mined_params: ""
+run: manual
+score: golden-12 (adj_edge_J + 0.1*div_J), by_embryo

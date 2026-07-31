@@ -1,0 +1,47 @@
+@ id: g411
+@ order: 411
+@ title: Model architecture fundamentals
+@ subtitle: decoder-only Transformer, RMSNorm + QKNorm, dense vs MoE, per-layer embeddings
+@ source: arxiv 2607.02770
+
+--- note
+## The backbone
+All Gemma 4 models are **decoder-only Transformers** (Vaswani et al., 2017) with three normalization
+choices carried from recent Gemma/Gemini practice:
+
+- **Pre-norm AND post-norm** with **RMSNorm** (Zhang & Sennrich, 2019) — normalize both entering and
+  leaving each sub-layer, using root-mean-square (no mean-subtraction) normalization.
+- **QKNorm** (Henry et al., 2020) — normalize the query and key projections before attention, which
+  stabilizes attention logits (and pairs well with the long-context RoPE setup in g403).
+
+--- note
+## Dense vs MoE, and "effective" parameters
+The family mixes two capacity styles:
+
+- **Dense**: E2B (2.3B effective), E4B (4.5B effective), 12B, 31B — every parameter is used on every
+  token.
+- **MoE**: **26B-A4B** — **26B total** parameters but only **~3.8B activated** per token (a router
+  picks a few experts). You get large-model capacity at small-model compute.
+
+**Per-layer embeddings** (from Gemma 3n) explain the "effective" label: **E2B is 2.3B effective out of
+5B total**, and **E4B is 4.5B effective out of 8B total**. The surplus is per-layer embedding lookup —
+memory, not FLOPs — which is why Table 1 lists a large "Embedder" term (400M + 2,340M for E2B).
+
+--- image
+learning/assets/gemma4/t01_params.png
+Table 1 — the parameter budget decomposed: audio encoder, vision encoder, embedder, einsums (the transformer compute weights), and MTP drafter. Read the MoE row (26B-A4B): 24,500M total einsum params vs 2,800M active — the essence of "26B total / ~4B activated". Vocabulary = 262k.
+
+--- note
+## Attention structure (recap from g403)
+Architecturally, the attention stack is **mostly local sliding-window with a few global layers**
+(5:1, or 4:1 for E2B); global layers use **p-RoPE (p=0.25)** and **reuse keys as values** (except E2B,
+E4B), local layers use ordinary RoPE. These are architecture decisions as much as inference ones — they
+shape both the model and its KV-cache cost. See g403 for the full treatment.
+
+--- note
+## Reading Table 1 as an engineer
+Table 1 is the single best map of "where the parameters go." For deployment you care about the
+**einsums** column (the compute weights that must be resident and fast) plus the relevant encoder;
+the **embedder** is mostly memory; the **drafter** (g404) is a small add-on for speed. This
+decomposition is exactly what a **MoE inference cost profiler** needs — which Part B builds as the
+`moe-inference-cost` agent.

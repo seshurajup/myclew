@@ -1,0 +1,46 @@
+[
+  {
+    "text": "Functions are reusable blocks of code that take inputs and return outputs.",
+    "until_line": 5
+  },
+  {
+    "text": "Define a function with def, [laugh] give it a name and parameters in parentheses.",
+    "until_line": 5
+  },
+  {
+    "text": "The return statement sends a value back to wherever the function was called.",
+    "until_line": 8
+  },
+  {
+    "text": "Good functions do one clear job, which makes your code easier to read, test, and reuse later.",
+    "until_line": 8
+  },
+  {
+    "text": "Call functions by name with arguments in parentheses.",
+    "until_line": 8
+  },
+  {
+    "text": "Parameters can have a default value, making them optional — call without it and Python fills in the default.",
+    "until_line": 15
+  },
+  {
+    "text": "[sigh] A function can return more than one value at once — Python packs them into a tuple automatically.",
+    "until_line": 21
+  },
+  {
+    "text": "[chuckle] You can also write a short docstring in triple quotes right under def, describing what the function does.",
+    "until_line": 21
+  },
+  {
+    "text": "And unpacking that tuple into two variables at once reads naturally — low, high equals min_max of the list.",
+    "until_line": 21
+  },
+  {
+    "text": "[groan] One gotcha: a function with no explicit return statement quietly returns None.",
+    "until_line": 29
+  },
+  {
+    "text": "In the next one we take on error handling. Comment the topic you want after that.",
+    "until_line": 29
+  }
+]

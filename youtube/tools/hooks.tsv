@@ -1,0 +1,102 @@
+01-python-basics/001-hello-world	Write your first Python program in 60s
+01-python-basics/002-variables-assignment	Store anything with a single = sign
+01-python-basics/003-numbers-math	The division gotcha that bites beginners
+01-python-basics/004-strings-basics	Everything you can do to text in Python
+01-python-basics/005-lists-intro	The one container you'll use every day
+01-python-basics/006-indexing-access	Why Python starts counting at zero
+01-python-basics/007-slicing	Grab any chunk of a list with two colons
+01-python-basics/008-dicts-intro	Look up any value instantly with dicts
+01-python-basics/009-if-conditionals	Teach your code to make decisions
+01-python-basics/010-boolean-logic	Master True and False in 60 seconds
+01-python-basics/011-for-loops	Stop repeating yourself, use a for loop
+01-python-basics/012-while-loops	Loop until you're done, not a fixed count
+01-python-basics/013-functions-intro	Turn 20 lines into one reusable function
+01-python-basics/014-error-handling	Stop your program crashing on bad input
+01-python-basics/015-input-output	Make your program talk back to you
+02-python-functions/016-function-params	Pass data into functions four ways
+02-python-functions/017-args-kwargs	What *args and **kwargs actually do
+02-python-functions/018-lambdas	Write a whole function on one line
+02-python-functions/019-map-filter	Transform a whole list without a loop
+02-python-functions/020-list-comprehensions	Replace four lines of loop with one
+02-python-functions/021-dict-comprehensions	Build a dictionary in a single line
+02-python-functions/022-decorators-intro	Upgrade a function without touching it
+02-python-functions/023-closures	Meet the function that remembers its past
+02-python-functions/024-generators	Loop a billion items using zero memory
+02-python-functions/025-recursion	Understand recursion once and for all
+02-python-functions/026-scope-locals-globals	Why Python says your variable isn't defined
+02-python-functions/027-type-hints	Catch bugs before you run your code
+03-python-loops-iteration/028-enumerate	Stop writing range(len()) — do this
+03-python-loops-iteration/029-zip	Loop over two lists at the same time
+03-python-loops-iteration/030-range-deep	range() does far more than count
+03-python-loops-iteration/031-iterators	What really happens inside a for loop
+03-python-loops-iteration/032-itertools	The itertools tricks that replace loops
+03-python-loops-iteration/033-sorted-key	Sort anything by any rule you want
+03-python-loops-iteration/034-reversed-slicing	Three ways to reverse in Python
+03-python-loops-iteration/035-any-all	Test an entire list in one line
+03-python-loops-iteration/036-nested-loops	Loop over grids and pairs the right way
+03-python-loops-iteration/037-loop-patterns	The 3 loop patterns you'll write forever
+04-python-oop/038-classes-intro	Build your own Python data type
+04-python-oop/039-instance-attributes	The class attribute bug everyone hits
+04-python-oop/040-methods	Instance, class or static — which one?
+04-python-oop/041-encapsulation	Stop other code breaking your objects
+04-python-oop/042-properties	Attributes that run code when you touch them
+04-python-oop/043-inheritance	Reuse a whole class without copying it
+04-python-oop/044-super	What super() is really doing
+04-python-oop/045-polymorphism	Swap the object, keep the interface
+04-python-oop/046-dunder-str	Make your objects print like they should
+04-python-oop/047-dunder-operators	Make your own class work with +
+04-python-oop/048-abstract-classes	Force every subclass to implement this
+04-python-oop/049-dataclasses	Delete 20 lines of class boilerplate
+04-python-oop/050-composition	When to build objects out of objects
+04-python-oop/051-multiple-inheritance	How Python picks which parent wins
+04-python-oop/052-enums	Kill the magic strings in your code
+04-python-oop/053-slots	Make your objects smaller and faster
+04-python-oop/054-context-manager-class	Build your own with-statement
+04-python-oop/055-callable-objects	Make an object you can call like a function
+05-python-advanced/056-contextlib	Write a context manager in three lines
+05-python-advanced/057-functools	Cache a slow function with one line
+05-python-advanced/058-collections	Four containers better than dict and list
+05-python-advanced/059-regex	Find any pattern in text with regex
+05-python-advanced/060-datetime	Do date math without losing your mind
+05-python-advanced/061-json	Move Python data in and out as JSON
+05-python-advanced/062-file-io	Read and write files without leaking them
+05-python-advanced/063-pathlib	Never join file paths with strings again
+05-python-advanced/064-custom-exceptions	Raise errors that say what actually broke
+05-python-advanced/065-yield-from	Chain generators with yield from
+05-python-advanced/066-decorators-with-args	Decorators you can configure
+05-python-advanced/067-walrus	Assign and test on the same line
+05-python-advanced/068-unpacking	Unpack anything with a single star
+05-python-advanced/069-fstrings-advanced	F-strings format more than you think
+06-python-testing-tools/070-assertions	Catch bad data the moment it appears
+06-python-testing-tools/071-unittest	Write your first test with zero installs
+06-python-testing-tools/072-pytest	Write real tests without the boilerplate
+06-python-testing-tools/073-fixtures	Stop repeating setup in every test
+06-python-testing-tools/074-mocking	Test code that calls the internet
+06-python-testing-tools/075-logging	Why print() is costing you debug time
+06-python-testing-tools/076-type-checking	Find type bugs without running anything
+06-python-testing-tools/077-timeit-profiling	Prove which code is actually faster
+07-python-libraries/078-math-random	Roll dice and shuffle, nothing to install
+07-python-libraries/079-os-sys	Talk to your operating system from Python
+07-python-libraries/080-argparse	Turn your script into a real CLI tool
+07-python-libraries/081-csv	Read a spreadsheet with three lines
+01-learn-python/001-fibonacci	Write Fibonacci in 8 lines of Python
+01-learn-python/002-list-comprehensions	Build a whole list in one line
+01-learn-python/003-decorators	Change what a function does without editing it
+01-learn-python/004-generators	Yield a million values using no memory
+01-learn-python/005-context-managers	Guarantee cleanup even when your code crashes
+01-learn-python/006-dataclasses	Write a class in three lines, not thirty
+01-learn-python/007-error-handling	Divide by zero without crashing
+01-learn-python/008-itertools	Two itertools tools you'll actually use
+01-learn-python/009-fstrings	F-strings can round, quote and debug
+01-learn-python/010-walrus	Assign and test in a single line
+01-learn-python/011-type-hints	Make Python readable before you run it
+01-learn-python/012-enumerate-zip	Loop with an index the clean way
+01-learn-python/013-counter	Tally anything with one line of Python
+01-learn-python/014-defaultdict	Never write a KeyError check again
+01-learn-python/015-lambda-map-filter	Transform a list without writing a loop
+01-learn-python/016-args-kwargs	Take any number of arguments you want
+01-learn-python/017-unpacking	Swap two variables without a temp
+01-learn-python/018-sets	Remove duplicates in one function call
+01-learn-python/019-sorting-key	Sort by anything with one keyword
+01-learn-python/020-pathlib	Stop joining file paths with strings
+03-learn-transformer/001-attention	Build attention in 4 lines of PyTorch

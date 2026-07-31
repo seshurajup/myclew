@@ -1,0 +1,22 @@
+@ id: hpe01
+@ order: 3200
+@ title: 1 Introduction
+@ subtitle: Hilbert Operator for Progressive Encoding (HOPE) §1
+@ source: docs/papers/hope-hilbert/hope-hilbert.md
+
+--- note
+## 1 Introduction
+**Paper:** Hilbert Operator for Progressive Encoding (HOPE) · §1 · pages 1–2 · equations (none) · 1 figures.
+
+**The claim.** Compression methods score parameters; parameters are
+gauge-dependent under BN and PH-1 rescaling; therefore the scores are artifacts. HOPE's programme: define
+the neuron as a continuous function (§3), give inputs a tractable surrogate distribution (§4), compute the
+resulting Hilbert-space geometry in closed form (§5), and derive pruning, merging (§6–7), block eviction
+(§8) and action selection (§9–10) as projections and costs in that geometry.
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/hope-hilbert/p01_0.png
+

@@ -1,0 +1,46 @@
+[
+  {
+    "text": "Enumerate and zip are the clean way to loop when you need more than one thing.",
+    "until_line": 1
+  },
+  {
+    "text": "We've got three names and three matching ages in parallel lists.",
+    "until_line": 2
+  },
+  {
+    "text": "Enumerate hands you the index and the value together on every pass.",
+    "until_line": 4
+  },
+  {
+    "text": "And start equals one means you count from one, not zero — ideal for numbered output.",
+    "until_line": 4
+  },
+  {
+    "text": "So you never write range len and index back into the list by hand.",
+    "until_line": 5
+  },
+  {
+    "text": "Zip walks two sequences side by side, pairing them position by position.",
+    "until_line": 7
+  },
+  {
+    "text": "Each pass unpacks straight into name and age, ready to use.",
+    "until_line": 8
+  },
+  {
+    "text": "Zip stops at the shorter of the two, so it never runs off the end.",
+    "until_line": 8
+  },
+  {
+    "text": "And wrapping zip in dict turns two parallel lists into one dictionary, instantly.",
+    "until_line": 10
+  },
+  {
+    "text": "Names to ages, in a single readable line.",
+    "until_line": 11
+  },
+  {
+    "text": "Up next, Counter. Which one do you already use? Comment below.",
+    "until_line": 11
+  }
+]

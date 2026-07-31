@@ -1,0 +1,4 @@
+[
+  {"after_line": 10, "text": ">>> checked\n>>> 5.0", "caption": "clean division"},
+  {"after_line": 11, "text": ">>> checked\n>>> None", "caption": "caught, no crash"}
+]

@@ -1,0 +1,16 @@
+[
+  {
+    "after_line": 15,
+    "text": ">>> (3, 4)\\n>>> (3, 4)\\n>>> Point(3, 4)",
+    "caption": "__str__ friendly, __repr__ exact"
+  },
+  {
+    "after_line": 18,
+    "text": ">>> [Point(1, 2), Point(5, 6)]",
+    "caption": "lists use __repr__"
+  },
+  {
+    "after_line": 18,
+    "image": "artifacts/terminal.png"
+  }
+]

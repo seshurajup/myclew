@@ -1,0 +1,54 @@
+@ id: dopd03
+@ order: 622
+@ title: The training objective — confirmed from the verl patch
+@ subtitle: token_reward_direct advantage + a GRPO term + an adaptive KL leash
+@ source: verl/verl/trainer/ppo/core_algos.py + scripts/train_justrl_qwen.sh
+
+--- note
+## We read the code, not just the README
+The exact update was confirmed by reading the cloned patch — the launch script, the advantage estimator, the
+reward computation, and the repo's own unit test (`tests/test_delta_opd_reward.py`). It is a **GRPO/PPO-style
+on-policy RL update on the student**, with Δ_T as the reward. Not a supervised KL-to-teacher loss.
+
+--- note
+## Step 1 — the dense reward (dopd02), detached
+    Δ_T        = teacher_rl_logp − teacher_ref_logp                # [B, T, K], detached
+    weights    = softmax(student_logp.detach(), dim=-1)            # student top-k distribution
+    rm_scores  = (weights · Δ_T).detach()                         # per-candidate token reward
+(`_compute_delta_opd_rm_scores`; invalid candidates are masked to −inf before softmax and Δ_T=0.) With
+`reward_weight_mode=student_p` and `log_prob_top_k=16`, this is an expectation of Δ_T under the student's own
+top-16.
+
+--- note
+## Step 2 — the advantage: `token_reward_direct`
+The launch script sets `adv_estimator=token_reward_direct`. That estimator is deliberately the **simplest
+possible** (from `core_algos.py`):
+
+    advantages = token_level_rewards · response_mask     # the reward IS the advantage (3-D [B,T,K] aware)
+    returns    = advantages
+
+i.e. **no learned critic, no group baseline** on the Δ_T term — the dense implicit reward is used directly as
+the token-level advantage. A sibling estimator `token_reward_direct_plus_grpo` combines it with the standard
+GRPO outcome advantage: `adv = direct_adv + grpo_outcome_weight · grpo_adv` (the script exposes
+`GRPO_OUTCOME_WEIGHT=1.0`), so the Δ_T direction and the true-reward GRPO signal can be summed.
+
+--- note
+## Step 3 — the policy update + adaptive KL leash
+The advantage feeds the usual PPO/GRPO **clipped policy-gradient** surrogate on the student
+(`loss_agg_mode=token-mean`), i.e. push up log-prob of candidates with positive rm, down for negative — a
+Δ_T-reweighted maximum-likelihood step, importance-corrected and clipped, on the student's on-policy rollouts.
+
+Critically there is a **KL-loss leash** keyed to the student's own reference:
+`KL_LOSS_COEF=2.5`, **adaptive** (`adaptive_kl_loss_*`, coef bounded to 0.5–2.5, keyed on
+`delta_opd/weighted_reward_mean`). This is what **preserves the student's strong base** — it only lets the Δ_T
+reward move the policy where the signal is strong enough to overcome the leash. Our toy (dopd06) shows this KL
+strength is not a detail: too weak a leash and the weak teacher's direction *corrupts* the student's base;
+firm enough and the student keeps its base while importing the teacher's improvement.
+
+--- note
+## The whole loop, in one paragraph
+Freeze πT and πT_ref. Repeat: (1) the **student rolls out** on prompts (vLLM/SGLang, temperature 1.0);
+(2) evaluate πT, πT_ref, and the student on those trajectories' top-k → **Δ_T** and student weights →
+**rm_scores** (dopd02); (3) advantage = `token_reward_direct` (rm_scores·mask), optionally + GRPO outcome;
+(4) **PPO/GRPO update the student** with an **adaptive KL leash to the student reference**. On-policy, dense,
+direction-as-reward. That is Direct-OPD.

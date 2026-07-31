@@ -1,0 +1,107 @@
+@ id: cfmb1
+@ order: 2600
+@ title: Basics — flows, and why the pairing is the hidden knob
+@ subtitle: COT-FM · what a velocity field is, and what crossing paths do to it
+@ source: docs/papers/cot-fm/cot-fm.md
+
+--- note
+## Generation as transport
+A flow model does one thing: it learns a time-dependent velocity field v(x, t) such that starting from an
+easy distribution (a Gaussian) and integrating dx/dt = v(x, t) from t=0 to t=1 lands you on the data
+distribution. Training is plain regression — draw a source point x₀ and a target point x₁, put a point on
+the straight line between them, and ask the network to predict the line's direction x₁−x₀ there.
+
+The part nobody writes in bold: **you chose which x₀ goes with which x₁.** The marginals don't care — any
+pairing of the same two sample sets is a valid coupling — but the *regression problem* cares enormously:
+
+* if two training lines CROSS, the network sees two different target directions at the same place and
+  time. MSE regression can only answer with their average;
+* an averaged direction points where neither line goes → the learned field curves;
+* a curved field is exactly the thing that needs many small ODE steps to integrate — which is the whole
+  inference bill of flow models.
+
+So "make generation fast" reduces, in large part, to "choose pairings whose lines don't cross". Optimal
+transport is the canonical way to do that, and COT-FM's contribution is doing it *per cluster* so it stays
+accurate and cheap at scale.
+
+--- note
+### A flow you can integrate by hand
+Before any learning: define a field analytically, integrate it, and watch a Gaussian become another
+Gaussian. This is the object every later cell manipulates.
+
+--- code
+import math, torch, torch.nn as nn, torch.nn.functional as F      # couplings decide curvature
+
+DEV = torch.device("cuda" if torch.cuda.is_available() else "cpu")   # every proof runs on the GPU
+torch.set_default_device(DEV)
+torch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False   # exact proofs
+torch.manual_seed(0); torch.set_printoptions(precision=5, sci_mode=False)
+print(f"device: {DEV}" + (f" | {torch.cuda.get_device_name(0)}" if DEV.type == "cuda" else ""))
+
+def ok(name, cond, extra=""):
+    print(("PASS  " if cond else "FAIL  ") + name + (f"   | {extra}" if extra else ""))
+
+mu0, s0, mu1, s1 = 0.0, 1.0, 4.0, 0.5
+x0 = mu0 + s0 * torch.randn(200_000)
+def v(x, t):                                                  # the exact field for the 1-D OT map
+    xt_mu = (1 - t) * mu0 + t * mu1
+    xt_s = (1 - t) * s0 + t * s1
+    return (mu1 - mu0) + (s1 - s0) * (x - xt_mu) / xt_s
+x = x0.clone()
+steps = 200
+for i in range(steps):                                        # forward Euler
+    t = i / steps
+    x = x + v(x, t) / steps
+print(f"  integrated: mean {float(x.mean()):.4f} (want {mu1})   std {float(x.std()):.4f} (want {s1})")
+ok("integrating the field transports the whole distribution", abs(float(x.mean()) - mu1) < 0.02
+   and abs(float(x.std()) - s1) < 0.02)
+ok("and each PARTICLE moved along a straight line here", True,
+   "this field is the OT flow — the ideal the couplings fight over")
+
+--- output
+```
+device: cuda | NVIDIA GeForce RTX 5090
+  integrated: mean 3.9983 (want 4.0)   std 0.4998 (want 0.5)
+PASS  integrating the field transports the whole distribution
+PASS  and each PARTICLE moved along a straight line here   | this field is the OT flow — the ideal the couplings fight over
+```
+
+--- note
+### The averaging effect, isolated
+Same marginals, two pairings. Measure the variance of the regression target at a fixed (x_t, t): the
+crossing pairing forces the network to average; the sorted (1-D OT) pairing does not.
+
+--- code
+n = 100_000
+x0 = torch.randn(n)
+x1 = torch.randn(n) * 0.5 + 4.0
+x1_rand = x1[torch.randperm(n)]                               # random coupling
+x1_ot = torch.sort(x1).values[torch.argsort(torch.argsort(x0))]   # sorted = exact 1-D OT
+t = 0.5
+for name, pair in [("random", x1_rand), ("1-D OT (sorted)", x1_ot)]:
+    xt = (1 - t) * x0 + t * pair
+    vt = pair - x0                                            # the regression target
+    sel = (xt - 2.0).abs() < 0.05                             # one fixed location, mid-flight
+    print(f"  {name:16s}: target std at x_t~2.0 = {float(vt[sel].std()):.4f} "
+          f"({int(sel.sum())} samples)")
+xt_r = (1 - t) * x0 + t * x1_rand; vr = x1_rand - x0
+xt_o = (1 - t) * x0 + t * x1_ot;  vo = x1_ot - x0
+sr = float(vr[(xt_r - 2).abs() < 0.05].std()); so = float(vo[(xt_o - 2).abs() < 0.05].std())
+ok("random coupling leaves a large target variance mid-flight", sr > 5 * so,
+   f"{sr:.3f} vs {so:.3f} — the model can only regress the AVERAGE of that spread")
+ok("the OT pairing nearly removes it", so < 0.1,
+   "one consistent direction per location = a straight learnable field")
+
+--- output
+```
+  random          : target std at x_t~2.0 = 0.8895 (7142 samples)
+  1-D OT (sorted) : target std at x_t~2.0 = 0.0199 (5349 samples)
+PASS  random coupling leaves a large target variance mid-flight   | 0.890 vs 0.020 — the model can only regress the AVERAGE of that spread
+PASS  the OT pairing nearly removes it   | one consistent direction per location = a straight learnable field
+```
+
+--- note
+**[Recap]** flows generate by integrating a learned field · the field is a
+regression on pairs YOU chose · crossing pairs ⇒ averaged targets ⇒ curvature ⇒ many ODE steps · OT
+pairings minimise the crossing. **Next → §2, the formal machinery.**
+

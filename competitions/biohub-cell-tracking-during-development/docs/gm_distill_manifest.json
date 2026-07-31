@@ -1,0 +1,3771 @@
+{
+ "a/x": {
+  "status": "done",
+  "techniques": [
+   "exponential moving average (EMA)",
+   "pseudo-labeling / self-training"
+  ],
+  "gaps": [
+   "exponential moving average (EMA)"
+  ],
+  "covered_by": {
+   "pseudo-labeling / self-training": "pseudo-label"
+  }
+ },
+ "b/y": {
+  "status": "done",
+  "techniques": [
+   "exponential moving average (EMA)",
+   "pseudo-labeling / self-training"
+  ],
+  "gaps": [
+   "exponential moving average (EMA)"
+  ],
+  "covered_by": {
+   "pseudo-labeling / self-training": "pseudo-label"
+  }
+ },
+ "bad/repo": {
+  "status": "clone-failed"
+ },
+ "1ytic/NVARC": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "LoRA / PEFT finetune",
+   "OOF stacking / blending",
+   "exponential moving average (EMA)",
+   "quantization / pruning",
+   "temporal / sequence model"
+  ],
+  "gaps": [
+   "exponential moving average (EMA)",
+   "temporal / sequence model"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "LoRA / PEFT finetune": "lora-train",
+   "OOF stacking / blending": "tab-stack",
+   "quantization / pruning": "quantize"
+  }
+ },
+ "Alehandreus/ariel-2025": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "OOF stacking / blending",
+   "diffusion / generative aug"
+  ],
+  "gaps": [],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "OOF stacking / blending": "tab-stack",
+   "diffusion / generative aug": "gan-train"
+  }
+ },
+ "Anaphase21/Deep-Past-Challenge-2026": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "LoRA / PEFT finetune",
+   "OOF stacking / blending",
+   "ensemble / snapshot",
+   "temporal / sequence model"
+  ],
+  "gaps": [
+   "temporal / sequence model"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "LoRA / PEFT finetune": "lora-train",
+   "OOF stacking / blending": "tab-stack",
+   "ensemble / snapshot": "ensemble"
+  }
+ },
+ "AndyGrant/ClosedGrapheus": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "OOF stacking / blending",
+   "quantization / pruning",
+   "retrieval / RAG"
+  ],
+  "gaps": [],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "OOF stacking / blending": "tab-stack",
+   "quantization / pruning": "quantize",
+   "retrieval / RAG": "llm-retrieve-rerank"
+  }
+ },
+ "AndyGrant/Ethereal": {
+  "status": "done",
+  "techniques": [],
+  "gaps": [],
+  "covered_by": {}
+ },
+ "AndyGrant/KaggleFish": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "quantization / pruning"
+  ],
+  "gaps": [],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "quantization / pruning": "quantize"
+  }
+ },
+ "AndyGrant/OpenBench": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "retrieval / RAG",
+   "temporal / sequence model"
+  ],
+  "gaps": [
+   "temporal / sequence model"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "retrieval / RAG": "llm-retrieve-rerank"
+  }
+ },
+ "AutoML-Grandmasters/Fourth-AutoML-Grand-Prix": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "OOF stacking / blending",
+   "ensemble / snapshot"
+  ],
+  "gaps": [],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "OOF stacking / blending": "tab-stack",
+   "ensemble / snapshot": "ensemble"
+  }
+ },
+ "BYU/RSNA": {
+  "status": "clone-failed"
+ },
+ "Blosc/python-blosc2": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "LoRA / PEFT finetune",
+   "OOF stacking / blending",
+   "diffusion / generative aug",
+   "ensemble / snapshot",
+   "quantization / pruning",
+   "retrieval / RAG",
+   "self-consistency / majority vote",
+   "temporal / sequence model",
+   "test-time training (TTT)",
+   "weighted boxes fusion (WBF)"
+  ],
+  "gaps": [
+   "temporal / sequence model",
+   "test-time training (TTT)",
+   "weighted boxes fusion (WBF)"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "LoRA / PEFT finetune": "lora-train",
+   "OOF stacking / blending": "tab-stack",
+   "diffusion / generative aug": "gan-train",
+   "ensemble / snapshot": "ensemble",
+   "quantization / pruning": "quantize",
+   "retrieval / RAG": "llm-retrieve-rerank",
+   "self-consistency / majority vote": "self-consistency-aggregator"
+  }
+ },
+ "BrendanCarlin/march-mania-2026-2nd-place": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "OOF stacking / blending",
+   "ensemble / snapshot"
+  ],
+  "gaps": [],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "OOF stacking / blending": "tab-stack",
+   "ensemble / snapshot": "ensemble"
+  }
+ },
+ "ByteDance-Seed/Depth-Anything-3": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "LoRA / PEFT finetune",
+   "OOF stacking / blending",
+   "diffusion / generative aug",
+   "exponential moving average (EMA)",
+   "pseudo-labeling / self-training",
+   "quantization / pruning",
+   "retrieval / RAG",
+   "temporal / sequence model",
+   "test-time training (TTT)",
+   "weighted boxes fusion (WBF)"
+  ],
+  "gaps": [
+   "exponential moving average (EMA)",
+   "temporal / sequence model",
+   "test-time training (TTT)",
+   "weighted boxes fusion (WBF)"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "LoRA / PEFT finetune": "lora-train",
+   "OOF stacking / blending": "tab-stack",
+   "diffusion / generative aug": "gan-train",
+   "pseudo-labeling / self-training": "pseudo-label",
+   "quantization / pruning": "quantize",
+   "retrieval / RAG": "llm-retrieve-rerank"
+  }
+ },
+ "CatIIIIIIII/RNAErnie": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "OOF stacking / blending",
+   "diffusion / generative aug",
+   "ensemble / snapshot",
+   "gradient accumulation",
+   "pseudo-labeling / self-training",
+   "quantization / pruning",
+   "retrieval / RAG",
+   "self-consistency / majority vote",
+   "temporal / sequence model"
+  ],
+  "gaps": [
+   "gradient accumulation",
+   "temporal / sequence model"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "OOF stacking / blending": "tab-stack",
+   "diffusion / generative aug": "gan-train",
+   "ensemble / snapshot": "ensemble",
+   "pseudo-labeling / self-training": "pseudo-label",
+   "quantization / pruning": "quantize",
+   "retrieval / RAG": "llm-retrieve-rerank",
+   "self-consistency / majority vote": "self-consistency-aggregator"
+  }
+ },
+ "ChristofHenkel/kaggle-cryoet-1st-place-segmentation": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "OOF stacking / blending",
+   "gradient accumulation",
+   "mixup / cutmix",
+   "pseudo-labeling / self-training",
+   "temporal / sequence model"
+  ],
+  "gaps": [
+   "gradient accumulation",
+   "mixup / cutmix",
+   "temporal / sequence model"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "OOF stacking / blending": "tab-stack",
+   "pseudo-labeling / self-training": "pseudo-label"
+  }
+ },
+ "DasLab/arnie": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "OOF stacking / blending",
+   "diffusion / generative aug",
+   "ensemble / snapshot",
+   "temporal / sequence model"
+  ],
+  "gaps": [
+   "temporal / sequence model"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "OOF stacking / blending": "tab-stack",
+   "diffusion / generative aug": "gan-train",
+   "ensemble / snapshot": "ensemble"
+  }
+ },
+ "Duke-MatSci/ChemProps": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "OOF stacking / blending"
+  ],
+  "gaps": [],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "OOF stacking / blending": "tab-stack"
+  }
+ },
+ "ElFazouani/RSNA-2024-Lumbar-Spine-Degenerative-Classification": {
+  "status": "done",
+  "techniques": [
+   "OOF stacking / blending",
+   "mixup / cutmix",
+   "pseudo-labeling / self-training",
+   "quantization / pruning",
+   "temporal / sequence model"
+  ],
+  "gaps": [
+   "mixup / cutmix",
+   "temporal / sequence model"
+  ],
+  "covered_by": {
+   "OOF stacking / blending": "tab-stack",
+   "pseudo-labeling / self-training": "pseudo-label",
+   "quantization / pruning": "quantize"
+  }
+ },
+ "Elias-Buerger/kaggle-lux-s3": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "OOF stacking / blending",
+   "retrieval / RAG",
+   "temporal / sequence model"
+  ],
+  "gaps": [
+   "temporal / sequence model"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "OOF stacking / blending": "tab-stack",
+   "retrieval / RAG": "llm-retrieve-rerank"
+  }
+ },
+ "Elo/Colley": {
+  "status": "clone-failed"
+ },
+ "FT-Transformer/TabICL": {
+  "status": "clone-failed"
+ },
+ "FlorentinGe/Birdclef2026-2ndplace": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "LoRA / PEFT finetune",
+   "OOF stacking / blending",
+   "ensemble / snapshot",
+   "focal loss",
+   "knowledge distillation",
+   "mixup / cutmix",
+   "pseudo-labeling / self-training",
+   "quantization / pruning",
+   "retrieval / RAG",
+   "self-consistency / majority vote",
+   "stochastic weight averaging (SWA)",
+   "temporal / sequence model",
+   "test-time augmentation (TTA)"
+  ],
+  "gaps": [
+   "focal loss",
+   "mixup / cutmix",
+   "stochastic weight averaging (SWA)",
+   "temporal / sequence model"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "LoRA / PEFT finetune": "lora-train",
+   "OOF stacking / blending": "tab-stack",
+   "ensemble / snapshot": "ensemble",
+   "knowledge distillation": "distill",
+   "pseudo-labeling / self-training": "pseudo-label",
+   "quantization / pruning": "quantize",
+   "retrieval / RAG": "llm-retrieve-rerank",
+   "self-consistency / majority vote": "self-consistency-aggregator",
+   "test-time augmentation (TTA)": "aug-ablation"
+  }
+ },
+ "FrancescoSaverioZuppichini/ConvNext": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "temporal / sequence model"
+  ],
+  "gaps": [
+   "temporal / sequence model"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices"
+  }
+ },
+ "GWwangshuo/Kaggle-2024-CZII-Pub": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "OOF stacking / blending",
+   "ensemble / snapshot",
+   "label smoothing",
+   "pseudo-labeling / self-training",
+   "quantization / pruning",
+   "retrieval / RAG",
+   "test-time augmentation (TTA)"
+  ],
+  "gaps": [
+   "label smoothing"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "OOF stacking / blending": "tab-stack",
+   "ensemble / snapshot": "ensemble",
+   "pseudo-labeling / self-training": "pseudo-label",
+   "quantization / pruning": "quantize",
+   "retrieval / RAG": "llm-retrieve-rerank",
+   "test-time augmentation (TTA)": "aug-ablation"
+  }
+ },
+ "GosUxD/MABe-5th": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "OOF stacking / blending",
+   "focal loss",
+   "gradient accumulation",
+   "graph neural net / GNN",
+   "mixup / cutmix",
+   "quantization / pruning",
+   "stochastic weight averaging (SWA)",
+   "temporal / sequence model"
+  ],
+  "gaps": [
+   "focal loss",
+   "gradient accumulation",
+   "mixup / cutmix",
+   "stochastic weight averaging (SWA)",
+   "temporal / sequence model"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "OOF stacking / blending": "tab-stack",
+   "graph neural net / GNN": "gnn-link-train",
+   "quantization / pruning": "quantize"
+  }
+ },
+ "GuidoBartoli/sherloq": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "diffusion / generative aug",
+   "pseudo-labeling / self-training",
+   "quantization / pruning",
+   "retrieval / RAG"
+  ],
+  "gaps": [],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "diffusion / generative aug": "gan-train",
+   "pseudo-labeling / self-training": "pseudo-label",
+   "quantization / pruning": "quantize",
+   "retrieval / RAG": "llm-retrieve-rerank"
+  }
+ },
+ "HEALPix/grid-cell": {
+  "status": "clone-failed"
+ },
+ "HumanSignal/labelImg": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "OOF stacking / blending"
+  ],
+  "gaps": [],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "OOF stacking / blending": "tab-stack"
+  }
+ },
+ "ImageMarkup/isic-cli": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision"
+  ],
+  "gaps": [],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices"
+  }
+ },
+ "IsaiahPressman/kaggle-lux-2024": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "OOF stacking / blending",
+   "diffusion / generative aug",
+   "pseudo-labeling / self-training",
+   "temporal / sequence model"
+  ],
+  "gaps": [
+   "temporal / sequence model"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "OOF stacking / blending": "tab-stack",
+   "diffusion / generative aug": "gan-train",
+   "pseudo-labeling / self-training": "pseudo-label"
+  }
+ },
+ "IsaiahPressman/kaggle-orbit-wars": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "LoRA / PEFT finetune",
+   "OOF stacking / blending",
+   "diffusion / generative aug",
+   "gradient accumulation",
+   "knowledge distillation",
+   "quantization / pruning",
+   "temporal / sequence model"
+  ],
+  "gaps": [
+   "gradient accumulation",
+   "temporal / sequence model"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "LoRA / PEFT finetune": "lora-train",
+   "OOF stacking / blending": "tab-stack",
+   "diffusion / generative aug": "gan-train",
+   "knowledge distillation": "distill",
+   "quantization / pruning": "quantize"
+  }
+ },
+ "KASSII/Kaggle_LuxAI-s3": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "pseudo-labeling / self-training",
+   "quantization / pruning",
+   "temporal / sequence model"
+  ],
+  "gaps": [
+   "temporal / sequence model"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "pseudo-labeling / self-training": "pseudo-label",
+   "quantization / pruning": "quantize"
+  }
+ },
+ "KSB21ST/MINI-ARC": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "LoRA / PEFT finetune",
+   "OOF stacking / blending",
+   "diffusion / generative aug",
+   "quantization / pruning",
+   "retrieval / RAG",
+   "temporal / sequence model",
+   "weighted boxes fusion (WBF)"
+  ],
+  "gaps": [
+   "temporal / sequence model",
+   "weighted boxes fusion (WBF)"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "LoRA / PEFT finetune": "lora-train",
+   "OOF stacking / blending": "tab-stack",
+   "diffusion / generative aug": "gan-train",
+   "quantization / pruning": "quantize",
+   "retrieval / RAG": "llm-retrieve-rerank"
+  }
+ },
+ "LIHANG-HONG/WSDM-Cup-3rd-place-solution": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "LoRA / PEFT finetune",
+   "OOF stacking / blending",
+   "diffusion / generative aug",
+   "gradient accumulation",
+   "knowledge distillation",
+   "quantization / pruning",
+   "temporal / sequence model",
+   "test-time augmentation (TTA)"
+  ],
+  "gaps": [
+   "gradient accumulation",
+   "temporal / sequence model"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "LoRA / PEFT finetune": "lora-train",
+   "OOF stacking / blending": "tab-stack",
+   "diffusion / generative aug": "gan-train",
+   "knowledge distillation": "distill",
+   "quantization / pruning": "quantize",
+   "test-time augmentation (TTA)": "aug-ablation"
+  }
+ },
+ "LSXI7/MINIMA": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "LoRA / PEFT finetune",
+   "OOF stacking / blending",
+   "diffusion / generative aug",
+   "ensemble / snapshot",
+   "exponential moving average (EMA)",
+   "label smoothing",
+   "pseudo-labeling / self-training",
+   "quantization / pruning",
+   "retrieval / RAG",
+   "temporal / sequence model"
+  ],
+  "gaps": [
+   "exponential moving average (EMA)",
+   "label smoothing",
+   "temporal / sequence model"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "LoRA / PEFT finetune": "lora-train",
+   "OOF stacking / blending": "tab-stack",
+   "diffusion / generative aug": "gan-train",
+   "ensemble / snapshot": "ensemble",
+   "pseudo-labeling / self-training": "pseudo-label",
+   "quantization / pruning": "quantize",
+   "retrieval / RAG": "llm-retrieve-rerank"
+  }
+ },
+ "Le-Gris/h-arc": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "OOF stacking / blending",
+   "diffusion / generative aug",
+   "temporal / sequence model",
+   "test-time training (TTT)"
+  ],
+  "gaps": [
+   "temporal / sequence model",
+   "test-time training (TTT)"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "OOF stacking / blending": "tab-stack",
+   "diffusion / generative aug": "gan-train"
+  }
+ },
+ "Lgeu/kaggle-stockfish": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "OOF stacking / blending",
+   "exponential moving average (EMA)"
+  ],
+  "gaps": [
+   "exponential moving average (EMA)"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "OOF stacking / blending": "tab-stack"
+  }
+ },
+ "Lgeu/santa2024": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "quantization / pruning",
+   "temporal / sequence model"
+  ],
+  "gaps": [
+   "temporal / sequence model"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "quantization / pruning": "quantize"
+  }
+ },
+ "Lightning-AI/pytorch-lightning": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "OOF stacking / blending",
+   "diffusion / generative aug",
+   "ensemble / snapshot",
+   "exponential moving average (EMA)",
+   "gradient accumulation",
+   "pseudo-labeling / self-training",
+   "quantization / pruning",
+   "retrieval / RAG",
+   "stochastic weight averaging (SWA)",
+   "temporal / sequence model",
+   "test-time training (TTT)"
+  ],
+  "gaps": [
+   "exponential moving average (EMA)",
+   "gradient accumulation",
+   "stochastic weight averaging (SWA)",
+   "temporal / sequence model",
+   "test-time training (TTT)"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "OOF stacking / blending": "tab-stack",
+   "diffusion / generative aug": "gan-train",
+   "ensemble / snapshot": "ensemble",
+   "pseudo-labeling / self-training": "pseudo-label",
+   "quantization / pruning": "quantize",
+   "retrieval / RAG": "llm-retrieve-rerank"
+  }
+ },
+ "Luecx/Grapheus": {
+  "status": "done",
+  "techniques": [
+   "retrieval / RAG"
+  ],
+  "gaps": [],
+  "covered_by": {
+   "retrieval / RAG": "llm-retrieve-rerank"
+  }
+ },
+ "Lux-AI-Challenge/Lux-Design-S3": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "OOF stacking / blending",
+   "diffusion / generative aug"
+  ],
+  "gaps": [],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "OOF stacking / blending": "tab-stack",
+   "diffusion / generative aug": "gan-train"
+  }
+ },
+ "MIC-DKFZ/batchgeneratorsv2": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "OOF stacking / blending",
+   "nnU-Net / medical seg",
+   "quantization / pruning"
+  ],
+  "gaps": [],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "OOF stacking / blending": "tab-stack",
+   "nnU-Net / medical seg": "nnunet-segmentation-runner",
+   "quantization / pruning": "quantize"
+  }
+ },
+ "MIC-DKFZ/kaggle_BYU_Locating_Bacterial-Flagellar_Motors_2025_solution": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "LoRA / PEFT finetune",
+   "OOF stacking / blending",
+   "diffusion / generative aug",
+   "ensemble / snapshot",
+   "focal loss",
+   "label smoothing",
+   "nnU-Net / medical seg",
+   "pseudo-labeling / self-training",
+   "quantization / pruning",
+   "retrieval / RAG",
+   "temporal / sequence model",
+   "test-time augmentation (TTA)"
+  ],
+  "gaps": [
+   "focal loss",
+   "label smoothing",
+   "temporal / sequence model"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "LoRA / PEFT finetune": "lora-train",
+   "OOF stacking / blending": "tab-stack",
+   "diffusion / generative aug": "gan-train",
+   "ensemble / snapshot": "ensemble",
+   "nnU-Net / medical seg": "nnunet-segmentation-runner",
+   "pseudo-labeling / self-training": "pseudo-label",
+   "quantization / pruning": "quantize",
+   "retrieval / RAG": "llm-retrieve-rerank",
+   "test-time augmentation (TTA)": "aug-ablation"
+  }
+ },
+ "MIC-DKFZ/napari-data-inspection": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "OOF stacking / blending",
+   "diffusion / generative aug",
+   "quantization / pruning"
+  ],
+  "gaps": [],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "OOF stacking / blending": "tab-stack",
+   "diffusion / generative aug": "gan-train",
+   "quantization / pruning": "quantize"
+  }
+ },
+ "MIC-DKFZ/nnDetection": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "OOF stacking / blending",
+   "diffusion / generative aug",
+   "ensemble / snapshot",
+   "focal loss",
+   "label smoothing",
+   "nnU-Net / medical seg",
+   "pseudo-labeling / self-training",
+   "quantization / pruning",
+   "retrieval / RAG",
+   "self-consistency / majority vote",
+   "stochastic weight averaging (SWA)",
+   "temporal / sequence model",
+   "test-time augmentation (TTA)",
+   "weighted boxes fusion (WBF)"
+  ],
+  "gaps": [
+   "focal loss",
+   "label smoothing",
+   "stochastic weight averaging (SWA)",
+   "temporal / sequence model",
+   "weighted boxes fusion (WBF)"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "OOF stacking / blending": "tab-stack",
+   "diffusion / generative aug": "gan-train",
+   "ensemble / snapshot": "ensemble",
+   "nnU-Net / medical seg": "nnunet-segmentation-runner",
+   "pseudo-labeling / self-training": "pseudo-label",
+   "quantization / pruning": "quantize",
+   "retrieval / RAG": "llm-retrieve-rerank",
+   "self-consistency / majority vote": "self-consistency-aggregator",
+   "test-time augmentation (TTA)": "aug-ablation"
+  }
+ },
+ "Make-Data-Count-Community/corpus-data-file": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "diffusion / generative aug",
+   "retrieval / RAG"
+  ],
+  "gaps": [],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "diffusion / generative aug": "gan-train",
+   "retrieval / RAG": "llm-retrieve-rerank"
+  }
+ },
+ "Moyasii/Kaggle-2024-RSNA-Pub": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "OOF stacking / blending",
+   "focal loss",
+   "mixup / cutmix",
+   "pseudo-labeling / self-training",
+   "quantization / pruning",
+   "temporal / sequence model",
+   "test-time augmentation (TTA)"
+  ],
+  "gaps": [
+   "focal loss",
+   "mixup / cutmix",
+   "temporal / sequence model"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "OOF stacking / blending": "tab-stack",
+   "pseudo-labeling / self-training": "pseudo-label",
+   "quantization / pruning": "quantize",
+   "test-time augmentation (TTA)": "aug-ablation"
+  }
+ },
+ "NVIDIA-Digital-Bio/RNAPro": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "OOF stacking / blending",
+   "diffusion / generative aug",
+   "exponential moving average (EMA)",
+   "gradient accumulation",
+   "knowledge distillation",
+   "pseudo-labeling / self-training",
+   "quantization / pruning",
+   "retrieval / RAG",
+   "temporal / sequence model"
+  ],
+  "gaps": [
+   "exponential moving average (EMA)",
+   "gradient accumulation",
+   "temporal / sequence model"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "OOF stacking / blending": "tab-stack",
+   "diffusion / generative aug": "gan-train",
+   "knowledge distillation": "distill",
+   "pseudo-labeling / self-training": "pseudo-label",
+   "quantization / pruning": "quantize",
+   "retrieval / RAG": "llm-retrieve-rerank"
+  }
+ },
+ "NVIDIA-NeMo/RL": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "LoRA / PEFT finetune",
+   "OOF stacking / blending",
+   "diffusion / generative aug",
+   "knowledge distillation",
+   "pseudo-labeling / self-training",
+   "quantization / pruning",
+   "retrieval / RAG",
+   "self-consistency / majority vote",
+   "temporal / sequence model"
+  ],
+  "gaps": [
+   "temporal / sequence model"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "LoRA / PEFT finetune": "lora-train",
+   "OOF stacking / blending": "tab-stack",
+   "diffusion / generative aug": "gan-train",
+   "knowledge distillation": "distill",
+   "pseudo-labeling / self-training": "pseudo-label",
+   "quantization / pruning": "quantize",
+   "retrieval / RAG": "llm-retrieve-rerank",
+   "self-consistency / majority vote": "self-consistency-aggregator"
+  }
+ },
+ "NYNYNY67/kaggle_isic": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "OOF stacking / blending",
+   "ensemble / snapshot"
+  ],
+  "gaps": [],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "OOF stacking / blending": "tab-stack",
+   "ensemble / snapshot": "ensemble"
+  }
+ },
+ "Nivratti/recodai-luc-sifd-4th-place-solution": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "LoRA / PEFT finetune",
+   "OOF stacking / blending",
+   "diffusion / generative aug",
+   "mixup / cutmix",
+   "quantization / pruning",
+   "retrieval / RAG",
+   "temporal / sequence model",
+   "weighted boxes fusion (WBF)"
+  ],
+  "gaps": [
+   "mixup / cutmix",
+   "temporal / sequence model",
+   "weighted boxes fusion (WBF)"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "LoRA / PEFT finetune": "lora-train",
+   "OOF stacking / blending": "tab-stack",
+   "diffusion / generative aug": "gan-train",
+   "quantization / pruning": "quantize",
+   "retrieval / RAG": "llm-retrieve-rerank"
+  }
+ },
+ "Paul-G2/VesuviusSurfaceDetection": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "diffusion / generative aug",
+   "ensemble / snapshot",
+   "nnU-Net / medical seg"
+  ],
+  "gaps": [],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "diffusion / generative aug": "gan-train",
+   "ensemble / snapshot": "ensemble",
+   "nnU-Net / medical seg": "nnunet-segmentation-runner"
+  }
+ },
+ "PengchengShi1220/RSNA2025_Intracranial-Aneurysm-Detection": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "LoRA / PEFT finetune",
+   "OOF stacking / blending",
+   "ensemble / snapshot",
+   "exponential moving average (EMA)",
+   "label smoothing",
+   "nnU-Net / medical seg",
+   "pseudo-labeling / self-training",
+   "quantization / pruning",
+   "retrieval / RAG",
+   "temporal / sequence model",
+   "test-time augmentation (TTA)"
+  ],
+  "gaps": [
+   "exponential moving average (EMA)",
+   "label smoothing",
+   "temporal / sequence model"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "LoRA / PEFT finetune": "lora-train",
+   "OOF stacking / blending": "tab-stack",
+   "ensemble / snapshot": "ensemble",
+   "nnU-Net / medical seg": "nnunet-segmentation-runner",
+   "pseudo-labeling / self-training": "pseudo-label",
+   "quantization / pruning": "quantize",
+   "retrieval / RAG": "llm-retrieve-rerank",
+   "test-time augmentation (TTA)": "aug-ablation"
+  }
+ },
+ "PriorLabs/TabPFN": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "OOF stacking / blending",
+   "ensemble / snapshot",
+   "knowledge distillation",
+   "pseudo-labeling / self-training",
+   "quantization / pruning",
+   "retrieval / RAG",
+   "temporal / sequence model"
+  ],
+  "gaps": [
+   "temporal / sequence model"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "OOF stacking / blending": "tab-stack",
+   "ensemble / snapshot": "ensemble",
+   "knowledge distillation": "distill",
+   "pseudo-labeling / self-training": "pseudo-label",
+   "quantization / pruning": "quantize",
+   "retrieval / RAG": "llm-retrieve-rerank"
+  }
+ },
+ "Project-MONAI/MONAI": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "OOF stacking / blending",
+   "diffusion / generative aug",
+   "ensemble / snapshot",
+   "focal loss",
+   "gradient accumulation",
+   "label smoothing",
+   "mixup / cutmix",
+   "nnU-Net / medical seg",
+   "pseudo-labeling / self-training",
+   "quantization / pruning",
+   "retrieval / RAG",
+   "temporal / sequence model",
+   "test-time augmentation (TTA)"
+  ],
+  "gaps": [
+   "focal loss",
+   "gradient accumulation",
+   "label smoothing",
+   "mixup / cutmix",
+   "temporal / sequence model"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "OOF stacking / blending": "tab-stack",
+   "diffusion / generative aug": "gan-train",
+   "ensemble / snapshot": "ensemble",
+   "nnU-Net / medical seg": "nnunet-segmentation-runner",
+   "pseudo-labeling / self-training": "pseudo-label",
+   "quantization / pruning": "quantize",
+   "retrieval / RAG": "llm-retrieve-rerank",
+   "test-time augmentation (TTA)": "aug-ablation"
+  }
+ },
+ "Project-MONAI/tutorials": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "LoRA / PEFT finetune",
+   "OOF stacking / blending",
+   "diffusion / generative aug",
+   "ensemble / snapshot",
+   "exponential moving average (EMA)",
+   "focal loss",
+   "gradient accumulation",
+   "mixup / cutmix",
+   "nnU-Net / medical seg",
+   "pseudo-labeling / self-training",
+   "quantization / pruning",
+   "retrieval / RAG",
+   "temporal / sequence model",
+   "test-time augmentation (TTA)",
+   "test-time training (TTT)",
+   "weighted boxes fusion (WBF)"
+  ],
+  "gaps": [
+   "exponential moving average (EMA)",
+   "focal loss",
+   "gradient accumulation",
+   "mixup / cutmix",
+   "temporal / sequence model",
+   "test-time training (TTT)",
+   "weighted boxes fusion (WBF)"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "LoRA / PEFT finetune": "lora-train",
+   "OOF stacking / blending": "tab-stack",
+   "diffusion / generative aug": "gan-train",
+   "ensemble / snapshot": "ensemble",
+   "nnU-Net / medical seg": "nnunet-segmentation-runner",
+   "pseudo-labeling / self-training": "pseudo-label",
+   "quantization / pruning": "quantize",
+   "retrieval / RAG": "llm-retrieve-rerank",
+   "test-time augmentation (TTA)": "aug-ablation"
+  }
+ },
+ "Qihoo360/360-LLaMA-Factory": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "LoRA / PEFT finetune",
+   "OOF stacking / blending",
+   "diffusion / generative aug",
+   "exponential moving average (EMA)",
+   "gradient accumulation",
+   "label smoothing",
+   "pseudo-labeling / self-training",
+   "quantization / pruning",
+   "retrieval / RAG",
+   "temporal / sequence model"
+  ],
+  "gaps": [
+   "exponential moving average (EMA)",
+   "gradient accumulation",
+   "label smoothing",
+   "temporal / sequence model"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "LoRA / PEFT finetune": "lora-train",
+   "OOF stacking / blending": "tab-stack",
+   "diffusion / generative aug": "gan-train",
+   "pseudo-labeling / self-training": "pseudo-label",
+   "quantization / pruning": "quantize",
+   "retrieval / RAG": "llm-retrieve-rerank"
+  }
+ },
+ "Qihoo360/Light-R1": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "LoRA / PEFT finetune",
+   "OOF stacking / blending",
+   "diffusion / generative aug",
+   "gradient accumulation",
+   "knowledge distillation",
+   "optimized rounding / threshold",
+   "pseudo-labeling / self-training",
+   "quantization / pruning",
+   "retrieval / RAG",
+   "temporal / sequence model"
+  ],
+  "gaps": [
+   "gradient accumulation",
+   "temporal / sequence model"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "LoRA / PEFT finetune": "lora-train",
+   "OOF stacking / blending": "tab-stack",
+   "diffusion / generative aug": "gan-train",
+   "knowledge distillation": "distill",
+   "optimized rounding / threshold": "post-optimize",
+   "pseudo-labeling / self-training": "pseudo-label",
+   "quantization / pruning": "quantize",
+   "retrieval / RAG": "llm-retrieve-rerank"
+  }
+ },
+ "QwenLM/Qwen-Image": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "LoRA / PEFT finetune",
+   "OOF stacking / blending",
+   "diffusion / generative aug",
+   "knowledge distillation",
+   "temporal / sequence model"
+  ],
+  "gaps": [
+   "temporal / sequence model"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "LoRA / PEFT finetune": "lora-train",
+   "OOF stacking / blending": "tab-stack",
+   "diffusion / generative aug": "gan-train",
+   "knowledge distillation": "distill"
+  }
+ },
+ "RUIMINMA1996/PI1M": {
+  "status": "done",
+  "techniques": [],
+  "gaps": [],
+  "covered_by": {}
+ },
+ "RadonPy/RadonPy": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "OOF stacking / blending",
+   "diffusion / generative aug",
+   "ensemble / snapshot",
+   "temporal / sequence model"
+  ],
+  "gaps": [
+   "temporal / sequence model"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "OOF stacking / blending": "tab-stack",
+   "diffusion / generative aug": "gan-train",
+   "ensemble / snapshot": "ensemble"
+  }
+ },
+ "SRS/Massey": {
+  "status": "clone-failed"
+ },
+ "SamsungSAILMontreal/TinyRecursiveModels": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "OOF stacking / blending",
+   "exponential moving average (EMA)",
+   "pseudo-labeling / self-training",
+   "quantization / pruning",
+   "temporal / sequence model"
+  ],
+  "gaps": [
+   "exponential moving average (EMA)",
+   "temporal / sequence model"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "OOF stacking / blending": "tab-stack",
+   "pseudo-labeling / self-training": "pseudo-label",
+   "quantization / pruning": "quantize"
+  }
+ },
+ "SamusRam/ProFun": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "diffusion / generative aug",
+   "pseudo-labeling / self-training"
+  ],
+  "gaps": [],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "diffusion / generative aug": "gan-train",
+   "pseudo-labeling / self-training": "pseudo-label"
+  }
+ },
+ "Seek64/NeurIPS-Code-Golf-2025": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision"
+  ],
+  "gaps": [],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices"
+  }
+ },
+ "Shujun-He/RibonanzaNet": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "OOF stacking / blending",
+   "gradient accumulation",
+   "pseudo-labeling / self-training",
+   "quantization / pruning",
+   "temporal / sequence model"
+  ],
+  "gaps": [
+   "gradient accumulation",
+   "temporal / sequence model"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "OOF stacking / blending": "tab-stack",
+   "pseudo-labeling / self-training": "pseudo-label",
+   "quantization / pruning": "quantize"
+  }
+ },
+ "SimJeg/orbit-wars": {
+  "status": "done",
+  "techniques": [
+   "temporal / sequence model",
+   "test-time augmentation (TTA)"
+  ],
+  "gaps": [
+   "temporal / sequence model"
+  ],
+  "covered_by": {
+   "test-time augmentation (TTA)": "aug-ablation"
+  }
+ },
+ "StarrySky-SHT/BirdClef2025-8thSol": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "OOF stacking / blending",
+   "diffusion / generative aug",
+   "ensemble / snapshot",
+   "focal loss",
+   "knowledge distillation",
+   "mixup / cutmix",
+   "pseudo-labeling / self-training",
+   "quantization / pruning",
+   "stochastic weight averaging (SWA)",
+   "temporal / sequence model",
+   "test-time training (TTT)",
+   "weighted boxes fusion (WBF)"
+  ],
+  "gaps": [
+   "focal loss",
+   "mixup / cutmix",
+   "stochastic weight averaging (SWA)",
+   "temporal / sequence model",
+   "test-time training (TTT)",
+   "weighted boxes fusion (WBF)"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "OOF stacking / blending": "tab-stack",
+   "diffusion / generative aug": "gan-train",
+   "ensemble / snapshot": "ensemble",
+   "knowledge distillation": "distill",
+   "pseudo-labeling / self-training": "pseudo-label",
+   "quantization / pruning": "quantize"
+  }
+ },
+ "THUDM/ImageReward": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "LoRA / PEFT finetune",
+   "OOF stacking / blending",
+   "diffusion / generative aug",
+   "exponential moving average (EMA)",
+   "gradient accumulation",
+   "pseudo-labeling / self-training",
+   "quantization / pruning",
+   "temporal / sequence model"
+  ],
+  "gaps": [
+   "exponential moving average (EMA)",
+   "gradient accumulation",
+   "temporal / sequence model"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "LoRA / PEFT finetune": "lora-train",
+   "OOF stacking / blending": "tab-stack",
+   "diffusion / generative aug": "gan-train",
+   "pseudo-labeling / self-training": "pseudo-label",
+   "quantization / pruning": "quantize"
+  }
+ },
+ "TabM/RealMLP": {
+  "status": "clone-failed"
+ },
+ "TabPFN/DAE": {
+  "status": "clone-failed"
+ },
+ "TakoiHirokazu/kaggle-Eedi-4th-solution": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "LoRA / PEFT finetune",
+   "ensemble / snapshot",
+   "gradient accumulation",
+   "pseudo-labeling / self-training",
+   "quantization / pruning",
+   "retrieval / RAG",
+   "temporal / sequence model"
+  ],
+  "gaps": [
+   "gradient accumulation",
+   "temporal / sequence model"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "LoRA / PEFT finetune": "lora-train",
+   "ensemble / snapshot": "ensemble",
+   "pseudo-labeling / self-training": "pseudo-label",
+   "quantization / pruning": "quantize",
+   "retrieval / RAG": "llm-retrieve-rerank"
+  }
+ },
+ "ToseiHatori/isic": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "OOF stacking / blending",
+   "diffusion / generative aug",
+   "exponential moving average (EMA)",
+   "pseudo-labeling / self-training",
+   "quantization / pruning",
+   "temporal / sequence model"
+  ],
+  "gaps": [
+   "exponential moving average (EMA)",
+   "temporal / sequence model"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "OOF stacking / blending": "tab-stack",
+   "diffusion / generative aug": "gan-train",
+   "pseudo-labeling / self-training": "pseudo-label",
+   "quantization / pruning": "quantize"
+  }
+ },
+ "VSydorskyy/BirdCLEF_2025_2nd_place": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "OOF stacking / blending",
+   "ensemble / snapshot",
+   "focal loss",
+   "knowledge distillation",
+   "label smoothing",
+   "mixup / cutmix",
+   "pseudo-labeling / self-training",
+   "quantization / pruning",
+   "stochastic weight averaging (SWA)",
+   "temporal / sequence model"
+  ],
+  "gaps": [
+   "focal loss",
+   "label smoothing",
+   "mixup / cutmix",
+   "stochastic weight averaging (SWA)",
+   "temporal / sequence model"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "OOF stacking / blending": "tab-stack",
+   "ensemble / snapshot": "ensemble",
+   "knowledge distillation": "distill",
+   "pseudo-labeling / self-training": "pseudo-label",
+   "quantization / pruning": "quantize"
+  }
+ },
+ "ViennaRNA/ViennaRNA": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "OOF stacking / blending",
+   "diffusion / generative aug",
+   "ensemble / snapshot",
+   "retrieval / RAG"
+  ],
+  "gaps": [],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "OOF stacking / blending": "tab-stack",
+   "diffusion / generative aug": "gan-train",
+   "ensemble / snapshot": "ensemble",
+   "retrieval / RAG": "llm-retrieve-rerank"
+  }
+ },
+ "WaymentSteeleLab/EternaFold": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "diffusion / generative aug",
+   "ensemble / snapshot"
+  ],
+  "gaps": [],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "diffusion / generative aug": "gan-train",
+   "ensemble / snapshot": "ensemble"
+  }
+ },
+ "Xroxa/4th-Place-Solution-for-the-March-Machine-Learning-Mania-2026-Competition": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision"
+  ],
+  "gaps": [],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices"
+  }
+ },
+ "YS-L/nvidia-nemotron-reasoning-3rd-place-solution": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "LoRA / PEFT finetune",
+   "OOF stacking / blending",
+   "gradient accumulation",
+   "temporal / sequence model"
+  ],
+  "gaps": [
+   "gradient accumulation",
+   "temporal / sequence model"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "LoRA / PEFT finetune": "lora-train",
+   "OOF stacking / blending": "tab-stack"
+  }
+ },
+ "Yamato-Arai/kaggle-cmi-detect-behavior-2nd-place-solution": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "OOF stacking / blending",
+   "mixup / cutmix",
+   "pseudo-labeling / self-training",
+   "retrieval / RAG",
+   "temporal / sequence model"
+  ],
+  "gaps": [
+   "mixup / cutmix",
+   "temporal / sequence model"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "OOF stacking / blending": "tab-stack",
+   "pseudo-labeling / self-training": "pseudo-label",
+   "retrieval / RAG": "llm-retrieve-rerank"
+  }
+ },
+ "ZFTurbo/segmentation_models_pytorch_3d": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "OOF stacking / blending",
+   "focal loss",
+   "knowledge distillation",
+   "label smoothing",
+   "pseudo-labeling / self-training",
+   "retrieval / RAG",
+   "temporal / sequence model"
+  ],
+  "gaps": [
+   "focal loss",
+   "label smoothing",
+   "temporal / sequence model"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "OOF stacking / blending": "tab-stack",
+   "knowledge distillation": "distill",
+   "pseudo-labeling / self-training": "pseudo-label",
+   "retrieval / RAG": "llm-retrieve-rerank"
+  }
+ },
+ "alphanumericslab/ecg-image-kit": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "OOF stacking / blending",
+   "diffusion / generative aug",
+   "ensemble / snapshot",
+   "exponential moving average (EMA)",
+   "focal loss",
+   "label smoothing",
+   "pseudo-labeling / self-training",
+   "quantization / pruning",
+   "retrieval / RAG",
+   "temporal / sequence model",
+   "test-time training (TTT)",
+   "weighted boxes fusion (WBF)"
+  ],
+  "gaps": [
+   "exponential moving average (EMA)",
+   "focal loss",
+   "label smoothing",
+   "temporal / sequence model",
+   "test-time training (TTT)",
+   "weighted boxes fusion (WBF)"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "OOF stacking / blending": "tab-stack",
+   "diffusion / generative aug": "gan-train",
+   "ensemble / snapshot": "ensemble",
+   "pseudo-labeling / self-training": "pseudo-label",
+   "quantization / pruning": "quantize",
+   "retrieval / RAG": "llm-retrieve-rerank"
+  }
+ },
+ "auccchi/kaggle_isic": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "OOF stacking / blending"
+  ],
+  "gaps": [],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "OOF stacking / blending": "tab-stack"
+  }
+ },
+ "autoencoder/DVAE": {
+  "status": "clone-failed"
+ },
+ "awaliuddin/Diabetes-Prediction-Challenge": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "OOF stacking / blending",
+   "diffusion / generative aug",
+   "ensemble / snapshot",
+   "optimized rounding / threshold",
+   "pseudo-labeling / self-training",
+   "quantization / pruning",
+   "temporal / sequence model",
+   "test-time augmentation (TTA)",
+   "test-time training (TTT)",
+   "weighted boxes fusion (WBF)"
+  ],
+  "gaps": [
+   "temporal / sequence model",
+   "test-time training (TTT)",
+   "weighted boxes fusion (WBF)"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "OOF stacking / blending": "tab-stack",
+   "diffusion / generative aug": "gan-train",
+   "ensemble / snapshot": "ensemble",
+   "optimized rounding / threshold": "post-optimize",
+   "pseudo-labeling / self-training": "pseudo-label",
+   "quantization / pruning": "quantize",
+   "test-time augmentation (TTA)": "aug-ablation"
+  }
+ },
+ "baseline/generating-function": {
+  "status": "clone-failed"
+ },
+ "biomed-AI/SPROF-GO": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "OOF stacking / blending",
+   "diffusion / generative aug",
+   "pseudo-labeling / self-training",
+   "temporal / sequence model"
+  ],
+  "gaps": [
+   "temporal / sequence model"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "OOF stacking / blending": "tab-stack",
+   "diffusion / generative aug": "gan-train",
+   "pseudo-labeling / self-training": "pseudo-label"
+  }
+ },
+ "btbpanda/CAFA5-protein-function-prediction-2nd-place": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "OOF stacking / blending",
+   "diffusion / generative aug",
+   "ensemble / snapshot",
+   "stochastic weight averaging (SWA)",
+   "temporal / sequence model",
+   "test-time augmentation (TTA)"
+  ],
+  "gaps": [
+   "stochastic weight averaging (SWA)",
+   "temporal / sequence model"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "OOF stacking / blending": "tab-stack",
+   "diffusion / generative aug": "gan-train",
+   "ensemble / snapshot": "ensemble",
+   "test-time augmentation (TTA)": "aug-ablation"
+  }
+ },
+ "btbpanda/CAFA6-updates": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "LoRA / PEFT finetune",
+   "OOF stacking / blending",
+   "ensemble / snapshot",
+   "pseudo-labeling / self-training",
+   "quantization / pruning",
+   "retrieval / RAG",
+   "stochastic weight averaging (SWA)",
+   "temporal / sequence model",
+   "test-time augmentation (TTA)"
+  ],
+  "gaps": [
+   "stochastic weight averaging (SWA)",
+   "temporal / sequence model"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "LoRA / PEFT finetune": "lora-train",
+   "OOF stacking / blending": "tab-stack",
+   "ensemble / snapshot": "ensemble",
+   "pseudo-labeling / self-training": "pseudo-label",
+   "quantization / pruning": "quantize",
+   "retrieval / RAG": "llm-retrieve-rerank",
+   "test-time augmentation (TTA)": "aug-ablation"
+  }
+ },
+ "bytedance/Protenix": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "OOF stacking / blending",
+   "diffusion / generative aug",
+   "exponential moving average (EMA)",
+   "gradient accumulation",
+   "knowledge distillation",
+   "pseudo-labeling / self-training",
+   "quantization / pruning",
+   "retrieval / RAG",
+   "temporal / sequence model"
+  ],
+  "gaps": [
+   "exponential moving average (EMA)",
+   "gradient accumulation",
+   "temporal / sequence model"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "OOF stacking / blending": "tab-stack",
+   "diffusion / generative aug": "gan-train",
+   "knowledge distillation": "distill",
+   "pseudo-labeling / self-training": "pseudo-label",
+   "quantization / pruning": "quantize",
+   "retrieval / RAG": "llm-retrieve-rerank"
+  }
+ },
+ "cdeotte/KGMON-Playbook-2026": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "OOF stacking / blending",
+   "ensemble / snapshot",
+   "knowledge distillation",
+   "pseudo-labeling / self-training",
+   "self-consistency / majority vote",
+   "temporal / sequence model",
+   "test-time training (TTT)"
+  ],
+  "gaps": [
+   "temporal / sequence model",
+   "test-time training (TTT)"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "OOF stacking / blending": "tab-stack",
+   "ensemble / snapshot": "ensemble",
+   "knowledge distillation": "distill",
+   "pseudo-labeling / self-training": "pseudo-label",
+   "self-consistency / majority vote": "self-consistency-aggregator"
+  }
+ },
+ "chaidiscovery/chai-lab": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "LoRA / PEFT finetune",
+   "OOF stacking / blending",
+   "diffusion / generative aug",
+   "knowledge distillation",
+   "quantization / pruning",
+   "temporal / sequence model"
+  ],
+  "gaps": [
+   "temporal / sequence model"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "LoRA / PEFT finetune": "lora-train",
+   "OOF stacking / blending": "tab-stack",
+   "diffusion / generative aug": "gan-train",
+   "knowledge distillation": "distill",
+   "quantization / pruning": "quantize"
+  }
+ },
+ "charmq00/kaggle_eedi_public": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "LoRA / PEFT finetune",
+   "gradient accumulation",
+   "quantization / pruning",
+   "retrieval / RAG",
+   "temporal / sequence model"
+  ],
+  "gaps": [
+   "gradient accumulation",
+   "temporal / sequence model"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "LoRA / PEFT finetune": "lora-train",
+   "quantization / pruning": "quantize",
+   "retrieval / RAG": "llm-retrieve-rerank"
+  }
+ },
+ "claradepaolis/CAFA-evaluator-PK": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "diffusion / generative aug",
+   "quantization / pruning"
+  ],
+  "gaps": [],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "diffusion / generative aug": "gan-train",
+   "quantization / pruning": "quantize"
+  }
+ },
+ "clarkkev/svg-diffusion": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "LoRA / PEFT finetune",
+   "OOF stacking / blending",
+   "diffusion / generative aug",
+   "pseudo-labeling / self-training",
+   "quantization / pruning",
+   "temporal / sequence model"
+  ],
+  "gaps": [
+   "temporal / sequence model"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "LoRA / PEFT finetune": "lora-train",
+   "OOF stacking / blending": "tab-stack",
+   "diffusion / generative aug": "gan-train",
+   "pseudo-labeling / self-training": "pseudo-label",
+   "quantization / pruning": "quantize"
+  }
+ },
+ "cvg/glue-factory": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "OOF stacking / blending",
+   "focal loss",
+   "graph neural net / GNN",
+   "pseudo-labeling / self-training",
+   "quantization / pruning",
+   "retrieval / RAG",
+   "temporal / sequence model"
+  ],
+  "gaps": [
+   "focal loss",
+   "temporal / sequence model"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "OOF stacking / blending": "tab-stack",
+   "graph neural net / GNN": "gnn-link-train",
+   "pseudo-labeling / self-training": "pseudo-label",
+   "quantization / pruning": "quantize",
+   "retrieval / RAG": "llm-retrieve-rerank"
+  }
+ },
+ "dangnh0611/kaggle_ecg_digitization": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "LoRA / PEFT finetune",
+   "OOF stacking / blending",
+   "diffusion / generative aug",
+   "ensemble / snapshot",
+   "exponential moving average (EMA)",
+   "focal loss",
+   "gradient accumulation",
+   "label smoothing",
+   "pseudo-labeling / self-training",
+   "quantization / pruning",
+   "retrieval / RAG",
+   "self-consistency / majority vote",
+   "stochastic weight averaging (SWA)",
+   "temporal / sequence model",
+   "test-time augmentation (TTA)",
+   "test-time training (TTT)"
+  ],
+  "gaps": [
+   "exponential moving average (EMA)",
+   "focal loss",
+   "gradient accumulation",
+   "label smoothing",
+   "stochastic weight averaging (SWA)",
+   "temporal / sequence model",
+   "test-time training (TTT)"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "LoRA / PEFT finetune": "lora-train",
+   "OOF stacking / blending": "tab-stack",
+   "diffusion / generative aug": "gan-train",
+   "ensemble / snapshot": "ensemble",
+   "pseudo-labeling / self-training": "pseudo-label",
+   "quantization / pruning": "quantize",
+   "retrieval / RAG": "llm-retrieve-rerank",
+   "self-consistency / majority vote": "self-consistency-aggregator",
+   "test-time augmentation (TTA)": "aug-ablation"
+  }
+ },
+ "dholzmueller/pytabkit": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "LoRA / PEFT finetune",
+   "OOF stacking / blending",
+   "diffusion / generative aug",
+   "ensemble / snapshot",
+   "label smoothing",
+   "mixup / cutmix",
+   "pseudo-labeling / self-training",
+   "quantization / pruning",
+   "retrieval / RAG",
+   "temporal / sequence model"
+  ],
+  "gaps": [
+   "label smoothing",
+   "mixup / cutmix",
+   "temporal / sequence model"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "LoRA / PEFT finetune": "lora-train",
+   "OOF stacking / blending": "tab-stack",
+   "diffusion / generative aug": "gan-train",
+   "ensemble / snapshot": "ensemble",
+   "pseudo-labeling / self-training": "pseudo-label",
+   "quantization / pruning": "quantize",
+   "retrieval / RAG": "llm-retrieve-rerank"
+  }
+ },
+ "dungnb1333/ISIC-2024": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "OOF stacking / blending",
+   "exponential moving average (EMA)",
+   "focal loss",
+   "knowledge distillation",
+   "label smoothing",
+   "mixup / cutmix",
+   "pseudo-labeling / self-training",
+   "quantization / pruning",
+   "retrieval / RAG",
+   "temporal / sequence model"
+  ],
+  "gaps": [
+   "exponential moving average (EMA)",
+   "focal loss",
+   "label smoothing",
+   "mixup / cutmix",
+   "temporal / sequence model"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "OOF stacking / blending": "tab-stack",
+   "knowledge distillation": "distill",
+   "pseudo-labeling / self-training": "pseudo-label",
+   "quantization / pruning": "quantize",
+   "retrieval / RAG": "llm-retrieve-rerank"
+  }
+ },
+ "dylanliu2/BirdCLEF2025-4th-place-solution": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "OOF stacking / blending",
+   "diffusion / generative aug",
+   "ensemble / snapshot",
+   "mixup / cutmix",
+   "pseudo-labeling / self-training",
+   "stochastic weight averaging (SWA)",
+   "temporal / sequence model",
+   "test-time augmentation (TTA)"
+  ],
+  "gaps": [
+   "mixup / cutmix",
+   "stochastic weight averaging (SWA)",
+   "temporal / sequence model"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "OOF stacking / blending": "tab-stack",
+   "diffusion / generative aug": "gan-train",
+   "ensemble / snapshot": "ensemble",
+   "pseudo-labeling / self-training": "pseudo-label",
+   "test-time augmentation (TTA)": "aug-ablation"
+  }
+ },
+ "ebinan92/Eedi-5th-solution": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "LoRA / PEFT finetune",
+   "gradient accumulation",
+   "knowledge distillation",
+   "quantization / pruning",
+   "retrieval / RAG",
+   "temporal / sequence model"
+  ],
+  "gaps": [
+   "gradient accumulation",
+   "temporal / sequence model"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "LoRA / PEFT finetune": "lora-train",
+   "knowledge distillation": "distill",
+   "quantization / pruning": "quantize",
+   "retrieval / RAG": "llm-retrieve-rerank"
+  }
+ },
+ "evgeniavolkova/kagglejanestreet": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "OOF stacking / blending",
+   "ensemble / snapshot",
+   "pseudo-labeling / self-training",
+   "temporal / sequence model"
+  ],
+  "gaps": [
+   "temporal / sequence model"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "OOF stacking / blending": "tab-stack",
+   "ensemble / snapshot": "ensemble",
+   "pseudo-labeling / self-training": "pseudo-label"
+  }
+ },
+ "fakyras/ncaa_women_2018": {
+  "status": "done",
+  "techniques": [],
+  "gaps": [],
+  "covered_by": {}
+ },
+ "fogleman/primitive": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "temporal / sequence model"
+  ],
+  "gaps": [
+   "temporal / sequence model"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices"
+  }
+ },
+ "fresnellll/kaggle-NeurIPS-polymer-prediction-solution": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "OOF stacking / blending",
+   "diffusion / generative aug",
+   "graph neural net / GNN",
+   "test-time augmentation (TTA)"
+  ],
+  "gaps": [],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "OOF stacking / blending": "tab-stack",
+   "diffusion / generative aug": "gan-train",
+   "graph neural net / GNN": "gnn-link-train",
+   "test-time augmentation (TTA)": "aug-ablation"
+  }
+ },
+ "fyk7/kaggle-isic2024-5th-table-part": {
+  "status": "clone-failed"
+ },
+ "genbio-ai/ModelGenerator": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "LoRA / PEFT finetune",
+   "OOF stacking / blending",
+   "diffusion / generative aug",
+   "ensemble / snapshot",
+   "exponential moving average (EMA)",
+   "graph neural net / GNN",
+   "knowledge distillation",
+   "label smoothing",
+   "pseudo-labeling / self-training",
+   "quantization / pruning",
+   "retrieval / RAG",
+   "self-consistency / majority vote",
+   "temporal / sequence model",
+   "test-time training (TTT)"
+  ],
+  "gaps": [
+   "exponential moving average (EMA)",
+   "label smoothing",
+   "temporal / sequence model",
+   "test-time training (TTT)"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "LoRA / PEFT finetune": "lora-train",
+   "OOF stacking / blending": "tab-stack",
+   "diffusion / generative aug": "gan-train",
+   "ensemble / snapshot": "ensemble",
+   "graph neural net / GNN": "gnn-link-train",
+   "knowledge distillation": "distill",
+   "pseudo-labeling / self-training": "pseudo-label",
+   "quantization / pruning": "quantize",
+   "retrieval / RAG": "llm-retrieve-rerank",
+   "self-consistency / majority vote": "self-consistency-aggregator"
+  }
+ },
+ "gmberton/vismatch": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "OOF stacking / blending",
+   "diffusion / generative aug",
+   "ensemble / snapshot",
+   "graph neural net / GNN",
+   "quantization / pruning",
+   "retrieval / RAG",
+   "self-consistency / majority vote",
+   "temporal / sequence model",
+   "test-time training (TTT)"
+  ],
+  "gaps": [
+   "temporal / sequence model",
+   "test-time training (TTT)"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "OOF stacking / blending": "tab-stack",
+   "diffusion / generative aug": "gan-train",
+   "ensemble / snapshot": "ensemble",
+   "graph neural net / GNN": "gnn-link-train",
+   "quantization / pruning": "quantize",
+   "retrieval / RAG": "llm-retrieve-rerank",
+   "self-consistency / majority vote": "self-consistency-aggregator"
+  }
+ },
+ "google-deepmind/alphafold": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "OOF stacking / blending",
+   "diffusion / generative aug",
+   "ensemble / snapshot",
+   "knowledge distillation",
+   "quantization / pruning",
+   "retrieval / RAG"
+  ],
+  "gaps": [],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "OOF stacking / blending": "tab-stack",
+   "diffusion / generative aug": "gan-train",
+   "ensemble / snapshot": "ensemble",
+   "knowledge distillation": "distill",
+   "quantization / pruning": "quantize",
+   "retrieval / RAG": "llm-retrieve-rerank"
+  }
+ },
+ "google/ARC-GEN": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision"
+  ],
+  "gaps": [],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices"
+  }
+ },
+ "gotoConversion/goto_conversion": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "OOF stacking / blending",
+   "quantization / pruning",
+   "temporal / sequence model"
+  ],
+  "gaps": [
+   "temporal / sequence model"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "OOF stacking / blending": "tab-stack",
+   "quantization / pruning": "quantize"
+  }
+ },
+ "hoanghuyen797/RSNA-Intracranial-Aneurysm-Detection": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "OOF stacking / blending",
+   "diffusion / generative aug",
+   "ensemble / snapshot",
+   "exponential moving average (EMA)",
+   "focal loss",
+   "knowledge distillation",
+   "label smoothing",
+   "mixup / cutmix",
+   "pseudo-labeling / self-training",
+   "quantization / pruning",
+   "retrieval / RAG",
+   "temporal / sequence model"
+  ],
+  "gaps": [
+   "exponential moving average (EMA)",
+   "focal loss",
+   "label smoothing",
+   "mixup / cutmix",
+   "temporal / sequence model"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "OOF stacking / blending": "tab-stack",
+   "diffusion / generative aug": "gan-train",
+   "ensemble / snapshot": "ensemble",
+   "knowledge distillation": "distill",
+   "pseudo-labeling / self-training": "pseudo-label",
+   "quantization / pruning": "quantize",
+   "retrieval / RAG": "llm-retrieve-rerank"
+  }
+ },
+ "imagination-research/aimo2": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "OOF stacking / blending",
+   "knowledge distillation",
+   "quantization / pruning",
+   "retrieval / RAG",
+   "self-consistency / majority vote",
+   "temporal / sequence model"
+  ],
+  "gaps": [
+   "temporal / sequence model"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "OOF stacking / blending": "tab-stack",
+   "knowledge distillation": "distill",
+   "quantization / pruning": "quantize",
+   "retrieval / RAG": "llm-retrieve-rerank",
+   "self-consistency / majority vote": "self-consistency-aggregator"
+  }
+ },
+ "intel/auto-round": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "LoRA / PEFT finetune",
+   "OOF stacking / blending",
+   "diffusion / generative aug",
+   "exponential moving average (EMA)",
+   "gradient accumulation",
+   "knowledge distillation",
+   "pseudo-labeling / self-training",
+   "quantization / pruning",
+   "retrieval / RAG",
+   "stochastic weight averaging (SWA)",
+   "temporal / sequence model"
+  ],
+  "gaps": [
+   "exponential moving average (EMA)",
+   "gradient accumulation",
+   "stochastic weight averaging (SWA)",
+   "temporal / sequence model"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "LoRA / PEFT finetune": "lora-train",
+   "OOF stacking / blending": "tab-stack",
+   "diffusion / generative aug": "gan-train",
+   "knowledge distillation": "distill",
+   "pseudo-labeling / self-training": "pseudo-label",
+   "quantization / pruning": "quantize",
+   "retrieval / RAG": "llm-retrieve-rerank"
+  }
+ },
+ "ironbar/arc24": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "LoRA / PEFT finetune",
+   "OOF stacking / blending",
+   "diffusion / generative aug",
+   "ensemble / snapshot",
+   "gradient accumulation",
+   "quantization / pruning",
+   "retrieval / RAG",
+   "self-consistency / majority vote",
+   "temporal / sequence model",
+   "test-time augmentation (TTA)"
+  ],
+  "gaps": [
+   "gradient accumulation",
+   "temporal / sequence model"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "LoRA / PEFT finetune": "lora-train",
+   "OOF stacking / blending": "tab-stack",
+   "diffusion / generative aug": "gan-train",
+   "ensemble / snapshot": "ensemble",
+   "quantization / pruning": "quantize",
+   "retrieval / RAG": "llm-retrieve-rerank",
+   "self-consistency / majority vote": "self-consistency-aggregator",
+   "test-time augmentation (TTA)": "aug-ablation"
+  }
+ },
+ "jailctf-merger-goog-golf/compression": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "OOF stacking / blending",
+   "temporal / sequence model"
+  ],
+  "gaps": [
+   "temporal / sequence model"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "OOF stacking / blending": "tab-stack"
+  }
+ },
+ "jailctf-merger-goog-golf/golf": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "temporal / sequence model"
+  ],
+  "gaps": [
+   "temporal / sequence model"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices"
+  }
+ },
+ "jak-ma/BirdCLEF2026-5th-solution": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "OOF stacking / blending",
+   "ensemble / snapshot",
+   "exponential moving average (EMA)",
+   "knowledge distillation",
+   "mixup / cutmix",
+   "pseudo-labeling / self-training",
+   "stochastic weight averaging (SWA)",
+   "test-time augmentation (TTA)",
+   "test-time training (TTT)"
+  ],
+  "gaps": [
+   "exponential moving average (EMA)",
+   "mixup / cutmix",
+   "stochastic weight averaging (SWA)",
+   "test-time training (TTT)"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "OOF stacking / blending": "tab-stack",
+   "ensemble / snapshot": "ensemble",
+   "knowledge distillation": "distill",
+   "pseudo-labeling / self-training": "pseudo-label",
+   "test-time augmentation (TTA)": "aug-ablation"
+  }
+ },
+ "jcole75/arc_2025_mindsai": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "LoRA / PEFT finetune",
+   "OOF stacking / blending",
+   "diffusion / generative aug",
+   "ensemble / snapshot",
+   "gradient accumulation",
+   "label smoothing",
+   "mixup / cutmix",
+   "quantization / pruning",
+   "retrieval / RAG",
+   "self-consistency / majority vote",
+   "temporal / sequence model",
+   "test-time training (TTT)"
+  ],
+  "gaps": [
+   "gradient accumulation",
+   "label smoothing",
+   "mixup / cutmix",
+   "temporal / sequence model",
+   "test-time training (TTT)"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "LoRA / PEFT finetune": "lora-train",
+   "OOF stacking / blending": "tab-stack",
+   "diffusion / generative aug": "gan-train",
+   "ensemble / snapshot": "ensemble",
+   "quantization / pruning": "quantize",
+   "retrieval / RAG": "llm-retrieve-rerank",
+   "self-consistency / majority vote": "self-consistency-aggregator"
+  }
+ },
+ "jcottaar/ariel2": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "OOF stacking / blending",
+   "pseudo-labeling / self-training",
+   "quantization / pruning",
+   "retrieval / RAG"
+  ],
+  "gaps": [],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "OOF stacking / blending": "tab-stack",
+   "pseudo-labeling / self-training": "pseudo-label",
+   "quantization / pruning": "quantize",
+   "retrieval / RAG": "llm-retrieve-rerank"
+  }
+ },
+ "jcottaar/packing": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "OOF stacking / blending",
+   "diffusion / generative aug",
+   "ensemble / snapshot",
+   "temporal / sequence model",
+   "test-time training (TTT)",
+   "weighted boxes fusion (WBF)"
+  ],
+  "gaps": [
+   "temporal / sequence model",
+   "test-time training (TTT)",
+   "weighted boxes fusion (WBF)"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "OOF stacking / blending": "tab-stack",
+   "diffusion / generative aug": "gan-train",
+   "ensemble / snapshot": "ensemble"
+  }
+ },
+ "jday96314/NeurIPS-polymer-prediction": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "OOF stacking / blending",
+   "diffusion / generative aug",
+   "ensemble / snapshot",
+   "graph neural net / GNN",
+   "pseudo-labeling / self-training",
+   "quantization / pruning",
+   "self-consistency / majority vote",
+   "temporal / sequence model",
+   "test-time augmentation (TTA)",
+   "test-time training (TTT)",
+   "weighted boxes fusion (WBF)"
+  ],
+  "gaps": [
+   "temporal / sequence model",
+   "test-time training (TTT)",
+   "weighted boxes fusion (WBF)"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "OOF stacking / blending": "tab-stack",
+   "diffusion / generative aug": "gan-train",
+   "ensemble / snapshot": "ensemble",
+   "graph neural net / GNN": "gnn-link-train",
+   "pseudo-labeling / self-training": "pseudo-label",
+   "quantization / pruning": "quantize",
+   "self-consistency / majority vote": "self-consistency-aggregator",
+   "test-time augmentation (TTA)": "aug-ablation"
+  }
+ },
+ "karpathy/autoresearch": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "OOF stacking / blending",
+   "diffusion / generative aug",
+   "temporal / sequence model"
+  ],
+  "gaps": [
+   "temporal / sequence model"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "OOF stacking / blending": "tab-stack",
+   "diffusion / generative aug": "gan-train"
+  }
+ },
+ "kevin1000/march-mania-2026-3rd-place": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "OOF stacking / blending",
+   "diffusion / generative aug",
+   "quantization / pruning"
+  ],
+  "gaps": [],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "OOF stacking / blending": "tab-stack",
+   "diffusion / generative aug": "gan-train",
+   "quantization / pruning": "quantize"
+  }
+ },
+ "key-moon/deflate-viz": {
+  "status": "done",
+  "techniques": [],
+  "gaps": [],
+  "covered_by": {}
+ },
+ "key-moon/golf": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "OOF stacking / blending",
+   "optimized rounding / threshold",
+   "quantization / pruning",
+   "temporal / sequence model"
+  ],
+  "gaps": [
+   "temporal / sequence model"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "OOF stacking / blending": "tab-stack",
+   "optimized rounding / threshold": "post-optimize",
+   "quantization / pruning": "quantize"
+  }
+ },
+ "khawar-islam/diffuseMix": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "OOF stacking / blending",
+   "diffusion / generative aug",
+   "mixup / cutmix",
+   "quantization / pruning"
+  ],
+  "gaps": [
+   "mixup / cutmix"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "OOF stacking / blending": "tab-stack",
+   "diffusion / generative aug": "gan-train",
+   "quantization / pruning": "quantize"
+  }
+ },
+ "ksb21ST/Mini-ARC": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "LoRA / PEFT finetune",
+   "OOF stacking / blending",
+   "diffusion / generative aug",
+   "quantization / pruning",
+   "retrieval / RAG",
+   "temporal / sequence model",
+   "weighted boxes fusion (WBF)"
+  ],
+  "gaps": [
+   "temporal / sequence model",
+   "weighted boxes fusion (WBF)"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "LoRA / PEFT finetune": "lora-train",
+   "OOF stacking / blending": "tab-stack",
+   "diffusion / generative aug": "gan-train",
+   "quantization / pruning": "quantize",
+   "retrieval / RAG": "llm-retrieve-rerank"
+  }
+ },
+ "lcy80366872/kaggle-project": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "LoRA / PEFT finetune",
+   "OOF stacking / blending",
+   "exponential moving average (EMA)",
+   "gradient accumulation",
+   "knowledge distillation",
+   "label smoothing",
+   "pseudo-labeling / self-training",
+   "quantization / pruning",
+   "retrieval / RAG",
+   "temporal / sequence model"
+  ],
+  "gaps": [
+   "exponential moving average (EMA)",
+   "gradient accumulation",
+   "label smoothing",
+   "temporal / sequence model"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "LoRA / PEFT finetune": "lora-train",
+   "OOF stacking / blending": "tab-stack",
+   "knowledge distillation": "distill",
+   "pseudo-labeling / self-training": "pseudo-label",
+   "quantization / pruning": "quantize",
+   "retrieval / RAG": "llm-retrieve-rerank"
+  }
+ },
+ "livctr/nvidia-nemotron": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "LoRA / PEFT finetune",
+   "OOF stacking / blending",
+   "diffusion / generative aug",
+   "focal loss",
+   "quantization / pruning",
+   "temporal / sequence model"
+  ],
+  "gaps": [
+   "focal loss",
+   "temporal / sequence model"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "LoRA / PEFT finetune": "lora-train",
+   "OOF stacking / blending": "tab-stack",
+   "diffusion / generative aug": "gan-train",
+   "quantization / pruning": "quantize"
+  }
+ },
+ "luchris429/purejaxrl": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "OOF stacking / blending",
+   "pseudo-labeling / self-training",
+   "temporal / sequence model"
+  ],
+  "gaps": [
+   "temporal / sequence model"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "OOF stacking / blending": "tab-stack",
+   "pseudo-labeling / self-training": "pseudo-label"
+  }
+ },
+ "luoziqianX/CZII-CryoET-Object-Identification-2nd-luoziqian": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "OOF stacking / blending",
+   "pseudo-labeling / self-training",
+   "quantization / pruning",
+   "retrieval / RAG"
+  ],
+  "gaps": [],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "OOF stacking / blending": "tab-stack",
+   "pseudo-labeling / self-training": "pseudo-label",
+   "quantization / pruning": "quantize",
+   "retrieval / RAG": "llm-retrieve-rerank"
+  }
+ },
+ "mass-balance/Einthoven": {
+  "status": "clone-failed"
+ },
+ "matheuspf/draw": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "LoRA / PEFT finetune",
+   "OOF stacking / blending",
+   "diffusion / generative aug",
+   "ensemble / snapshot",
+   "gradient accumulation",
+   "pseudo-labeling / self-training",
+   "quantization / pruning",
+   "retrieval / RAG",
+   "temporal / sequence model"
+  ],
+  "gaps": [
+   "gradient accumulation",
+   "temporal / sequence model"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "LoRA / PEFT finetune": "lora-train",
+   "OOF stacking / blending": "tab-stack",
+   "diffusion / generative aug": "gan-train",
+   "ensemble / snapshot": "ensemble",
+   "pseudo-labeling / self-training": "pseudo-label",
+   "quantization / pruning": "quantize",
+   "retrieval / RAG": "llm-retrieve-rerank"
+  }
+ },
+ "maxreciprocate/kaggle-lmarena-1st-place": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "LoRA / PEFT finetune",
+   "OOF stacking / blending",
+   "gradient accumulation",
+   "knowledge distillation",
+   "pseudo-labeling / self-training",
+   "quantization / pruning",
+   "temporal / sequence model"
+  ],
+  "gaps": [
+   "gradient accumulation",
+   "temporal / sequence model"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "LoRA / PEFT finetune": "lora-train",
+   "OOF stacking / blending": "tab-stack",
+   "knowledge distillation": "distill",
+   "pseudo-labeling / self-training": "pseudo-label",
+   "quantization / pruning": "quantize"
+  }
+ },
+ "mert-byrktr/KAGGLE-PS-S6E2-PREDICTING-HEART-DISEASE": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "OOF stacking / blending",
+   "ensemble / snapshot",
+   "pseudo-labeling / self-training"
+  ],
+  "gaps": [],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "OOF stacking / blending": "tab-stack",
+   "ensemble / snapshot": "ensemble",
+   "pseudo-labeling / self-training": "pseudo-label"
+  }
+ },
+ "mert-byrktr/KAGGLE-PS-S6E3-PREDICT-CUSTOMER-CHURN": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "quantization / pruning"
+  ],
+  "gaps": [],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "quantization / pruning": "quantize"
+  }
+ },
+ "michaelhodel/arc-dsl": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision"
+  ],
+  "gaps": [],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices"
+  }
+ },
+ "michaelhodel/re-arc": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision"
+  ],
+  "gaps": [],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices"
+  }
+ },
+ "myso1987/BirdCLEF-2025-5th-place-solution": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "focal loss",
+   "pseudo-labeling / self-training",
+   "temporal / sequence model"
+  ],
+  "gaps": [
+   "focal loss",
+   "temporal / sequence model"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "pseudo-labeling / self-training": "pseudo-label"
+  }
+ },
+ "naver-ai/rdnet": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "diffusion / generative aug",
+   "exponential moving average (EMA)",
+   "gradient accumulation",
+   "knowledge distillation",
+   "label smoothing",
+   "mixup / cutmix",
+   "pseudo-labeling / self-training",
+   "quantization / pruning",
+   "temporal / sequence model"
+  ],
+  "gaps": [
+   "exponential moving average (EMA)",
+   "gradient accumulation",
+   "label smoothing",
+   "mixup / cutmix",
+   "temporal / sequence model"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "diffusion / generative aug": "gan-train",
+   "knowledge distillation": "distill",
+   "pseudo-labeling / self-training": "pseudo-label",
+   "quantization / pruning": "quantize"
+  }
+ },
+ "naver/mast3r": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "OOF stacking / blending",
+   "quantization / pruning",
+   "retrieval / RAG"
+  ],
+  "gaps": [],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "OOF stacking / blending": "tab-stack",
+   "quantization / pruning": "quantize",
+   "retrieval / RAG": "llm-retrieve-rerank"
+  }
+ },
+ "neoneye/arc-dataset-collection": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "diffusion / generative aug"
+  ],
+  "gaps": [],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "diffusion / generative aug": "gan-train"
+  }
+ },
+ "neoneye/arc-dataset-tama": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision"
+  ],
+  "gaps": [],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices"
+  }
+ },
+ "ns-rokuyon/kaggle-image-matching-challenge-2025": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "OOF stacking / blending",
+   "diffusion / generative aug",
+   "ensemble / snapshot",
+   "graph neural net / GNN",
+   "pseudo-labeling / self-training",
+   "quantization / pruning",
+   "retrieval / RAG",
+   "temporal / sequence model"
+  ],
+  "gaps": [
+   "temporal / sequence model"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "OOF stacking / blending": "tab-stack",
+   "diffusion / generative aug": "gan-train",
+   "ensemble / snapshot": "ensemble",
+   "graph neural net / GNN": "gnn-link-train",
+   "pseudo-labeling / self-training": "pseudo-label",
+   "quantization / pruning": "quantize",
+   "retrieval / RAG": "llm-retrieve-rerank"
+  }
+ },
+ "original-data-as-rows/cols": {
+  "status": "clone-failed"
+ },
+ "phillipecardenuto/upm": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "OOF stacking / blending",
+   "diffusion / generative aug",
+   "ensemble / snapshot",
+   "exponential moving average (EMA)",
+   "focal loss",
+   "label smoothing",
+   "mixup / cutmix",
+   "pseudo-labeling / self-training",
+   "quantization / pruning",
+   "retrieval / RAG",
+   "temporal / sequence model",
+   "test-time augmentation (TTA)"
+  ],
+  "gaps": [
+   "exponential moving average (EMA)",
+   "focal loss",
+   "label smoothing",
+   "mixup / cutmix",
+   "temporal / sequence model"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "OOF stacking / blending": "tab-stack",
+   "diffusion / generative aug": "gan-train",
+   "ensemble / snapshot": "ensemble",
+   "pseudo-labeling / self-training": "pseudo-label",
+   "quantization / pruning": "quantize",
+   "retrieval / RAG": "llm-retrieve-rerank",
+   "test-time augmentation (TTA)": "aug-ablation"
+  }
+ },
+ "photoholmes/photoholmes": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "OOF stacking / blending",
+   "diffusion / generative aug",
+   "pseudo-labeling / self-training",
+   "quantization / pruning",
+   "retrieval / RAG",
+   "temporal / sequence model"
+  ],
+  "gaps": [
+   "temporal / sequence model"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "OOF stacking / blending": "tab-stack",
+   "diffusion / generative aug": "gan-train",
+   "pseudo-labeling / self-training": "pseudo-label",
+   "quantization / pruning": "quantize",
+   "retrieval / RAG": "llm-retrieve-rerank"
+  }
+ },
+ "protein/molecule": {
+  "status": "clone-failed"
+ },
+ "pufferai/pufferlib": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "OOF stacking / blending",
+   "quantization / pruning",
+   "temporal / sequence model"
+  ],
+  "gaps": [
+   "temporal / sequence model"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "OOF stacking / blending": "tab-stack",
+   "quantization / pruning": "quantize"
+  }
+ },
+ "quantize-W8A8/AWQ": {
+  "status": "clone-failed"
+ },
+ "rbiswasfc/eedi-mining-misconceptions": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "LoRA / PEFT finetune",
+   "OOF stacking / blending",
+   "exponential moving average (EMA)",
+   "gradient accumulation",
+   "knowledge distillation",
+   "quantization / pruning",
+   "retrieval / RAG",
+   "temporal / sequence model"
+  ],
+  "gaps": [
+   "exponential moving average (EMA)",
+   "gradient accumulation",
+   "temporal / sequence model"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "LoRA / PEFT finetune": "lora-train",
+   "OOF stacking / blending": "tab-stack",
+   "knowledge distillation": "distill",
+   "quantization / pruning": "quantize",
+   "retrieval / RAG": "llm-retrieve-rerank"
+  }
+ },
+ "rbiswasfc/lmsys-arena": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "LoRA / PEFT finetune",
+   "OOF stacking / blending",
+   "exponential moving average (EMA)",
+   "gradient accumulation",
+   "label smoothing",
+   "pseudo-labeling / self-training",
+   "quantization / pruning",
+   "temporal / sequence model"
+  ],
+  "gaps": [
+   "exponential moving average (EMA)",
+   "gradient accumulation",
+   "label smoothing",
+   "temporal / sequence model"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "LoRA / PEFT finetune": "lora-train",
+   "OOF stacking / blending": "tab-stack",
+   "pseudo-labeling / self-training": "pseudo-label",
+   "quantization / pruning": "quantize"
+  }
+ },
+ "rbiswasfc/mdc-4th-place-solution": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "LoRA / PEFT finetune",
+   "OOF stacking / blending",
+   "exponential moving average (EMA)",
+   "gradient accumulation",
+   "knowledge distillation",
+   "quantization / pruning",
+   "retrieval / RAG",
+   "temporal / sequence model"
+  ],
+  "gaps": [
+   "exponential moving average (EMA)",
+   "gradient accumulation",
+   "temporal / sequence model"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "LoRA / PEFT finetune": "lora-train",
+   "OOF stacking / blending": "tab-stack",
+   "knowledge distillation": "distill",
+   "quantization / pruning": "quantize",
+   "retrieval / RAG": "llm-retrieve-rerank"
+  }
+ },
+ "richzhang/PerceptualSimilarity": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "OOF stacking / blending",
+   "diffusion / generative aug",
+   "quantization / pruning"
+  ],
+  "gaps": [],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "OOF stacking / blending": "tab-stack",
+   "diffusion / generative aug": "gan-train",
+   "quantization / pruning": "quantize"
+  }
+ },
+ "saharan/santa-2025": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision"
+  ],
+  "gaps": [],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices"
+  }
+ },
+ "script-Yang/SegDINO": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "OOF stacking / blending",
+   "diffusion / generative aug",
+   "quantization / pruning"
+  ],
+  "gaps": [],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "OOF stacking / blending": "tab-stack",
+   "diffusion / generative aug": "gan-train",
+   "quantization / pruning": "quantize"
+  }
+ },
+ "shlomoron/GWI-solution": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "ensemble / snapshot"
+  ],
+  "gaps": [],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "ensemble / snapshot": "ensemble"
+  }
+ },
+ "sinking-point/ender": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "LoRA / PEFT finetune",
+   "OOF stacking / blending",
+   "exponential moving average (EMA)",
+   "knowledge distillation",
+   "pseudo-labeling / self-training",
+   "quantization / pruning",
+   "self-consistency / majority vote",
+   "temporal / sequence model"
+  ],
+  "gaps": [
+   "exponential moving average (EMA)",
+   "temporal / sequence model"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "LoRA / PEFT finetune": "lora-train",
+   "OOF stacking / blending": "tab-stack",
+   "knowledge distillation": "distill",
+   "pseudo-labeling / self-training": "pseudo-label",
+   "quantization / pruning": "quantize",
+   "self-consistency / majority vote": "self-consistency-aggregator"
+  }
+ },
+ "siwooyong/RSNA-2024-Lumbar-Spine-Degenerative-Classification": {
+  "status": "done",
+  "techniques": [
+   "diffusion / generative aug",
+   "ensemble / snapshot",
+   "label smoothing",
+   "mixup / cutmix",
+   "temporal / sequence model",
+   "test-time augmentation (TTA)"
+  ],
+  "gaps": [
+   "label smoothing",
+   "mixup / cutmix",
+   "temporal / sequence model"
+  ],
+  "covered_by": {
+   "diffusion / generative aug": "gan-train",
+   "ensemble / snapshot": "ensemble",
+   "test-time augmentation (TTA)": "aug-ablation"
+  }
+ },
+ "snakers4/silero-vad": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "LoRA / PEFT finetune",
+   "OOF stacking / blending",
+   "temporal / sequence model"
+  ],
+  "gaps": [
+   "temporal / sequence model"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "LoRA / PEFT finetune": "lora-train",
+   "OOF stacking / blending": "tab-stack"
+  }
+ },
+ "someya-takashi/physionet-image-digitization": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "OOF stacking / blending",
+   "focal loss",
+   "gradient accumulation",
+   "pseudo-labeling / self-training"
+  ],
+  "gaps": [
+   "focal loss",
+   "gradient accumulation"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "OOF stacking / blending": "tab-stack",
+   "pseudo-labeling / self-training": "pseudo-label"
+  }
+ },
+ "statist-bhfz/kaggle_cmi_1st_place_solution": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "OOF stacking / blending",
+   "ensemble / snapshot",
+   "exponential moving average (EMA)",
+   "focal loss",
+   "mixup / cutmix",
+   "temporal / sequence model"
+  ],
+  "gaps": [
+   "exponential moving average (EMA)",
+   "focal loss",
+   "mixup / cutmix",
+   "temporal / sequence model"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "OOF stacking / blending": "tab-stack",
+   "ensemble / snapshot": "ensemble"
+  }
+ },
+ "tamotamo17/RSNA2025-3rd-place-solution": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "OOF stacking / blending",
+   "ensemble / snapshot",
+   "focal loss",
+   "gradient accumulation",
+   "label smoothing",
+   "mixup / cutmix",
+   "pseudo-labeling / self-training",
+   "quantization / pruning",
+   "temporal / sequence model",
+   "weighted boxes fusion (WBF)"
+  ],
+  "gaps": [
+   "focal loss",
+   "gradient accumulation",
+   "label smoothing",
+   "mixup / cutmix",
+   "temporal / sequence model",
+   "weighted boxes fusion (WBF)"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "OOF stacking / blending": "tab-stack",
+   "ensemble / snapshot": "ensemble",
+   "pseudo-labeling / self-training": "pseudo-label",
+   "quantization / pruning": "quantize"
+  }
+ },
+ "tanghaozhe/physionet-ecg-image-digitization-3rd-place": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "OOF stacking / blending",
+   "diffusion / generative aug",
+   "gradient accumulation",
+   "quantization / pruning",
+   "temporal / sequence model",
+   "test-time augmentation (TTA)"
+  ],
+  "gaps": [
+   "gradient accumulation",
+   "temporal / sequence model"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "OOF stacking / blending": "tab-stack",
+   "diffusion / generative aug": "gan-train",
+   "quantization / pruning": "quantize",
+   "test-time augmentation (TTA)": "aug-ablation"
+  }
+ },
+ "tascj/kaggle-lmsys-chatbot-arena": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "OOF stacking / blending",
+   "exponential moving average (EMA)",
+   "pseudo-labeling / self-training",
+   "quantization / pruning",
+   "temporal / sequence model"
+  ],
+  "gaps": [
+   "exponential moving average (EMA)",
+   "temporal / sequence model"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "OOF stacking / blending": "tab-stack",
+   "pseudo-labeling / self-training": "pseudo-label",
+   "quantization / pruning": "quantize"
+  }
+ },
+ "tascj/kaggle-map-charting-student-math-misunderstandings": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "OOF stacking / blending",
+   "knowledge distillation",
+   "pseudo-labeling / self-training",
+   "quantization / pruning",
+   "temporal / sequence model"
+  ],
+  "gaps": [
+   "temporal / sequence model"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "OOF stacking / blending": "tab-stack",
+   "knowledge distillation": "distill",
+   "pseudo-labeling / self-training": "pseudo-label",
+   "quantization / pruning": "quantize"
+  }
+ },
+ "tascj/kaggle-waveform-inversion": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "OOF stacking / blending",
+   "pseudo-labeling / self-training"
+  ],
+  "gaps": [],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "OOF stacking / blending": "tab-stack",
+   "pseudo-labeling / self-training": "pseudo-label"
+  }
+ },
+ "tascj/offload_adam": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "OOF stacking / blending",
+   "gradient accumulation",
+   "quantization / pruning",
+   "temporal / sequence model"
+  ],
+  "gaps": [
+   "gradient accumulation",
+   "temporal / sequence model"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "OOF stacking / blending": "tab-stack",
+   "quantization / pruning": "quantize"
+  }
+ },
+ "tattaka/rsna-2024-lumbar-spine-degenerative-classification-public": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "OOF stacking / blending",
+   "diffusion / generative aug",
+   "exponential moving average (EMA)",
+   "mixup / cutmix",
+   "pseudo-labeling / self-training",
+   "quantization / pruning",
+   "temporal / sequence model",
+   "test-time training (TTT)",
+   "weighted boxes fusion (WBF)"
+  ],
+  "gaps": [
+   "exponential moving average (EMA)",
+   "mixup / cutmix",
+   "temporal / sequence model",
+   "test-time training (TTT)",
+   "weighted boxes fusion (WBF)"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "OOF stacking / blending": "tab-stack",
+   "diffusion / generative aug": "gan-train",
+   "pseudo-labeling / self-training": "pseudo-label",
+   "quantization / pruning": "quantize"
+  }
+ },
+ "tensorflow/models": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "OOF stacking / blending",
+   "diffusion / generative aug",
+   "ensemble / snapshot",
+   "exponential moving average (EMA)",
+   "focal loss",
+   "gradient accumulation",
+   "knowledge distillation",
+   "label smoothing",
+   "mixup / cutmix",
+   "pseudo-labeling / self-training",
+   "quantization / pruning",
+   "retrieval / RAG",
+   "temporal / sequence model",
+   "test-time augmentation (TTA)",
+   "test-time training (TTT)"
+  ],
+  "gaps": [
+   "exponential moving average (EMA)",
+   "focal loss",
+   "gradient accumulation",
+   "label smoothing",
+   "mixup / cutmix",
+   "temporal / sequence model",
+   "test-time training (TTT)"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "OOF stacking / blending": "tab-stack",
+   "diffusion / generative aug": "gan-train",
+   "ensemble / snapshot": "ensemble",
+   "knowledge distillation": "distill",
+   "pseudo-labeling / self-training": "pseudo-label",
+   "quantization / pruning": "quantize",
+   "retrieval / RAG": "llm-retrieve-rerank",
+   "test-time augmentation (TTA)": "aug-ablation"
+  }
+ },
+ "ternaus/check_orientation": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "pseudo-labeling / self-training"
+  ],
+  "gaps": [],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "pseudo-labeling / self-training": "pseudo-label"
+  }
+ },
+ "terry-u16/santa2025": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "OOF stacking / blending"
+  ],
+  "gaps": [],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "OOF stacking / blending": "tab-stack"
+  }
+ },
+ "tgxs002/HPSv2": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "LoRA / PEFT finetune",
+   "OOF stacking / blending",
+   "diffusion / generative aug",
+   "gradient accumulation",
+   "knowledge distillation",
+   "pseudo-labeling / self-training",
+   "quantization / pruning",
+   "retrieval / RAG",
+   "temporal / sequence model",
+   "test-time training (TTT)",
+   "weighted boxes fusion (WBF)"
+  ],
+  "gaps": [
+   "gradient accumulation",
+   "temporal / sequence model",
+   "test-time training (TTT)",
+   "weighted boxes fusion (WBF)"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "LoRA / PEFT finetune": "lora-train",
+   "OOF stacking / blending": "tab-stack",
+   "diffusion / generative aug": "gan-train",
+   "knowledge distillation": "distill",
+   "pseudo-labeling / self-training": "pseudo-label",
+   "quantization / pruning": "quantize",
+   "retrieval / RAG": "llm-retrieve-rerank"
+  }
+ },
+ "thomasdueholm/kaggle_ariel_2025": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "OOF stacking / blending",
+   "ensemble / snapshot"
+  ],
+  "gaps": [],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "OOF stacking / blending": "tab-stack",
+   "ensemble / snapshot": "ensemble"
+  }
+ },
+ "tonykozlovsky/lux-ai3-pub": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "OOF stacking / blending",
+   "diffusion / generative aug",
+   "knowledge distillation",
+   "temporal / sequence model"
+  ],
+  "gaps": [
+   "temporal / sequence model"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "OOF stacking / blending": "tab-stack",
+   "diffusion / generative aug": "gan-train",
+   "knowledge distillation": "distill"
+  }
+ },
+ "uchiyama33/physionet_4th_place": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "LoRA / PEFT finetune",
+   "OOF stacking / blending",
+   "diffusion / generative aug",
+   "ensemble / snapshot",
+   "exponential moving average (EMA)",
+   "pseudo-labeling / self-training",
+   "quantization / pruning",
+   "retrieval / RAG",
+   "self-consistency / majority vote",
+   "temporal / sequence model",
+   "test-time augmentation (TTA)"
+  ],
+  "gaps": [
+   "exponential moving average (EMA)",
+   "temporal / sequence model"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "LoRA / PEFT finetune": "lora-train",
+   "OOF stacking / blending": "tab-stack",
+   "diffusion / generative aug": "gan-train",
+   "ensemble / snapshot": "ensemble",
+   "pseudo-labeling / self-training": "pseudo-label",
+   "quantization / pruning": "quantize",
+   "retrieval / RAG": "llm-retrieve-rerank",
+   "self-consistency / majority vote": "self-consistency-aggregator",
+   "test-time augmentation (TTA)": "aug-ablation"
+  }
+ },
+ "uchiyama33/rsna2025_1st_place": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "LoRA / PEFT finetune",
+   "OOF stacking / blending",
+   "diffusion / generative aug",
+   "ensemble / snapshot",
+   "exponential moving average (EMA)",
+   "label smoothing",
+   "nnU-Net / medical seg",
+   "optimized rounding / threshold",
+   "pseudo-labeling / self-training",
+   "quantization / pruning",
+   "retrieval / RAG",
+   "self-consistency / majority vote",
+   "temporal / sequence model",
+   "test-time augmentation (TTA)"
+  ],
+  "gaps": [
+   "exponential moving average (EMA)",
+   "label smoothing",
+   "temporal / sequence model"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "LoRA / PEFT finetune": "lora-train",
+   "OOF stacking / blending": "tab-stack",
+   "diffusion / generative aug": "gan-train",
+   "ensemble / snapshot": "ensemble",
+   "nnU-Net / medical seg": "nnunet-segmentation-runner",
+   "optimized rounding / threshold": "post-optimize",
+   "pseudo-labeling / self-training": "pseudo-label",
+   "quantization / pruning": "quantize",
+   "retrieval / RAG": "llm-retrieve-rerank",
+   "self-consistency / majority vote": "self-consistency-aggregator",
+   "test-time augmentation (TTA)": "aug-ablation"
+  }
+ },
+ "xtcpete/rdd": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "OOF stacking / blending",
+   "focal loss",
+   "pseudo-labeling / self-training",
+   "quantization / pruning",
+   "retrieval / RAG",
+   "temporal / sequence model"
+  ],
+  "gaps": [
+   "focal loss",
+   "temporal / sequence model"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "OOF stacking / blending": "tab-stack",
+   "pseudo-labeling / self-training": "pseudo-label",
+   "quantization / pruning": "quantize",
+   "retrieval / RAG": "llm-retrieve-rerank"
+  }
+ },
+ "yanqiangmiffy/2025-Kaggle-CSIRO-5th-solution": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "OOF stacking / blending",
+   "diffusion / generative aug",
+   "ensemble / snapshot",
+   "exponential moving average (EMA)",
+   "gradient accumulation",
+   "pseudo-labeling / self-training",
+   "quantization / pruning",
+   "test-time augmentation (TTA)"
+  ],
+  "gaps": [
+   "exponential moving average (EMA)",
+   "gradient accumulation"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "OOF stacking / blending": "tab-stack",
+   "diffusion / generative aug": "gan-train",
+   "ensemble / snapshot": "ensemble",
+   "pseudo-labeling / self-training": "pseudo-label",
+   "quantization / pruning": "quantize",
+   "test-time augmentation (TTA)": "aug-ablation"
+  }
+ },
+ "zhudongwork/wsdm-cub-2nd-place-solution": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "OOF stacking / blending",
+   "exponential moving average (EMA)",
+   "knowledge distillation",
+   "pseudo-labeling / self-training",
+   "quantization / pruning",
+   "temporal / sequence model"
+  ],
+  "gaps": [
+   "exponential moving average (EMA)",
+   "temporal / sequence model"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "OOF stacking / blending": "tab-stack",
+   "knowledge distillation": "distill",
+   "pseudo-labeling / self-training": "pseudo-label",
+   "quantization / pruning": "quantize"
+  }
+ },
+ "chrishayuk/tinystories-train-video": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "OOF stacking / blending",
+   "temporal / sequence model"
+  ],
+  "gaps": [
+   "temporal / sequence model"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "OOF stacking / blending": "tab-stack"
+  }
+ },
+ "chrishayuk/chuk-mcp-training": {
+  "status": "done",
+  "techniques": [
+   "AMP / mixed precision",
+   "LoRA / PEFT finetune",
+   "OOF stacking / blending",
+   "exponential moving average (EMA)",
+   "quantization / pruning",
+   "retrieval / RAG",
+   "temporal / sequence model"
+  ],
+  "gaps": [
+   "exponential moving average (EMA)",
+   "temporal / sequence model"
+  ],
+  "covered_by": {
+   "AMP / mixed precision": "gpu-best-practices",
+   "LoRA / PEFT finetune": "lora-train",
+   "OOF stacking / blending": "tab-stack",
+   "quantization / pruning": "quantize",
+   "retrieval / RAG": "llm-retrieve-rerank"
+  }
+ },
+ "andrewyng/openworker": {
+  "status": "done",
+  "techniques": [
+   "multi-provider LLM routing (aisuite)",
+   "MCP connectors",
+   "risk/approval gating (WRITE_LOCAL/EXEC/EXTERNAL)",
+   "scheduled automations",
+   "agent memory"
+  ],
+  "gaps": [],
+  "covered_by": {
+   "multi-provider LLM routing (aisuite)": "coworker-backend",
+   "risk/approval gating (WRITE_LOCAL/EXEC/EXTERNAL)": "coworker-backend"
+  }
+ },
+ "karpathy/llama2.c": {
+  "status": "done",
+  "techniques": [
+   "minimal decoder transformer inference",
+   "RoPE + RMSNorm + SwiGLU",
+   "GQA KV-cache",
+   "int8 group-wise (Q8_0) quantized export"
+  ],
+  "gaps": [],
+  "covered_by": {
+   "minimal decoder transformer inference": "llama2-infer",
+   "int8 group-wise (Q8_0) quantized export": "llama2-infer",
+   "GQA KV-cache": "llama2-infer"
+  }
+ },
+ "karpathy/llm.c": {
+  "status": "done",
+  "techniques": [
+   "minimal GPT-2 pre-training",
+   "FLOPs/token + MFU estimation",
+   "vocab padding to 128 for tensor cores",
+   "fp32/tf32/bf16/fp8 training kernels"
+  ],
+  "gaps": [],
+  "covered_by": {
+   "minimal GPT-2 pre-training": "llmc-train",
+   "FLOPs/token + MFU estimation": "llmc-train",
+   "vocab padding to 128 for tensor cores": "llmc-train"
+  }
+ }
+}

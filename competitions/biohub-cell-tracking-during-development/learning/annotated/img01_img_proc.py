@@ -1,0 +1,64 @@
+"""Working code for img01 — image processing (normalize, isotropic, NMS). Running it
+applies the REAL img_proc.py functions to a real frame and writes img01_img_proc.learning.
+    research/cellmot_venv/bin/python learning/annotated/img01_img_proc.py
+"""
+from pathlib import Path
+import sys
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from lessonkit import build_lesson
+
+ROOT = Path("/home/seshu/kaggle/2026/biohub-cell-tracking-during-development")
+TRAIN = ROOT / "input/biohub-cell-tracking-during-development/train"
+REPO = ROOT / "research/pilkwang_support_pack/repo"
+
+META = dict(id="img01", order=9, title="Image processing — normalize, isotropic, NMS",
+            subtitle="The real img_proc.py steps the detector needs before it sees a frame",
+            source="research/pilkwang_support_pack/repo/src/biohub_tracking/img_proc.py")
+
+CELLS = [
+    dict(note="""## Before the model: three image ops
+The raw microscope frame can't go straight into the detector — it's noisy-scaled and
+**anisotropic** (z voxels are 4× coarser than x/y). `img_proc.py` fixes this with three real
+functions we run below on a real frame of `6bba_062c8d37`. Every output is the real result."""),
+
+    dict(note="""### quantile_normalize — a robust 0..1 scale
+**[PyTorch/Data]** Raw intensities span a huge range with bright outliers, so min/max scaling is
+fragile. `quantile_normalize` uses the **0.1% and 99.9% quantiles** (`q_min=0.001, q_max=0.999`),
+subtracts the low quantile, divides by the range, clips. **[Domain]** different embryos/stages
+have very different brightness — this makes the detector see a consistent scale.""",
+         code="""import sys, numpy as np, zarr                            # arrays, on-disk reader
+sys.path.insert(0, f"{REPO}/src")                          # reach the biohub_tracking package
+from biohub_tracking.img_proc import quantile_normalize    # the REAL normaliser
+v = np.asarray(zarr.open(f"{TRAIN}/6bba_062c8d37.zarr/0")[0]).astype(np.float32)  # real frame (Z,Y,X)
+n = quantile_normalize(v[None])                            # normalise (adds a T axis it expects)
+{"raw min/max": (float(v.min()), float(v.max())),          # real raw intensity range
+ "normed min/max": (round(float(n.min()), 2), round(float(n.max()), 2))}  # real normalised range"""),
+
+    dict(note="""### resample_image_to_isotropic — equal spacing on every axis
+**[Data — the key choice]** Voxel size is `(z=1.625, y=x=0.40625) µm` — z is **4× coarser**.
+`resample_image_to_isotropic` resamples so every axis has the same physical spacing (1.625 µm),
+so a nucleus is a *round* blob, not a squashed one. This is why the detector works in an
+**isotropic** grid (the (1,4,4) downsample achieves the same thing cheaply).""",
+         code="""from biohub_tracking.img_proc import resample_image_to_isotropic  # the REAL resampler
+iso = resample_image_to_isotropic(v[None], scale=(1.625, 0.40625, 0.40625))  # anisotropic -> isotropic
+{"anisotropic (Z,Y,X)": v.shape,                           # coarse-z input
+ "isotropic (Z,Y,X)": iso.shape[1:]}                       # z upsampled to match x/y spacing"""),
+
+    dict(note="""### nms_3d — one detection per nucleus, in physical µm
+**[PyTorch/Domain]** Peak-finding can fire several times on one bright nucleus. `nms_3d` keeps the
+highest-scoring peak and **suppresses others within a physical distance** (`min_distance` µm,
+using the real voxel `scale`). Distances are in µm, not voxels — so it respects the anisotropy.""",
+         code="""from biohub_tracking.img_proc import nms_3d               # the REAL physical-µm NMS
+coords = np.array([[10, 20, 20], [10, 21, 21], [30, 80, 80]], float)  # 3 candidate peaks (z,y,x)
+scores = np.array([3.0, 2.0, 1.0])                         # their intensities
+keep = nms_3d(coords, scores, min_distance=5.0, scale=(1.625, 0.40625, 0.40625))  # suppress within 5µm
+{"candidates": len(coords), "kept after NMS": len(keep)}   # the two close peaks merge to one"""),
+
+    dict(note="""**[Recap]** `quantile_normalize` (robust 0..1) → `resample_image_to_isotropic`
+(round nuclei) → detector → `nms_3d` (one peak per nucleus, in µm). These are the real
+pre/post steps around the model. **Next → pt01: the conv block**, the model itself."""),
+]
+
+if __name__ == "__main__":
+    build_lesson(META, CELLS, Path(__file__).with_suffix(".learning"),
+                 {"TRAIN": TRAIN, "REPO": REPO})

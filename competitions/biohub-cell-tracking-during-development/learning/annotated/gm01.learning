@@ -1,0 +1,21 @@
+@ id: gm01
+@ order: 2200
+@ title: with Test-Time Gradient Descent
+@ subtitle: GradMem: Learning to Write Context into Memory §
+@ source: docs/papers/gradmem/gradmem.md
+
+--- note
+## with Test-Time Gradient Descent
+**Paper:** GradMem: Learning to Write Context into Memory · § · pages 1–1 · equations (none) · 1 figures.
+
+> TODO(author): the *why* of § in 3–5 lines.
+
+--- note
+### Figure 1 — as printed in the paper
+
+Figure 1. GradMem learns to write context into memory via
+
+--- image
+learning/assets/gradmem/p01_0.png
+Figure 1. GradMem learns to write context into memory via
+

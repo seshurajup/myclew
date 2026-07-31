@@ -1,0 +1,26 @@
+[
+  {
+    "after_line": 8,
+    "text": ">>> Hello, Alice!\n>>> 8",
+    "caption": "def + return = a function"
+  },
+  {
+    "after_line": 15,
+    "text": ">>> Hello, Bob!\n>>> Hi, Bob!",
+    "caption": "default parameters are optional"
+  },
+  {
+    "after_line": 21,
+    "text": ">>> 1 9",
+    "caption": "return a tuple, unpack it"
+  },
+  {
+    "after_line": 28,
+    "text": ">>> LOG: started\n>>> None",
+    "caption": "no return → None"
+  },
+  {
+    "after_line": 29,
+    "image": "artifacts/terminal.png"
+  }
+]

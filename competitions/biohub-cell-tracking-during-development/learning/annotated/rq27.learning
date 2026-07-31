@@ -1,0 +1,12 @@
+@ id: rq27
+@ order: 2360
+@ title: R Sensitivity Distribution Analysis
+@ subtitle: RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory §R
+@ source: docs/papers/ratequant/ratequant.md
+
+--- note
+## R Sensitivity Distribution Analysis
+**Paper:** RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory · §R · pages 21–21 · equations (none) · 0 figures.
+
+> TODO(author): the *why* of §R in 3–5 lines.
+

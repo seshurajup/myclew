@@ -1,0 +1,36 @@
+@ id: rs05
+@ order: 34
+@ title: lucifer's 0.888 — a preset, not a model
+@ subtitle: how +0.003 came from one flag, no training
+@ source: learning/ensemble_work/pilk_post.py
+
+--- note
+## The same model, a higher score
+A notebook (`lucifer`) beat pilkwang: **0.888 vs 0.885** — using the **identical** detector and edge
+weights. No training. The entire gain is one post-processing preset: **2-frame gap recovery turned
+ON**. It's a reminder that points hide in the boring post-processing, not just the model.
+
+--- note
+### What gap2 does
+**[Domain]** pilkwang's gap-close bridges a **1**-frame miss (pp01). lucifer also bridges **2**-frame
+misses: link a track-end at t to a track-start at **t+3** if the motion is coherent, inserting two
+synthetic nodes. This recovers real cells on broken tracks → **node recall ↑** → **edge-Jaccard ↑**.
+
+--- note
+**Illustrative — the key code (not a runnable cell):**
+```python
+OUTPUT_GAP2_RECOVERY = 1             # pilkwang default 0 (off); lucifer turns it ON
+# bridge end@t -> start@t+3 when total <= 9.7 µm AND per-step <= 4.05 µm AND velocity-coherent
+if total <= 9.7 and step <= 4.05 and cos(v_prev, v_bridge) > -0.25:
+    insert_two_nodes(end_t, start_t3)   # recover the missed cells across the 2-frame gap
+```
+
+--- note
+### The lesson
+**[Craft]** We had swept post-processing but never toggled **gap2** — a reminder to test *every*
+switch, including the ones off by default. It's a **node-recall** win (the metric's dominant term),
+orthogonal to the **division** win of `rs04` — so the two could stack.
+
+--- note
+**Next → rs06: so why not just ensemble all the public detectors?**
+

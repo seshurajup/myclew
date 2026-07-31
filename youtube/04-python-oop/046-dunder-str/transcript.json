@@ -1,0 +1,42 @@
+[
+  {
+    "text": "By default, printing an object shows an ugly memory address — dunder methods fix that beautifully.",
+    "until_line": 4
+  },
+  {
+    "text": "The dunder-str method defines the friendly, readable version shown to end users.",
+    "until_line": 7
+  },
+  {
+    "text": "So print of a point now shows those clean coordinates instead of gibberish.",
+    "until_line": 10
+  },
+  {
+    "text": "[chuckle] dunder-repr is the developer-facing version, meant to be unambiguous and ideally reconstructable.",
+    "until_line": 10
+  },
+  {
+    "text": "By convention, repr looks like the code you'd type to recreate the object — Point of three, four.",
+    "until_line": 10
+  },
+  {
+    "text": "[sniff] print and str use dunder-str, while repr and the interactive prompt use dunder-repr.",
+    "until_line": 15
+  },
+  {
+    "text": "If you only define one, define repr — Python falls back to it when str is missing.",
+    "until_line": 15
+  },
+  {
+    "text": "[sigh] And notice — printing a list of objects uses repr for each element, not str.",
+    "until_line": 18
+  },
+  {
+    "text": "[groan] Adding these two methods turns your objects from cryptic to crystal clear in every print and debug session.",
+    "until_line": 18
+  },
+  {
+    "text": "Next video: operator overloading. Tell me in the comments if this clicked.",
+    "until_line": 18
+  }
+]

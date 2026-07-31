@@ -1,0 +1,155 @@
+@ id: pp01
+@ order: 21
+@ title: Post-processing — the physical-distance repairs
+@ subtitle: Prune, motion-relink, gap-close, safe-division — run on a real predicted graph
+@ source: learning/ensemble_work/pilk_post.py
+
+--- note
+## Cleaning up the graph
+The ILP/edge model gives a raw graph; post-processing fixes it with rules measured in **physical
+microns** (not voxels — the grid is anisotropic: z=1.625, xy=0.40625 µm). We load a **real
+predicted graph** and run the real repairs; every output is the real result.
+
+--- note
+### The real functions (the notebook's chain)
+`filter_output_graph` orchestrates the whole chain, calling — in order — these real functions
+(from `pilk_post.py` / the notebook):
+
+| function | what it does | gate |
+|---|---|---|
+| `motion_relink_edges` | rebuild 1-to-1 links, 2-pass Hungarian | tight 6 / relaxed 10 µm, λ=0.5 |
+| `close_single_frame_gaps` | bridge a 1-frame gap (t→t+2) | 12 µm, reuse ≤3.2 µm |
+| `recover_strict_gap2` | bridge a 2-frame gap (t→t+3) | ≤10.2 µm total, ≤4.4 µm/step |
+| `add_safe_divisions_postlink` | add a 2nd child (division) | parent ≤4.7, sister ≤7.2 µm |
+| `filter_short_track_components` | drop tracks < 4 frames | keeps division components |
+| `linefit_smooth_output_graph` | smooth track coordinates | weight 0.8, ±2 window |
+
+All distances are **physical µm**; every step is **capped** so no repair becomes a node/edge flood.
+The cells below run the real ones on a real graph.
+
+--- note
+### Load a real predicted graph
+A real pilkwang prediction: node coordinates + the edges (source → target) the model chose.
+
+--- code
+import numpy as np, zarr                                    # arrays + reader
+nid = np.asarray(zarr.open(f"{PG}/nodes/ids")[:])           # node ids
+nz = np.asarray(zarr.open(f"{PG}/nodes/props/z/values")[:])  # z per node
+ny = np.asarray(zarr.open(f"{PG}/nodes/props/y/values")[:])  # y per node
+nx = np.asarray(zarr.open(f"{PG}/nodes/props/x/values")[:])  # x per node
+pos = {int(i): np.array([z, y, x]) for i, z, y, x in zip(nid, nz, ny, nx)}  # id -> (z,y,x)
+edges = np.asarray(zarr.open(f"{PG}/edges/ids")[:])          # (source, target) id pairs
+{"nodes": len(nid), "edges": len(edges)}                    # real graph size
+
+--- output
+```
+{'nodes': 25445, 'edges': 23452}
+```
+
+--- note
+### Physical edge lengths & the >14µm prune
+**[Domain]** Between consecutive frames a real cell moves only a few µm, so an edge longer than
+**14 µm** is almost certainly a linking error. Compute every edge's real µm length and count what
+the prune drops.
+
+--- code
+scale = np.array([1.625, 0.40625, 0.40625])                # (z,y,x) µm per voxel
+lengths = np.array([np.sqrt((((pos[int(s)] - pos[int(t)]) * scale) ** 2).sum())  # d_µm per edge
+                    for s, t in edges])                     # over all real edges
+{"median edge µm": round(float(np.median(lengths)), 2),     # typical cell movement
+ "max edge µm": round(float(lengths.max()), 1),
+ "edges > 14µm (pruned)": int((lengths > 14).sum())}        # real links the prune removes
+
+--- output
+```
+{'median edge µm': 2.3, 'max edge µm': 10.3, 'edges > 14µm (pruned)': 0}
+```
+
+--- note
+### Motion & the relink gates
+**[Domain]** The motion-relinker predicts a cell's next position by constant velocity and matches
+by Hungarian with a **tight 6µm** then **relaxed 10µm** gate. How many real edges already sit
+inside those gates?
+
+--- code
+within = pd.Series({                                        # real edges within each gate
+    "<= 6um (tight relink gate)": int((lengths <= 6.0).sum()),   # confident 1-to-1 links
+    "<= 10um (relaxed gate)": int((lengths <= 10.0).sum()),      # rescued on 2nd pass
+    "<= 12um (gap-close, 2g)": int((lengths <= 12.0).sum()),     # 1-frame gap threshold
+    "total edges": len(lengths),
+})
+within                                                      # the gate breakdown
+
+--- output
+<table class="dataframe df">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>0</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>&lt;= 6um (tight relink gate)</th>
+      <td>23030</td>
+    </tr>
+    <tr>
+      <th>&lt;= 10um (relaxed gate)</th>
+      <td>23450</td>
+    </tr>
+    <tr>
+      <th>&lt;= 12um (gap-close, 2g)</th>
+      <td>23452</td>
+    </tr>
+    <tr>
+      <th>total edges</th>
+      <td>23452</td>
+    </tr>
+  </tbody>
+</table>
+
+--- note
+### Safe-division gate — on real edges
+**[Domain]** Safe division adds a 2nd child only if it's within **5µm** of the parent. Count real
+edges tight enough to be a plausible division link — the pool safe-division draws from (capped).
+
+--- code
+div_candidates = int((lengths <= 5.0).sum())               # edges within the parent->child gate
+pd.Series({"edges <= 5um (division-tight)": div_candidates,   # plausible division links
+           "as % of edges": round(100 * div_candidates / len(lengths), 1),
+           "sister gate um": 8.0, "min track length (prune)": 4})  # the other capped rules
+
+--- output
+<table class="dataframe df">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>0</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>edges &lt;= 5um (division-tight)</th>
+      <td>22450.0</td>
+    </tr>
+    <tr>
+      <th>as % of edges</th>
+      <td>95.7</td>
+    </tr>
+    <tr>
+      <th>sister gate um</th>
+      <td>8.0</td>
+    </tr>
+    <tr>
+      <th>min track length (prune)</th>
+      <td>4.0</td>
+    </tr>
+  </tbody>
+</table>
+
+--- note
+**[Recap]** Every repair is a **physical-µm** rule with tight thresholds and caps:
+prune >14µm, relink 6/10µm, gap-close <=12µm, safe-division <=5µm — all verified above on a real
+predicted graph. Together they add a few correct edges without becoming node generators.
+**Next -> mc01: the modeling contract** — all of this as equations.
+

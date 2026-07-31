@@ -1,0 +1,26 @@
+[
+  {
+    "after_line": 7,
+    "text": ">>> apple\n>>> banana\n>>> cherry\n>>> cherry\n>>> banana",
+    "caption": "positive + negative indices"
+  },
+  {
+    "after_line": 11,
+    "text": ">>> p\n>>> n",
+    "caption": "strings index the same way"
+  },
+  {
+    "after_line": 17,
+    "text": ">>> Error: list index out of range",
+    "caption": "try/except catches IndexError"
+  },
+  {
+    "after_line": 19,
+    "text": ">>> 2",
+    "caption": ".index() finds the position"
+  },
+  {
+    "after_line": 21,
+    "image": "artifacts/terminal.png"
+  }
+]

@@ -1,0 +1,15 @@
+@ id: tsc01
+@ order: 2800
+@ title: 1 Introduction
+@ subtitle: TRANSFORMERS ARE INHERENTLY SUCCINCT §1
+@ source: docs/papers/transformers-succinct/transformers-succinct.md
+
+--- note
+## 1 Introduction
+**Paper:** TRANSFORMERS ARE INHERENTLY SUCCINCT · §1 · pages 1–1 · equations (none) · 0 figures.
+
+**The claim.** Transformers-as-recognizers are not just expressive — they are
+*succinct*: exponentially smaller than LTL, doubly-exponentially smaller than automata, exponentially
+smaller than fixed-precision RNNs, on the same languages. And the cost is stated with the benefit:
+reasoning about UHATs (emptiness, equivalence) is EXPSPACE-complete.
+

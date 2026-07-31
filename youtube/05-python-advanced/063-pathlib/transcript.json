@@ -1,0 +1,42 @@
+[
+  {
+    "text": "Pathlib is the modern, object-oriented way to work with file paths, replacing clumsy string juggling.",
+    "until_line": 1
+  },
+  {
+    "text": "You build a path by joining pieces with a slash — and pathlib overloads the division operator for exactly this.",
+    "until_line": 3
+  },
+  {
+    "text": "It automatically uses the right separator for your operating system, so your code works everywhere.",
+    "until_line": 4
+  },
+  {
+    "text": "[chuckle] A path object knows its own parts — the name, the file extension, the stem, and its parent folder.",
+    "until_line": 6
+  },
+  {
+    "text": "No more fragile string splitting to pull apart a file path by hand.",
+    "until_line": 6
+  },
+  {
+    "text": "[sniff] Path objects can check reality too — whether they exist, and whether they're a file or a directory.",
+    "until_line": 10
+  },
+  {
+    "text": "[sigh] And glob finds every file matching a pattern, like all the Python files in a folder.",
+    "until_line": 14
+  },
+  {
+    "text": "That turns directory searching into a single, readable loop.",
+    "until_line": 14
+  },
+  {
+    "text": "[groan] Once you switch to pathlib, you'll never go back to gluing path strings together by hand.",
+    "until_line": 14
+  },
+  {
+    "text": "In the next one we take on custom exceptions. Save this one for when you need it.",
+    "until_line": 14
+  }
+]

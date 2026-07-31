@@ -1,0 +1,4 @@
+name: loeo_conv_f1_clean_eval
+paths: {python: research/cellmot_venv/bin/python, data_dir: input/biohub-cell-tracking-during-development/train, splits: learning/ensemble_work/finetune/fleet_loeo_mini8.json}
+gpu: {power_limit_w: 400}
+train: {method: loeo_conv_f1_clean, split: 1, downsample: "1,4,4", pool_kernel_um: 5.0}

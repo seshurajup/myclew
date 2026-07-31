@@ -1,0 +1,12 @@
+@ id: eda06
+@ order: 1950
+@ title: 5 Related Work
+@ subtitle: Erase-then-Delta Attention: Decoupling Erase and Write Addresses in Delta-Rule Linear Attention §5
+@ source: docs/papers/eda-delta-attention/eda-delta-attention.md
+
+--- note
+## 5 Related Work
+**Paper:** Erase-then-Delta Attention: Decoupling Erase and Write Addresses in Delta-Rule Linear Attention · §5 · pages 10–10 · equations (none) · 0 figures.
+
+> TODO(author): the *why* of §5 in 3–5 lines.
+

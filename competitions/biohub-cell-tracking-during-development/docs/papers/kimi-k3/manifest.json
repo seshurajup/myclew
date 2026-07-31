@@ -1,0 +1,300 @@
+{
+  "slug": "kimi-k3",
+  "source": "docs/papers/kimi-k3/source.pdf",
+  "pdf": "docs/papers/kimi-k3/source.pdf",
+  "title": "KIMI K3: OPEN FRONTIER INTELLIGENCE",
+  "backend": "docling+pymupdf-assets",
+  "pages": 47,
+  "figures": [
+    {
+      "page": 1,
+      "path": "assets/fig/p01_1.png",
+      "y0": 471.5746154785156,
+      "y1": 474.9310302734375,
+      "caption": "",
+      "label": "",
+      "w": 1280,
+      "h": 1280
+    },
+    {
+      "page": 1,
+      "path": "assets/fig/p01_2.png",
+      "y0": 518.6481323242188,
+      "y1": 522.0045166015625,
+      "caption": "",
+      "label": "",
+      "w": 1280,
+      "h": 1280
+    },
+    {
+      "page": 1,
+      "path": "assets/fig/p01_3.png",
+      "y0": 471.5746154785156,
+      "y1": 474.9310302734375,
+      "caption": "",
+      "label": "",
+      "w": 1280,
+      "h": 1280
+    },
+    {
+      "page": 1,
+      "path": "assets/fig/p01_4.png",
+      "y0": 518.6481323242188,
+      "y1": 522.0045166015625,
+      "caption": "",
+      "label": "",
+      "w": 1280,
+      "h": 1280
+    },
+    {
+      "page": 1,
+      "path": "assets/fig/p01_5.png",
+      "y0": 459.9950256347656,
+      "y1": 463.3514404296875,
+      "caption": "",
+      "label": "",
+      "w": 1280,
+      "h": 1280
+    },
+    {
+      "page": 1,
+      "path": "assets/fig/p01_6.png",
+      "y0": 518.6481323242188,
+      "y1": 522.0045166015625,
+      "caption": "",
+      "label": "",
+      "w": 1280,
+      "h": 1280
+    },
+    {
+      "page": 1,
+      "path": "assets/fig/p01_7.png",
+      "y0": 579.3989868164062,
+      "y1": 582.75537109375,
+      "caption": "",
+      "label": "",
+      "w": 1280,
+      "h": 1280
+    },
+    {
+      "page": 1,
+      "path": "assets/fig/p01_8.png",
+      "y0": 632.3462524414062,
+      "y1": 635.70263671875,
+      "caption": "Figure 1: Kimi K3 main results.",
+      "label": "Figure 1",
+      "w": 1280,
+      "h": 1280
+    },
+    {
+      "page": 1,
+      "path": "assets/fig/p01_9.png",
+      "y0": 585.1887817382812,
+      "y1": 588.545166015625,
+      "caption": "",
+      "label": "",
+      "w": 1280,
+      "h": 1280
+    }
+  ],
+  "tables": [
+    {
+      "page": 1,
+      "rows": 4,
+      "cols": 3,
+      "image": "assets/tab/p01_0.png"
+    },
+    {
+      "page": 7,
+      "rows": 2,
+      "cols": 3,
+      "image": "assets/tab/p07_0.png"
+    },
+    {
+      "page": 13,
+      "rows": 4,
+      "cols": 2,
+      "image": "assets/tab/p13_0.png"
+    },
+    {
+      "page": 17,
+      "rows": 11,
+      "cols": 10,
+      "image": "assets/tab/p17_0.png"
+    },
+    {
+      "page": 19,
+      "rows": 8,
+      "cols": 28,
+      "image": "assets/tab/p19_0.png"
+    },
+    {
+      "page": 19,
+      "rows": 5,
+      "cols": 46,
+      "image": "assets/tab/p19_1.png"
+    },
+    {
+      "page": 23,
+      "rows": 3,
+      "cols": 12,
+      "image": "assets/tab/p23_0.png"
+    },
+    {
+      "page": 32,
+      "rows": 10,
+      "cols": 7,
+      "image": "assets/tab/p32_4.png"
+    },
+    {
+      "page": 32,
+      "rows": 6,
+      "cols": 6,
+      "image": "assets/tab/p32_5.png"
+    },
+    {
+      "page": 32,
+      "rows": 8,
+      "cols": 5,
+      "image": "assets/tab/p32_6.png"
+    },
+    {
+      "page": 32,
+      "rows": 6,
+      "cols": 6,
+      "image": "assets/tab/p32_7.png"
+    },
+    {
+      "page": 33,
+      "rows": 8,
+      "cols": 4,
+      "image": "assets/tab/p33_0.png"
+    }
+  ],
+  "sections": [
+    {
+      "level": 1,
+      "page": 2,
+      "num": "1",
+      "title": "Introduction",
+      "heading": "1 Introduction"
+    },
+    {
+      "level": 1,
+      "page": 3,
+      "num": "2",
+      "title": "Model Architecture",
+      "heading": "2 Model Architecture"
+    },
+    {
+      "level": 1,
+      "page": 10,
+      "num": "3",
+      "title": "Pre-Training",
+      "heading": "3 Pre-Training"
+    },
+    {
+      "level": 1,
+      "page": 12,
+      "num": "4",
+      "title": "Post-Training",
+      "heading": "4 Post-Training"
+    },
+    {
+      "level": 1,
+      "page": 17,
+      "num": "5",
+      "title": "Infrastructure",
+      "heading": "5 Infrastructure"
+    },
+    {
+      "level": 1,
+      "page": 25,
+      "num": "6",
+      "title": "Evaluations",
+      "heading": "6 Evaluations"
+    },
+    {
+      "level": 1,
+      "page": 33,
+      "num": "7",
+      "title": "Case Studies",
+      "heading": "7 Case Studies"
+    },
+    {
+      "level": 1,
+      "page": 34,
+      "num": "8",
+      "title": "Conclusion",
+      "heading": "8 Conclusion"
+    },
+    {
+      "level": 1,
+      "page": 35,
+      "num": "",
+      "title": "References",
+      "heading": "References"
+    },
+    {
+      "level": 1,
+      "page": 41,
+      "num": "A",
+      "title": "Contributions",
+      "heading": "A Contributions"
+    },
+    {
+      "level": 1,
+      "page": 43,
+      "num": "B",
+      "title": "Details of Sigmoid Tanh Unit GLU",
+      "heading": "B Details of Sigmoid Tanh Unit GLU"
+    },
+    {
+      "level": 1,
+      "page": 43,
+      "num": "C",
+      "title": "Derivation of Quantile Balancing",
+      "heading": "C Derivation of Quantile Balancing"
+    },
+    {
+      "level": 1,
+      "page": 44,
+      "num": "D",
+      "title": "Histogram-Based Quantile Estimation",
+      "heading": "D Histogram-Based Quantile Estimation"
+    },
+    {
+      "level": 1,
+      "page": 45,
+      "num": "E",
+      "title": "MoonEP General Upper Bound Proof",
+      "heading": "E MoonEP General Upper Bound Proof"
+    },
+    {
+      "level": 1,
+      "page": 46,
+      "num": "F",
+      "title": "Chat Template",
+      "heading": "F Chat Template"
+    }
+  ],
+  "equations": 371,
+  "numbered": 12,
+  "md": "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/docs/papers/kimi-k3/kimi-k3.md",
+  "equations_json": "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/docs/papers/kimi-k3/equations.json",
+  "available": {
+    "pymupdf": true,
+    "marker": true,
+    "docling": true
+  },
+  "score": {
+    "chars": 202434,
+    "headings": 76,
+    "equations": 30,
+    "eq_tags": 0,
+    "images": 21,
+    "tables": 119,
+    "latex_cmds": 379,
+    "mojibake": 0
+  }
+}

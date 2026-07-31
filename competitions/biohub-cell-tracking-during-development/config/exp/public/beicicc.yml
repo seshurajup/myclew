@@ -1,0 +1,10 @@
+# PUBLIC notebook config — **beicicc / exp006** rule-safe-div
+name: pub_beicicc
+source: **beicicc / exp006** rule-safe-div
+family: other
+base: unknown
+lb: 0.839
+golden_cv: None
+mined_params: ""
+run: manual
+score: golden-12 (adj_edge_J + 0.1*div_J), by_embryo

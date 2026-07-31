@@ -1,0 +1,42 @@
+[
+  {
+    "text": "Unittest is Python's built-in framework for writing automated tests that check your code stays correct.",
+    "until_line": 1
+  },
+  {
+    "text": "You group related tests inside a class that inherits from TestCase.",
+    "until_line": 6
+  },
+  {
+    "text": "Each test is a method whose name starts with test, so the framework can find and run it.",
+    "until_line": 8
+  },
+  {
+    "text": "[chuckle] assertEqual checks that two values match — here, that adding two and three really gives five.",
+    "until_line": 8
+  },
+  {
+    "text": "[sniff] You write one test method per behavior you want to verify, keeping each focused and clear.",
+    "until_line": 11
+  },
+  {
+    "text": "TestCase gives you many assertions — assertEqual, assertTrue, assertRaises, and assertIsInstance among them.",
+    "until_line": 14
+  },
+  {
+    "text": "This last one confirms the result is actually an integer, not just the right number.",
+    "until_line": 14
+  },
+  {
+    "text": "[sigh] Running the tests reports which passed and which failed, so a broken change gets caught immediately.",
+    "until_line": 17
+  },
+  {
+    "text": "[groan] Automated tests are your safety net — they let you refactor fearlessly, knowing you'll catch anything you break.",
+    "until_line": 17
+  },
+  {
+    "text": "Next video: pytest. Comment PYTHON if you want the cheat sheet.",
+    "until_line": 17
+  }
+]

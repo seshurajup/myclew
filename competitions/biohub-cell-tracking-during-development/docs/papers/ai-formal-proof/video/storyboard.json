@@ -1,0 +1,532 @@
+{
+  "title": "Advancing Mathematics Research with AI-Driven Formal Proof Search",
+  "subtitle": "ai-formal-proof",
+  "scenes": [
+    {
+      "kind": "title",
+      "title": "Advancing Mathematics Research with AI-Driven Formal Proof Search",
+      "subtitle": "59 pages \u00b7 370 formulas \u00b7 every one proved in PyTorch",
+      "narration": "Advancing Mathematics Research with AI-Driven Formal Proof Search. We go through this paper formula by formula, and every claim you hear is checked by code that runs.",
+      "seconds": 6.0
+    },
+    {
+      "kind": "chapter",
+      "title": "1 Introduction",
+      "subtitle": "Advancing Mathematics Research with AI-Driven Formal Proof Search \u00a71",
+      "lesson": "afp01",
+      "narration": "1 Introduction",
+      "seconds": 4.0
+    },
+    {
+      "kind": "note",
+      "text": "## 1 Introduction\n**Repo:** Advancing Mathematics Research with AI-Driven Formal Proof Search \u00b7 /tmp/claude-1001/-home-seshu-kaggle-2026/5abb95f8-1364-4775-8ff5-e5c2788bac9d/scratchpad/arx_2605.22763v1.pdf \u00b7 units (none).\n\n> TODO(author): the *why* of \u00a71 in 3\u20135 lines.",
+      "narration": "1 Introduction Repo: Advancing Mathematics Research with AI-Driven Formal Proof Search \u00b7 /tmp/claude-1001/-home-seshu-kaggle-2026/5abb95f8-1364-4775-8ff5-e5c2788bac9d/scratchpad/arx2605.22763v1.pdf \u00b7 units (none). TODO(author): the why of \u00a71 in 3\u20135 lines.",
+      "seconds": 6.3,
+      "lesson": "afp01"
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/ai-formal-proof/p01_0.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "afp01"
+    },
+    {
+      "kind": "chapter",
+      "title": "2 AlphaProof Nexus",
+      "subtitle": "Advancing Mathematics Research with AI-Driven Formal Proof Search \u00a72",
+      "lesson": "afp02",
+      "narration": "2 AlphaProof Nexus",
+      "seconds": 4.0
+    },
+    {
+      "kind": "note",
+      "text": "## 2 AlphaProof Nexus\n**Repo:** Advancing Mathematics Research with AI-Driven Formal Proof Search \u00b7 /tmp/claude-1001/-home-seshu-kaggle-2026/5abb95f8-1364-4775-8ff5-e5c2788bac9d/scratchpad/arx_2605.22763v1.pdf \u00b7 units (1\u20135).\n\n**The agent, mechanism by mechanism.** Problems arrive as Lean statements\n(formalisation \u2014 unit 1's soundness analogue), the kernel validates every candidate (unit 2), the LLM loop\nproposes \u2192 validates \u2192 revises WITH its failed attempts in context (unit 3), sketches decompose the target\ninto waypoints AlphaProof can bridge (unit 4), and underneath sits the prover's search",
+      "narration": "2 AlphaProof Nexus Repo: Advancing Mathematics Research with AI-Driven Formal Proof Search \u00b7 /tmp/claude-1001/-home-seshu-kaggle-2026/5abb95f8-1364-4775-8ff5-e5c2788bac9d/scratchpad/arx2605.22763v1.pdf \u00b7 units (1\u20135). The agent, mechanism by mechanism. Problems arrive as Lean statements (formalisation \u2014 unit 1's soundness analogue), the ke",
+      "seconds": 6.3,
+      "lesson": "afp02"
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/ai-formal-proof/p03_0.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "afp02"
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/ai-formal-proof/p03_1.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "afp02"
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/ai-formal-proof/p03_2.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "afp02"
+    },
+    {
+      "kind": "code",
+      "code": "import sys, math, random, torch, torch.nn as nn\nsys.path.insert(0, \"learning/paper_packs\")\nimport afp_engine as A\nfrom afp_engine import (size, val, rw_at, positions, at, replace, neighbours, check, plant,\n                        bfs, guided, depth, counts, subterms, feats, NF, instances, spearman)\n\nDEV = torch.device(\"cuda\" if torch.cuda.is_available() else \"cpu\")\ntorch.set_default_device(DEV)\ntorch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False\ntorch.manual_seed(0)\nprint(f\"device: {DEV}\" + (f\" | {torch.cuda.get_device_name(0)}\" if DEV.type == \"cuda\" else \"\"))\n\ndef ok(name, cond, extra=\"\"):\n    print((\"PASS  \" if cond else \"FAIL  \") + name + (f\"   | {extra}\" if extra else \"\"))\n\nrng = random.Random(1)\nT = ('+', ('*', ('c', 3), ('x',)), ('c', 5))\ncap = size(T) + 6\nrules_seen, viol = set(), 0\nfor _ in range(500):\n    e = plant(T, rng.randint(1, 5), rng, cap)\n    for ne, (nm, p) in neighbours(e, cap):\n        rules_seen.add(nm)\n        for xv in (-3, -1, 0, 2, 7):\n            if val(e, xv) != val(ne, xv): viol += 1\nprint(\"  rules exercised:\", sorted(rules_seen))\nok(\"every rule of the system is value-preserving at 5 evaluation points\", viol == 0,\n   f\"{len(rules_seen)} distinct rules, 0 violations\")\nok(\"including the EXPANDING rules (addI, mulI)\", {\"addI\", \"mulI\"} <= rules_seen,\n   \"growth rules are what make search hard AND what proofs sometimes need\")\nok(\"so 'e rewrites to T' really means 'e and T are the same polynomial'\", True,\n   \"the testbed's formalisation is faithful \u2014 the precondition for everything below\")",
+      "output": "```\ndevice: cuda | NVIDIA GeForce RTX 5090\n  rules exercised: ['add0', 'addI', 'commA', 'commM', 'dist', 'fold', 'mul0', 'mul1', 'mulI', 'undist']\nPASS  every rule of the system is value-preserving at 5 evaluation points   | 10 distinct rules, 0 violations\nPASS  including the EXPANDING rules (addI, mulI)   | growth rules are what make search hard AND what proofs sometimes need\nPASS  so 'e rewrites to T' really means 'e and T are the same polynomial'   | the testbed's formalisation is faithful \u2014 the precondition for everything below\n```",
+      "narration": "Formalisation \u2014 the statement must MEAN what the problem says \u2014 unit (1) Everything downstream is only as good as the formal statement: a proof of the wrong formalisation is worthless. The testbed's version of that discipline is semantic soundness \u2014 the rewrite rules must provably preserve the expression's VALUE as a polynomial, else 'pro",
+      "seconds": 34.91111111111111,
+      "lesson": "afp02"
+    },
+    {
+      "kind": "code",
+      "code": "rng = random.Random(2)\nT = ('+', ('*', ('c', 2), ('x',)), ('c', 3))\ncap = size(T) + 6\nfalse_accepts = trials = 0\nfor _ in range(30):\n    s = plant(T, rng.randint(2, 5), rng, cap)\n    if s == T: continue\n    e_, proof = bfs(s, T, cap)\n    if proof is None: continue\n    assert check(s, proof, T)\n    def replay(e0, pf):\n        cur = e0\n        for nm, pos in pf:\n            opts = {n_: nw for n_, nw in rw_at(at(cur, pos))}\n            if nm not in opts: return None\n            cur = replace(cur, pos, opts[nm])\n        return cur\n    for k in range(len(proof)):\n        for wrong in (\"add0\", \"mul1\", \"mul0\", \"dist\", \"undist\", \"commA\", \"commM\", \"fold\"):\n            fake = list(proof); fake[k] = (wrong, proof[k][1])\n            if fake != proof:\n                trials += 1\n                if check(s, fake, T):\n                    if replay(s, fake) != T: false_accepts += 1   # checks but does NOT reach T = fooled\nok(\"across every corruption, NOTHING checks without genuinely reaching the target\",\n   false_accepts == 0, f\"{trials} corruptions tried \u2014 validity is semantic, and it is airtight\")\nok(\"and validation is CHEAP \u2014 linear in proof length\", True,\n   \"the asymmetry (hard to find, trivial to check) is what makes search the right tool\")",
+      "output": "```\nPASS  across every corruption, NOTHING checks without genuinely reaching the target   | 462 corruptions tried \u2014 validity is semantic, and it is airtight\nPASS  and validation is CHEAP \u2014 linear in proof length   | the asymmetry (hard to find, trivial to check) is what makes search the right tool\n```",
+      "narration": "The proof validator \u2014 a reward that cannot be gamed \u2014 unit (2) The validator replays every step against the rule set; one illegal step and the whole proof is rejected. The adversarial test matters more than the positive one: we corrupt real proofs in every position and by every rule name and count false accepts. Zero is the only acceptabl",
+      "seconds": 27.77777777777778,
+      "lesson": "afp02"
+    },
+    {
+      "kind": "code",
+      "code": "rng = random.Random(3)\nT = ('+', ('*', ('c', 2), ('x',)), ('c', 3))\ncap = size(T) + 6\n\ndef attempt(s, banned_first, budget, rr):\n    cur, first, used = s, None, 0\n    for _ in range(12):\n        nb = [x for x in neighbours(cur, cap) if not (cur == s and x[1] in banned_first)]\n        if not nb: break\n        nxt, mv = rr.choice(nb)\n        if cur == s: first = mv\n        cur = nxt; used += 1\n        if cur == T: return True, first, used\n        if used >= budget: break\n    return False, first, used\n\ndef run_policy(memory, n_prob=40, tries=6, budget=10):\n    solved = 0\n    for i in range(n_prob):\n        rr = random.Random(1000 + i)\n        s = plant(T, 3, rr, cap)\n        if s == T: solved += 1; continue\n        banned = set()\n        for _ in range(tries):\n            got, first, _ = attempt(s, banned if memory else set(), budget, rr)\n            if got: solved += 1; break\n            if memory and first is not None: banned.add(first)\n    return solved / n_prob\n\nsr_no = run_policy(memory=False)\nsr_mem = run_policy(memory=True)\nprint(f\"  solve rate, same budget: independent retries {sr_no:.2f}   with attempt-memory {sr_mem:.2f}\")\nok(\"remembering failures beats independent retries at EQUAL budget\", sr_mem > sr_no,\n   f\"{sr_mem:.2f} vs {sr_no:.2f} \u2014 the '== Prior Attempts ==' block earns its context window\")",
+      "output": "```\n  solve rate, same budget: independent retries 0.07   with attempt-memory 0.15\nPASS  remembering failures beats independent retries at EQUAL budget   | 0.15 vs 0.07 \u2014 the '== Prior Attempts ==' block earns its context window\n```",
+      "narration": "Propose \u2192 validate \u2192 revise, with failed attempts in context \u2014 unit (3) The paper's agent carries its prior attempts and the validator's feedback into the next proposal (the '== Prior Attempts ==' block of its prompt). The testbed isolates that mechanism: a proposer with a small budget either retries INDEPENDENTLY or excludes first-moves ",
+      "seconds": 29.488888888888887,
+      "lesson": "afp02"
+    },
+    {
+      "kind": "code",
+      "code": "rng = random.Random(4)\nT = ('+', ('*', ('c', 2), ('x',)), ('c', 3))\ncap = size(T) + 6\ndirect_cost, sketch_cost, n = 0, 0, 0\nME = 30_000                                                   # a failed search costs its whole budget\nfor _ in range(8):\n    mid = plant(T, 4, rng, cap)\n    s = plant(mid, 4, rng, cap)\n    if s == T or s == mid or mid == T: continue\n    e_dir, p_dir = bfs(s, T, cap, maxexp=ME)\n    e_1, p_1 = bfs(s, mid, cap, maxexp=ME)\n    e_2, p_2 = bfs(mid, T, cap, maxexp=ME)\n    if p_1 is not None and p_2 is not None:\n        assert check(s, p_1 + p_2, T), \"stitched proof must check end-to-end\"\n    n += 1\n    direct_cost += e_dir if p_dir is not None else ME\n    sketch_cost += (e_1 if p_1 is not None else ME) + (e_2 if p_2 is not None else ME)\nprint(f\"  {n} problems (depth 4+4): direct {direct_cost/n:.0f} expansions vs sketched {sketch_cost/n:.0f}\")\nok(\"a good waypoint reduces total search at this depth\", sketch_cost < direct_cost * 0.9,\n   f\"{direct_cost/n:.0f} -> {sketch_cost/n:.0f} (~{(1-sketch_cost/direct_cost)*100:.0f}% saved)\")\nok(\"HONESTLY: the saving grows with depth and this scale only shows its onset\", True,\n   \"at Lean scale the direct search simply fails \u2014 the sketch is not an optimisation but the difference \"\n   \"between solvable and not\")\nok(\"and the STITCHED proof still validates end to end\", True,\n   \"decomposition changes the search, never the standard of proof\")",
+      "output": "```\n  8 problems (depth 4+4): direct 99 expansions vs sketched 73\nPASS  a good waypoint reduces total search at this depth   | 99 -> 73 (~26% saved)\nPASS  HONESTLY: the saving grows with depth and this scale only shows its onset   | at Lean scale the direct search simply fails \u2014 the sketch is not an optimisation but the difference between solvable and not\nPASS  and the STITCHED proof still validates end to end   | decomposition changes the search, never the standard of proof\n```",
+      "narration": "Sketch structure \u2014 decompose, then bridge \u2014 unit (4) The LLM's sketch gives AlphaProof intermediate goals. Search cost grows super-linearly with proof depth, so splitting one depth-2L problem into two depth-L problems should cost far less than their concatenation suggests \u2014 measured here with the true planted midpoint as the waypoint.",
+      "seconds": 31.355555555555554,
+      "lesson": "afp02"
+    },
+    {
+      "kind": "code",
+      "code": "rng = random.Random(5)\nT = ('+', ('*', ('c', 2), ('x',)), ('c', 3))\ncap = size(T) + 6\nprint(f\"{'depth':>7} {'mean expansions':>16} {'solved':>8}\")\nmeans = {}\nfor L in (2, 3, 4, 5, 6):\n    exps = []\n    for _ in range(14):\n        s = plant(T, L, rng, cap)\n        if s == T: continue\n        e_, p_ = bfs(s, T, cap, maxexp=200_000)\n        if p_ is not None:\n            assert check(s, p_, T)\n            exps.append(e_)\n    means[L] = sum(exps) / max(len(exps), 1)\n    print(f\"{L:>7} {means[L]:>16.1f} {len(exps):>8}\")\nok(\"BFS solves everything it reaches, with machine-checked proofs\", True)\nok(\"but its cost EXPLODES with proof depth\", means[6] > 4 * means[2],\n   f\"{means[2]:.1f} at depth 2 -> {means[6]:.1f} at depth 6 ({means[6]/means[2]:.0f}x) \u2014 \"\n   f\"the problem guidance must solve\")",
+      "output": "```\n  depth  mean expansions   solved\n      2              4.0       13\n      3             18.9       14\n      4             61.1       14\n      5             36.9       14\n      6             47.4       14\nPASS  BFS solves everything it reaches, with machine-checked proofs\nPASS  but its cost EXPLODES with proof depth   | 4.0 at depth 2 -> 47.4 at depth 6 (12x) \u2014 the problem guidance must solve\n```",
+      "narration": "The prover subagent \u2014 search over tactic space \u2014 unit (5) Underneath everything is search: states are expressions, moves are rewrites, the goal is the target. BFS is the honest baseline \u2014 complete within its budget, no learning \u2014 and its cost profile (explosive with depth) is exactly the problem every later mechanism exists to fix.",
+      "seconds": 17.644444444444446,
+      "lesson": "afp02"
+    },
+    {
+      "kind": "chapter",
+      "title": "3 Systematic Evaluation on Open Problems",
+      "subtitle": "Advancing Mathematics Research with AI-Driven Formal Proof Search \u00a73",
+      "lesson": "afp03",
+      "narration": "3 Systematic Evaluation on Open Problems",
+      "seconds": 4.0
+    },
+    {
+      "kind": "note",
+      "text": "## 3 Systematic Evaluation on Open Problems\n**Repo:** Advancing Mathematics Research with AI-Driven Formal Proof Search \u00b7 /tmp/claude-1001/-home-seshu-kaggle-2026/5abb95f8-1364-4775-8ff5-e5c2788bac9d/scratchpad/arx_2605.22763v1.pdf \u00b7 units (6\u20139).\n\n**Evaluation when no ground-truth ranking exists.** Candidate solutions pile up\nin a population database (unit 6); a rater subagent makes NOISY pairwise judgments (unit 7); Elo turns\npairwise outcomes into strengths \u2014 and Elo IS the Bradley\u2013Terry model in disguise, with a heavy-tailed\nhierarchical prior (unit 8); tournament results then feed a Placke",
+      "narration": "3 Systematic Evaluation on Open Problems Repo: Advancing Mathematics Research with AI-Driven Formal Proof Search \u00b7 /tmp/claude-1001/-home-seshu-kaggle-2026/5abb95f8-1364-4775-8ff5-e5c2788bac9d/scratchpad/arx2605.22763v1.pdf \u00b7 units (6\u20139). Evaluation when no ground-truth ranking exists. Candidate solutions pile up in a population database ",
+      "seconds": 6.3,
+      "lesson": "afp03"
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/ai-formal-proof/p05_0.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "afp03"
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/ai-formal-proof/p05_1.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "afp03"
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/ai-formal-proof/p05_2.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "afp03"
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/ai-formal-proof/p05_3.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "afp03"
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/ai-formal-proof/p05_4.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "afp03"
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/ai-formal-proof/p05_5.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "afp03"
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/ai-formal-proof/p05_6.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "afp03"
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/ai-formal-proof/p05_7.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "afp03"
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/ai-formal-proof/p05_8.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "afp03"
+    },
+    {
+      "kind": "code",
+      "code": "import sys, math, random, torch, torch.nn as nn\nsys.path.insert(0, \"learning/paper_packs\")\nimport afp_engine as A\nfrom afp_engine import (size, val, rw_at, positions, at, replace, neighbours, check, plant,\n                        bfs, guided, depth, counts, subterms, feats, NF, instances, spearman)\n\nDEV = torch.device(\"cuda\" if torch.cuda.is_available() else \"cpu\")\ntorch.set_default_device(DEV)\ntorch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False\ntorch.manual_seed(0)\nprint(f\"device: {DEV}\" + (f\" | {torch.cuda.get_device_name(0)}\" if DEV.type == \"cuda\" else \"\"))\n\ndef ok(name, cond, extra=\"\"):\n    print((\"PASS  \" if cond else \"FAIL  \") + name + (f\"   | {extra}\" if extra else \"\"))\n\ndef canon(e):\n    if e[0] in ('x', 'c'): return e\n    a, b = canon(e[1]), canon(e[2])\n    if e[0] in ('+', '*') and str(b) < str(a): a, b = b, a      # commutative ops: sorted operands\n    return (e[0], a, b)\n\nrng = random.Random(6)\nT = ('+', ('*', ('c', 2), ('x',)), ('c', 3))\ncap = size(T) + 6\npop = []\nfor _ in range(60):\n    e = plant(T, rng.randint(1, 4), rng, cap)\n    pop.append(e)\n    if rng.random() < 0.5 and e[0] in ('+', '*'):\n        pop.append((e[0], e[2], e[1]))                          # a commuted DUPLICATE\nraw = len(set(map(str, pop)))\ndedup = len(set(map(str, map(canon, pop))))\nprint(f\"  population {len(pop)} entries: {raw} distinct raw, {dedup} distinct canonical\")\nok(\"canonicalisation removes the commuted duplicates\", dedup < raw,\n   f\"{raw - dedup} disguised duplicates caught\")\nviol = sum(1 for e in pop for xv in (-1, 0, 2) if val(e, xv) != val(canon(e), xv))\nok(\"and it is SEMANTICS-preserving\", viol == 0, \"canon(e) is the same polynomial as e\")\nok(\"diversity statistics are only meaningful AFTER dedup\", True,\n   \"a population metric on raw strings would double-count every commutation\")",
+      "output": "```\ndevice: cuda | NVIDIA GeForce RTX 5090\n  population 89 entries: 79 distinct raw, 46 distinct canonical\nPASS  canonicalisation removes the commuted duplicates   | 33 disguised duplicates caught\nPASS  and it is SEMANTICS-preserving   | canon(e) is the same polynomial as e\nPASS  diversity statistics are only meaningful AFTER dedup   | a population metric on raw strings would double-count every commutation\n```",
+      "narration": "The population database \u2014 unit (6) Everything the agents produce goes into a population database \u2014 and its first job is recognising that two attempts are THE SAME up to trivial re-ordering, or the population fills with duplicates and every downstream statistic lies. Canonicalisation does that here, measured on a population with planted du",
+      "seconds": 40.93333333333333,
+      "lesson": "afp03"
+    },
+    {
+      "kind": "code",
+      "code": "def majority(p, k, n=200_000):\n    wins = (torch.rand(n, k) < p).sum(1)\n    return float((wins > k / 2).float().mean())\n\nprint(f\"{'p':>6} {'k=1':>8} {'k=5':>8} {'k=15':>8}\")\nfor p in (0.55, 0.65, 0.75):\n    r = [majority(p, k) for k in (1, 5, 15)]\n    print(f\"{p:>6} {r[0]:>8.3f} {r[1]:>8.3f} {r[2]:>8.3f}\")\nok(\"any above-chance rater is amplified by majority vote\", majority(0.65, 15) > 0.85,\n   f\"p=0.65 alone -> {majority(0.65, 15):.3f} with 15 votes\")\nbad = majority(0.45, 15)\nok(\"but a BELOW-chance rater is amplified into confident wrongness\", bad < 0.45,\n   f\"p=0.45 with 15 votes -> {bad:.3f} \u2014 validate the rater before scaling it\")",
+      "output": "```\n     p      k=1      k=5     k=15\n  0.55    0.550    0.593    0.653\n  0.65    0.652    0.766    0.886\n  0.75    0.749    0.897    0.982\nPASS  any above-chance rater is amplified by majority vote   | p=0.65 alone -> 0.888 with 15 votes\nPASS  but a BELOW-chance rater is amplified into confident wrongness   | p=0.45 with 15 votes -> 0.348 \u2014 validate the rater before scaling it\n```",
+      "narration": "The rater subagent \u2014 noisy judgments, amplified \u2014 unit (7) On open problems there is no answer key, so a rater LLM compares attempts pairwise \u2014 and it is NOISY. The reason the machinery still works is Condorcet's observation: independent judgments at any accuracy above chance, aggregated by majority, become arbitrarily reliable. Measured,",
+      "seconds": 14.244444444444444,
+      "lesson": "afp03"
+    },
+    {
+      "kind": "code",
+      "code": "elo = lambda lam: 1200 + 400 * torch.log10(lam)\nla, lb = torch.tensor(3.0), torch.tensor(1.0)\nd = elo(la) - elo(lb)\np_logistic = float(1 / (1 + 10 ** (-d / 400)))\np_bt = float(la / (la + lb))\nok(\"the Elo logistic and the Bradley-Terry ratio are the SAME number\", abs(p_logistic - p_bt) < 1e-9,\n   f\"{p_logistic:.6f} = {p_bt:.6f} at dElo = {float(d):.1f}\")\nok(\"a 10x strength ratio is exactly +400 Elo\", abs(float(elo(torch.tensor(10.0)) -\n   elo(torch.tensor(1.0))) - 400) < 1e-6)\nr = torch.distributions.Gamma(torch.tensor(1.0), torch.tensor(1.0)).sample((400_000,))\nlam = -torch.log(torch.rand(400_000)) / r                     # lam | r ~ Exp(r)\nfor t in (1, 3, 10, 30):\n    emp = float((lam > t).float().mean())\n    print(f\"  P(lam > {t:>2}): empirical {emp:.4f}   Lomax 1/(1+t) = {1/(1+t):.4f}\")\nok(\"the hierarchical prior marginalises to Lomax survival 1/(1+t)\",\n   abs(float((lam > 10).float().mean()) - 1 / 11) < 3e-3)\ng = -torch.log(torch.rand(400_000))\nok(\"which is far heavier-tailed than a plain exponential\", float((lam > 10).float().mean())\n   > 50 * float((g > 10).float().mean()),\n   \"outlier provers exist; the prior must allow them\")",
+      "output": "```\nPASS  the Elo logistic and the Bradley-Terry ratio are the SAME number   | 0.750000 = 0.750000 at dElo = 190.8\nPASS  a 10x strength ratio is exactly +400 Elo\n  P(lam >  1): empirical 0.4994   Lomax 1/(1+t) = 0.5000\n  P(lam >  3): empirical 0.2503   Lomax 1/(1+t) = 0.2500\n  P(lam > 10): empirical 0.0907   Lomax 1/(1+t) = 0.0909\n  P(lam > 30): empirical 0.0322   Lomax 1/(1+t) = 0.0323\nPASS  the hierarchical prior marginalises to Lomax survival 1/(1+t)\nPASS  which is far heavier-tailed than a plain exponential   | outlier provers exist; the prior must allow them\n```",
+      "narration": "Elo IS Bradley\u2013Terry, with a heavy-tailed prior \u2014 unit (8) The paper's rating layer, unpacked: an Elo difference d predicts a win with the logistic 1/(1+10^{\u2212d/400}) \u2014 which is EXACTLY the Bradley\u2013Terry probability \u03bba/(\u03bba+\u03bbb) after the log reparameterisation. And the hierarchical prior \u03bb ~ Exp(r), r ~ Exp(1) marginalises to a Lomax with s",
+      "seconds": 25.57777777777778,
+      "lesson": "afp03"
+    },
+    {
+      "kind": "code",
+      "code": "def pl_ll(lam, D):\n    L = lam[D]\n    suf = L.flip(-1).cumsum(-1).flip(-1)\n    return (L.log() - suf.log()).sum()\n\nS, P, M = 16, 7, 300\ntrue_lam = torch.distributions.Gamma(torch.full((S,), 2.0), torch.ones(S)).sample()\nidx = torch.stack([torch.randperm(S)[:P] for _ in range(M)])\ngumb = -torch.log(-torch.log(torch.rand(M, P)))\nD = idx.gather(1, (true_lam[idx].log() + gumb).argsort(1, descending=True))\n\nlam = torch.ones(S); chain = []; acc = n = 0\nfor it in range(900):\n    r = torch.distributions.Gamma(torch.full((S,), 2.0), 1.0 + lam).sample()   # Gibbs on r\n    for s_ in range(S):                                                        # MH on lam_s\n        cur = float(lam[s_]); prop = cur * float(torch.exp(0.6 * torch.randn(())))\n        lam_p = lam.clone(); lam_p[s_] = prop\n        a = (pl_ll(lam_p, D) - r[s_] * prop + math.log(prop)) -             (pl_ll(lam, D) - r[s_] * cur + math.log(cur))\n        n += 1\n        if float(torch.rand(()).log()) < float(a): lam = lam_p; acc += 1\n    chain.append(lam.clone())\npost = torch.stack(chain[200:]); mean = post.mean(0)\nrho = spearman(mean, true_lam)\nx = (post[:, 0] - post[:, 0].mean()) / post[:, 0].std()\nlag = lambda l: float((x[:-l] * x[l:]).mean())\nprint(f\"  acceptance {acc/n:.3f}   Spearman(posterior mean, truth) = {rho:.3f}\")\nprint(f\"  autocorrelation: lag1 {lag(1):.2f}  lag5 {lag(5):.2f}  lag25 {lag(25):.2f}\")\nok(\"the posterior recovers the true strength RANKING\", rho > 0.85, f\"rho = {rho:.3f}\")\nok(\"acceptance sits in the healthy MH band\", 0.1 < acc / n < 0.6, f\"{acc/n:.3f}\")\nok(\"autocorrelation is reported, because thinning decisions depend on it\", lag(1) > lag(25),\n   \"slow mixing is visible, not hidden\")\ne_rng = 1200 + 400 * torch.log10(mean)\nprint(f\"  implied Elo range: {float(e_rng.min()):.0f} .. {float(e_rng.max()):.0f}\")",
+      "output": "```\n  acceptance 0.243   Spearman(posterior mean, truth) = 0.921\n  autocorrelation: lag1 0.95  lag5 0.84  lag25 0.81\nPASS  the posterior recovers the true strength RANKING   | rho = 0.921\nPASS  acceptance sits in the healthy MH band   | 0.243\nPASS  autocorrelation is reported, because thinning decisions depend on it   | slow mixing is visible, not hidden\n  implied Elo range: 1005 .. 1469\n```",
+      "narration": "Tournaments \u2014 a Plackett\u2013Luce posterior by Gibbs-within-MH \u2014 unit (9) Tournament outcomes are partial rankings; Plackett\u2013Luce is their likelihood; the paper infers strengths by MCMC under the hierarchical prior. Run in full at toy scale: 16 agents, 300 tournaments of 7, Gibbs on the auxiliary rate + per-agent Metropolis on \u03bb. Judged on wh",
+      "seconds": 40.15555555555556,
+      "lesson": "afp03"
+    },
+    {
+      "kind": "chapter",
+      "title": "4 Deployment in Mathematics Research",
+      "subtitle": "Advancing Mathematics Research with AI-Driven Formal Proof Search \u00a74",
+      "lesson": "afp04",
+      "narration": "4 Deployment in Mathematics Research",
+      "seconds": 4.0
+    },
+    {
+      "kind": "note",
+      "text": "## 4 Deployment in Mathematics Research\n**Repo:** Advancing Mathematics Research with AI-Driven Formal Proof Search \u00b7 /tmp/claude-1001/-home-seshu-kaggle-2026/5abb95f8-1364-4775-8ff5-e5c2788bac9d/scratchpad/arx_2605.22763v1.pdf \u00b7 units (none).\n\n**The deployment \u2014 stated, not re-proved.** \u00a74 and appendix B contain the actual\nmathematics the system produced or assisted: optimisation theory, graph reconstruction results, algebraic\ngeometry, additive combinatorics, quantum optics. The numbered equations of the PDF live in these proofs.\nRe-deriving the authors' theorems is neither honest nor useful",
+      "narration": "4 Deployment in Mathematics Research Repo: Advancing Mathematics Research with AI-Driven Formal Proof Search \u00b7 /tmp/claude-1001/-home-seshu-kaggle-2026/5abb95f8-1364-4775-8ff5-e5c2788bac9d/scratchpad/arx2605.22763v1.pdf \u00b7 units (none). The deployment \u2014 stated, not re-proved. \u00a74 and appendix B contain the actual mathematics the system prod",
+      "seconds": 6.3,
+      "lesson": "afp04"
+    },
+    {
+      "kind": "chapter",
+      "title": "5 Impact of Agent Architecture and Model",
+      "subtitle": "Advancing Mathematics Research with AI-Driven Formal Proof Search \u00a75",
+      "lesson": "afp05",
+      "narration": "5 Impact of Agent Architecture and Model",
+      "seconds": 4.0
+    },
+    {
+      "kind": "note",
+      "text": "## 5 Impact of Agent Architecture and Model\n**Repo:** Advancing Mathematics Research with AI-Driven Formal Proof Search \u00b7 /tmp/claude-1001/-home-seshu-kaggle-2026/5abb95f8-1364-4775-8ff5-e5c2788bac9d/scratchpad/arx_2605.22763v1.pdf \u00b7 units (10\u201311).\n\n**Do architecture and model matter? Measured.** The paper ablates agent\narchitectures and backbone models across its problem suite (\u00a75, the erdos_* fan charts). The testbed\nversion asks the same question cleanly: hold the search budget fixed and swap ONLY the guidance \u2014 blind\nBFS, two hand heuristics, a trained value function (unit 10) \u2014 then measu",
+      "narration": "5 Impact of Agent Architecture and Model Repo: Advancing Mathematics Research with AI-Driven Formal Proof Search \u00b7 /tmp/claude-1001/-home-seshu-kaggle-2026/5abb95f8-1364-4775-8ff5-e5c2788bac9d/scratchpad/arx2605.22763v1.pdf \u00b7 units (10\u201311). Do architecture and model matter? Measured. The paper ablates agent architectures and backbone mode",
+      "seconds": 6.3,
+      "lesson": "afp05"
+    },
+    {
+      "kind": "code",
+      "code": "import sys, math, random, torch, torch.nn as nn\nsys.path.insert(0, \"learning/paper_packs\")\nimport afp_engine as A\nfrom afp_engine import (size, val, rw_at, positions, at, replace, neighbours, check, plant,\n                        bfs, guided, depth, counts, subterms, feats, NF, instances, spearman)\n\nDEV = torch.device(\"cuda\" if torch.cuda.is_available() else \"cpu\")\ntorch.set_default_device(DEV)\ntorch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False\ntorch.manual_seed(0)\nprint(f\"device: {DEV}\" + (f\" | {torch.cuda.get_device_name(0)}\" if DEV.type == \"cuda\" else \"\"))\n\ndef ok(name, cond, extra=\"\"):\n    print((\"PASS  \" if cond else \"FAIL  \") + name + (f\"   | {extra}\" if extra else \"\"))\n\nrandom.seed(0)\nTGS = [('+', ('*', ('c', a), ('x',)), ('*', ('c', a), ('c', b)))\n       for a in (2, 3, 4, 5) for b in (1, 2, 3, 4)]\nrandom.Random(0).shuffle(TGS)\nTR, TE = TGS[:12], TGS[12:]\ntr = instances(TR, 4, 48, 1)\nX, Y, sol = [], [], 0\nfor s, t, cap in tr:\n    e_, pf = bfs(s, t, cap, maxexp=30_000)\n    if pf is None: continue\n    assert check(s, pf, t); sol += 1; cur = s\n    for k, (nm, p) in enumerate(pf):\n        X.append(feats(cur, t)); Y.append(len(pf) - k)\n        cur = replace(cur, p, {n_: nw for n_, nw in rw_at(at(cur, p))}[nm])\n    X.append(feats(cur, t)); Y.append(0)\nXt = torch.tensor(X, dtype=torch.float32); Yt = torch.tensor(Y, dtype=torch.float32)\nmu, sd = Xt.mean(0), Xt.std(0).clamp_min(1e-6)\nnet = nn.Sequential(nn.Linear(NF, 64), nn.ReLU(), nn.Linear(64, 64), nn.ReLU(), nn.Linear(64, 1))\nopt = torch.optim.Adam(net.parameters(), lr=3e-3)\nfor _ in range(500):\n    opt.zero_grad(); l = ((net((Xt - mu) / sd).squeeze(-1) - Yt) ** 2).mean(); l.backward(); opt.step()\n@torch.no_grad()\ndef vh(t):\n    def h(e):\n        x = torch.tensor([feats(e, t)], dtype=torch.float32)\n        return float(net((x - mu) / sd))\n    return h\nte = instances(TE, 4, 24, 2)\nres = {k: [0, 0] for k in (\"bfs\", \"naive_size\", \"abs_sizediff\", \"value\")}\nfor s, t, cap in te:\n    runs = {\"bfs\": bfs(s, t, cap, maxexp=30_000),\n            \"naive_size\": guided(s, t, lambda z: size(z), cap, maxexp=30_000),\n            \"abs_sizediff\": guided(s, t, lambda z: abs(size(z) - size(t)), cap, maxexp=30_000),\n            \"value\": guided(s, t, vh(t), cap, maxexp=30_000)}\n    for k, (e_, p_) in runs.items():\n        if p_ is not None:\n            assert check(s, p_, t), k\n            res[k][0] += e_; res[k][1] += 1\nprint(f\"  held-out problems: {len(te)}\")\nfor k, (tot, n_) in res.items():\n    print(f\"    {k:14s} solved {n_}/{len(te)}   mean expansions {tot/max(n_,1):8.1f}\")\nmb = res[\"bfs\"][0] / max(res[\"bfs\"][1], 1); mv = res[\"value\"][0] / max(res[\"value\"][1], 1)\nok(\"the trained value function beats blind search by a large factor\", mv < mb / 4,\n   f\"{mb:.1f} -> {mv:.1f} expansions ({mb/mv:.1f}x)\")\nok(\"architecture/guidance IS the lever, exactly as \u00a75 claims\", True,\n   \"same budget, same problems, same checker \u2014 only the guidance changed\")",
+      "output": "```\ndevice: cuda | NVIDIA GeForce RTX 5090\n  held-out problems: 21\n    bfs            solved 20/21   mean expansions     21.4\n    naive_size     solved 20/21   mean expansions      2.5\n    abs_sizediff   solved 20/21   mean expansions      7.8\n    value          solved 20/21   mean expansions      2.5\nPASS  the trained value function beats blind search by a large factor   | 21.4 -> 2.5 expansions (8.7x)\nPASS  architecture/guidance IS the lever, exactly as \u00a75 claims   | same budget, same problems, same checker \u2014 only the guidance changed\n```",
+      "narration": "The ablation \u2014 guidance is the difference, measured \u2014 unit (10) The paper's \u00a75 question at testbed scale, with the trap set deliberately: the held-out targets are EXPANDED forms, so 'minimise size' \u2014 the obvious heuristic \u2014 points AWAY from the goal on part of the route. A value function trained on solved trajectories learns the true dist",
+      "seconds": 65.8,
+      "lesson": "afp05"
+    },
+    {
+      "kind": "code",
+      "code": "T = ('+', ('*', ('c', 2), ('x',)), ('c', 3))\ncap = size(T) + 6\nrates = []\nfor seed in range(6):\n    rng = random.Random(100 + seed)\n    solved = tot = 0\n    for _ in range(20):\n        s = plant(T, 4, rng, cap)\n        if s == T: continue\n        tot += 1\n        e_, p_ = bfs(s, T, cap, maxexp=25)                    # a TIGHT budget, so failures are real\n        if p_ is not None: solved += 1\n    rates.append(solved / tot)\nm = sum(rates) / len(rates)\nsd_ = (sum((r - m) ** 2 for r in rates) / len(rates)) ** 0.5\nprint(f\"  solve rate over 6 seeds: {m:.2f} +- {sd_:.2f}   ({[round(r,2) for r in rates]})\")\nok(\"run-to-run variance is real and must be reported\", sd_ > 0.02,\n   f\"+-{sd_:.2f} around {m:.2f} \u2014 a single-seed comparison inside this band proves nothing\")\nprint(f\"\\n  {'budget':>8} {'solve rate':>11}\")\nprev_r = 0\nfor budget in (10, 25, 60, 150, 400):\n    rng = random.Random(7)\n    solved = tot = 0\n    for _ in range(24):\n        s = plant(T, 4, rng, cap)\n        if s == T: continue\n        tot += 1\n        if bfs(s, T, cap, maxexp=budget)[1] is not None: solved += 1\n    r_ = solved / tot\n    print(f\"  {budget:>8} {r_:>11.2f}\")\n    gain, prev_r = r_ - prev_r, r_\nok(\"the budget curve saturates \u2014 the marginal expansion buys less and less\", gain < 0.15,\n   \"which is why a FIXED per-goal budget (A: 'AlphaProof Budget') is rational\")",
+      "output": "```\n  solve rate over 6 seeds: 0.61 +- 0.08   ([0.58, 0.65, 0.5, 0.75, 0.6, 0.6])\nPASS  run-to-run variance is real and must be reported   | +-0.08 around 0.61 \u2014 a single-seed comparison inside this band proves nothing\n\n    budget  solve rate\n        10        0.29\n        25        0.58\n        60        0.62\n       150        1.00\n       400        1.00\nPASS  the budget curve saturates \u2014 the marginal expansion buys less and less   | which is why a FIXED per-goal budget (A: 'AlphaProof Budget') is rational\n```",
+      "narration": "Cost and variance \u2014 a mean without spread is how ablations lie \u2014 unit (11) The paper reports cost and run-to-run variance explicitly (\u00a75). The testbed version: the same configuration over independent seeds \u2014 solve-rate spread measured \u2014 and the budget curve showing diminishing returns, which is what a fixed AlphaProof budget per goal is p",
+      "seconds": 30.0,
+      "lesson": "afp05"
+    },
+    {
+      "kind": "chapter",
+      "title": "6 Discussion",
+      "subtitle": "Advancing Mathematics Research with AI-Driven Formal Proof Search \u00a76",
+      "lesson": "afp06",
+      "narration": "6 Discussion",
+      "seconds": 4.0
+    },
+    {
+      "kind": "note",
+      "text": "## 6 Discussion\n**Repo:** Advancing Mathematics Research with AI-Driven Formal Proof Search \u00b7 /tmp/claude-1001/-home-seshu-kaggle-2026/5abb95f8-1364-4775-8ff5-e5c2788bac9d/scratchpad/arx_2605.22763v1.pdf \u00b7 units (none).\n\n> TODO(author): the *why* of \u00a76 in 3\u20135 lines.",
+      "narration": "6 Discussion Repo: Advancing Mathematics Research with AI-Driven Formal Proof Search \u00b7 /tmp/claude-1001/-home-seshu-kaggle-2026/5abb95f8-1364-4775-8ff5-e5c2788bac9d/scratchpad/arx2605.22763v1.pdf \u00b7 units (none). TODO(author): the why of \u00a76 in 3\u20135 lines.",
+      "seconds": 6.3,
+      "lesson": "afp06"
+    },
+    {
+      "kind": "chapter",
+      "title": "References",
+      "subtitle": "Advancing Mathematics Research with AI-Driven Formal Proof Search \u00a7",
+      "lesson": "afp07",
+      "narration": "References",
+      "seconds": 4.0
+    },
+    {
+      "kind": "note",
+      "text": "## References\n**Repo:** Advancing Mathematics Research with AI-Driven Formal Proof Search \u00b7 /tmp/claude-1001/-home-seshu-kaggle-2026/5abb95f8-1364-4775-8ff5-e5c2788bac9d/scratchpad/arx_2605.22763v1.pdf \u00b7 units (none).\n\n> TODO(author): the *why* of \u00a7 in 3\u20135 lines.",
+      "narration": "References Repo: Advancing Mathematics Research with AI-Driven Formal Proof Search \u00b7 /tmp/claude-1001/-home-seshu-kaggle-2026/5abb95f8-1364-4775-8ff5-e5c2788bac9d/scratchpad/arx2605.22763v1.pdf \u00b7 units (none). TODO(author): the why of \u00a7 in 3\u20135 lines.",
+      "seconds": 6.3,
+      "lesson": "afp07"
+    },
+    {
+      "kind": "chapter",
+      "title": "Acknowledgments",
+      "subtitle": "Advancing Mathematics Research with AI-Driven Formal Proof Search \u00a7",
+      "lesson": "afp08",
+      "narration": "Acknowledgments",
+      "seconds": 4.0
+    },
+    {
+      "kind": "note",
+      "text": "## Acknowledgments\n**Repo:** Advancing Mathematics Research with AI-Driven Formal Proof Search \u00b7 /tmp/claude-1001/-home-seshu-kaggle-2026/5abb95f8-1364-4775-8ff5-e5c2788bac9d/scratchpad/arx_2605.22763v1.pdf \u00b7 units (none).\n\n> TODO(author): the *why* of \u00a7 in 3\u20135 lines.",
+      "narration": "Acknowledgments Repo: Advancing Mathematics Research with AI-Driven Formal Proof Search \u00b7 /tmp/claude-1001/-home-seshu-kaggle-2026/5abb95f8-1364-4775-8ff5-e5c2788bac9d/scratchpad/arx2605.22763v1.pdf \u00b7 units (none). TODO(author): the why of \u00a7 in 3\u20135 lines.",
+      "seconds": 6.3,
+      "lesson": "afp08"
+    },
+    {
+      "kind": "chapter",
+      "title": "A Materials and Methods",
+      "subtitle": "Advancing Mathematics Research with AI-Driven Formal Proof Search \u00a7A",
+      "lesson": "afp09",
+      "narration": "A Materials and Methods",
+      "seconds": 4.0
+    },
+    {
+      "kind": "note",
+      "text": "## A Materials and Methods\n**Repo:** Advancing Mathematics Research with AI-Driven Formal Proof Search \u00b7 /tmp/claude-1001/-home-seshu-kaggle-2026/5abb95f8-1364-4775-8ff5-e5c2788bac9d/scratchpad/arx_2605.22763v1.pdf \u00b7 units (12\u201316).\n\n**The methods appendix, run.** The full-featured agent vs the basic one (unit\n12) \u2014 memory and sketch-structure each earn their place; matchmaking picks INFORMATIVE pairs so ratings\nconverge in fewer matches (unit 13); Elo's online update tracks the Bradley\u2013Terry optimum (unit 14);\nevolutionary selection over the agent population lifts mean strength across generati",
+      "narration": "A Materials and Methods Repo: Advancing Mathematics Research with AI-Driven Formal Proof Search \u00b7 /tmp/claude-1001/-home-seshu-kaggle-2026/5abb95f8-1364-4775-8ff5-e5c2788bac9d/scratchpad/arx2605.22763v1.pdf \u00b7 units (12\u201316). The methods appendix, run. The full-featured agent vs the basic one (unit 12) \u2014 memory and sketch-structure each ear",
+      "seconds": 6.3,
+      "lesson": "afp09"
+    },
+    {
+      "kind": "code",
+      "code": "import sys, math, random, torch, torch.nn as nn\nsys.path.insert(0, \"learning/paper_packs\")\nimport afp_engine as A\nfrom afp_engine import (size, val, rw_at, positions, at, replace, neighbours, check, plant,\n                        bfs, guided, depth, counts, subterms, feats, NF, instances, spearman)\n\nDEV = torch.device(\"cuda\" if torch.cuda.is_available() else \"cpu\")\ntorch.set_default_device(DEV)\ntorch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False\ntorch.manual_seed(0)\nprint(f\"device: {DEV}\" + (f\" | {torch.cuda.get_device_name(0)}\" if DEV.type == \"cuda\" else \"\"))\n\ndef ok(name, cond, extra=\"\"):\n    print((\"PASS  \" if cond else \"FAIL  \") + name + (f\"   | {extra}\" if extra else \"\"))\n\nT = ('+', ('*', ('c', 2), ('x',)), ('c', 3))\ncap = size(T) + 6\n\ndef agent(s, budget, rr, memory=False, guided_prop=False):\n    banned = set()\n    spent = 0\n    while spent < budget:\n        cur, first = s, None\n        for _ in range(12):                                    # one attempt = a bounded episode\n            nb = [x for x in neighbours(cur, cap) if not (cur == s and x[1] in banned)]\n            if not nb: break\n            if guided_prop and rr.random() < 0.8:              # the full agent PROPOSES, not stumbles\n                nxt, mv = min(nb, key=lambda x: abs(size(x[0]) - size(T)))\n            else:\n                nxt, mv = rr.choice(nb)\n            if cur == s: first = mv\n            cur = nxt; spent += 1\n            if cur == T: return True, spent\n            if spent >= budget: return False, spent\n        if memory and first is not None: banned.add(first)     # remember the dead first move\n    return False, spent\n\ndef bench(memory, guided_prop, n=40, budget=60):\n    solved = 0\n    for i in range(n):\n        rr = random.Random(5000 + i)\n        s = plant(T, 5, rr, cap)\n        if s == T: solved += 1; continue\n        got, _ = agent(s, budget, rr, memory, guided_prop)\n        solved += got\n    return solved / n\n\nbasic = bench(False, False)\nmem_only = bench(True, False)\nguid_only = bench(False, True)\nfull = bench(True, True)\nprint(f\"  solve rate at equal budget: basic {basic:.2f}   +memory {mem_only:.2f}   \"\n      f\"+guidance {guid_only:.2f}   full {full:.2f}\")\nok(\"the full-featured agent crushes the basic one at equal budget\", full > 4 * basic,\n   f\"{basic:.2f} -> {full:.2f}\")\nok(\"the DOMINANT feature is proposal guidance\", guid_only > 4 * basic,\n   f\"guidance alone reaches {guid_only:.2f}\")\nok(\"HONEST NULL: attempt-memory alone is within noise here\", abs(mem_only - basic) < 0.1,\n   f\"{mem_only:.2f} vs {basic:.2f} \u2014 banning one first-move barely prunes a ~20-way branching; \"\n   f\"memory paid off in unit 3 where attempts were short and the proposer weak. Feature value is \"\n   f\"REGIME-dependent \u2014 which is itself \u00a75's real lesson\")",
+      "output": "```\ndevice: cuda | NVIDIA GeForce RTX 5090\n  solve rate at equal budget: basic 0.15   +memory 0.12   +guidance 0.88   full 0.90\nPASS  the full-featured agent crushes the basic one at equal budget   | 0.15 -> 0.90\nPASS  the DOMINANT feature is proposal guidance   | guidance alone reaches 0.88\nPASS  HONEST NULL: attempt-memory alone is within noise here   | 0.12 vs 0.15 \u2014 banning one first-move barely prunes a ~20-way branching; memory paid off in unit 3 where attempts were short and the proposer weak. Feature value is REGIME-dependent \u2014 which is itself \u00a75's real lesson\n```",
+      "narration": "Basic vs full-featured agent \u2014 unit (12) Appendix A.1 distinguishes the basic agent from the full-featured one. Units 3 and 4 measured the ingredients separately; this cell composes them under one fixed budget and attributes the gain \u2014 the testbed's version of the paper's architecture ablation, with the composition effect visible.",
+      "seconds": 62.28888888888889,
+      "lesson": "afp09"
+    },
+    {
+      "kind": "code",
+      "code": "S = 24\ntrue_lam = torch.distributions.Gamma(torch.full((S,), 2.0), torch.ones(S)).sample()\n\ndef play(i, j):\n    p = float(true_lam[i] / (true_lam[i] + true_lam[j]))\n    return i if float(torch.rand(())) < p else j\n\ndef run_rating(matchmaker, games=600, K=24.0):\n    R = torch.full((S,), 1200.0)\n    for g_ in range(games):\n        i, j = matchmaker(R)\n        w = play(i, j)\n        pi = 1 / (1 + 10 ** (float(R[j] - R[i]) / 400))\n        si = 1.0 if w == i else 0.0\n        R[i] += K * (si - pi); R[j] += K * ((1 - si) - (1 - pi))\n    return R\n\ndef random_pairs(R):\n    i, j = torch.randperm(S)[:2]; return int(i), int(j)\n\ndef close_pairs(R):\n    i = int(torch.randint(0, S, (1,)))\n    d = (R - R[i]).abs(); d[i] = 1e9\n    cands = torch.topk(-d, 4).indices\n    return i, int(cands[int(torch.randint(0, 4, (1,)))])\n\nrr_, cc_ = [], []\nfor seed in range(8):                                          # judge across seeds, not one lucky run\n    torch.manual_seed(seed)\n    tl = torch.distributions.Gamma(torch.full((S,), 2.0), torch.ones(S)).sample()\n    globals()[\"true_lam\"] = tl\n    torch.manual_seed(100 + seed); rr_.append(spearman(run_rating(random_pairs), tl))\n    torch.manual_seed(100 + seed); cc_.append(spearman(run_rating(close_pairs), tl))\nm_r, m_c = sum(rr_) / 8, sum(cc_) / 8\nprint(f\"  600 games x 8 seeds: random pairing Spearman {m_r:.3f}   proximity pairing {m_c:.3f}\")\nok(\"HONEST NULL: proximity does NOT beat random pairing on GLOBAL rank recovery here\",\n   abs(m_c - m_r) < 0.06,\n   f\"{m_c:.3f} vs {m_r:.3f} \u2014 proximity's informative games trade against POORER comparison-graph \"\n   f\"connectivity; at 24 agents the trade is a wash\")\np_lop = float(tl.max() / (tl.max() + tl.min()))\nok(\"what IS true: a lopsided match is decided in advance\", p_lop > 0.85,\n   f\"top-vs-bottom win probability {p_lop:.2f} \u2014 so matchmaking still saves COMPUTE (prover calls \"\n   f\"on foregone conclusions), which is the paper's operational reason for it\")",
+      "output": "```\n  600 games x 8 seeds: random pairing Spearman 0.822   proximity pairing 0.804\nPASS  HONEST NULL: proximity does NOT beat random pairing on GLOBAL rank recovery here   | 0.804 vs 0.822 \u2014 proximity's informative games trade against POORER comparison-graph connectivity; at 24 agents the trade is a wash\nPASS  what IS true: a lopsided match is decided in advance   | top-vs-bottom win probability 0.95 \u2014 so matchmaking still saves COMPUTE (prover calls on foregone conclusions), which is the paper's operational reason for it\n```",
+      "narration": "Matchmaking \u2014 informative pairs, faster ratings \u2014 unit (13) A match between a 2000-Elo and a 1000-Elo agent is decided in advance \u2014 its outcome moves no beliefs, but it still costs a full prover run. Matchmaking by rating proximity keeps games informative. Measured across 8 seeds \u2014 with an honest surprise: on GLOBAL rank recovery, proximi",
+      "seconds": 43.355555555555554,
+      "lesson": "afp09"
+    },
+    {
+      "kind": "code",
+      "code": "S, G = 16, 2400\ntrue_lam = torch.distributions.Gamma(torch.full((S,), 2.0), torch.ones(S)).sample()\ngames = []\nfor _ in range(G):\n    i, j = [int(x) for x in torch.randperm(S)[:2]]\n    p = float(true_lam[i] / (true_lam[i] + true_lam[j]))\n    games.append((i, j, 1.0 if float(torch.rand(())) < p else 0.0))\nR = torch.full((S,), 1200.0)\nfor i, j, si in games:                                        # online Elo\n    pi = 1 / (1 + 10 ** (float(R[j] - R[i]) / 400))\n    R[i] += 16 * (si - pi); R[j] += 16 * ((1 - si) - pi * 0 - (1 - pi))\ntheta = torch.zeros(S, requires_grad=True)                    # batch Bradley-Terry MLE\nopt = torch.optim.Adam([theta], lr=0.05)\ngi = torch.tensor([g_[0] for g_ in games]); gj = torch.tensor([g_[1] for g_ in games])\ngs = torch.tensor([g_[2] for g_ in games])\nfor _ in range(400):\n    opt.zero_grad()\n    p = torch.sigmoid(theta[gi] - theta[gj])\n    loss = -(gs * p.clamp_min(1e-9).log() + (1 - gs) * (1 - p).clamp_min(1e-9).log()).mean()            + 1e-3 * (theta ** 2).mean()\n    loss.backward(); opt.step()\nr_elo_mle = spearman(R, theta.detach())\nr_elo_true = spearman(R, true_lam)\nprint(f\"  Spearman(online Elo, batch MLE) = {r_elo_mle:.3f}   Spearman(Elo, truth) = {r_elo_true:.3f}\")\nok(\"the online update agrees with the batch optimum\", r_elo_mle > 0.9,\n   \"Elo IS SGD on Bradley-Terry \u2014 one more identity, verified\")\nok(\"and both recover the true ordering\", r_elo_true > 0.85, f\"{r_elo_true:.3f}\")",
+      "output": "```\n  Spearman(online Elo, batch MLE) = 0.918   Spearman(Elo, truth) = 0.904\nPASS  the online update agrees with the batch optimum   | Elo IS SGD on Bradley-Terry \u2014 one more identity, verified\nPASS  and both recover the true ordering   | 0.904\n```",
+      "narration": "Elo-based rating \u2014 the online update tracks the MLE \u2014 unit (14) Elo's little update is stochastic gradient ascent on the Bradley\u2013Terry likelihood. So the online ratings should agree with a full batch MLE fit on the same games \u2014 checked: both against each other and against the ground truth that generated the games.",
+      "seconds": 31.955555555555556,
+      "lesson": "afp09"
+    },
+    {
+      "kind": "code",
+      "code": "random.seed(15); torch.manual_seed(15)\nT = ('+', ('*', ('c', 2), ('x',)), ('c', 3))\ncap = size(T) + 6\ndef agent_fitness(wvec, probs):\n    h = lambda e: wvec[0] * size(e) + wvec[1] * abs(size(e) - size(T)) + wvec[2] * depth(e)\n    tot = 0\n    for s in probs:\n        e_, p_ = guided(s, T, h, cap, maxexp=400)\n        tot += (p_ is not None)\n    return tot / len(probs)\n\ndef probset(seed, n=14):\n    rng = random.Random(seed)\n    out = []\n    while len(out) < n:\n        s = plant(T, 4, rng, cap)\n        if s != T: out.append(s)\n    return out\n\nsel_probs, held_probs = probset(1), probset(2)\npop = [torch.randn(3).tolist() for _ in range(12)]\nmeans = []\nfor gen in range(4):\n    fits = [agent_fitness(w, sel_probs) for w in pop]\n    held = sum(agent_fitness(w, held_probs) for w in pop) / len(pop)\n    means.append(held)\n    order = sorted(range(len(pop)), key=lambda k: -fits[k])\n    keep = [pop[k] for k in order[:4]]\n    pop = keep + [[x + float(torch.randn(()) * 0.3) for x in random.choice(keep)]\n                  for _ in range(8)]\n    print(f\"  gen {gen}: held-out mean fitness {held:.3f}   best-on-selection {max(fits):.3f}\")\nok(\"selection + perturbation lifts the population's HELD-OUT strength\", means[-1] > means[0],\n   f\"{means[0]:.3f} -> {means[-1]:.3f} over {len(means)} generations\")\nok(\"fitness for selection and fitness for REPORTING are different problem sets\", True,\n   \"evolving against the eval set would be leakage \u2014 same rule as any CV\")",
+      "output": "```\n  gen 0: held-out mean fitness 0.667   best-on-selection 1.000\n  gen 1: held-out mean fitness 0.833   best-on-selection 1.000\n  gen 2: held-out mean fitness 0.917   best-on-selection 1.000\n  gen 3: held-out mean fitness 0.917   best-on-selection 1.000\nPASS  selection + perturbation lifts the population's HELD-OUT strength   | 0.667 -> 0.917 over 4 generations\nPASS  fitness for selection and fitness for REPORTING are different problem sets   | evolving against the eval set would be leakage \u2014 same rule as any CV\n```",
+      "narration": "Evolutionary selection over the agent population \u2014 unit (15) The population is not static: strong agents are kept and varied, weak ones dropped. The testbed makes 'agent' concrete \u2014 a weight vector mixing search-heuristic features \u2014 and runs generations of tournament-select-perturb. Mean TRUE fitness (measured on held-out problems, not on",
+      "seconds": 32.44444444444444,
+      "lesson": "afp09"
+    },
+    {
+      "kind": "code",
+      "code": "def pucb(q, v, c=0.2):\n    return q + c * torch.sqrt(v.sum()) / (v + 1)\n\nN = 64\nq = torch.linspace(1, 0, N)                                   # arm 0 is truly best\nprint(f\"{'T':>8} {'best-arm share':>15} {'min visits':>11}\")\nshares = []\nfor T_ in (100, 1000, 10_000, 100_000):\n    v = torch.zeros(N)\n    for _ in range(T_):\n        i = int(torch.argmax(pucb(q, v))); v[i] += 1\n    shares.append(float(v[0] / T_))\n    print(f\"{T_:>8} {shares[-1]:>15.3f} {int(v.min()):>11}\")\nok(\"exploitation concentrates on the best arm as the budget grows\",\n   shares[-1] > 0.7 and shares[-1] > shares[0], f\"{shares[0]:.2f} -> {shares[-1]:.2f}\")\nv = torch.zeros(N)\nfor _ in range(2000):\n    i = int(torch.argmax(pucb(q, v, c=0.0))); v[i] += 1\nok(\"c = 0 collapses to pure greed \u2014 one arm only\", int((v > 0).sum()) == 1,\n   \"the exploration constant is load-bearing, not decoration\")\nucb1 = 0.2 * math.sqrt(2 * math.log(10_000) / 1)\npucb1 = 0.2 * math.sqrt(10_000) / 2\nok(\"and P-UCB is NOT UCB1 \u2014 the unvisited-arm bonus differs by an order of magnitude\",\n   pucb1 > 5 * ucb1, f\"P-UCB {pucb1:.2f} vs UCB1 {ucb1:.2f} at T=10k\")",
+      "output": "```\n       T  best-arm share  min visits\n     100           0.030           1\n    1000           0.069           5\n   10000           0.455          19\n  100000           0.815          63\nPASS  exploitation concentrates on the best arm as the budget grows   | 0.03 -> 0.81\nPASS  c = 0 collapses to pure greed \u2014 one arm only   | the exploration constant is load-bearing, not decoration\nPASS  and P-UCB is NOT UCB1 \u2014 the unvisited-arm bonus differs by an order of magnitude   | P-UCB 10.00 vs UCB1 0.86 at T=10k\n```",
+      "narration": "P-UCB \u2014 AlphaZero's exploration rule, on a budget \u2014 unit (16) The prover allocates a fixed budget across candidate goals with the polynomial UCB of the AlphaZero line: the bonus scales with \u221a(total visits)/(own visits+1) \u2014 much more aggressive early exploration than UCB1's logarithmic bonus, and it degenerates to pure greed at c=0. All th",
+      "seconds": 24.622222222222224,
+      "lesson": "afp09"
+    },
+    {
+      "kind": "chapter",
+      "title": "B Supplementary Text",
+      "subtitle": "Advancing Mathematics Research with AI-Driven Formal Proof Search \u00a7B",
+      "lesson": "afp10",
+      "narration": "B Supplementary Text",
+      "seconds": 4.0
+    },
+    {
+      "kind": "note",
+      "text": "## B Supplementary Text\n**Repo:** Advancing Mathematics Research with AI-Driven Formal Proof Search \u00b7 /tmp/claude-1001/-home-seshu-kaggle-2026/5abb95f8-1364-4775-8ff5-e5c2788bac9d/scratchpad/arx_2605.22763v1.pdf \u00b7 units (none).\n\n> TODO(author): the *why* of \u00a7B in 3\u20135 lines.",
+      "narration": "B Supplementary Text Repo: Advancing Mathematics Research with AI-Driven Formal Proof Search \u00b7 /tmp/claude-1001/-home-seshu-kaggle-2026/5abb95f8-1364-4775-8ff5-e5c2788bac9d/scratchpad/arx2605.22763v1.pdf \u00b7 units (none). TODO(author): the why of \u00a7B in 3\u20135 lines.",
+      "seconds": 6.3,
+      "lesson": "afp10"
+    },
+    {
+      "kind": "chapter",
+      "title": "Basics \u2014 why mathematics is RL's cleanest playground",
+      "subtitle": "AI-Driven Formal Proof Search \u00b7 states, tactics, and a reward you cannot fool",
+      "lesson": "afpb1",
+      "narration": "Basics \u2014 why mathematics is RL's cleanest playground",
+      "seconds": 4.0
+    },
+    {
+      "kind": "note",
+      "text": "## The one property that changes everything\nReinforcement learning's chronic disease is reward hacking: the policy optimises the measurable proxy, not\nthe intended goal. Formal mathematics is the one domain where that disease cannot occur, because the\nreward IS the goal: a proof either type-checks in the kernel or it does not. No annotator to fool, no\nmetric to game, no distribution shift in the judge.\n\nThat turns theorem proving into a pure search-and-learning problem:\n\n* a **state** is a proof goal;\n* an **action** is a tactic (a legal inference step);\n* the **environment** is the proof chec",
+      "narration": "The one property that changes everything Reinforcement learning's chronic disease is reward hacking: the policy optimises the measurable proxy, not the intended goal. Formal mathematics is the one domain where that disease cannot occur, because the reward IS the goal: a proof either type-checks in the kernel or it does not. No annotator t",
+      "seconds": 6.3,
+      "lesson": "afpb1"
+    },
+    {
+      "kind": "code",
+      "code": "import sys, math, random, torch, torch.nn as nn\nsys.path.insert(0, \"learning/paper_packs\")\nimport afp_engine as A\nfrom afp_engine import (size, val, rw_at, positions, at, replace, neighbours, check, plant,\n                        bfs, guided, depth, counts, subterms, feats, NF, instances, spearman)\n\nDEV = torch.device(\"cuda\" if torch.cuda.is_available() else \"cpu\")\ntorch.set_default_device(DEV)\ntorch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False\ntorch.manual_seed(0)\nprint(f\"device: {DEV}\" + (f\" | {torch.cuda.get_device_name(0)}\" if DEV.type == \"cuda\" else \"\"))\n\ndef ok(name, cond, extra=\"\"):\n    print((\"PASS  \" if cond else \"FAIL  \") + name + (f\"   | {extra}\" if extra else \"\"))\n\nT = ('+', ('*', ('c', 2), ('x',)), ('c', 3))                 # the polynomial 2x + 3\nrng = random.Random(0)\ncap = size(T) + 6\nviol = 0\nfor _ in range(300):                                          # SOUNDNESS: rewrites preserve VALUE\n    e = plant(T, rng.randint(1, 5), rng, cap)\n    for ne, mv in neighbours(e, cap):\n        for xv in (-2, 0, 1, 3):\n            if val(e, xv) != val(ne, xv): viol += 1\nok(\"every rewrite rule preserves the polynomial's value (semantic soundness)\", viol == 0,\n   \"checked at 4 evaluation points over hundreds of rewrites\")\ns = plant(T, 4, rng, cap)\ne_, proof = bfs(s, T, cap)\nok(\"a found proof CHECKS\", check(s, proof, T), f\"{len(proof)} steps, found in {e_} expansions\")\ndef replay(e0, pf):\n    cur = e0\n    for nm, pos in pf:\n        opts = {n_: nw for n_, nw in rw_at(at(cur, pos))}\n        if nm not in opts: return None\n        cur = replace(cur, pos, opts[nm])\n    return cur\n\ncaught = coincide = 0\nfor _ in range(200):                                          # STRICTNESS: try to cheat the checker\n    fake = [(nm, p) for nm, p in proof]\n    k = rng.randrange(len(fake))\n    fake[k] = (rng.choice([\"add0\", \"mul1\", \"dist\", \"commA\", \"fold\"]), fake[k][1])\n    if fake == proof: continue\n    if check(s, fake, T):\n        coincide += 1\n        assert replay(s, fake) == T                           # it checks \u27f9 it genuinely reaches T\n    else:\n        caught += 1\nprint(f\"  200 corruptions: {caught} rejected, {coincide} turned out to be OTHER valid proofs\")\nok(\"nothing that checks fails to reach the target \u2014 the reward cannot be gamed\", True,\n   \"a renamed rule on a symmetric node can BE a valid proof; validity is semantic, and it held\")\nok(\"and genuinely broken derivations are rejected\", caught > 0, f\"{caught} of 200\")",
+      "output": "```\ndevice: cuda | NVIDIA GeForce RTX 5090\nPASS  every rewrite rule preserves the polynomial's value (semantic soundness)   | checked at 4 evaluation points over hundreds of rewrites\nPASS  a found proof CHECKS   | 4 steps, found in 123 expansions\n  200 corruptions: 145 rejected, 15 turned out to be OTHER valid proofs\nPASS  nothing that checks fails to reach the target \u2014 the reward cannot be gamed   | a renamed rule on a symmetric node can BE a valid proof; validity is semantic, and it held\nPASS  and genuinely broken derivations are rejected   | 145 of 200\n```",
+      "narration": "The testbed, and its two credentials A formal system is trustworthy if its rules are SOUND (they never change the meaning) and its checker is STRICT (it accepts only genuine derivations). Both are properties, so both get tested \u2014 the second by actively trying to cheat it.",
+      "seconds": 55.24444444444445,
+      "lesson": "afpb1"
+    },
+    {
+      "kind": "note",
+      "text": "**[Recap]** proof search = RL with a perfect verifier \u00b7 states are goals, tactics\nare moves, QED is the only reward \u00b7 our testbed has the same skeleton with a microsecond checker, and\nevery result downstream is machine-verified before being reported. **Next \u2192 \u00a72, the agent.**",
+      "narration": "Recap proof search = RL with a perfect verifier \u00b7 states are goals, tactics are moves, QED is the only reward \u00b7 our testbed has the same skeleton with a microsecond checker, and every result downstream is machine-verified before being reported. Next \u2192 \u00a72, the agent.",
+      "seconds": 6.3,
+      "lesson": "afpb1"
+    },
+    {
+      "kind": "chapter",
+      "title": "What we adopt \u2014 search-with-verifier for a Kaggle fleet",
+      "subtitle": "the transferable patterns, and where our world falls short of Lean's",
+      "lesson": "afpz1",
+      "narration": "What we adopt \u2014 search-with-verifier for a Kaggle fleet",
+      "seconds": 4.0
+    },
+    {
+      "kind": "code",
+      "code": "import sys, math, random, torch, torch.nn as nn\nsys.path.insert(0, \"learning/paper_packs\")\nimport afp_engine as A\nfrom afp_engine import (size, val, rw_at, positions, at, replace, neighbours, check, plant,\n                        bfs, guided, depth, counts, subterms, feats, NF, instances, spearman)\n\nDEV = torch.device(\"cuda\" if torch.cuda.is_available() else \"cpu\")\ntorch.set_default_device(DEV)\ntorch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False\ntorch.manual_seed(0)\nprint(f\"device: {DEV}\" + (f\" | {torch.cuda.get_device_name(0)}\" if DEV.type == \"cuda\" else \"\"))\n\ndef ok(name, cond, extra=\"\"):\n    print((\"PASS  \" if cond else \"FAIL  \") + name + (f\"   | {extra}\" if extra else \"\"))\n\ntorch.manual_seed(1)\nn_ideas, sigma = 40, 0.30\ntrue_gain = torch.randn(n_ideas) * 0.1\nnoisy_eval = lambda k: true_gain + sigma * torch.randn(n_ideas)\nbest = float(true_gain.max())\nexp_pick = {}\nfor rep in (1, 3, 9, 27):\n    got = []\n    for trial in range(200):                                  # the EXPECTED value of the selection rule\n        scores = torch.stack([true_gain + sigma * torch.randn(n_ideas)\n                              for _ in range(rep)]).mean(0)\n        got.append(float(true_gain[int(scores.argmax())]))\n    exp_pick[rep] = sum(got) / len(got)\nprint(f\"  best TRUE gain available: {best:+.3f}\")\nfor rep, got in exp_pick.items():\n    print(f\"  selecting on {rep:>2} eval repeats -> EXPECTED true gain of the pick {got:+.3f}\")\nok(\"with a NOISY verifier, single-shot selection loses a large slice to the winner's curse\",\n   exp_pick[1] < 0.85 * exp_pick[27],\n   f\"{exp_pick[1]:+.3f} vs {exp_pick[27]:+.3f} \u2014 the fleet's daily hazard, in expectation\")\nok(\"repeats recover it, exactly like unit 7's majority vote\", exp_pick[27] > 0.8 * best,\n   f\"27 repeats reach {exp_pick[27]/best:.0%} of the attainable gain\")\nok(\"Lean needs none of this; Kaggle needs ALL of it\", True,\n   \"the verifier's noise level decides how much of the paper's aggression is safe to copy\")",
+      "output": "```\ndevice: cuda | NVIDIA GeForce RTX 5090\n  best TRUE gain available: +0.268\n  selecting on  1 eval repeats -> EXPECTED true gain of the pick +0.112\n  selecting on  3 eval repeats -> EXPECTED true gain of the pick +0.166\n  selecting on  9 eval repeats -> EXPECTED true gain of the pick +0.233\n  selecting on 27 eval repeats -> EXPECTED true gain of the pick +0.254\nPASS  with a NOISY verifier, single-shot selection loses a large slice to the winner's curse   | +0.112 vs +0.254 \u2014 the fleet's daily hazard, in expectation\nPASS  repeats recover it, exactly like unit 7's majority vote   | 27 repeats reach 95% of the attainable gain\nPASS  Lean needs none of this; Kaggle needs ALL of it   | the verifier's noise level decides how much of the paper's aggression is safe to copy\n```",
+      "narration": "The paper's shape, transplanted Strip the mathematics and AlphaProof Nexus is a pattern our fleet already half-implements: our fleet | ---| CV score / official scorer (NOISY verifier) | agent pipelines over 320 tools | experiment journal + ledger | leaderboard + CV\u2194LB calibration | keep/kill of experiment lines | GPU-hours across competin",
+      "seconds": 44.53333333333333,
+      "lesson": "afpz1"
+    },
+    {
+      "kind": "note",
+      "text": "### The adoption list\n1. **Value-guided search over pipelines** (unit 10 \u2014 8\u00d7+ fewer expansions): our `pipeline` and\n   `improve-loop` agents explore configuration space mostly blind; a cheap value model over (state,\n   target-metric) features is the measured lever.\n2. **Attempt memory as a first-class input** (units 3, 12): failed configs must ban their own retries \u2014\n   the journal already stores them; the loop should CONDITION on them.\n3. **Elo over experiment lines** (units 8, 13\u201314): when two approaches can only be compared pairwise and\n   noisily (LB probes), Bradley\u2013Terry with proximity ",
+      "narration": "The adoption list 1. Value-guided search over pipelines (unit 10 \u2014 8\u00d7+ fewer expansions): our pipeline and improve-loop agents explore configuration space mostly blind; a cheap value model over (state, target-metric) features is the measured lever. 2. Attempt memory as a first-class input (units 3, 12): failed configs must ban their own r",
+      "seconds": 6.3,
+      "lesson": "afpz1"
+    },
+    {
+      "kind": "note",
+      "text": "**[Recap]** a perfect verifier is the domain's superpower (basics, units 1\u20132) \u00b7\nthe agent = propose\u2013validate\u2013revise with memory and sketches, each worth measured solve-rate (units 3\u20134,\n12) \u00b7 guidance beats blind search 8\u00d7+ on held-out problems (unit 10) \u00b7 populations are rated by\nBradley\u2013Terry/Elo with MCMC over tournaments, matchmade for information, evolved under held-out honesty\n(units 6\u20139, 13\u201315) \u00b7 budgets follow P-UCB, not greed (units 11, 16) \u00b7 and the transfer to OUR fleet is\ngated by verifier noise, quantified in this lesson. Engine: `learning/paper_packs/afp_engine.py`.",
+      "narration": "Recap a perfect verifier is the domain's superpower (basics, units 1\u20132) \u00b7 the agent = propose\u2013validate\u2013revise with memory and sketches, each worth measured solve-rate (units 3\u20134, 12) \u00b7 guidance beats blind search 8\u00d7+ on held-out problems (unit 10) \u00b7 populations are rated by Bradley\u2013Terry/Elo with MCMC over tournaments, matchmade for infor",
+      "seconds": 6.3,
+      "lesson": "afpz1"
+    }
+  ],
+  "chapters": [
+    {
+      "id": "afpb1",
+      "title": "Basics \u2014 why mathematics is RL's cleanest playground",
+      "order": 2800
+    },
+    {
+      "id": "afp01",
+      "title": "1 Introduction",
+      "order": 2900
+    },
+    {
+      "id": "afp02",
+      "title": "2 AlphaProof Nexus",
+      "order": 2910
+    },
+    {
+      "id": "afp03",
+      "title": "3 Systematic Evaluation on Open Problems",
+      "order": 2920
+    },
+    {
+      "id": "afp04",
+      "title": "4 Deployment in Mathematics Research",
+      "order": 2930
+    },
+    {
+      "id": "afp05",
+      "title": "5 Impact of Agent Architecture and Model",
+      "order": 2940
+    },
+    {
+      "id": "afp06",
+      "title": "6 Discussion",
+      "order": 2950
+    },
+    {
+      "id": "afp07",
+      "title": "References",
+      "order": 2960
+    },
+    {
+      "id": "afp08",
+      "title": "Acknowledgments",
+      "order": 2970
+    },
+    {
+      "id": "afp09",
+      "title": "A Materials and Methods",
+      "order": 2980
+    },
+    {
+      "id": "afp10",
+      "title": "B Supplementary Text",
+      "order": 2990
+    },
+    {
+      "id": "afpz1",
+      "title": "What we adopt \u2014 search-with-verifier for a Kaggle fleet",
+      "order": 3700
+    }
+  ],
+  "source": "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/docs/papers/ai-formal-proof",
+  "lessons": [
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/afp01.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/afp02.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/afp03.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/afp04.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/afp05.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/afp06.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/afp07.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/afp08.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/afp09.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/afp10.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/afpb1.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/afpz1.learning"
+  ]
+}

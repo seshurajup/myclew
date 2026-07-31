@@ -1,0 +1,58 @@
+[
+  {
+    "text": "A set is an unordered collection of unique values, with real maths built in.",
+    "until_line": 1
+  },
+  {
+    "text": "Duplicates simply cannot exist in a set — adding one again changes nothing.",
+    "until_line": 1
+  },
+  {
+    "text": "We define two sets that share the numbers three and four.",
+    "until_line": 2
+  },
+  {
+    "text": "Ampersand is intersection — only the elements found in both.",
+    "until_line": 4
+  },
+  {
+    "text": "That gives us three and four, the overlap.",
+    "until_line": 4
+  },
+  {
+    "text": "Pipe is union, every element from either side, with duplicates collapsed.",
+    "until_line": 5
+  },
+  {
+    "text": "Union is how you merge two collections and forget about overlap entirely.",
+    "until_line": 5
+  },
+  {
+    "text": "Minus is difference, what's in a but not in b.",
+    "until_line": 6
+  },
+  {
+    "text": "Which leaves one and two.",
+    "until_line": 6
+  },
+  {
+    "text": "Passing a list to set is the fastest way to remove duplicates.",
+    "until_line": 9
+  },
+  {
+    "text": "Six items become three, though the order is not guaranteed.",
+    "until_line": 9
+  },
+  {
+    "text": "And membership tests are near instant, because sets are hash based, not scanned.",
+    "until_line": 10
+  },
+  {
+    "text": "Checking membership in a list scans it; in a set it's a single hash lookup.",
+    "until_line": 10
+  },
+  {
+    "text": "In the next one we take on sorting by a key. Which one do you already use? Comment below.",
+    "until_line": 10
+  }
+]

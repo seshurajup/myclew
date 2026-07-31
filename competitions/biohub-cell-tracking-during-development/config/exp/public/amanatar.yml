@@ -1,0 +1,10 @@
+# PUBLIC notebook config — **amanatar** / EMA intensity cost
+name: pub_amanatar
+source: **amanatar** / EMA intensity cost
+family: other
+base: unknown
+lb: 0.855
+golden_cv: None
+mined_params: ""
+run: manual
+score: golden-12 (adj_edge_J + 0.1*div_J), by_embryo

@@ -1,0 +1,50 @@
+[
+  {
+    "text": "F-strings do far more than drop a variable into some text.",
+    "until_line": 1
+  },
+  {
+    "text": "We start with a float and a short string to play with.",
+    "until_line": 2
+  },
+  {
+    "text": "Put an f before the quote, and anything in curly braces gets evaluated.",
+    "until_line": 4
+  },
+  {
+    "text": "Colon dot two f is a format spec — round this float to two decimal places.",
+    "until_line": 4
+  },
+  {
+    "text": "So pi prints as three point one four, not the full messy value.",
+    "until_line": 4
+  },
+  {
+    "text": "Format specs handle padding and thousands separators too, all inside the braces.",
+    "until_line": 4
+  },
+  {
+    "text": "Bang r calls repr instead of str, which keeps the quotes visible around the string.",
+    "until_line": 5
+  },
+  {
+    "text": "And you can run real expressions inside the braces, like len of name.",
+    "until_line": 5
+  },
+  {
+    "text": "The equals sign suffix is the debugging trick — it prints the expression and its value.",
+    "until_line": 8
+  },
+  {
+    "text": "x equals five, written once, shown as both the name and the result.",
+    "until_line": 8
+  },
+  {
+    "text": "That saves you writing the variable name twice every time you debug.",
+    "until_line": 8
+  },
+  {
+    "text": "the walrus operator is next, video number 10. Save this one for when you need it.",
+    "until_line": 8
+  }
+]

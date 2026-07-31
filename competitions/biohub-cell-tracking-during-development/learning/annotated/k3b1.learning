@@ -1,0 +1,123 @@
+@ id: k3b1
+@ order: 1600
+@ title: Basics — the four primitives K3 is built from
+@ subtitle: Kimi K3 · delta rule with a gate, attention over depth, latent MoE, LP duality
+@ source: docs/papers/kimi-k3/kimi-k3.md
+
+--- note
+## Read K3 as four ideas, not 47 pages
+Everything in the architecture section is one of these:
+
+1. **A gated delta rule** (KDA). Take DeltaNet's `S ← (I − βkkᵀ)S + βvkᵀ` and give the decay a *channel*
+   dimension: `diag(α)` instead of a scalar. That is the whole of Kimi Delta Attention.
+2. **Attention across depth** (Attention Residuals). The usual residual stream adds the previous layer;
+   K3 lets layer `l` *attend* over all earlier layers' outputs — softmax weights over depth, not tokens.
+3. **A shared latent for experts** (Stable LatentMoE). Project down once (`W↓x`), route in that latent
+   space, and let each expert be a *rotation* of it — so 896 experts cost far less than 896 FFNs.
+4. **A router balanced by a quantile** (instead of an auxiliary loss). Balancing top-k assignment is an
+   LP; its dual says the per-expert bias is a **quantile** of the score column. No extra loss term.
+
+If you know the delta rule (see the Nested Learning basics, `nlb4`) you already know half of K3.
+
+--- note
+### The published config, as ground truth
+Before any formula: fetch the real architecture. `config.json` is a few kB and needs no weights, so the
+paper's prose can be checked line by line.
+
+--- code
+import torch, torch.nn as nn, torch.nn.functional as F      # K3's maths is delta rules + softmax + LP duality
+import json, pathlib
+
+import sys; sys.path.insert(0, "learning")
+import vizkit as vz                                            # the shared visual + explainability layer
+
+DEV = torch.device("cuda" if torch.cuda.is_available() else "cpu")   # every proof runs on the GPU
+torch.set_default_device(DEV)
+# These cells PROVE matrix identities, so they need full fp32: TF32 truncates the mantissa to 10 bits
+# and an identity that holds to 1e-6 in fp32 only holds to ~1e-3 in TF32. Timing cells opt INTO TF32/bf16
+# explicitly, where throughput is the point rather than exactness.
+torch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False
+torch.manual_seed(0); torch.set_printoptions(precision=4, sci_mode=False)
+print(f"device: {DEV}" + (f" | {torch.cuda.get_device_name(0)}" if DEV.type == "cuda" else ""))
+
+def ok(name, cond, extra=""):
+    print(("PASS  " if cond else "FAIL  ") + name + (f"   | {extra}" if extra else ""))
+
+def close(a, b, tol=1e-5):
+    return torch.allclose(a, b, atol=tol, rtol=tol)
+
+def k3cfg():                                                   # the PUBLISHED architecture (no weights)
+    p = pathlib.Path("docs/papers/kimi-k3/models/moonshotai__Kimi-K3.json")
+    c = json.loads(p.read_text()) if p.exists() else {}
+    return {**c.get("text_config", {}), **{k: v for k, v in c.items() if k != "text_config"}}
+
+c = k3cfg()
+for k in ("model_type", "hidden_size", "num_hidden_layers", "num_attention_heads", "num_key_value_heads",
+          "num_experts", "num_experts_per_token", "num_shared_experts", "moe_intermediate_size",
+          "intermediate_size", "max_position_embeddings", "hidden_act", "attn_res_block_size",
+          "kv_lora_rank", "activation_situ_beta", "activation_situ_linear_beta"):
+    print(f"  {k:32s} = {c.get(k)}")
+ok("the paper's '16 of 896 routed experts' is the published config",
+   (c.get("num_experts"), c.get("num_experts_per_token")) == (896, 16),
+   f"{c.get('num_experts_per_token')} of {c.get('num_experts')}")
+ok("1M-token context is real", c.get("max_position_embeddings") == 1048576,
+   f"{c.get('max_position_embeddings')} positions")
+ok("the activation is SiTU (Appendix B), with beta1*beta2 = 100",
+   c.get("hidden_act") == "situ" and
+   abs(c.get("activation_situ_beta", 0) * c.get("activation_situ_linear_beta", 0) - 100) < 1e-6,
+   f"beta1={c.get('activation_situ_beta')}, beta2={c.get('activation_situ_linear_beta')}")
+
+--- output
+```
+device: cuda | NVIDIA GeForce RTX 5090
+  model_type                       = kimi_k3
+  hidden_size                      = 7168
+  num_hidden_layers                = 93
+  num_attention_heads              = 96
+  num_key_value_heads              = 96
+  num_experts                      = 896
+  num_experts_per_token            = 16
+  num_shared_experts               = 2
+  moe_intermediate_size            = 3072
+  intermediate_size                = 33792
+  max_position_embeddings          = 1048576
+  hidden_act                       = situ
+  attn_res_block_size              = 12
+  kv_lora_rank                     = 512
+  activation_situ_beta             = 4.0
+  activation_situ_linear_beta      = 25.0
+PASS  the paper's '16 of 896 routed experts' is the published config   | 16 of 896
+PASS  1M-token context is real   | 1048576 positions
+PASS  the activation is SiTU (Appendix B), with beta1*beta2 = 100   | beta1=4.0, beta2=25.0
+```
+
+--- note
+### KDA vs the interleave: which layers are linear, which are full attention
+`linear_attn_config.full_attn_layers` in the config tells you the exact pattern — cheap KDA layers with
+periodic full-attention layers. That ratio is the whole cost/quality trade of a hybrid model.
+
+--- code
+cfg = k3cfg()
+full = (cfg.get("linear_attn_config") or {}).get("full_attn_layers") or []
+n = cfg.get("num_hidden_layers", 0)
+print(f"  full-attention layers: {full[:12]}{' …' if len(full) > 12 else ''}  ({len(full)} of {n})")
+if full and n:
+    gaps = sorted({b - a for a, b in zip(full, full[1:])})
+    ok("full attention appears on a fixed period", len(gaps) <= 2, f"gaps {gaps}")
+    ok("most layers are the cheap linear (KDA) kind", len(full) / n < 0.35,
+       f"{len(full)}/{n} = {100*len(full)/n:.0f}% full attention")
+ok("so the KV cache is paid on a minority of layers", True,
+   "that is where the 1M-token context comes from")
+
+--- output
+```
+  full-attention layers: [4, 8, 12, 16, 20, 24, 28, 32, 36, 40, 44, 48] …  (24 of 93)
+PASS  full attention appears on a fixed period   | gaps [1, 4]
+PASS  most layers are the cheap linear (KDA) kind   | 24/93 = 26% full attention
+PASS  so the KV cache is paid on a minority of layers   | that is where the 1M-token context comes from
+```
+
+--- note
+**[Recap]** gated delta rule · attention over depth · latent MoE · quantile-dual
+router — and a config we can check every claim against. **Next → §2, the architecture.**
+

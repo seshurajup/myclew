@@ -1,0 +1,3 @@
+[
+  {"after_line": 9, "text": ">>> report.txt\n>>> .txt\n>>> report\n>>> data\n>>> data/report.md", "caption": "paths as objects, not strings"}
+]

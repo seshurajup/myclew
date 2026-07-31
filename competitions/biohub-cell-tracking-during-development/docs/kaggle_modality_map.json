@@ -1,0 +1,55 @@
+{
+  "ai-agent-security-multi-step-tool-attacks": {
+    "category": "Featured",
+    "kaggle_tags": [],
+    "modality": "agent-env",
+    "source": "known-comps"
+  },
+  "biohub-cell-tracking-during-development": {
+    "category": "Research",
+    "kaggle_tags": [],
+    "modality": "volume-time",
+    "source": "known-comps"
+  },
+  "birdclef-2026": {
+    "category": "Research",
+    "kaggle_tags": [
+      "earth and nature",
+      "animals",
+      "multilabel classification",
+      "audio event classification"
+    ],
+    "modality": "audio",
+    "source": "kaggle-tags"
+  },
+  "deep-past-initiative-machine-translation": {
+    "category": "Featured",
+    "kaggle_tags": [
+      "history",
+      "text",
+      "translation"
+    ],
+    "modality": "text",
+    "source": "kaggle-tags"
+  },
+  "nvidia-nemotron-model-reasoning-challenge": {
+    "category": "Featured",
+    "kaggle_tags": [
+      "deep learning",
+      "pre-trained model",
+      "general knowledge and reasoning"
+    ],
+    "modality": "text",
+    "source": "kaggle-tags"
+  },
+  "orbit-wars": {
+    "category": "Featured",
+    "kaggle_tags": [
+      "games",
+      "artificial intelligence",
+      "reinforcement learning"
+    ],
+    "modality": "agent-env",
+    "source": "kaggle-tags"
+  }
+}

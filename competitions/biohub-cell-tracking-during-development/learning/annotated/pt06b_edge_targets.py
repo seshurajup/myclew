@@ -1,0 +1,81 @@
+"""Working code for pt06b — building the edge/division targets, on REAL data.
+Runs the real compute_gt_transition_matrix on a real frame-pair's real edges.
+    research/cellmot_venv/bin/python learning/annotated/pt06b_edge_targets.py
+"""
+from pathlib import Path
+import sys
+ROOT = Path("/home/seshu/kaggle/2026/biohub-cell-tracking-during-development")
+sys.path.insert(0, str(ROOT / "learning"))
+from lessonkit import build_lesson
+
+REPO = ROOT / "research/pilkwang_support_pack/repo"
+TRAIN = ROOT / "input/biohub-cell-tracking-during-development/train"
+
+META = dict(id="pt06b", order=15, title="Building the edge/division targets",
+            subtitle="compute_gt_transition_matrix: the supervision the edge loss learns from",
+            source="research/pilkwang_support_pack/repo/scripts/train_unet_transformer.py")
+
+CELLS = [
+    dict(note="""## What does the edge model learn FROM?
+The edge loss (pt06) needs a **target**: for a frame pair, a matrix `M[i,j]=1` when cell `i@t`
+really continues to `j@t+1` (and a **division** is a row with two 1s). That target is built from
+the **real** tracking graph. Here we run the real `compute_gt_transition_matrix` on real cells and
+edges of `6bba_062c8d37`."""),
+
+    dict(note="""### Read real nodes and edges
+Node ids + their frame, and the real edges `(source_id → target_id)` from the `.geff`.""",
+         code="""import numpy as np, zarr                                              # arrays + reader
+g = f"{TRAIN}/6bba_062c8d37.geff"                                        # a real embryo graph
+nid = np.asarray(zarr.open(f"{g}/nodes/ids")[:])                        # every node id
+nt  = np.asarray(zarr.open(f"{g}/nodes/props/t/values")[:])            # every node frame
+edges = np.asarray(zarr.open(f"{g}/edges/ids")[:])                     # real edges (source_id, target_id)
+ids_t  = nid[nt == 0]                                                  # ids of cells at frame 0
+ids_t1 = nid[nt == 1]                                                  # ids of cells at frame 1
+(len(ids_t), len(ids_t1), len(edges))                                 # #cells@0, #cells@1, #edges total"""),
+
+    dict(note="""### Build the target matrix — the real function
+**[PyTorch]** `compute_gt_transition_matrix` maps each real edge to a `1` at `[row_of_source,
+col_of_target]`. **[Domain]** a normal cell = one 1 in its row; a **division** = two 1s (parent →
+two daughters) — exactly the events worth `+0.1×` in the metric. Run it on the real edges.""",
+         code="""import sys, polars as pl                                              # to reach the repo; edges as a frame
+sys.path.insert(0, f"{REPO}/src"); sys.path.insert(0, f"{REPO}/scripts")  # the real repo
+from train_unet_transformer import compute_gt_transition_matrix          # the REAL target builder
+edge_df = pl.DataFrame({"source_id": edges[:, 0], "target_id": edges[:, 1]})  # real edges as a DataFrame
+M = compute_gt_transition_matrix(ids_t, ids_t1, edge_df)                 # (n@0, n@1) real target matrix
+M.shape                                                                  # the real supervision matrix shape"""),
+
+    dict(note="""### How many links, and any divisions?
+Row-sums: `1` = a normal continuation, `2` = a division (parent → 2 daughters).""",
+         code="""row_sums = M.sum(dim=1)                                              # outgoing links per frame-0 cell
+{"real links": int(M.sum()),                                            # total frame-0->1 links
+ "divisions (row==2)": int((row_sums == 2).sum())}                      # real division events in this pair"""),
+
+    dict(note="""### Before targets: matching detections to GT (`detect_and_match`)
+**[PyTorch]** In training the model doesn't know which predicted peak is which GT cell. The real
+`detect_and_match` finds peaks in the detector logits (3-D max-pool NMS) and matches each to the
+nearest GT cell **within 5 µm** — so the edge model is supervised on detections aligned to real
+cells. **[Domain]** run it on a real frame's logits + the real GT coords of `6bba_062c8d37`.""",
+         code="""import torch, torch.nn as nn                                          # layers
+from train_unet_transformer import detect_and_match                          # the REAL matcher
+vol = np.asarray(zarr.open(f"{TRAIN}/6bba_062c8d37.zarr/0")[0]).astype(np.float32)[:, ::4, ::4]  # real frame, ds (1,4,4)
+det_logits = nn.Conv3d(1, 1, 1)(torch.from_numpy(vol)[None, None])           # per-voxel detection logits on the real frame
+zc = np.asarray(zarr.open(f"{TRAIN}/6bba_062c8d37.geff/nodes/props/z/values")[:])  # real GT z
+yc = np.asarray(zarr.open(f"{TRAIN}/6bba_062c8d37.geff/nodes/props/y/values")[:])  # real GT y
+xc = np.asarray(zarr.open(f"{TRAIN}/6bba_062c8d37.geff/nodes/props/x/values")[:])  # real GT x
+gtc = np.stack([zc[nt == 0], yc[nt == 0] / 4, xc[nt == 0] / 4], 1).astype(np.float32)  # (n_gt,3) frame-0 coords, ds
+gt = torch.zeros(1, gtc.shape[0], 3); gt[0] = torch.from_numpy(gtc)          # padded (B, M, 3)
+mask = torch.ones(1, gtc.shape[0], dtype=torch.bool)                         # all real (non-padded)
+coords, feats, matched, _ = detect_and_match(det_logits, gt, mask,          # run the REAL matcher
+    (2,) + tuple(det_logits.shape[2:]), det_threshold=0.0, voxel_size=(1.625, 1.625, 1.625))
+{"gt cells @ t=0": int(gtc.shape[0]),                                        # real #GT cells
+ "detections matched to a GT cell (≤5µm)": int((matched >= 0).sum())}       # real matched count"""),
+
+    dict(note="""**[Recap]** `detect_and_match` aligns detections to real cells; then
+`compute_gt_transition_matrix` turns the real GT edges into the target `M` that `compute_loss`
+(pt06) trains the edge model against — division rows being the rare signal our fine-tune
+up-weights. **Next → pt07: the Dataset** that assembles frame-pairs into batches."""),
+]
+
+if __name__ == "__main__":
+    build_lesson(META, CELLS, Path(__file__).with_suffix(".learning"),
+                 {"ROOT": ROOT, "REPO": REPO, "TRAIN": TRAIN})

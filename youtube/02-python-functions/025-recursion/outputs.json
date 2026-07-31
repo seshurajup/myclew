@@ -1,0 +1,21 @@
+[
+  {
+    "after_line": 6,
+    "text": ">>> 120",
+    "caption": "factorial: base case + shrink"
+  },
+  {
+    "after_line": 13,
+    "text": ">>> [0, 1, 1, 2, 3, 5, 8, 13]",
+    "caption": "recursive fibonacci"
+  },
+  {
+    "after_line": 25,
+    "text": ">>> 21",
+    "caption": "recursion walks nested lists"
+  },
+  {
+    "after_line": 25,
+    "image": "artifacts/terminal.png"
+  }
+]

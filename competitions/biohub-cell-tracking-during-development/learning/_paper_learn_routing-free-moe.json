@@ -1,0 +1,42 @@
+{
+  "slug": "routing-free-moe",
+  "lessons": 11,
+  "ids": [
+    "rfmb1",
+    "rfm02",
+    "rfm03",
+    "rfm04",
+    "rfm05",
+    "rfm08",
+    "rfm13",
+    "rfm14",
+    "rfm15",
+    "rfm17",
+    "rfmz1"
+  ],
+  "coverage": {
+    "total": 30,
+    "placed": 30,
+    "missing": [],
+    "taught": 30,
+    "untaught": [],
+    "proven": 30,
+    "unproven": [],
+    "cropped": 18,
+    "figures": 208,
+    "figures_placed": 181,
+    "lessons": 9
+  },
+  "curriculum": {
+    "appended": true,
+    "section": "Routing-Free MoE (2026) \u2014 deleting the router, proved in PyTorch",
+    "lessons": 11
+  },
+  "pruned": [],
+  "code_cells": 34,
+  "cells_with_output": 34,
+  "silent_lessons": [],
+  "out_dir": "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated",
+  "assets": "learning/assets/routing-free-moe",
+  "python": "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/research/cellmot_venv/bin/python"
+}

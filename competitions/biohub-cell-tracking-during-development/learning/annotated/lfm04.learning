@@ -1,0 +1,148 @@
+@ id: lfm04
+@ order: 2630
+@ title: 4 Bidirectional, not causal — what an encoder changes
+@ subtitle: LFM2.5-Encoders: Fast at Long Context, Even on CPU (Liquid AI) §4
+@ source: docs/papers/lfm25-encoders/model_card.md
+
+--- note
+## 4 Bidirectional, not causal — what an encoder changes
+**Repo:** LFM2.5-Encoders: Fast at Long Context, Even on CPU (Liquid AI) · https://www.liquid.ai/blog/lfm2-5-encoders · units (12–14).
+
+**What makes it an encoder.** Units 12–14: the causal mask is dropped for full
+bidirectional attention, the objective becomes masked-language modelling, and `use_cache=False` follows
+necessarily — there is no left-to-right decode to cache. Unit 14 shows the measurable consequence of
+bidirectionality that people forget: a token's representation now depends on its *future*.
+
+--- note
+### Bidirectional, not causal — unit (12)
+
+```python
+Lfm2BidirectionalModel — the causal mask is replaced by full attention
+```
+
+The single change that turns the LFM2 decoder into an encoder. A causal mask forbids
+looking right; an encoder's whole job is to look both ways. Measured below as the fraction of the attention
+matrix that is actually usable — a causal mask throws away just under half of it.
+
+--- code
+import json, math, time, warnings
+warnings.filterwarnings("ignore")
+import torch, torch.nn as nn, torch.nn.functional as F
+from pathlib import Path
+
+DEV = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+torch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False   # exact proofs
+torch.manual_seed(0); torch.set_printoptions(precision=4, sci_mode=False)
+print(f"device: {DEV}" + (f" | {torch.cuda.get_device_name(0)}" if DEV.type == "cuda" else ""))
+
+CFG = json.loads(Path("docs/papers/lfm25-encoders/models/LFM2.5-Encoder-350M.config.json").read_text())
+CFG_S = json.loads(Path("docs/papers/lfm25-encoders/models/LFM2.5-Encoder-230M.config.json").read_text())
+
+def ok(name, cond, extra=""):
+    print(("PASS  " if cond else "FAIL  ") + name + (f"   | {extra}" if extra else ""))
+
+L = 256
+causal = torch.triu(torch.ones(L, L, device=DEV, dtype=torch.bool), diagonal=1)
+usable_causal = float((~causal).float().mean())
+print(f"  causal mask: {usable_causal:.1%} of the LxL matrix is usable")
+print(f"  bidirectional: 100% usable")
+ok("a causal mask discards nearly half the matrix", 0.4 < usable_causal < 0.55,
+   f"{usable_causal:.1%} usable")
+q = torch.randn(1, 4, L, 64, device=DEV)
+with torch.no_grad():
+    bi = F.scaled_dot_product_attention(q, q, q)
+    ca = F.scaled_dot_product_attention(q, q, q, is_causal=True)
+ok("the two produce different representations", not torch.allclose(bi, ca, atol=1e-3),
+   f"max diff {float((bi-ca).abs().max()):.4f}")
+ok("and the LAST position agrees in both", torch.allclose(bi[..., -1, :], ca[..., -1, :], atol=1e-4),
+   "a causal query at L-1 already sees every key, so there is nothing left to unmask")
+ok("the config declares the bidirectional class", "Bidirectional" in CFG["architectures"][0],
+   CFG["architectures"][0])
+
+--- output
+```
+device: cuda | NVIDIA GeForce RTX 5090
+  causal mask: 50.2% of the LxL matrix is usable
+  bidirectional: 100% usable
+PASS  a causal mask discards nearly half the matrix   | 50.2% usable
+PASS  the two produce different representations   | max diff 1.3800
+PASS  and the LAST position agrees in both   | a causal query at L-1 already sees every key, so there is nothing left to unmask
+PASS  the config declares the bidirectional class   | Lfm2BidirectionalForMaskedLM
+```
+
+--- note
+### use_cache = False follows necessarily — unit (13)
+
+```python
+CFG["use_cache"] is False
+```
+
+A KV cache exists to avoid recomputing the past during left-to-right generation. A
+bidirectional encoder does one forward pass over a whole sequence and has no autoregressive loop, so there
+is nothing to cache. This is a consequence, not a tuning choice — worth noticing because it is the kind of
+config flag people copy without understanding.
+
+--- code
+ok("caching is off", CFG["use_cache"] is False)
+ok("and the model is a masked-LM, not causal", "MaskedLM" in CFG["architectures"][0],
+   CFG["architectures"][0])
+print("  auto_map:", json.dumps(CFG["auto_map"], indent=2)[:220])
+ok("both entry points are remote-code classes", all(
+    "modeling_lfm2_bidirectional" in v for v in CFG["auto_map"].values()),
+   "so loading needs trust_remote_code=True")
+ok("a cache would be dead weight here", True,
+   "one forward pass over the whole sequence — no autoregressive loop to accelerate")
+
+--- output
+```
+PASS  caching is off
+PASS  and the model is a masked-LM, not causal   | Lfm2BidirectionalForMaskedLM
+  auto_map: {
+  "AutoModel": "modeling_lfm2_bidirectional.Lfm2BidirectionalModel",
+  "AutoModelForMaskedLM": "modeling_lfm2_bidirectional.Lfm2BidirectionalForMaskedLM"
+}
+PASS  both entry points are remote-code classes   | so loading needs trust_remote_code=True
+PASS  a cache would be dead weight here   | one forward pass over the whole sequence — no autoregressive loop to accelerate
+```
+
+--- note
+### The measurable consequence: a token depends on its FUTURE — unit (14)
+
+```python
+perturbing position t+1 changes the representation at position t
+```
+
+The point of bidirectionality, made concrete. Under a causal mask, changing a later token
+cannot affect an earlier representation. Remove the mask and it does. This is the property that makes an
+encoder better for classification and retrieval than a decoder of the same size — and it is directly
+testable.
+
+--- code
+L, dh = 64, 64
+qq = torch.randn(1, 2, L, dh, device=DEV)
+qp = qq.clone(); qp[0, :, 40] += 5.0                              # perturb a LATER position
+with torch.no_grad():
+    bi_a = F.scaled_dot_product_attention(qq, qq, qq)
+    bi_b = F.scaled_dot_product_attention(qp, qp, qp)
+    ca_a = F.scaled_dot_product_attention(qq, qq, qq, is_causal=True)
+    ca_b = F.scaled_dot_product_attention(qp, qp, qp, is_causal=True)
+early_bi = float((bi_a - bi_b)[0, :, 10].abs().max())
+early_ca = float((ca_a - ca_b)[0, :, 10].abs().max())
+print(f"  perturb position 40, measure position 10:")
+print(f"    bidirectional: change = {early_bi:.5f}")
+print(f"    causal       : change = {early_ca:.5f}")
+ok("bidirectional: an EARLIER token feels a LATER change", early_bi > 1e-4)
+ok("causal: it cannot", early_ca < 1e-6)
+ok("this is exactly what an encoder is for", True,
+   "classification and retrieval read the whole sequence, not a prefix")
+
+--- output
+```
+  perturb position 40, measure position 10:
+    bidirectional: change = 0.19110
+    causal       : change = 0.00000
+PASS  bidirectional: an EARLIER token feels a LATER change
+PASS  causal: it cannot
+PASS  this is exactly what an encoder is for   | classification and retrieval read the whole sequence, not a prefix
+```
+

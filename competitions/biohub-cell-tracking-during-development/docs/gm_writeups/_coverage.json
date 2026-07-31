@@ -1,0 +1,392 @@
+{
+  "nfl-big-data-bowl-2025": {
+    "deadline": "2025-01-06",
+    "cat": "Analytics",
+    "n": 0,
+    "status": "no-writeups"
+  },
+  "santa-2024": {
+    "deadline": "2025-01-31",
+    "cat": "Featured",
+    "n": 5,
+    "status": "fetched"
+  },
+  "playground-series-s5e1": {
+    "deadline": "2025-01-31",
+    "cat": "Playground",
+    "n": 5,
+    "status": "fetched"
+  },
+  "czii-cryo-et-object-identification": {
+    "deadline": "2025-02-05",
+    "cat": "Featured",
+    "n": 5,
+    "status": "already"
+  },
+  "playground-series-s5e2": {
+    "deadline": "2025-02-28",
+    "cat": "Playground",
+    "n": 4,
+    "status": "fetched"
+  },
+  "llms-you-cant-please-them-all": {
+    "deadline": "2025-03-04",
+    "cat": "Featured",
+    "n": 5,
+    "status": "fetched"
+  },
+  "equity-post-HCT-survival-predictions": {
+    "deadline": "2025-03-05",
+    "cat": "Research",
+    "n": 5,
+    "status": "already"
+  },
+  "fide-google-efficiency-chess-ai-challenge": {
+    "deadline": "2025-03-06",
+    "cat": "Featured",
+    "n": 5,
+    "status": "fetched"
+  },
+  "wsdm-cup-multilingual-chatbot-arena": {
+    "deadline": "2025-03-10",
+    "cat": "Featured",
+    "n": 5,
+    "status": "already"
+  },
+  "lux-ai-season-3": {
+    "deadline": "2025-03-24",
+    "cat": "Featured",
+    "n": 5,
+    "status": "already"
+  },
+  "playground-series-s5e3": {
+    "deadline": "2025-03-31",
+    "cat": "Playground",
+    "n": 4,
+    "status": "fetched"
+  },
+  "ai-mathematical-olympiad-progress-prize-2": {
+    "deadline": "2025-04-01",
+    "cat": "Featured",
+    "n": 5,
+    "status": "fetched"
+  },
+  "march-machine-learning-mania-2025": {
+    "deadline": "2025-04-08",
+    "cat": "Featured",
+    "n": 5,
+    "status": "fetched"
+  },
+  "playground-series-s5e4": {
+    "deadline": "2025-04-30",
+    "cat": "Playground",
+    "n": 5,
+    "status": "already"
+  },
+  "drawing-with-llms": {
+    "deadline": "2025-05-27",
+    "cat": "Featured",
+    "n": 5,
+    "status": "already"
+  },
+  "playground-series-s5e5": {
+    "deadline": "2025-05-31",
+    "cat": "Playground",
+    "n": 5,
+    "status": "fetched"
+  },
+  "image-matching-challenge-2025": {
+    "deadline": "2025-06-02",
+    "cat": "Research",
+    "n": 5,
+    "status": "fetched"
+  },
+  "byu-locating-bacterial-flagellar-motors-2025": {
+    "deadline": "2025-06-04",
+    "cat": "Research",
+    "n": 5,
+    "status": "already"
+  },
+  "birdclef-2025": {
+    "deadline": "2025-06-05",
+    "cat": "Research",
+    "n": 5,
+    "status": "already"
+  },
+  "openai-to-z-challenge": {
+    "deadline": "2025-06-29",
+    "cat": "Featured",
+    "n": 0,
+    "status": "no-writeups"
+  },
+  "playground-series-s5e6": {
+    "deadline": "2025-06-30",
+    "cat": "Playground",
+    "n": 5,
+    "status": "fetched"
+  },
+  "waveform-inversion": {
+    "deadline": "2025-06-30",
+    "cat": "Research",
+    "n": 5,
+    "status": "fetched"
+  },
+  "jane-street-real-time-market-data-forecasting": {
+    "deadline": "2025-07-12",
+    "cat": "Featured",
+    "n": 3,
+    "status": "already"
+  },
+  "konwinski-prize": {
+    "deadline": "2025-07-23",
+    "cat": "Featured",
+    "n": 5,
+    "status": "fetched"
+  },
+  "playground-series-s5e7": {
+    "deadline": "2025-07-31",
+    "cat": "Playground",
+    "n": 1,
+    "status": "already"
+  },
+  "openai-gpt-oss-20b-red-teaming": {
+    "deadline": "2025-08-26",
+    "cat": "Featured",
+    "n": 0,
+    "status": "no-writeups"
+  },
+  "playground-series-s5e8": {
+    "deadline": "2025-08-31",
+    "cat": "Playground",
+    "n": 5,
+    "status": "fetched"
+  },
+  "cmi-detect-behavior-with-sensor-data": {
+    "deadline": "2025-09-02",
+    "cat": "Featured",
+    "n": 5,
+    "status": "fetched"
+  },
+  "make-data-count-finding-data-references": {
+    "deadline": "2025-09-09",
+    "cat": "Research",
+    "n": 5,
+    "status": "fetched"
+  },
+  "neurips-open-polymer-prediction-2025": {
+    "deadline": "2025-09-15",
+    "cat": "Featured",
+    "n": 5,
+    "status": "fetched"
+  },
+  "ariel-data-challenge-2025": {
+    "deadline": "2025-09-24",
+    "cat": "Featured",
+    "n": 5,
+    "status": "fetched"
+  },
+  "stanford-rna-3d-folding": {
+    "deadline": "2025-09-24",
+    "cat": "Featured",
+    "n": 5,
+    "status": "already"
+  },
+  "playground-series-s5e9": {
+    "deadline": "2025-09-30",
+    "cat": "Playground",
+    "n": 2,
+    "status": "fetched"
+  },
+  "rsna-intracranial-aneurysm-detection": {
+    "deadline": "2025-10-14",
+    "cat": "Featured",
+    "n": 5,
+    "status": "fetched"
+  },
+  "map-charting-student-math-misunderstandings": {
+    "deadline": "2025-10-15",
+    "cat": "Featured",
+    "n": 5,
+    "status": "already"
+  },
+  "jigsaw-agile-community-rules": {
+    "deadline": "2025-10-23",
+    "cat": "Featured",
+    "n": 5,
+    "status": "fetched"
+  },
+  "google-code-golf-2025": {
+    "deadline": "2025-10-30",
+    "cat": "Research",
+    "n": 5,
+    "status": "fetched"
+  },
+  "playground-series-s5e10": {
+    "deadline": "2025-10-31",
+    "cat": "Playground",
+    "n": 5,
+    "status": "fetched"
+  },
+  "arc-prize-2025": {
+    "deadline": "2025-11-03",
+    "cat": "Featured",
+    "n": 5,
+    "status": "fetched"
+  },
+  "playground-series-s5e11": {
+    "deadline": "2025-11-30",
+    "cat": "Playground",
+    "n": 5,
+    "status": "already"
+  },
+  "MABe-mouse-behavior-detection": {
+    "deadline": "2025-12-15",
+    "cat": "Research",
+    "n": 5,
+    "status": "fetched"
+  },
+  "nfl-big-data-bowl-2026-analytics": {
+    "deadline": "2025-12-17",
+    "cat": "Featured",
+    "n": 0,
+    "status": "no-writeups"
+  },
+  "playground-series-s5e12": {
+    "deadline": "2025-12-31",
+    "cat": "Playground",
+    "n": 4,
+    "status": "fetched"
+  },
+  "nfl-big-data-bowl-2026-prediction": {
+    "deadline": "2026-01-06",
+    "cat": "Featured",
+    "n": 5,
+    "status": "fetched"
+  },
+  "mitsui-commodity-prediction-challenge": {
+    "deadline": "2026-01-16",
+    "cat": "Featured",
+    "n": 5,
+    "status": "fetched"
+  },
+  "physionet-ecg-image-digitization": {
+    "deadline": "2026-01-22",
+    "cat": "Research",
+    "n": 5,
+    "status": "fetched"
+  },
+  "csiro-biomass": {
+    "deadline": "2026-01-28",
+    "cat": "Research",
+    "n": 5,
+    "status": "fetched"
+  },
+  "santa-2025": {
+    "deadline": "2026-01-30",
+    "cat": "Featured",
+    "n": 5,
+    "status": "fetched"
+  },
+  "playground-series-s6e1": {
+    "deadline": "2026-01-31",
+    "cat": "Playground",
+    "n": 5,
+    "status": "fetched"
+  },
+  "vesuvius-challenge-surface-detection": {
+    "deadline": "2026-02-27",
+    "cat": "Research",
+    "n": 5,
+    "status": "fetched"
+  },
+  "playground-series-s6e2": {
+    "deadline": "2026-02-28",
+    "cat": "Playground",
+    "n": 5,
+    "status": "fetched"
+  },
+  "deep-past-initiative-machine-translation": {
+    "deadline": "2026-03-23",
+    "cat": "Featured",
+    "n": 5,
+    "status": "fetched"
+  },
+  "stanford-rna-3d-folding-2": {
+    "deadline": "2026-03-25",
+    "cat": "Featured",
+    "n": 5,
+    "status": "fetched"
+  },
+  "playground-series-s6e3": {
+    "deadline": "2026-03-31",
+    "cat": "Playground",
+    "n": 5,
+    "status": "fetched"
+  },
+  "march-machine-learning-mania-2026": {
+    "deadline": "2026-04-07",
+    "cat": "Featured",
+    "n": 5,
+    "status": "fetched"
+  },
+  "ai-mathematical-olympiad-progress-prize-3": {
+    "deadline": "2026-04-15",
+    "cat": "Featured",
+    "n": 5,
+    "status": "fetched"
+  },
+  "recodai-luc-scientific-image-forgery-detection": {
+    "deadline": "2026-04-22",
+    "cat": "Research",
+    "n": 5,
+    "status": "fetched"
+  },
+  "playground-series-s6e4": {
+    "deadline": "2026-04-30",
+    "cat": "Playground",
+    "n": 5,
+    "status": "fetched"
+  },
+  "playground-series-s6e5": {
+    "deadline": "2026-05-31",
+    "cat": "Playground",
+    "n": 5,
+    "status": "fetched"
+  },
+  "cafa-6-protein-function-prediction": {
+    "deadline": "2026-06-01",
+    "cat": "Research",
+    "n": 5,
+    "status": "fetched"
+  },
+  "birdclef-2026": {
+    "deadline": "2026-06-03",
+    "cat": "Research",
+    "n": 5,
+    "status": "fetched"
+  },
+  "nvidia-nemotron-model-reasoning-challenge": {
+    "deadline": "2026-06-15",
+    "cat": "Featured",
+    "n": 5,
+    "status": "fetched"
+  },
+  "hull-tactical-market-prediction": {
+    "deadline": "2026-06-25",
+    "cat": "Featured",
+    "n": 4,
+    "status": "fetched"
+  },
+  "playground-series-s6e6": {
+    "deadline": "2026-06-30",
+    "cat": "Playground",
+    "n": 5,
+    "status": "fetched"
+  },
+  "orbit-wars": {
+    "deadline": "2026-07-07",
+    "cat": "Featured",
+    "n": 5,
+    "status": "fetched"
+  }
+}

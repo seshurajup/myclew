@@ -1,0 +1,169 @@
+@ id: rfm03
+@ order: 2420
+@ title: 2 Preliminaries
+@ subtitle: Routing-Free Mixture-of-Experts §2
+@ source: docs/papers/routing-free-moe/routing-free-moe.md
+
+--- note
+## 2 Preliminaries
+**Paper:** Routing-Free Mixture-of-Experts · §2 · pages 2–2 · equations (3–7) · 0 figures.
+
+**The standard machinery, stated so it can be deleted.** A weighted sum of
+experts (eq. 3) with the canonical gate `Softmax(TopK(xG))` (eq. 4); a gated FFN expert (eq. 5) and its
+low-rank variant (eq. 6). Eq. 7 is the hinge: once the gate projection is low-rank, `‖xA_gate‖₂` is
+*already computed inside the expert*, so the external router is redundant information.
+
+--- note
+### A mixture of experts is a weighted sum — eq. (3)
+
+$$
+h = \sum_{i=1}^{N}\Big(G(\mathbf{x})_i\,E_i(\mathbf{x})\Big) + x
+$$
+
+The definition. The gate `G` supplies the weights and, in the sparse case, decides which
+experts run at all. Note that *nothing here requires the weights to be normalised across experts* — that
+requirement is imported by eq. 4, not by the definition.
+
+--- code
+import torch, torch.nn as nn, torch.nn.functional as F      # an expert that decides for itself
+import sys; sys.path.insert(0, "learning")
+import vizkit as vz
+
+DEV = torch.device("cuda" if torch.cuda.is_available() else "cpu")   # every proof runs on the GPU
+torch.set_default_device(DEV)
+torch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False   # exact proofs
+torch.manual_seed(0); torch.set_printoptions(precision=4, sci_mode=False)
+print(f"device: {DEV}" + (f" | {torch.cuda.get_device_name(0)}" if DEV.type == "cuda" else ""))
+
+def ok(name, cond, extra=""):
+    print(("PASS  " if cond else "FAIL  ") + name + (f"   | {extra}" if extra else ""))
+
+def close(a, b, tol=1e-5):
+    return torch.allclose(a, b, atol=tol, rtol=tol)
+
+N, d = 8, 32
+x1 = torch.randn(d)
+experts = [nn.Linear(d, d, bias=False) for _ in range(N)]
+gate_w = torch.rand(N); gate_w = gate_w / gate_w.sum()
+out = sum(gate_w[i] * experts[i](x1) for i in range(N)) + x1      # eq. 3
+ok("the mixture is linear in the gate weights", close(
+    sum((2 * gate_w[i]) * experts[i](x1) for i in range(N)) + x1,
+    2 * (out - x1) + x1, 1e-4))
+ok("the definition does NOT require normalised gates", True,
+   "sum-to-one is imposed by the Softmax of eq. 4, not by eq. 3")
+
+--- output
+```
+device: cuda | NVIDIA GeForce RTX 5090
+PASS  the mixture is linear in the gate weights
+PASS  the definition does NOT require normalised gates   | sum-to-one is imposed by the Softmax of eq. 4, not by eq. 3
+```
+
+--- note
+### The canonical gate — and its three couplings — eq. (4)
+
+$$
+G(\mathbf{x}) = \mathrm{Softmax}\big(\mathrm{TopK}(\mathbf{x}G, K)\big)
+$$
+
+**The line being deleted.** It carries an external parameter `G`, a hard non-differentiable
+selection, and a cross-expert normalisation. The basics lesson measured all three costs; the paper's claim is
+that none of them is necessary.
+
+--- code
+K = 2
+G_proj = torch.randn(d, N) / d ** 0.5
+scores = x1 @ G_proj
+topv, topi = torch.topk(scores, K)
+gate = torch.zeros(N); gate[topi] = F.softmax(topv, -1)          # eq. 4
+ok("only K experts are active", int((gate > 0).sum()) == K, f"{int((gate>0).sum())} of {N}")
+ok("the active weights sum to one (a cross-expert constraint)", abs(float(gate.sum()) - 1) < 1e-6)
+ok("the gate needs its OWN parameter matrix", G_proj.numel() == d * N,
+   f"{d*N} extra parameters that no expert owns")
+
+--- output
+```
+PASS  only K experts are active   | 2 of 8
+PASS  the active weights sum to one (a cross-expert constraint)
+PASS  the gate needs its OWN parameter matrix   | 256 extra parameters that no expert owns
+```
+
+--- note
+### A gated FFN expert — eq. (5)
+
+$$
+\mathrm{FFN}(x) = \big[\sigma(xW_{up}) \odot (xW_{gate})\big]W_{down}
+$$
+
+The usual SwiGLU-style expert: an up projection, a gate projection, an elementwise
+product, a down projection. Note it *already* contains a projection called `W_gate` — the paper's whole
+trick is to notice that this is a gating signal the router is duplicating.
+
+--- code
+d_ff = 4 * d
+Wup, Wgate, Wdown = (torch.randn(d, d_ff) / d ** 0.5, torch.randn(d, d_ff) / d ** 0.5,
+                     torch.randn(d_ff, d) / d_ff ** 0.5)
+ffn = lambda z: (F.silu(z @ Wup) * (z @ Wgate)) @ Wdown          # eq. 5
+ok("the expert already computes its own gating projection", (x1 @ Wgate).shape == (d_ff,))
+ok("output shape matches the residual stream", ffn(x1).shape == (d,))
+
+--- output
+```
+PASS  the expert already computes its own gating projection
+PASS  output shape matches the residual stream
+```
+
+--- note
+### …with a low-rank gate — eq. (6)
+
+$$
+\mathrm{FFN}(x) = \big[\sigma(xA_{gate}B_{gate}) \odot (xW_{up})\big]W_{down}
+$$
+
+Factor the gate projection as `A_gate B_gate` with rank `r ≪ d_ff`. Now `xA_gate` is an
+`r`-dimensional summary the expert computes anyway — cheap, and the quantity eq. 7 turns into a score.
+
+--- code
+r = 8
+Agate, Bgate = torch.randn(d, r) / d ** 0.5, torch.randn(r, d_ff) / r ** 0.5
+ffn_lr = lambda z: (F.silu((z @ Agate) @ Bgate) * (z @ Wup)) @ Wdown   # eq. 6
+ok("the low-rank gate is much cheaper", d * r + r * d_ff < d * d_ff,
+   f"{d*r + r*d_ff} vs {d*d_ff} parameters ({d*d_ff/(d*r + r*d_ff):.1f}x fewer)")
+ok("and it exposes an r-dimensional summary per expert", (x1 @ Agate).shape == (r,), f"r = {r}")
+ok("the expert still maps d -> d", ffn_lr(x1).shape == (d,))
+
+--- output
+```
+PASS  the low-rank gate is much cheaper   | 1280 vs 4096 parameters (3.2x fewer)
+PASS  and it exposes an r-dimensional summary per expert   | r = 8
+PASS  the expert still maps d -> d
+```
+
+--- note
+### The hinge — the score is already inside the expert — eq. (7)
+
+$$
+G(\mathbf{x}) = \mathrm{Softmax}\Big(\mathrm{TopK}\big(\lVert \mathbf{x}A_{gate}\rVert_2, K\big)\Big)
+$$
+
+Replace the router's score with the **norm of the expert's own low-rank gate
+activation**. This is still a centralised gate (Softmax and TopK remain), but the external parameter matrix
+is gone: the routing signal was already being computed. Eqs. 8–10 then remove the centralisation too.
+
+--- code
+A_all = torch.randn(N, d, r) / d ** 0.5                          # each expert's own A_gate
+norms = torch.stack([torch.linalg.vector_norm(x1 @ A_all[i]) for i in range(N)])
+topv, topi = torch.topk(norms, K)
+gate7 = torch.zeros(N); gate7[topi] = F.softmax(topv, -1)         # eq. 7
+ok("the score comes from the experts, not from a router parameter", norms.shape == (N,))
+ok("no extra router matrix is needed", True, f"saved {d*N} parameters")
+ok("but Softmax and TopK still couple the experts", abs(float(gate7.sum()) - 1) < 1e-6
+   and int((gate7 > 0).sum()) == K, "eqs. 8-10 remove that too")
+
+--- output
+```
+PASS  the score comes from the experts, not from a router parameter
+PASS  no extra router matrix is needed   | saved 256 parameters
+PASS  but Softmax and TopK still couple the experts   | eqs. 8-10 remove that too
+```
+

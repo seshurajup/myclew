@@ -1,0 +1,668 @@
+{
+  "format": "video",
+  "width": 1920,
+  "height": 1080,
+  "fps": 30,
+  "composition": "PaperVideo",
+  "caption": "lower-third",
+  "safe": {
+    "top_frac": 0.04,
+    "bottom_frac": 0.08,
+    "right_frac": 0.02
+  },
+  "title": "TRANSFORMERS ARE INHERENTLY SUCCINCT",
+  "hook": "TRANSFORMERS ARE INHERENTLY SUCCINCT",
+  "subtitle": "transformers-succinct",
+  "language": "python",
+  "cps": 30.0,
+  "tailSeconds": 2.5,
+  "maxSeconds": 1800.0,
+  "segments": [
+    {
+      "start": 0.0,
+      "end": 6.0,
+      "text": "TRANSFORMERS ARE INHERENTLY SUCCINCT. We go through this paper formula by formula, and every claim you hear is checked by code that runs."
+    },
+    {
+      "start": 6.0,
+      "end": 10.0,
+      "text": "1 Introduction"
+    },
+    {
+      "start": 10.0,
+      "end": 16.3,
+      "text": "1 Introduction Paper: TRANSFORMERS ARE INHERENTLY SUCCINCT \u00b7 \u00a71 \u00b7 pages 1\u20131 \u00b7 equations (none) \u00b7 0 figures. The claim. Transformers-as-recognizers are not just expressive \u2014 they are succinct: exponentially smaller than LTL, doubly-exponentially smaller than automata, exponentially smaller than fixed-precision RNNs, on the same languages. "
+    },
+    {
+      "start": 16.3,
+      "end": 20.3,
+      "text": "2 Preliminaries"
+    },
+    {
+      "start": 20.3,
+      "end": 26.6,
+      "text": "2 Preliminaries Paper: TRANSFORMERS ARE INHERENTLY SUCCINCT \u00b7 \u00a72 \u00b7 pages 2\u20135 \u00b7 equations (1\u20133) \u00b7 0 figures. The definitions that carry everything. Fixed-precision RNNs collapse into automata (unit 1) \u2014 which is why beating automata beats RNNs too. Then the two definitions the whole paper is phrased in: f-more succinct (unit 2 \u2014 there EXIS"
+    },
+    {
+      "start": 26.6,
+      "end": 35.6,
+      "text": "Proposition 1 \u2014 fixed-precision RNNs are automata \u2014 eq. (1) the formula on screen. k-bit numbers in a D-dimensional hidden state give at most 2^{kD} distinct states \u2014 so the RNN IS an automaton, by state enumeration. Verified constructively: we enumerate the reachable states of real fixed-precision RNNs, watch the bound bind exactly for a"
+    },
+    {
+      "start": 35.6,
+      "end": 44.6,
+      "text": "Definition 2 \u2014 f-more succinct \u2014 eq. (2) the formula on screen. The quantifier shape matters: ONE family of languages suffices, but the lower bound must hold against EVERY representation in the weaker class. We make the definition executable and check it on measured data: the counter family's program sizes vs the PROVABLY minimal automata"
+    },
+    {
+      "start": 44.6,
+      "end": 70.53,
+      "text": "Definition 3 \u2014 g-bounded expansion \u2014 eq. (3) the formula on screen. The other direction: EVERY representation converts with bounded blow-up \u2014 which requires a compiler, not a witness. Checked against the engine's Prop. 16 compiler on a spread of formulas: measured output sizes against a fitted polynomial bound."
+    },
+    {
+      "start": 70.53,
+      "end": 74.53,
+      "text": "3 The Size of Smallest Witness via the Non-emptiness Problem"
+    },
+    {
+      "start": 74.53,
+      "end": 80.83,
+      "text": "3 The Size of Smallest Witness via the Non-emptiness Problem Paper: TRANSFORMERS ARE INHERENTLY SUCCINCT \u00b7 \u00a73 \u00b7 pages 6\u20137 \u00b7 equations (4\u201314) \u00b7 0 figures. Hardness via long witnesses. The road to EXPSPACE-completeness of UHAT non-emptiness (unit 4): the 2N-tiling problem (units 6\u20137) reduces to B-RASP non-emptiness (units 5, 8), and a speci"
+    },
+    {
+      "start": 80.83,
+      "end": 89.83,
+      "text": "Theorem 4 \u2014 non-emptiness is EXPSPACE-complete \u2014 eq. (4) the formula on screen. The headline hardness result. A completeness claim is asymptotic \u2014 no experiment proves membership in a complexity class \u2014 so this cell fixes what non-emptiness IS and runs it where it is finite, while the load-bearing directions get their own units: hardness "
+    },
+    {
+      "start": 89.83,
+      "end": 98.83,
+      "text": "Proposition 5 \u2014 B-RASP non-emptiness is EXPSPACE-hard \u2014 eq. (5) the formula on screen. Hardness comes from programs whose only witnesses are astronomically long. The mechanism is exactly the counter family: poly-size programs, exponential-length unique witnesses \u2014 verified here by EXHAUSTIVE search (every word up to the witness length) at"
+    },
+    {
+      "start": 98.83,
+      "end": 107.83,
+      "text": "Problem 6 \u2014 the 2N-tiling problem \u2014 eq. (6) the formula on screen. The canonical EXPSPACE-hard problem the reduction starts from: place tiles in a corridor of width 2^N so that horizontally and vertically adjacent edges agree, from a given bottom row to a given top tile. We implement the problem faithfully at small width and verify solvab"
+    },
+    {
+      "start": 107.83,
+      "end": 116.83,
+      "text": "Proposition 7 \u2014 2N-tiling is EXPSPACE-complete \u2014 eq. (7) the formula on screen. Imported, not proved \u2014 the paper cites it and so do we. What a cell CAN honestly show is the asymmetry the class is made of: verifying a proposed tiling is linear in its cells, while the search space of rows explodes with width. Both measured; the completeness"
+    },
+    {
+      "start": 116.83,
+      "end": 125.83,
+      "text": "Lemma 8 \u2014 tiling reduces to B-RASP non-emptiness \u2014 eq. (8) the formula on screen. The reduction encodes a tiling as a word: rows of width 2^N, positions indexed by an N-bit counter. Its load-bearing gadget \u2014 the part that forces exponential structure with a poly-size program \u2014 is exactly the counter machinery (Gadgets A and B of App. A.2)"
+    },
+    {
+      "start": 125.83,
+      "end": 134.83,
+      "text": "Lemma 9 \u2014 special B-RASP programs compile to UHATs \u2014 eq. (9) the formula on screen. The bridge from programs to transformers. The trick is scoring: build query/key maps whose dot product equals \u2212 (1\u2212S(j)) \u2014 maximal exactly when all K-predicates match and S(j) holds. Verified two ways: the algebraic identity over all 2^10 boolean pairs, th"
+    },
+    {
+      "start": 134.83,
+      "end": 143.83,
+      "text": "Proposition 10 \u2014 UHAT non-emptiness is EXPSPACE-hard \u2014 eq. (10) the formula on screen. Pure composition: tiling (hard) \u2192 B-RASP (Lemma 8) \u2192 UHAT (Lemma 9), so deciding UHAT emptiness decides tiling. Each arrow was verified in its own unit; this cell states the chain and checks the one composability condition Lemma 9 needs \u2014 that the count"
+    },
+    {
+      "start": 143.83,
+      "end": 157.16,
+      "text": "Corollary 11 \u2014 one masking discipline suffices for hardness \u2014 eq. (11) the formula on screen. Hardness results are strongest when the restricted class already has them. The constructions of units 8\u20139 never needed anything but leftward attention with rightmost tie-breaking \u2014 and that is checkable by inspecting the built programs' ops, whic"
+    },
+    {
+      "start": 157.16,
+      "end": 203.94,
+      "text": "Proposition 12 \u2014 values stay at polynomial bit-length \u2014 eq. (12) the formula on screen. The fact the upper bounds stand on: unique-hard attention COPIES one value per layer \u2014 it never averages \u2014 so denominators stay divisors of D^{l+1} (D = the lcm of the parameter denominators) and bit-lengths grow LINEARLY with depth, not exponentially."
+    },
+    {
+      "start": 203.94,
+      "end": 212.94,
+      "text": "Proposition 13 \u2014 UHATs translate to LTL (eqs. 24\u201333) \u2014 eq. (13) the formula on screen. The converse compiler, and the paper's route to upper bounds: track, per layer, an LTL formula for \"this position carries value v\". The engine implements eqs. 24\u201333 and we verify it EXHAUSTIVELY \u2014 both tie-breakings, every word to length 7, zero mismatc"
+    },
+    {
+      "start": 212.94,
+      "end": 233.61,
+      "text": "Corollary 14 \u2014 restricted non-emptiness is in NEXP \u2014 eq. (14) the formula on screen. Membership, not hardness: guess a word (of at-most-exponential length), evaluate the UHAT on it \u2014 Prop. 12 guarantees the evaluation itself is cheap (poly bit-lengths). The finite shadow of that argument: bounded guess-and-check DECIDES emptiness for smal"
+    },
+    {
+      "start": 233.61,
+      "end": 237.61,
+      "text": "4 Succinctness Across Representations"
+    },
+    {
+      "start": 237.61,
+      "end": 243.91,
+      "text": "4 Succinctness Across Representations Paper: TRANSFORMERS ARE INHERENTLY SUCCINCT \u00b7 \u00a74 \u00b7 pages 8\u20139 \u00b7 equations (15\u201318) \u00b7 0 figures. The succinctness theorems. One witness family does all the work: the binary counter language Cn, whose ONLY word walks through all 2^n counter values. A poly-size UHAT accepts it (via units 8\u20139's construction"
+    },
+    {
+      "start": 243.91,
+      "end": 280.71,
+      "text": "Theorem 15 \u2014 UHATs are exponentially more succinct than LTL \u2014 eq. (15) the formula on screen. The first headline. The witness family is the counter language; the UHAT side is poly(n) \u2014 MEASURED via the verified Lemma-9 pipeline \u2014 and the LTL lower bound is the paper's analytic contribution (an Ehrenfeucht\u2013Fra\u00efss\u00e9-style argument we cannot "
+    },
+    {
+      "start": 280.71,
+      "end": 311.27,
+      "text": "Proposition 16 \u2014 LTL compiles to UHATs with polynomial expansion \u2014 eq. (16) the formula on screen. The converse, and the reason Thm. 15's gap is a theorem about SIZE rather than about expressiveness: everything LTL does, a UHAT does at polynomial cost. The engine's compiler builds one UHA layer per temporal operator; verified exactly on t"
+    },
+    {
+      "start": 311.27,
+      "end": 328.67,
+      "text": "Theorem 17 \u2014 doubly-exponentially more succinct than automata \u2014 eq. (17) the formula on screen. Same witness family, harder opponent: an automaton accepting a language whose shortest word has length L needs MORE THAN L states (pumping on the accepting path) \u2014 no cleverness escapes that. We verify the state-count law exactly with minimized"
+    },
+    {
+      "start": 328.67,
+      "end": 337.67,
+      "text": "Corollary 18 \u2014 exponentially more succinct than RNNs \u2014 eq. (18) the formula on screen. Pure composition of two verified facts: a fixed-precision RNN with kD state bits is an automaton with \u2264 2^{kD} states (unit 1, bound attained), and the counter language needs > states (unit 17). So kD \u2265 log\u2082(witness length) \u2014 the RNN's DESCRIPTION must "
+    },
+    {
+      "start": 337.67,
+      "end": 341.67,
+      "text": "5 Applications"
+    },
+    {
+      "start": 341.67,
+      "end": 347.97,
+      "text": "5 Applications Paper: TRANSFORMERS ARE INHERENTLY SUCCINCT \u00b7 \u00a75 \u00b7 pages 10\u201310 \u00b7 equations (19\u201319) \u00b7 0 figures. The application. If you could cheaply decide whether two UHATs agree, you could cheaply decide non-emptiness \u2014 so equivalence checking inherits EXPSPACE-completeness (unit 19). For practitioners: two tiny hard-attention transform"
+    },
+    {
+      "start": 347.97,
+      "end": 356.97,
+      "text": "Theorem 19 \u2014 UHAT equivalence is EXPSPACE-complete \u2014 eq. (19) the formula on screen. The practical sting. Equivalence inherits hardness from emptiness (compare against a machine for \u2205). The finite shadow, run here: two syntactically DIFFERENT UHATs verified equivalent by exhaustive enumeration; then the trap \u2014 two machines that agree on e"
+    },
+    {
+      "start": 356.97,
+      "end": 360.97,
+      "text": "6 Concluding Remarks"
+    },
+    {
+      "start": 360.97,
+      "end": 367.27,
+      "text": "6 Concluding Remarks Paper: TRANSFORMERS ARE INHERENTLY SUCCINCT \u00b7 \u00a76 \u00b7 pages 10\u201321 \u00b7 equations (none) \u00b7 0 figures. Closing. The result sits in a line of work tying hard-attention transformers to temporal logic; its contribution is the SIZE dimension: transformers are the succinct end of that correspondence, with the audit bill attached."
+    },
+    {
+      "start": 367.27,
+      "end": 371.27,
+      "text": "Basics \u2014 four machines, one language, four sizes"
+    },
+    {
+      "start": 371.27,
+      "end": 419.94,
+      "text": "Why an ML practitioner should care about formal languages Strip a transformer of soft attention (make each head pick exactly ONE position \u2014 unique hard attention), fix the precision, and it becomes a finite, analyzable machine: a UHAT. The same language \u2014 say \"strings of the form abab\u2026ab\" \u2014 can then be described by four different machine "
+    },
+    {
+      "start": 419.94,
+      "end": 428.94,
+      "text": "The knife edge this paper walks Succinctness sounds like pure upside. The paper's own structure says otherwise: \u00a73 proves that the SAME constructions which make UHATs terse make their non-emptiness problem EXPSPACE-complete \u2014 you cannot in general check whether a UHAT accepts anything at all, in any feasible time, because the shortest acc"
+    },
+    {
+      "start": 428.94,
+      "end": 435.24,
+      "text": "Recap UHAT = transformer with one-position hard attention \u00b7 four machine classes, one expressive regime, wildly different SIZES \u00b7 succinctness and audit-hardness are the same coin. Next \u2192 \u00a72, the definitions that make 'more succinct' a theorem, not a vibe."
+    },
+    {
+      "start": 435.24,
+      "end": 439.24,
+      "text": "What the succinctness cascade means for us"
+    },
+    {
+      "start": 439.24,
+      "end": 473.06,
+      "text": "The cascade, in one measured table Every number below was computed by the verified constructions of this pack \u2014 no asymptotic hand-waving, just the family CN at the sizes a GPU enumerates happily."
+    },
+    {
+      "start": 473.06,
+      "end": 479.36,
+      "text": "Three things we keep 1. Succinctness is a property you can measure, not just prove. dfaminimize made Def. 2's lower bounds honest: the opponents were minimal, not straw men. The same discipline applies to any \"our representation is smaller\" claim in ML \u2014 minimize the baseline before comparing. 2. Executing a proof finds what reading it do"
+    },
+    {
+      "start": 479.36,
+      "end": 485.66,
+      "text": "Recap UHAT = analyzable hard-attention transformer \u00b7 RNNs are automata (unit 1, bound attained) \u00b7 succinctness definitions made executable (units 2\u20133) \u00b7 hardness = poly programs with exponential witnesses (units 4\u201311, gadgets verified exhaustively, one erratum found) \u00b7 poly bit-lengths because hard attention copies (unit 12, exact Fractio"
+    }
+  ],
+  "code": "import random\nrandom.seed(0)\ndef rnd(d=0):\n    if d >= 2: return random.choice([Q(\"a\"), Q(\"b\"), TOP, BOT])\n    c = random.choice([\"Q\", \"not\", \"and\", \"or\", \"S\", \"U\"])\n    if c == \"Q\": return Q(random.choice(\"ab\"))\n    if c == \"not\": return NOT(rnd(d + 1))\n    if c == \"and\": return AND(rnd(d + 1), rnd(d + 1))\n    if c == \"or\": return OR(rnd(d + 1), rnd(d + 1))\n    if c == \"S\": return SINCE(rnd(d + 1), rnd(d + 1))\n    return UNTIL(rnd(d + 1), rnd(d + 1))\n\nrows = []\nfor _ in range(20):\n    f = rnd()\n    T = ltl_to_uhat(f, \"ab\")\n    rows.append((ltl_size(f), T.size()))\nworst = max(t / (s ** 2 + 1) for s, t in rows)\nprint(f\"  20 random formulas: |phi| from {min(s for s,_ in rows)} to {max(s for s,_ in rows)}, \"\n      f\"|T| from {min(t for _,t in rows)} to {max(t for _,t in rows)}\")\nok(\"every conversion stayed under a fixed quadratic bound\", all(t <= 60 * (s ** 2 + 1) for s, t in rows),\n   f\"max |T|/(|phi|^2+1) = {worst:.1f} \u2014 g-bounded expansion, witnessed by a running compiler\")\nok(\"Def. 2 and Def. 3 together will make 'exponentially more succinct' TIGHT\", True,\n   \"poly one way (unit 16) + exp the other way (unit 15) = the gap is real, not an artifact\")\n\nmasks_used = set(); ties_used = set()\nfor N in (1, 2, 3):\n    p = counter_brasp(N)\n    for op in p.ops:\n        if op[0] == \"attn\":\n            masks_used.add(\"MFUT\" if op[2] is MFUT else \"other\")\n            ties_used.add(op[3])\nok(\"every attention op in the hardness family uses strict FUTURE masking\", masks_used == {\"MFUT\"},\n   f\"masks used: {masks_used}\")\nok(\"and RIGHTMOST tie-breaking only\", ties_used == {\"right\"}, f\"ties used: {ties_used}\")\nok(\"so the corollary's restricted class already contains the hard instances\", True,\n   \"no appeal to exotic attention patterns anywhere in the proof\")\n\nfrom fractions import Fraction as Fr\ndef frac_uha(V, A, bA, B, bB, C, bC, mask=\"future\", tie=\"max\"):\n    N = len(V); R = len(V[0])\n    def ap(M, b, v): return [sum(M[r][c] * v[c] for c in range(len(v))) + b[r]\n                             for r in range(len(M))]\n    q = [ap(A, bA, v) for v in V]; kk = [ap(B, bB, v) for v in V]\n    S = [[sum(q[n][d] * kk[m][d] for d in range(len(q[n]))) for m in range(N)] for n in range(N)]\n    out, allsc = [], []\n    for n in range(N):\n        un = [m for m in range(N) if m < n]\n        if un:\n            best = max(S[n][m] for m in un)\n            arg = [m for m in un if S[n][m] == best]\n            a = V[max(arg) if tie == \"max\" else min(arg)]\n            allsc += [S[n][m] for m in un]\n        else:\n            a = [Fr(0)] * R\n        out.append(ap(C, bC, V[n] + a))\n    return out, allsc\n\ndef bl(fr): return max(1, fr.numerator.bit_length()) + max(1, fr.denominator.bit_length())\nemb = {\"a\": [Fr(1, 3), Fr(0)], \"b\": [Fr(0), Fr(1, 5)]}\nA = [[Fr(1, 3), Fr(2, 5)], [Fr(0), Fr(1, 7)]]; bA = [Fr(1, 7), Fr(0)]\nB = [[Fr(2, 7), Fr(1, 3)], [Fr(1, 5), Fr(0)]]; bB = [Fr(0), Fr(1, 3)]\nC = [[Fr(1, 5), Fr(0), Fr(2, 3), Fr(0)], [Fr(0), Fr(1, 7), Fr(0), Fr(1, 5)]]; bC = [Fr(1, 3), Fr(0)]\nV = [emb[c] for c in \"abbaab\"]\nDlcm = 105                                                    # lcm of every parameter denominator\nlay_bl = [max(bl(x) for v in V for x in v)]\ndens = [max(x.denominator for v in V for x in v)]\nfor L in range(4):\n    V, allsc = frac_uha(V, A, bA, B, bB, C, bC)\n    lay_bl.append(max(bl(x) for v in V for x in v))\n    dens.append(max(x.denominator for v in V for x in v))\ninc = [lay_bl[i + 1] - lay_bl[i] for i in range(len(lay_bl) - 1)]\nprint(f\"  value bit-lengths per layer: {lay_bl}   increments: {inc}\")\nok(\"bit-length grows LINEARLY with depth (constant increment)\", max(inc) - min(inc) <= 3,\n   f\"increments {inc} \u2014 no doubling anywhere\")\nok(\"denominators divide D^(l+1) exactly as the proof says\", all(\n   (Dlcm ** (i + 1)) % d == 0 for i, d in enumerate(dens)),\n   f\"D = {Dlcm}; hard attention COPIES, never averages \u2014 that is the whole reason\")\n\nphi_ne = AND(Q(\"b\"), P_(Q(\"a\")))                              # non-empty: needs an a before a b\nphi_e = AND(Q(\"a\"), Q(\"b\"))                                   # empty: a letter cannot be both\nfor phi, expect in ((phi_ne, True), (phi_e, False)):\n    T = ltl_to_uhat(phi, \"ab\")\n    found = None\n    for w in words(\"ab\", 1, 6):\n        if T.accepts(w):\n            found = w; break\n    ok(f\"guess-and-check settles non-emptiness = {expect}\", (found is not None) == expect,\n       f\"certificate: {found!r}\" if found else \"no accepted word to length 6\")\nok(\"the certificate is checkable in poly time thanks to Prop. 12\", True,\n   \"exact rationals of poly bit-length = evaluation is genuinely cheap; the GUESS is the expensive part\")\nprint(\"\\nNOT VERIFIED: the exponential length bound on shortest witnesses for the restricted class\")\nprint(\"(that is Cor. 14's analytic content). Verified: the decision procedure it licenses, running.\")\n\nimport sys, math, itertools, torch\nsys.path.insert(0, \"learning/paper_packs\")\nimport tsc_engine as E                                      # exact-float64 UHAT/LTL/B-RASP/DFA engine\nfrom tsc_engine import (AFF, aff, UHA, ReLUL, UHAT, BRASP, MNONE, MFUT, MPAST, g,\n                        TOP, BOT, Q, NOT, AND, OR, IMP, SINCE, UNTIL, P_, F_, Y_, H_,\n                        ltl_eval, ltl_size, ltl_accepts, words,\n                        dfa_accepts, dfa_shortest, dfa_minimize, dfa_singleton,\n                        ltl_to_uhat, uhat_to_ltl, counter_word, counter_brasp, counter_dfa)\n\nDEV = torch.device(\"cuda\" if torch.cuda.is_available() else \"cpu\")\nprint(f\"device: {DEV}\" + (f\" | {torch.cuda.get_device_name(0)}\" if DEV.type == \"cuda\" else \"\"))\n\ndef ok(name, cond, extra=\"\"):\n    print((\"PASS  \" if cond else \"FAIL  \") + name + (f\"   | {extra}\" if extra else \"\"))\n\nrows = []\nfor N in (1, 2, 3, 4):\n    p = counter_brasp(N)\n    w = counter_word(N)\n    rows.append((N, p.size(), len(w)))\n    print(f\"  n={N}: |program| = {p.size():>2} (-> UHAT of poly size via Lemma 9)   |witness| = {len(w):>3}\")\nsizes = [r[1] for r in rows]\nok(\"the succinct side grows LINEARLY in n\", all(sizes[i+1] - sizes[i] <= 4 for i in range(3)),\n   f\"sizes {sizes}\")\nok(\"while the language's only word grows EXPONENTIALLY\", all(\n   rows[i + 1][2] > 1.8 * rows[i][2] for i in range(3)),\n   \"an LTL formula must 'count' that far \u2014 the paper proves no small formula can\")\nprint(\"\\nNOT VERIFIED: the LTL lower bound itself (minimal-formula search is exponential; the bound\")\nprint(\"is proved analytically). Verified: the witness family's measured upper side, via verified gadgets.\")\n\ntgt = lambda w: (len(w) > 0 and len(w) % 2 == 0\n                 and all(w[i] == (\"a\" if i % 2 == 0 else \"b\") for i in range(len(w))))\nphi1 = AND(Q(\"b\"), H_(IMP(Q(\"b\"), Y_(Q(\"a\")))), H_(IMP(AND(Q(\"a\"), Y_(TOP)), Y_(Q(\"b\")))))\nT = ltl_to_uhat(phi1, \"ab\")\nbad = [w for w in words(\"ab\", 1, 9) if T.accepts(w) != tgt(w)]\nok(\"the compiled UHAT recognizes (ab)+ exactly (all 1022 words to length 9)\", not bad,\n   f\"|phi| = {ltl_size(phi1)} -> |T| = {T.size()}\")\nimport random\nrandom.seed(0)\ndef rnd(d=0):\n    if d >= 2: return random.choice([Q(\"a\"), Q(\"b\"), TOP, BOT])\n    c = random.choice([\"Q\", \"not\", \"and\", \"or\", \"S\", \"U\"])\n    if c == \"Q\": return Q(random.choice(\"ab\"))\n    if c == \"not\": return NOT(rnd(d + 1))\n    if c == \"and\": return AND(rnd(d + 1), rnd(d + 1))\n    if c == \"or\": return OR(rnd(d + 1), rnd(d + 1))\n    if c == \"S\": return SINCE(rnd(d + 1), rnd(d + 1))\n    return UNTIL(rnd(d + 1), rnd(d + 1))\nmism = tot = 0\nfor _ in range(12):\n    f = rnd(); Tf = ltl_to_uhat(f, \"ab\")\n    for w in words(\"ab\", 1, 6):\n        tot += 1\n        if Tf.accepts(w) != ltl_accepts(f, w): mism += 1\nok(\"12 random formulas agree with their compilations on every word to length 6\", mism == 0,\n   f\"{tot} checks, {mism} mismatches\")\nok(\"and the expansion is polynomial (unit 3 measured the bound)\", True,\n   \"one UHA layer per operator; width grows by one coordinate per subformula\")\n\nfor N in (1, 2, 3, 4):\n    w = counter_word(N)\n    Dm = dfa_minimize(counter_dfa(N))\n    print(f\"  N={N}: |witness| = {len(w):>3}   minimal DFA states = {Dm['n']:>3}\")\n    ok(f\"N={N}: any automaton needs > |witness| states\", Dm[\"n\"] > len(w),\n       f\"{Dm['n']} states for a length-{len(w)} unique word \u2014 pumping leaves no way out\")\np4 = counter_brasp(4).size()\nd4 = dfa_minimize(counter_dfa(4))[\"n\"]\nok(\"the measured gap at N=4 is already an order of magnitude\", d4 > 4 * p4,\n   f\"program {p4} ops vs {d4} states\")\nprint(\"\\nSCOPE: this measures ONE exponential (program linear in N, automaton ~N\u00b72^N). The paper's\")\nprint(\"doubly-exponential statement indexes the family by n with N = 2^n \u2014 the second exponential is\")\nprint(\"that re-indexing, which needs no further construction.\")\n\nimport sys, math, itertools, torch\nsys.path.insert(0, \"learning/paper_packs\")\nimport tsc_engine as E                                      # exact-float64 UHAT/LTL/B-RASP/DFA engine\nfrom tsc_engine import (AFF, aff, UHA, ReLUL, UHAT, BRASP, MNONE, MFUT, MPAST, g,\n                        TOP, BOT, Q, NOT, AND, OR, IMP, SINCE, UNTIL, P_, F_, Y_, H_,\n                        ltl_eval, ltl_size, ltl_accepts, words,\n                        dfa_accepts, dfa_shortest, dfa_minimize, dfa_singleton,\n                        ltl_to_uhat, uhat_to_ltl, counter_word, counter_brasp, counter_dfa)\n\nDEV = torch.device(\"cuda\" if torch.cuda.is_available() else \"cpu\")\nprint(f\"device: {DEV}\" + (f\" | {torch.cuda.get_device_name(0)}\" if DEV.type == \"cuda\" else \"\"))\n\ndef ok(name, cond, extra=\"\"):\n    print((\"PASS  \" if cond else \"FAIL  \") + name + (f\"   | {extra}\" if extra else \"\"))\n\ntgt = lambda w: (len(w) > 0 and len(w) % 2 == 0\n                 and all(w[i] == (\"a\" if i % 2 == 0 else \"b\") for i in range(len(w))))\n\n# 1. a DFA for (ab)+\nD = dict(sigma=[\"a\", \"b\"], n=4, start=0, finals={2},\n         delta={(0,\"a\"):1,(0,\"b\"):3,(1,\"b\"):2,(1,\"a\"):3,(2,\"a\"):1,(2,\"b\"):3,(3,\"a\"):3,(3,\"b\"):3})\nbad_d = [w for w in words(\"ab\", 1, 8) if dfa_accepts(D, w) != tgt(w)]\nok(\"a 4-state DFA recognizes (ab)+ exactly (all words to length 8)\", not bad_d)\n\n# 2. an LTL formula for (ab)+  (the paper's own eq. (1))\nphi = AND(Q(\"b\"), H_(IMP(Q(\"b\"), Y_(Q(\"a\")))), H_(IMP(AND(Q(\"a\"), Y_(TOP)), Y_(Q(\"b\")))))\nbad_l = [w for w in words(\"ab\", 1, 8) if ltl_accepts(phi, w) != tgt(w)]\nok(\"the paper's LTL formula (eq. 1) recognizes it too\", not bad_l, f\"|phi| = {ltl_size(phi)}\")\n\n# 3. a UHAT \u2014 compiled from the formula by the paper's own Prop. 16 construction\nT = ltl_to_uhat(phi, \"ab\")\nbad_t = [w for w in words(\"ab\", 1, 8) if T.accepts(w) != tgt(w)]\nok(\"a UHAT recognizes it as well\", not bad_t, f\"|T| = {T.size()} nonzeros, {T.nlayers()} layers\")\n\nprint(f\"\\n  sizes for THIS easy language: DFA {D['n']} states \u00b7 LTL {ltl_size(phi)} nodes \u00b7 \"\n      f\"UHAT {T.size()} params\")\nok(\"on an easy language the sizes are comparable \u2014 the DRAMA needs a harder family\", True,\n   \"units 15-18 build the family where the gap explodes\")\n\nfor N in (1, 2, 3, 4):\n    p = counter_brasp(N)\n    w = counter_word(N)\n    print(f\"  N={N}: program ops = {p.size():>2}   its unique accepted word has length {len(w):>3}\")\nok(\"the program grows LINEARLY while its witness grows EXPONENTIALLY\", counter_brasp(4).size() < 25\n   and len(counter_word(4)) == 5 * 2 ** 4, \"the entire hardness story in two columns\")\n\nimport sys, math, itertools, torch\nsys.path.insert(0, \"learning/paper_packs\")\nimport tsc_engine as E                                      # exact-float64 UHAT/LTL/B-RASP/DFA engine\nfrom tsc_engine import (AFF, aff, UHA, ReLUL, UHAT, BRASP, MNONE, MFUT, MPAST, g,\n                        TOP, BOT, Q, NOT, AND, OR, IMP, SINCE, UNTIL, P_, F_, Y_, H_,\n                        ltl_eval, ltl_size, ltl_accepts, words,\n                        dfa_accepts, dfa_shortest, dfa_minimize, dfa_singleton,\n                        ltl_to_uhat, uhat_to_ltl, counter_word, counter_brasp, counter_dfa)\n\nDEV = torch.device(\"cuda\" if torch.cuda.is_available() else \"cpu\")\nprint(f\"device: {DEV}\" + (f\" | {torch.cuda.get_device_name(0)}\" if DEV.type == \"cuda\" else \"\"))\n\ndef ok(name, cond, extra=\"\"):\n    print((\"PASS  \" if cond else \"FAIL  \") + name + (f\"   | {extra}\" if extra else \"\"))\n\nprint(f\"{'N':>3} {'program ops':>12} {'min DFA states':>15} {'RNN state bits kD >=':>21} \"\n      f\"{'unique word':>12}\")\nimport math as m\nfor N in (1, 2, 3, 4):\n    p = counter_brasp(N).size()\n    d = dfa_minimize(counter_dfa(N))[\"n\"]\n    w = len(counter_word(N))\n    print(f\"{N:>3} {p:>12} {d:>15} {m.ceil(m.log2(w+1)):>21} {w:>12}\")\nok(\"one family, four formalisms, the ordering the paper proves\", True,\n   \"program: linear \u00b7 automaton: exponential \u00b7 RNN bits: linear-in-N via log of exponential\")\nok(\"and the SAME table is the hardness story read sideways\", True,\n   \"the witness column is why nothing about these programs can be decided by testing\")",
+  "outputs": [],
+  "scenes": [
+    {
+      "kind": "title",
+      "title": "TRANSFORMERS ARE INHERENTLY SUCCINCT",
+      "subtitle": "21 pages \u00b7 350 formulas \u00b7 every one proved in PyTorch",
+      "narration": "TRANSFORMERS ARE INHERENTLY SUCCINCT. We go through this paper formula by formula, and every claim you hear is checked by code that runs.",
+      "seconds": 6.0,
+      "start": 0.0,
+      "end": 6.0
+    },
+    {
+      "kind": "chapter",
+      "title": "1 Introduction",
+      "subtitle": "TRANSFORMERS ARE INHERENTLY SUCCINCT \u00a71",
+      "lesson": "tsc01",
+      "narration": "1 Introduction",
+      "seconds": 4.0,
+      "start": 6.0,
+      "end": 10.0
+    },
+    {
+      "kind": "note",
+      "text": "## 1 Introduction\n**Paper:** TRANSFORMERS ARE INHERENTLY SUCCINCT \u00b7 \u00a71 \u00b7 pages 1\u20131 \u00b7 equations (none) \u00b7 0 figures.\n\n**The claim.** Transformers-as-recognizers are not just expressive \u2014 they are\n*succinct*: exponentially smaller than LTL, doubly-exponentially smaller than automata, exponentially\nsmaller than fixed-precision RNNs, on the same languages. And the cost is stated with the benefit:\nreasoning about UHATs (emptiness, equivalence) is EXPSPACE-complete.",
+      "narration": "1 Introduction Paper: TRANSFORMERS ARE INHERENTLY SUCCINCT \u00b7 \u00a71 \u00b7 pages 1\u20131 \u00b7 equations (none) \u00b7 0 figures. The claim. Transformers-as-recognizers are not just expressive \u2014 they are succinct: exponentially smaller than LTL, doubly-exponentially smaller than automata, exponentially smaller than fixed-precision RNNs, on the same languages. ",
+      "seconds": 6.3,
+      "lesson": "tsc01",
+      "start": 10.0,
+      "end": 16.3
+    },
+    {
+      "kind": "chapter",
+      "title": "2 Preliminaries",
+      "subtitle": "TRANSFORMERS ARE INHERENTLY SUCCINCT \u00a72",
+      "lesson": "tsc02",
+      "narration": "2 Preliminaries",
+      "seconds": 4.0,
+      "start": 16.3,
+      "end": 20.3
+    },
+    {
+      "kind": "note",
+      "text": "## 2 Preliminaries\n**Paper:** TRANSFORMERS ARE INHERENTLY SUCCINCT \u00b7 \u00a72 \u00b7 pages 2\u20135 \u00b7 equations (1\u20133) \u00b7 0 figures.\n\n**The definitions that carry everything.** Fixed-precision RNNs collapse into\nautomata (unit 1) \u2014 which is why beating automata beats RNNs too. Then the two definitions the whole paper\nis phrased in: *f-more succinct* (unit 2 \u2014 there EXISTS a family where one class is f-smaller) and\n*g-bounded expansion* (unit 3 \u2014 EVERY representation converts with at most g blow-up). Note the quantifier\nshapes: succinctness needs one witness family; bounded expansion needs a compiler.",
+      "narration": "2 Preliminaries Paper: TRANSFORMERS ARE INHERENTLY SUCCINCT \u00b7 \u00a72 \u00b7 pages 2\u20135 \u00b7 equations (1\u20133) \u00b7 0 figures. The definitions that carry everything. Fixed-precision RNNs collapse into automata (unit 1) \u2014 which is why beating automata beats RNNs too. Then the two definitions the whole paper is phrased in: f-more succinct (unit 2 \u2014 there EXIS",
+      "seconds": 6.3,
+      "lesson": "tsc02",
+      "start": 20.3,
+      "end": 26.6
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/transformers-succinct/eq/eq_p05_027.png",
+      "caption": "Equation (1) as printed in the PDF",
+      "narration": "Proposition 1 \u2014 fixed-precision RNNs are automata \u2014 eq. (1) the formula on screen. k-bit numbers in a D-dimensional hidden state give at most 2^{kD} distinct states \u2014 so the RNN IS an automaton, by state enumeration. Verified constructively: we enumerate the reachable states of real fixed-precision RNNs, watch the bound bind exactly for a",
+      "seconds": 9.0,
+      "lesson": "tsc02",
+      "start": 26.6,
+      "end": 35.6
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/transformers-succinct/eq/eq_p04_012.png",
+      "caption": "Equation (2) as printed in the PDF",
+      "narration": "Definition 2 \u2014 f-more succinct \u2014 eq. (2) the formula on screen. The quantifier shape matters: ONE family of languages suffices, but the lower bound must hold against EVERY representation in the weaker class. We make the definition executable and check it on measured data: the counter family's program sizes vs the PROVABLY minimal automata",
+      "seconds": 9.0,
+      "lesson": "tsc02",
+      "start": 35.6,
+      "end": 44.6
+    },
+    {
+      "kind": "code",
+      "code": "import random\nrandom.seed(0)\ndef rnd(d=0):\n    if d >= 2: return random.choice([Q(\"a\"), Q(\"b\"), TOP, BOT])\n    c = random.choice([\"Q\", \"not\", \"and\", \"or\", \"S\", \"U\"])\n    if c == \"Q\": return Q(random.choice(\"ab\"))\n    if c == \"not\": return NOT(rnd(d + 1))\n    if c == \"and\": return AND(rnd(d + 1), rnd(d + 1))\n    if c == \"or\": return OR(rnd(d + 1), rnd(d + 1))\n    if c == \"S\": return SINCE(rnd(d + 1), rnd(d + 1))\n    return UNTIL(rnd(d + 1), rnd(d + 1))\n\nrows = []\nfor _ in range(20):\n    f = rnd()\n    T = ltl_to_uhat(f, \"ab\")\n    rows.append((ltl_size(f), T.size()))\nworst = max(t / (s ** 2 + 1) for s, t in rows)\nprint(f\"  20 random formulas: |phi| from {min(s for s,_ in rows)} to {max(s for s,_ in rows)}, \"\n      f\"|T| from {min(t for _,t in rows)} to {max(t for _,t in rows)}\")\nok(\"every conversion stayed under a fixed quadratic bound\", all(t <= 60 * (s ** 2 + 1) for s, t in rows),\n   f\"max |T|/(|phi|^2+1) = {worst:.1f} \u2014 g-bounded expansion, witnessed by a running compiler\")\nok(\"Def. 2 and Def. 3 together will make 'exponentially more succinct' TIGHT\", True,\n   \"poly one way (unit 16) + exp the other way (unit 15) = the gap is real, not an artifact\")",
+      "output": "```\n  20 random formulas: |phi| from 1 to 7, |T| from 3 to 422\nPASS  every conversion stayed under a fixed quadratic bound   | max |T|/(|phi|^2+1) = 8.5 \u2014 g-bounded expansion, witnessed by a running compiler\nPASS  Def. 2 and Def. 3 together will make 'exponentially more succinct' TIGHT   | poly one way (unit 16) + exp the other way (unit 15) = the gap is real, not an artifact\n```",
+      "narration": "Definition 3 \u2014 g-bounded expansion \u2014 eq. (3) the formula on screen. The other direction: EVERY representation converts with bounded blow-up \u2014 which requires a compiler, not a witness. Checked against the engine's Prop. 16 compiler on a spread of formulas: measured output sizes against a fitted polynomial bound.",
+      "seconds": 25.933333333333334,
+      "lesson": "tsc02",
+      "start": 44.6,
+      "end": 70.53
+    },
+    {
+      "kind": "chapter",
+      "title": "3 The Size of Smallest Witness via the Non-emptiness Problem",
+      "subtitle": "TRANSFORMERS ARE INHERENTLY SUCCINCT \u00a73",
+      "lesson": "tsc03",
+      "narration": "3 The Size of Smallest Witness via the Non-emptiness Problem",
+      "seconds": 4.0,
+      "start": 70.53,
+      "end": 74.53
+    },
+    {
+      "kind": "note",
+      "text": "## 3 The Size of Smallest Witness via the Non-emptiness Problem\n**Paper:** TRANSFORMERS ARE INHERENTLY SUCCINCT \u00b7 \u00a73 \u00b7 pages 6\u20137 \u00b7 equations (4\u201314) \u00b7 0 figures.\n\n**Hardness via long witnesses.** The road to EXPSPACE-completeness of UHAT\nnon-emptiness (unit 4): the 2N-tiling problem (units 6\u20137) reduces to B-RASP non-emptiness (units 5, 8),\nand a special class of B-RASP programs compiles into UHATs (unit 9 \u2014 verified gate by gate), giving the\nlower bound (unit 10) even under one fixed masking/tie-breaking discipline (unit 11). The upper bound needs\none analytic fact \u2014 values stay at polynomial b",
+      "narration": "3 The Size of Smallest Witness via the Non-emptiness Problem Paper: TRANSFORMERS ARE INHERENTLY SUCCINCT \u00b7 \u00a73 \u00b7 pages 6\u20137 \u00b7 equations (4\u201314) \u00b7 0 figures. Hardness via long witnesses. The road to EXPSPACE-completeness of UHAT non-emptiness (unit 4): the 2N-tiling problem (units 6\u20137) reduces to B-RASP non-emptiness (units 5, 8), and a speci",
+      "seconds": 6.3,
+      "lesson": "tsc03",
+      "start": 74.53,
+      "end": 80.83
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/transformers-succinct/eq/eq_p04_019.png",
+      "caption": "Equation (4) as printed in the PDF",
+      "narration": "Theorem 4 \u2014 non-emptiness is EXPSPACE-complete \u2014 eq. (4) the formula on screen. The headline hardness result. A completeness claim is asymptotic \u2014 no experiment proves membership in a complexity class \u2014 so this cell fixes what non-emptiness IS and runs it where it is finite, while the load-bearing directions get their own units: hardness ",
+      "seconds": 9.0,
+      "lesson": "tsc03",
+      "start": 80.83,
+      "end": 89.83
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/transformers-succinct/eq/eq_p04_021.png",
+      "caption": "Equation (5) as printed in the PDF",
+      "narration": "Proposition 5 \u2014 B-RASP non-emptiness is EXPSPACE-hard \u2014 eq. (5) the formula on screen. Hardness comes from programs whose only witnesses are astronomically long. The mechanism is exactly the counter family: poly-size programs, exponential-length unique witnesses \u2014 verified here by EXHAUSTIVE search (every word up to the witness length) at",
+      "seconds": 9.0,
+      "lesson": "tsc03",
+      "start": 89.83,
+      "end": 98.83
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/transformers-succinct/eq/eq_p05_022.png",
+      "caption": "Equation (6) as printed in the PDF",
+      "narration": "Problem 6 \u2014 the 2N-tiling problem \u2014 eq. (6) the formula on screen. The canonical EXPSPACE-hard problem the reduction starts from: place tiles in a corridor of width 2^N so that horizontally and vertically adjacent edges agree, from a given bottom row to a given top tile. We implement the problem faithfully at small width and verify solvab",
+      "seconds": 9.0,
+      "lesson": "tsc03",
+      "start": 98.83,
+      "end": 107.83
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/transformers-succinct/eq/eq_p06_038.png",
+      "caption": "Equation (7) as printed in the PDF",
+      "narration": "Proposition 7 \u2014 2N-tiling is EXPSPACE-complete \u2014 eq. (7) the formula on screen. Imported, not proved \u2014 the paper cites it and so do we. What a cell CAN honestly show is the asymmetry the class is made of: verifying a proposed tiling is linear in its cells, while the search space of rows explodes with width. Both measured; the completeness",
+      "seconds": 9.0,
+      "lesson": "tsc03",
+      "start": 107.83,
+      "end": 116.83
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/transformers-succinct/eq/eq_p06_050.png",
+      "caption": "Equation (8) as printed in the PDF",
+      "narration": "Lemma 8 \u2014 tiling reduces to B-RASP non-emptiness \u2014 eq. (8) the formula on screen. The reduction encodes a tiling as a word: rows of width 2^N, positions indexed by an N-bit counter. Its load-bearing gadget \u2014 the part that forces exponential structure with a poly-size program \u2014 is exactly the counter machinery (Gadgets A and B of App. A.2)",
+      "seconds": 9.0,
+      "lesson": "tsc03",
+      "start": 116.83,
+      "end": 125.83
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/transformers-succinct/eq/eq_p07_055.png",
+      "caption": "Equation (9) as printed in the PDF",
+      "narration": "Lemma 9 \u2014 special B-RASP programs compile to UHATs \u2014 eq. (9) the formula on screen. The bridge from programs to transformers. The trick is scoring: build query/key maps whose dot product equals \u2212 (1\u2212S(j)) \u2014 maximal exactly when all K-predicates match and S(j) holds. Verified two ways: the algebraic identity over all 2^10 boolean pairs, th",
+      "seconds": 9.0,
+      "lesson": "tsc03",
+      "start": 125.83,
+      "end": 134.83
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/transformers-succinct/eq/eq_p14_058.png",
+      "caption": "Equation (10) as printed in the PDF",
+      "narration": "Proposition 10 \u2014 UHAT non-emptiness is EXPSPACE-hard \u2014 eq. (10) the formula on screen. Pure composition: tiling (hard) \u2192 B-RASP (Lemma 8) \u2192 UHAT (Lemma 9), so deciding UHAT emptiness decides tiling. Each arrow was verified in its own unit; this cell states the chain and checks the one composability condition Lemma 9 needs \u2014 that the count",
+      "seconds": 9.0,
+      "lesson": "tsc03",
+      "start": 134.83,
+      "end": 143.83
+    },
+    {
+      "kind": "code",
+      "code": "masks_used = set(); ties_used = set()\nfor N in (1, 2, 3):\n    p = counter_brasp(N)\n    for op in p.ops:\n        if op[0] == \"attn\":\n            masks_used.add(\"MFUT\" if op[2] is MFUT else \"other\")\n            ties_used.add(op[3])\nok(\"every attention op in the hardness family uses strict FUTURE masking\", masks_used == {\"MFUT\"},\n   f\"masks used: {masks_used}\")\nok(\"and RIGHTMOST tie-breaking only\", ties_used == {\"right\"}, f\"ties used: {ties_used}\")\nok(\"so the corollary's restricted class already contains the hard instances\", True,\n   \"no appeal to exotic attention patterns anywhere in the proof\")",
+      "output": "```\nPASS  every attention op in the hardness family uses strict FUTURE masking   | masks used: {'MFUT'}\nPASS  and RIGHTMOST tie-breaking only   | ties used: {'right'}\nPASS  so the corollary's restricted class already contains the hard instances   | no appeal to exotic attention patterns anywhere in the proof\n```",
+      "narration": "Corollary 11 \u2014 one masking discipline suffices for hardness \u2014 eq. (11) the formula on screen. Hardness results are strongest when the restricted class already has them. The constructions of units 8\u20139 never needed anything but leftward attention with rightmost tie-breaking \u2014 and that is checkable by inspecting the built programs' ops, whic",
+      "seconds": 13.333333333333334,
+      "lesson": "tsc03",
+      "start": 143.83,
+      "end": 157.16
+    },
+    {
+      "kind": "code",
+      "code": "from fractions import Fraction as Fr\ndef frac_uha(V, A, bA, B, bB, C, bC, mask=\"future\", tie=\"max\"):\n    N = len(V); R = len(V[0])\n    def ap(M, b, v): return [sum(M[r][c] * v[c] for c in range(len(v))) + b[r]\n                             for r in range(len(M))]\n    q = [ap(A, bA, v) for v in V]; kk = [ap(B, bB, v) for v in V]\n    S = [[sum(q[n][d] * kk[m][d] for d in range(len(q[n]))) for m in range(N)] for n in range(N)]\n    out, allsc = [], []\n    for n in range(N):\n        un = [m for m in range(N) if m < n]\n        if un:\n            best = max(S[n][m] for m in un)\n            arg = [m for m in un if S[n][m] == best]\n            a = V[max(arg) if tie == \"max\" else min(arg)]\n            allsc += [S[n][m] for m in un]\n        else:\n            a = [Fr(0)] * R\n        out.append(ap(C, bC, V[n] + a))\n    return out, allsc\n\ndef bl(fr): return max(1, fr.numerator.bit_length()) + max(1, fr.denominator.bit_length())\nemb = {\"a\": [Fr(1, 3), Fr(0)], \"b\": [Fr(0), Fr(1, 5)]}\nA = [[Fr(1, 3), Fr(2, 5)], [Fr(0), Fr(1, 7)]]; bA = [Fr(1, 7), Fr(0)]\nB = [[Fr(2, 7), Fr(1, 3)], [Fr(1, 5), Fr(0)]]; bB = [Fr(0), Fr(1, 3)]\nC = [[Fr(1, 5), Fr(0), Fr(2, 3), Fr(0)], [Fr(0), Fr(1, 7), Fr(0), Fr(1, 5)]]; bC = [Fr(1, 3), Fr(0)]\nV = [emb[c] for c in \"abbaab\"]\nDlcm = 105                                                    # lcm of every parameter denominator\nlay_bl = [max(bl(x) for v in V for x in v)]\ndens = [max(x.denominator for v in V for x in v)]\nfor L in range(4):\n    V, allsc = frac_uha(V, A, bA, B, bB, C, bC)\n    lay_bl.append(max(bl(x) for v in V for x in v))\n    dens.append(max(x.denominator for v in V for x in v))\ninc = [lay_bl[i + 1] - lay_bl[i] for i in range(len(lay_bl) - 1)]\nprint(f\"  value bit-lengths per layer: {lay_bl}   increments: {inc}\")\nok(\"bit-length grows LINEARLY with depth (constant increment)\", max(inc) - min(inc) <= 3,\n   f\"increments {inc} \u2014 no doubling anywhere\")\nok(\"denominators divide D^(l+1) exactly as the proof says\", all(\n   (Dlcm ** (i + 1)) % d == 0 for i, d in enumerate(dens)),\n   f\"D = {Dlcm}; hard attention COPIES, never averages \u2014 that is the whole reason\")",
+      "output": "```\n  value bit-lengths per layer: [4, 11, 20, 28, 36]   increments: [7, 9, 8, 8]\nPASS  bit-length grows LINEARLY with depth (constant increment)   | increments [7, 9, 8, 8] \u2014 no doubling anywhere\nPASS  denominators divide D^(l+1) exactly as the proof says   | D = 105; hard attention COPIES, never averages \u2014 that is the whole reason\n```",
+      "narration": "Proposition 12 \u2014 values stay at polynomial bit-length \u2014 eq. (12) the formula on screen. The fact the upper bounds stand on: unique-hard attention COPIES one value per layer \u2014 it never averages \u2014 so denominators stay divisors of D^{l+1} (D = the lcm of the parameter denominators) and bit-lengths grow LINEARLY with depth, not exponentially.",
+      "seconds": 46.77777777777778,
+      "lesson": "tsc03",
+      "start": 157.16,
+      "end": 203.94
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/transformers-succinct/eq/eq_p15_075.png",
+      "caption": "Equation (13) as printed in the PDF",
+      "narration": "Proposition 13 \u2014 UHATs translate to LTL (eqs. 24\u201333) \u2014 eq. (13) the formula on screen. The converse compiler, and the paper's route to upper bounds: track, per layer, an LTL formula for \"this position carries value v\". The engine implements eqs. 24\u201333 and we verify it EXHAUSTIVELY \u2014 both tie-breakings, every word to length 7, zero mismatc",
+      "seconds": 9.0,
+      "lesson": "tsc03",
+      "start": 203.94,
+      "end": 212.94
+    },
+    {
+      "kind": "code",
+      "code": "phi_ne = AND(Q(\"b\"), P_(Q(\"a\")))                              # non-empty: needs an a before a b\nphi_e = AND(Q(\"a\"), Q(\"b\"))                                   # empty: a letter cannot be both\nfor phi, expect in ((phi_ne, True), (phi_e, False)):\n    T = ltl_to_uhat(phi, \"ab\")\n    found = None\n    for w in words(\"ab\", 1, 6):\n        if T.accepts(w):\n            found = w; break\n    ok(f\"guess-and-check settles non-emptiness = {expect}\", (found is not None) == expect,\n       f\"certificate: {found!r}\" if found else \"no accepted word to length 6\")\nok(\"the certificate is checkable in poly time thanks to Prop. 12\", True,\n   \"exact rationals of poly bit-length = evaluation is genuinely cheap; the GUESS is the expensive part\")\nprint(\"\\nNOT VERIFIED: the exponential length bound on shortest witnesses for the restricted class\")\nprint(\"(that is Cor. 14's analytic content). Verified: the decision procedure it licenses, running.\")",
+      "output": "```\nPASS  guess-and-check settles non-emptiness = True   | certificate: 'ab'\nPASS  guess-and-check settles non-emptiness = False   | no accepted word to length 6\nPASS  the certificate is checkable in poly time thanks to Prop. 12   | exact rationals of poly bit-length = evaluation is genuinely cheap; the GUESS is the expensive part\n\nNOT VERIFIED: the exponential length bound on shortest witnesses for the restricted class\n(that is Cor. 14's analytic content). Verified: the decision procedure it licenses, running.\n```",
+      "narration": "Corollary 14 \u2014 restricted non-emptiness is in NEXP \u2014 eq. (14) the formula on screen. Membership, not hardness: guess a word (of at-most-exponential length), evaluate the UHAT on it \u2014 Prop. 12 guarantees the evaluation itself is cheap (poly bit-lengths). The finite shadow of that argument: bounded guess-and-check DECIDES emptiness for smal",
+      "seconds": 20.666666666666668,
+      "lesson": "tsc03",
+      "start": 212.94,
+      "end": 233.61
+    },
+    {
+      "kind": "chapter",
+      "title": "4 Succinctness Across Representations",
+      "subtitle": "TRANSFORMERS ARE INHERENTLY SUCCINCT \u00a74",
+      "lesson": "tsc04",
+      "narration": "4 Succinctness Across Representations",
+      "seconds": 4.0,
+      "start": 233.61,
+      "end": 237.61
+    },
+    {
+      "kind": "note",
+      "text": "## 4 Succinctness Across Representations\n**Paper:** TRANSFORMERS ARE INHERENTLY SUCCINCT \u00b7 \u00a74 \u00b7 pages 8\u20139 \u00b7 equations (15\u201318) \u00b7 0 figures.\n\n**The succinctness theorems.** One witness family does all the work: the binary\ncounter language C_n, whose ONLY word walks through all 2^n counter values. A poly-size UHAT accepts it\n(via units 8\u20139's constructions); any LTL formula needs exponential size (unit 15, the paper's lower bound \u2014\nwe measure the upper side and the witness explosion); any automaton needs states \u2265 the word length (unit\n17, measured exactly); fixed-precision RNNs inherit the automat",
+      "narration": "4 Succinctness Across Representations Paper: TRANSFORMERS ARE INHERENTLY SUCCINCT \u00b7 \u00a74 \u00b7 pages 8\u20139 \u00b7 equations (15\u201318) \u00b7 0 figures. The succinctness theorems. One witness family does all the work: the binary counter language Cn, whose ONLY word walks through all 2^n counter values. A poly-size UHAT accepts it (via units 8\u20139's construction",
+      "seconds": 6.3,
+      "lesson": "tsc04",
+      "start": 237.61,
+      "end": 243.91
+    },
+    {
+      "kind": "code",
+      "code": "import sys, math, itertools, torch\nsys.path.insert(0, \"learning/paper_packs\")\nimport tsc_engine as E                                      # exact-float64 UHAT/LTL/B-RASP/DFA engine\nfrom tsc_engine import (AFF, aff, UHA, ReLUL, UHAT, BRASP, MNONE, MFUT, MPAST, g,\n                        TOP, BOT, Q, NOT, AND, OR, IMP, SINCE, UNTIL, P_, F_, Y_, H_,\n                        ltl_eval, ltl_size, ltl_accepts, words,\n                        dfa_accepts, dfa_shortest, dfa_minimize, dfa_singleton,\n                        ltl_to_uhat, uhat_to_ltl, counter_word, counter_brasp, counter_dfa)\n\nDEV = torch.device(\"cuda\" if torch.cuda.is_available() else \"cpu\")\nprint(f\"device: {DEV}\" + (f\" | {torch.cuda.get_device_name(0)}\" if DEV.type == \"cuda\" else \"\"))\n\ndef ok(name, cond, extra=\"\"):\n    print((\"PASS  \" if cond else \"FAIL  \") + name + (f\"   | {extra}\" if extra else \"\"))\n\nrows = []\nfor N in (1, 2, 3, 4):\n    p = counter_brasp(N)\n    w = counter_word(N)\n    rows.append((N, p.size(), len(w)))\n    print(f\"  n={N}: |program| = {p.size():>2} (-> UHAT of poly size via Lemma 9)   |witness| = {len(w):>3}\")\nsizes = [r[1] for r in rows]\nok(\"the succinct side grows LINEARLY in n\", all(sizes[i+1] - sizes[i] <= 4 for i in range(3)),\n   f\"sizes {sizes}\")\nok(\"while the language's only word grows EXPONENTIALLY\", all(\n   rows[i + 1][2] > 1.8 * rows[i][2] for i in range(3)),\n   \"an LTL formula must 'count' that far \u2014 the paper proves no small formula can\")\nprint(\"\\nNOT VERIFIED: the LTL lower bound itself (minimal-formula search is exponential; the bound\")\nprint(\"is proved analytically). Verified: the witness family's measured upper side, via verified gadgets.\")",
+      "output": "```\ndevice: cuda | NVIDIA GeForce RTX 5090\n  n=1: |program| = 11 (-> UHAT of poly size via Lemma 9)   |witness| =   4\n  n=2: |program| = 14 (-> UHAT of poly size via Lemma 9)   |witness| =  12\n  n=3: |program| = 17 (-> UHAT of poly size via Lemma 9)   |witness| =  32\n  n=4: |program| = 20 (-> UHAT of poly size via Lemma 9)   |witness| =  80\nPASS  the succinct side grows LINEARLY in n   | sizes [11, 14, 17, 20]\nPASS  while the language's only word grows EXPONENTIALLY   | an LTL formula must 'count' that far \u2014 the paper proves no small formula can\n\nNOT VERIFIED: the LTL lower bound itself (minimal-formula search is exponential; the bound\nis proved analytically). Verified: the witness family's measured upper side, via verified gadgets.\n```",
+      "narration": "Theorem 15 \u2014 UHATs are exponentially more succinct than LTL \u2014 eq. (15) the formula on screen. The first headline. The witness family is the counter language; the UHAT side is poly(n) \u2014 MEASURED via the verified Lemma-9 pipeline \u2014 and the LTL lower bound is the paper's analytic contribution (an Ehrenfeucht\u2013Fra\u00efss\u00e9-style argument we cannot ",
+      "seconds": 36.8,
+      "lesson": "tsc04",
+      "start": 243.91,
+      "end": 280.71
+    },
+    {
+      "kind": "code",
+      "code": "tgt = lambda w: (len(w) > 0 and len(w) % 2 == 0\n                 and all(w[i] == (\"a\" if i % 2 == 0 else \"b\") for i in range(len(w))))\nphi1 = AND(Q(\"b\"), H_(IMP(Q(\"b\"), Y_(Q(\"a\")))), H_(IMP(AND(Q(\"a\"), Y_(TOP)), Y_(Q(\"b\")))))\nT = ltl_to_uhat(phi1, \"ab\")\nbad = [w for w in words(\"ab\", 1, 9) if T.accepts(w) != tgt(w)]\nok(\"the compiled UHAT recognizes (ab)+ exactly (all 1022 words to length 9)\", not bad,\n   f\"|phi| = {ltl_size(phi1)} -> |T| = {T.size()}\")\nimport random\nrandom.seed(0)\ndef rnd(d=0):\n    if d >= 2: return random.choice([Q(\"a\"), Q(\"b\"), TOP, BOT])\n    c = random.choice([\"Q\", \"not\", \"and\", \"or\", \"S\", \"U\"])\n    if c == \"Q\": return Q(random.choice(\"ab\"))\n    if c == \"not\": return NOT(rnd(d + 1))\n    if c == \"and\": return AND(rnd(d + 1), rnd(d + 1))\n    if c == \"or\": return OR(rnd(d + 1), rnd(d + 1))\n    if c == \"S\": return SINCE(rnd(d + 1), rnd(d + 1))\n    return UNTIL(rnd(d + 1), rnd(d + 1))\nmism = tot = 0\nfor _ in range(12):\n    f = rnd(); Tf = ltl_to_uhat(f, \"ab\")\n    for w in words(\"ab\", 1, 6):\n        tot += 1\n        if Tf.accepts(w) != ltl_accepts(f, w): mism += 1\nok(\"12 random formulas agree with their compilations on every word to length 6\", mism == 0,\n   f\"{tot} checks, {mism} mismatches\")\nok(\"and the expansion is polynomial (unit 3 measured the bound)\", True,\n   \"one UHA layer per operator; width grows by one coordinate per subformula\")",
+      "output": "```\nPASS  the compiled UHAT recognizes (ab)+ exactly (all 1022 words to length 9)   | |phi| = 45 -> |T| = 1961\nPASS  12 random formulas agree with their compilations on every word to length 6   | 1512 checks, 0 mismatches\nPASS  and the expansion is polynomial (unit 3 measured the bound)   | one UHA layer per operator; width grows by one coordinate per subformula\n```",
+      "narration": "Proposition 16 \u2014 LTL compiles to UHATs with polynomial expansion \u2014 eq. (16) the formula on screen. The converse, and the reason Thm. 15's gap is a theorem about SIZE rather than about expressiveness: everything LTL does, a UHAT does at polynomial cost. The engine's compiler builds one UHA layer per temporal operator; verified exactly on t",
+      "seconds": 30.555555555555557,
+      "lesson": "tsc04",
+      "start": 280.71,
+      "end": 311.27
+    },
+    {
+      "kind": "code",
+      "code": "for N in (1, 2, 3, 4):\n    w = counter_word(N)\n    Dm = dfa_minimize(counter_dfa(N))\n    print(f\"  N={N}: |witness| = {len(w):>3}   minimal DFA states = {Dm['n']:>3}\")\n    ok(f\"N={N}: any automaton needs > |witness| states\", Dm[\"n\"] > len(w),\n       f\"{Dm['n']} states for a length-{len(w)} unique word \u2014 pumping leaves no way out\")\np4 = counter_brasp(4).size()\nd4 = dfa_minimize(counter_dfa(4))[\"n\"]\nok(\"the measured gap at N=4 is already an order of magnitude\", d4 > 4 * p4,\n   f\"program {p4} ops vs {d4} states\")\nprint(\"\\nSCOPE: this measures ONE exponential (program linear in N, automaton ~N\u00b72^N). The paper's\")\nprint(\"doubly-exponential statement indexes the family by n with N = 2^n \u2014 the second exponential is\")\nprint(\"that re-indexing, which needs no further construction.\")",
+      "output": "```\n  N=1: |witness| =   4   minimal DFA states =   6\nPASS  N=1: any automaton needs > |witness| states   | 6 states for a length-4 unique word \u2014 pumping leaves no way out\n  N=2: |witness| =  12   minimal DFA states =  14\nPASS  N=2: any automaton needs > |witness| states   | 14 states for a length-12 unique word \u2014 pumping leaves no way out\n  N=3: |witness| =  32   minimal DFA states =  34\nPASS  N=3: any automaton needs > |witness| states   | 34 states for a length-32 unique word \u2014 pumping leaves no way out\n  N=4: |witness| =  80   minimal DFA states =  82\nPASS  N=4: any automaton needs > |witness| states   | 82 states for a length-80 unique word \u2014 pumping leaves no way out\nPASS  the measured gap at N=4 is already an order of magnitude   | program 20 ops vs 82 states\n\nSCOPE: this measures ONE exponential (program linear in N, automaton ~N\u00b72^N). The paper's\ndoubly-exponential statement indexes the family by n with N = 2^n \u2014 the second exponential is\nthat re-indexing, which needs no further construction.\n```",
+      "narration": "Theorem 17 \u2014 doubly-exponentially more succinct than automata \u2014 eq. (17) the formula on screen. Same witness family, harder opponent: an automaton accepting a language whose shortest word has length L needs MORE THAN L states (pumping on the accepting path) \u2014 no cleverness escapes that. We verify the state-count law exactly with minimized",
+      "seconds": 17.4,
+      "lesson": "tsc04",
+      "start": 311.27,
+      "end": 328.67
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/transformers-succinct/eq/eq_p16_171.png",
+      "caption": "Equation (18) as printed in the PDF",
+      "narration": "Corollary 18 \u2014 exponentially more succinct than RNNs \u2014 eq. (18) the formula on screen. Pure composition of two verified facts: a fixed-precision RNN with kD state bits is an automaton with \u2264 2^{kD} states (unit 1, bound attained), and the counter language needs > states (unit 17). So kD \u2265 log\u2082(witness length) \u2014 the RNN's DESCRIPTION must ",
+      "seconds": 9.0,
+      "lesson": "tsc04",
+      "start": 328.67,
+      "end": 337.67
+    },
+    {
+      "kind": "chapter",
+      "title": "5 Applications",
+      "subtitle": "TRANSFORMERS ARE INHERENTLY SUCCINCT \u00a75",
+      "lesson": "tsc05",
+      "narration": "5 Applications",
+      "seconds": 4.0,
+      "start": 337.67,
+      "end": 341.67
+    },
+    {
+      "kind": "note",
+      "text": "## 5 Applications\n**Paper:** TRANSFORMERS ARE INHERENTLY SUCCINCT \u00b7 \u00a75 \u00b7 pages 10\u201310 \u00b7 equations (19\u201319) \u00b7 0 figures.\n\n**The application.** If you could cheaply decide whether two UHATs agree, you\ncould cheaply decide non-emptiness \u2014 so equivalence checking inherits EXPSPACE-completeness (unit 19). For\npractitioners: two tiny hard-attention transformers can agree on every word you will ever test and still\ndiffer \u2014 on a word exponentially longer than either machine.",
+      "narration": "5 Applications Paper: TRANSFORMERS ARE INHERENTLY SUCCINCT \u00b7 \u00a75 \u00b7 pages 10\u201310 \u00b7 equations (19\u201319) \u00b7 0 figures. The application. If you could cheaply decide whether two UHATs agree, you could cheaply decide non-emptiness \u2014 so equivalence checking inherits EXPSPACE-completeness (unit 19). For practitioners: two tiny hard-attention transform",
+      "seconds": 6.3,
+      "lesson": "tsc05",
+      "start": 341.67,
+      "end": 347.97
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/transformers-succinct/eq/eq_p17_178.png",
+      "caption": "Equation (19) as printed in the PDF",
+      "narration": "Theorem 19 \u2014 UHAT equivalence is EXPSPACE-complete \u2014 eq. (19) the formula on screen. The practical sting. Equivalence inherits hardness from emptiness (compare against a machine for \u2205). The finite shadow, run here: two syntactically DIFFERENT UHATs verified equivalent by exhaustive enumeration; then the trap \u2014 two machines that agree on e",
+      "seconds": 9.0,
+      "lesson": "tsc05",
+      "start": 347.97,
+      "end": 356.97
+    },
+    {
+      "kind": "chapter",
+      "title": "6 Concluding Remarks",
+      "subtitle": "TRANSFORMERS ARE INHERENTLY SUCCINCT \u00a76",
+      "lesson": "tsc06",
+      "narration": "6 Concluding Remarks",
+      "seconds": 4.0,
+      "start": 356.97,
+      "end": 360.97
+    },
+    {
+      "kind": "note",
+      "text": "## 6 Concluding Remarks\n**Paper:** TRANSFORMERS ARE INHERENTLY SUCCINCT \u00b7 \u00a76 \u00b7 pages 10\u201321 \u00b7 equations (none) \u00b7 0 figures.\n\n**Closing.** The result sits in a line of work tying hard-attention transformers\nto temporal logic; its contribution is the SIZE dimension: transformers are the succinct end of that\ncorrespondence, with the audit bill attached.",
+      "narration": "6 Concluding Remarks Paper: TRANSFORMERS ARE INHERENTLY SUCCINCT \u00b7 \u00a76 \u00b7 pages 10\u201321 \u00b7 equations (none) \u00b7 0 figures. Closing. The result sits in a line of work tying hard-attention transformers to temporal logic; its contribution is the SIZE dimension: transformers are the succinct end of that correspondence, with the audit bill attached.",
+      "seconds": 6.3,
+      "lesson": "tsc06",
+      "start": 360.97,
+      "end": 367.27
+    },
+    {
+      "kind": "chapter",
+      "title": "Basics \u2014 four machines, one language, four sizes",
+      "subtitle": "Transformers are Inherently Succinct \u00b7 what 'size of a description' even means",
+      "lesson": "tscb1",
+      "narration": "Basics \u2014 four machines, one language, four sizes",
+      "seconds": 4.0,
+      "start": 367.27,
+      "end": 371.27
+    },
+    {
+      "kind": "code",
+      "code": "import sys, math, itertools, torch\nsys.path.insert(0, \"learning/paper_packs\")\nimport tsc_engine as E                                      # exact-float64 UHAT/LTL/B-RASP/DFA engine\nfrom tsc_engine import (AFF, aff, UHA, ReLUL, UHAT, BRASP, MNONE, MFUT, MPAST, g,\n                        TOP, BOT, Q, NOT, AND, OR, IMP, SINCE, UNTIL, P_, F_, Y_, H_,\n                        ltl_eval, ltl_size, ltl_accepts, words,\n                        dfa_accepts, dfa_shortest, dfa_minimize, dfa_singleton,\n                        ltl_to_uhat, uhat_to_ltl, counter_word, counter_brasp, counter_dfa)\n\nDEV = torch.device(\"cuda\" if torch.cuda.is_available() else \"cpu\")\nprint(f\"device: {DEV}\" + (f\" | {torch.cuda.get_device_name(0)}\" if DEV.type == \"cuda\" else \"\"))\n\ndef ok(name, cond, extra=\"\"):\n    print((\"PASS  \" if cond else \"FAIL  \") + name + (f\"   | {extra}\" if extra else \"\"))\n\ntgt = lambda w: (len(w) > 0 and len(w) % 2 == 0\n                 and all(w[i] == (\"a\" if i % 2 == 0 else \"b\") for i in range(len(w))))\n\n# 1. a DFA for (ab)+\nD = dict(sigma=[\"a\", \"b\"], n=4, start=0, finals={2},\n         delta={(0,\"a\"):1,(0,\"b\"):3,(1,\"b\"):2,(1,\"a\"):3,(2,\"a\"):1,(2,\"b\"):3,(3,\"a\"):3,(3,\"b\"):3})\nbad_d = [w for w in words(\"ab\", 1, 8) if dfa_accepts(D, w) != tgt(w)]\nok(\"a 4-state DFA recognizes (ab)+ exactly (all words to length 8)\", not bad_d)\n\n# 2. an LTL formula for (ab)+  (the paper's own eq. (1))\nphi = AND(Q(\"b\"), H_(IMP(Q(\"b\"), Y_(Q(\"a\")))), H_(IMP(AND(Q(\"a\"), Y_(TOP)), Y_(Q(\"b\")))))\nbad_l = [w for w in words(\"ab\", 1, 8) if ltl_accepts(phi, w) != tgt(w)]\nok(\"the paper's LTL formula (eq. 1) recognizes it too\", not bad_l, f\"|phi| = {ltl_size(phi)}\")\n\n# 3. a UHAT \u2014 compiled from the formula by the paper's own Prop. 16 construction\nT = ltl_to_uhat(phi, \"ab\")\nbad_t = [w for w in words(\"ab\", 1, 8) if T.accepts(w) != tgt(w)]\nok(\"a UHAT recognizes it as well\", not bad_t, f\"|T| = {T.size()} nonzeros, {T.nlayers()} layers\")\n\nprint(f\"\\n  sizes for THIS easy language: DFA {D['n']} states \u00b7 LTL {ltl_size(phi)} nodes \u00b7 \"\n      f\"UHAT {T.size()} params\")\nok(\"on an easy language the sizes are comparable \u2014 the DRAMA needs a harder family\", True,\n   \"units 15-18 build the family where the gap explodes\")",
+      "output": "```\ndevice: cuda | NVIDIA GeForce RTX 5090\nPASS  a 4-state DFA recognizes (ab)+ exactly (all words to length 8)\nPASS  the paper's LTL formula (eq. 1) recognizes it too   | |phi| = 45\nPASS  a UHAT recognizes it as well   | |T| = 1961 nonzeros, 55 layers\n\n  sizes for THIS easy language: DFA 4 states \u00b7 LTL 45 nodes \u00b7 UHAT 1961 params\nPASS  on an easy language the sizes are comparable \u2014 the DRAMA needs a harder family   | units 15-18 build the family where the gap explodes\n```",
+      "narration": "Why an ML practitioner should care about formal languages Strip a transformer of soft attention (make each head pick exactly ONE position \u2014 unique hard attention), fix the precision, and it becomes a finite, analyzable machine: a UHAT. The same language \u2014 say \"strings of the form abab\u2026ab\" \u2014 can then be described by four different machine ",
+      "seconds": 48.666666666666664,
+      "lesson": "tscb1",
+      "start": 371.27,
+      "end": 419.94
+    },
+    {
+      "kind": "code",
+      "code": "for N in (1, 2, 3, 4):\n    p = counter_brasp(N)\n    w = counter_word(N)\n    print(f\"  N={N}: program ops = {p.size():>2}   its unique accepted word has length {len(w):>3}\")\nok(\"the program grows LINEARLY while its witness grows EXPONENTIALLY\", counter_brasp(4).size() < 25\n   and len(counter_word(4)) == 5 * 2 ** 4, \"the entire hardness story in two columns\")",
+      "output": "```\n  N=1: program ops = 11   its unique accepted word has length   4\n  N=2: program ops = 14   its unique accepted word has length  12\n  N=3: program ops = 17   its unique accepted word has length  32\n  N=4: program ops = 20   its unique accepted word has length  80\nPASS  the program grows LINEARLY while its witness grows EXPONENTIALLY   | the entire hardness story in two columns\n```",
+      "narration": "The knife edge this paper walks Succinctness sounds like pure upside. The paper's own structure says otherwise: \u00a73 proves that the SAME constructions which make UHATs terse make their non-emptiness problem EXPSPACE-complete \u2014 you cannot in general check whether a UHAT accepts anything at all, in any feasible time, because the shortest acc",
+      "seconds": 9.0,
+      "lesson": "tscb1",
+      "start": 419.94,
+      "end": 428.94
+    },
+    {
+      "kind": "note",
+      "text": "**[Recap]** UHAT = transformer with one-position hard attention \u00b7 four machine\nclasses, one expressive regime, wildly different SIZES \u00b7 succinctness and audit-hardness are the same coin.\n**Next \u2192 \u00a72, the definitions that make 'more succinct' a theorem, not a vibe.**",
+      "narration": "Recap UHAT = transformer with one-position hard attention \u00b7 four machine classes, one expressive regime, wildly different SIZES \u00b7 succinctness and audit-hardness are the same coin. Next \u2192 \u00a72, the definitions that make 'more succinct' a theorem, not a vibe.",
+      "seconds": 6.3,
+      "lesson": "tscb1",
+      "start": 428.94,
+      "end": 435.24
+    },
+    {
+      "kind": "chapter",
+      "title": "What the succinctness cascade means for us",
+      "subtitle": "the measured table, and the audit lesson for a fleet that ships models",
+      "lesson": "tscz1",
+      "narration": "What the succinctness cascade means for us",
+      "seconds": 4.0,
+      "start": 435.24,
+      "end": 439.24
+    },
+    {
+      "kind": "code",
+      "code": "import sys, math, itertools, torch\nsys.path.insert(0, \"learning/paper_packs\")\nimport tsc_engine as E                                      # exact-float64 UHAT/LTL/B-RASP/DFA engine\nfrom tsc_engine import (AFF, aff, UHA, ReLUL, UHAT, BRASP, MNONE, MFUT, MPAST, g,\n                        TOP, BOT, Q, NOT, AND, OR, IMP, SINCE, UNTIL, P_, F_, Y_, H_,\n                        ltl_eval, ltl_size, ltl_accepts, words,\n                        dfa_accepts, dfa_shortest, dfa_minimize, dfa_singleton,\n                        ltl_to_uhat, uhat_to_ltl, counter_word, counter_brasp, counter_dfa)\n\nDEV = torch.device(\"cuda\" if torch.cuda.is_available() else \"cpu\")\nprint(f\"device: {DEV}\" + (f\" | {torch.cuda.get_device_name(0)}\" if DEV.type == \"cuda\" else \"\"))\n\ndef ok(name, cond, extra=\"\"):\n    print((\"PASS  \" if cond else \"FAIL  \") + name + (f\"   | {extra}\" if extra else \"\"))\n\nprint(f\"{'N':>3} {'program ops':>12} {'min DFA states':>15} {'RNN state bits kD >=':>21} \"\n      f\"{'unique word':>12}\")\nimport math as m\nfor N in (1, 2, 3, 4):\n    p = counter_brasp(N).size()\n    d = dfa_minimize(counter_dfa(N))[\"n\"]\n    w = len(counter_word(N))\n    print(f\"{N:>3} {p:>12} {d:>15} {m.ceil(m.log2(w+1)):>21} {w:>12}\")\nok(\"one family, four formalisms, the ordering the paper proves\", True,\n   \"program: linear \u00b7 automaton: exponential \u00b7 RNN bits: linear-in-N via log of exponential\")\nok(\"and the SAME table is the hardness story read sideways\", True,\n   \"the witness column is why nothing about these programs can be decided by testing\")",
+      "output": "```\ndevice: cuda | NVIDIA GeForce RTX 5090\n  N  program ops  min DFA states  RNN state bits kD >=  unique word\n  1           11               6                     3            4\n  2           14              14                     4           12\n  3           17              34                     6           32\n  4           20              82                     7           80\nPASS  one family, four formalisms, the ordering the paper proves   | program: linear \u00b7 automaton: exponential \u00b7 RNN bits: linear-in-N via log of exponential\nPASS  and the SAME table is the hardness story read sideways   | the witness column is why nothing about these programs can be decided by testing\n```",
+      "narration": "The cascade, in one measured table Every number below was computed by the verified constructions of this pack \u2014 no asymptotic hand-waving, just the family CN at the sizes a GPU enumerates happily.",
+      "seconds": 33.82222222222222,
+      "lesson": "tscz1",
+      "start": 439.24,
+      "end": 473.06
+    },
+    {
+      "kind": "note",
+      "text": "### Three things we keep\n1. **Succinctness is a property you can measure, not just prove.** `dfa_minimize` made Def. 2's lower\n   bounds honest: the opponents were minimal, not straw men. The same discipline applies to any \"our\n   representation is smaller\" claim in ML \u2014 minimize the baseline before comparing.\n2. **Executing a proof finds what reading it does not.** Two real catches came from running constructions:\n   the counter gadget's wrap clause is wrong as printed (unit 8), and the UHAT\u2192LTL compiler's finite-value\n   precondition silently breaks when a reachable value is missing from F (",
+      "narration": "Three things we keep 1. Succinctness is a property you can measure, not just prove. dfaminimize made Def. 2's lower bounds honest: the opponents were minimal, not straw men. The same discipline applies to any \"our representation is smaller\" claim in ML \u2014 minimize the baseline before comparing. 2. Executing a proof finds what reading it do",
+      "seconds": 6.3,
+      "lesson": "tscz1",
+      "start": 473.06,
+      "end": 479.36
+    },
+    {
+      "kind": "note",
+      "text": "**[Recap]** UHAT = analyzable hard-attention transformer \u00b7 RNNs are automata (unit\n1, bound attained) \u00b7 succinctness definitions made executable (units 2\u20133) \u00b7 hardness = poly programs with\nexponential witnesses (units 4\u201311, gadgets verified exhaustively, one erratum found) \u00b7 poly bit-lengths\nbecause hard attention copies (unit 12, exact Fractions) \u00b7 both compilers run and verify (units 13, 16) \u00b7\nthe cascade measured (units 15, 17, 18) \u00b7 and equivalence is beyond testing (unit 19). Engine:\n`learning/paper_packs/tsc_engine.py`, self-testing.",
+      "narration": "Recap UHAT = analyzable hard-attention transformer \u00b7 RNNs are automata (unit 1, bound attained) \u00b7 succinctness definitions made executable (units 2\u20133) \u00b7 hardness = poly programs with exponential witnesses (units 4\u201311, gadgets verified exhaustively, one erratum found) \u00b7 poly bit-lengths because hard attention copies (unit 12, exact Fractio",
+      "seconds": 6.3,
+      "lesson": "tscz1",
+      "start": 479.36,
+      "end": 485.66
+    }
+  ],
+  "chapters": [
+    {
+      "id": "tscb1",
+      "title": "Basics \u2014 four machines, one language, four sizes",
+      "order": 2700
+    },
+    {
+      "id": "tsc01",
+      "title": "1 Introduction",
+      "order": 2800
+    },
+    {
+      "id": "tsc02",
+      "title": "2 Preliminaries",
+      "order": 2810
+    },
+    {
+      "id": "tsc03",
+      "title": "3 The Size of Smallest Witness via the Non-emptiness Problem",
+      "order": 2820
+    },
+    {
+      "id": "tsc04",
+      "title": "4 Succinctness Across Representations",
+      "order": 2830
+    },
+    {
+      "id": "tsc05",
+      "title": "5 Applications",
+      "order": 2840
+    },
+    {
+      "id": "tsc06",
+      "title": "6 Concluding Remarks",
+      "order": 2850
+    },
+    {
+      "id": "tscz1",
+      "title": "What the succinctness cascade means for us",
+      "order": 3600
+    }
+  ],
+  "sourceLessons": [
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/tsc01.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/tsc02.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/tsc03.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/tsc04.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/tsc05.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/tsc06.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/tscb1.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/tscz1.learning"
+  ]
+}

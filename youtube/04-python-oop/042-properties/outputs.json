@@ -1,0 +1,16 @@
+[
+  {
+    "after_line": 21,
+    "text": ">>> 25\\n>>> 77.0",
+    "caption": "@property: read like an attribute"
+  },
+  {
+    "after_line": 24,
+    "text": ">>> 86.0",
+    "caption": "computed fresh from celsius"
+  },
+  {
+    "after_line": 24,
+    "image": "artifacts/terminal.png"
+  }
+]

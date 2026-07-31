@@ -1,0 +1,12 @@
+@ id: rq17
+@ order: 2260
+@ title: H K/V Asymmetry Visualization
+@ subtitle: RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory §H
+@ source: docs/papers/ratequant/ratequant.md
+
+--- note
+## H K/V Asymmetry Visualization
+**Paper:** RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory · §H · pages 16–16 · equations (none) · 0 figures.
+
+> TODO(author): the *why* of §H in 3–5 lines.
+

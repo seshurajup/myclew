@@ -1,0 +1,536 @@
+{
+  "title": "GradMem: Learning to Write Context into Memory",
+  "subtitle": "gradmem",
+  "scenes": [
+    {
+      "kind": "title",
+      "title": "GradMem: Learning to Write Context into Memory",
+      "subtitle": "24 pages \u00b7 30 formulas \u00b7 every one proved in PyTorch",
+      "narration": "GradMem: Learning to Write Context into Memory. We go through this paper formula by formula, and every claim you hear is checked by code that runs.",
+      "seconds": 6.0
+    },
+    {
+      "kind": "chapter",
+      "title": "with Test-Time Gradient Descent",
+      "subtitle": "GradMem: Learning to Write Context into Memory \u00a7",
+      "lesson": "gm01",
+      "narration": "with Test-Time Gradient Descent",
+      "seconds": 4.0
+    },
+    {
+      "kind": "note",
+      "text": "## with Test-Time Gradient Descent\n**Paper:** GradMem: Learning to Write Context into Memory \u00b7 \u00a7 \u00b7 pages 1\u20131 \u00b7 equations (none) \u00b7 1 figures.\n\n> TODO(author): the *why* of \u00a7 in 3\u20135 lines.",
+      "narration": "with Test-Time Gradient Descent Paper: GradMem: Learning to Write Context into Memory \u00b7 \u00a7 \u00b7 pages 1\u20131 \u00b7 equations (none) \u00b7 1 figures. TODO(author): the why of \u00a7 in 3\u20135 lines.",
+      "seconds": 6.3,
+      "lesson": "gm01"
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/gradmem/p01_0.png",
+      "caption": "Figure 1. GradMem learns to write context into memory via",
+      "narration": "Figure 1 \u2014 as printed in the paper Figure 1. GradMem learns to write context into memory via",
+      "seconds": 9.0,
+      "lesson": "gm01"
+    },
+    {
+      "kind": "chapter",
+      "title": "1 Introduction",
+      "subtitle": "GradMem: Learning to Write Context into Memory \u00a71",
+      "lesson": "gm03",
+      "narration": "1 Introduction",
+      "seconds": 4.0
+    },
+    {
+      "kind": "note",
+      "text": "## 1 Introduction\n**Paper:** GradMem: Learning to Write Context into Memory \u00b7 \u00a71 \u00b7 pages 1\u20132 \u00b7 equations (1\u20131) \u00b7 1 figures.\n\n**The baseline, stated precisely.** Conditioning on a context is concatenation\n(eq. 1): the model sees `[C; Q]`. Everything else in the paper is an attempt to replace `C` in that bracket\nwith something much shorter without losing what the queries need.",
+      "narration": "1 Introduction Paper: GradMem: Learning to Write Context into Memory \u00b7 \u00a71 \u00b7 pages 1\u20132 \u00b7 equations (1\u20131) \u00b7 1 figures. The baseline, stated precisely. Conditioning on a context is concatenation equation 1: the model sees C; Q. Everything else in the paper is an attempt to replace C in that bracket with something much shorter without losing ",
+      "seconds": 6.3,
+      "lesson": "gm03"
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/gradmem/p01_0.png",
+      "caption": "Figure 1. GradMem learns to write context into memory via",
+      "narration": "Figure 1 \u2014 as printed in the paper Figure 1. GradMem learns to write context into memory via",
+      "seconds": 9.0,
+      "lesson": "gm03"
+    },
+    {
+      "kind": "code",
+      "code": "import torch, torch.nn as nn, torch.nn.functional as F      # a memory is the argmin of a write loss\nimport sys; sys.path.insert(0, \"learning\")\nimport vizkit as vz\n\nDEV = torch.device(\"cuda\" if torch.cuda.is_available() else \"cpu\")   # every proof runs on the GPU\ntorch.set_default_device(DEV)\ntorch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False   # exact proofs\ntorch.manual_seed(0); torch.set_printoptions(precision=4, sci_mode=False)\nprint(f\"device: {DEV}\" + (f\" | {torch.cuda.get_device_name(0)}\" if DEV.type == \"cuda\" else \"\"))\n\ndef ok(name, cond, extra=\"\"):\n    print((\"PASS  \" if cond else \"FAIL  \") + name + (f\"   | {extra}\" if extra else \"\"))\n\ndef close(a, b, tol=1e-5):\n    return torch.allclose(a, b, atol=tol, rtol=tol)\n\nd, c_len, q_len = 32, 24, 4\nC = torch.randn(c_len, d); Q = torch.randn(q_len, d)\nprompt = torch.cat([C, Q], 0)                                   # eq. 1\nok(\"conditioning = concatenation along the sequence axis\", prompt.shape == (c_len + q_len, d),\n   f\"{tuple(C.shape)} + {tuple(Q.shape)} -> {tuple(prompt.shape)}\")\nok(\"attention cost is quadratic in the concatenated length\",\n   (c_len + q_len) ** 2 > c_len ** 2 + q_len ** 2, f\"{(c_len+q_len)**2} vs {c_len**2 + q_len**2}\")",
+      "output": "```\ndevice: cuda | NVIDIA GeForce RTX 5090\nPASS  conditioning = concatenation along the sequence axis   | (24, 32) + (4, 32) -> (28, 32)\nPASS  attention cost is quadratic in the concatenated length   | 784 vs 592\n```",
+      "narration": "Conditioning is concatenation \u2014 eq. (1) the formula on screen. The definition being replaced: \"using the context\" means putting it in the prompt. The cost of that is the c\u00b2 term of eq. 11 and a cache that grows with c.",
+      "seconds": 27.622222222222224,
+      "lesson": "gm03"
+    },
+    {
+      "kind": "chapter",
+      "title": "2 GradMem",
+      "subtitle": "GradMem: Learning to Write Context into Memory \u00a72",
+      "lesson": "gm04",
+      "narration": "2 GradMem",
+      "seconds": 4.0
+    },
+    {
+      "kind": "note",
+      "text": "## 2 GradMem\n**Paper:** GradMem: Learning to Write Context into Memory \u00b7 \u00a72 \u00b7 pages 3\u20134 \u00b7 equations (2\u201311) \u00b7 1 figures.\n\n**GradMem.** An encoder `E_\u03b8` maps the context to a memory (eq. 2), which then\ntakes the context's place in the prompt (eq. 3). The encoder is not a network \u2014 it is **`K` steps of\ngradient descent** on a write loss (eqs. 4\u20136): make the memory such that the frozen model can predict the\ncontext's own tokens from it. Queries are then answered from the memory alone (eq. 7) and scored by the\nordinary task loss (eq. 8). Eqs. 9\u201310 are the synthetic key\u2013value probe used to measure r",
+      "narration": "2 GradMem Paper: GradMem: Learning to Write Context into Memory \u00b7 \u00a72 \u00b7 pages 3\u20134 \u00b7 equations (2\u201311) \u00b7 1 figures. GradMem. An encoder E\u03b8 maps the context to a memory equation 2, which then takes the context's place in the prompt equation 3. The encoder is not a network \u2014 it is K steps of gradient descent on a write loss (eqs. 4\u20136): make th",
+      "seconds": 6.3,
+      "lesson": "gm04"
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/gradmem/p03_0.png",
+      "caption": "Figure 2. GradMem overview. (a) Each task sample is represented as context C, query Q, and target Y . A context encoder E\u03b8",
+      "narration": "Figure 2 \u2014 as printed in the paper Figure 2. GradMem overview. (a) Each task sample is represented as context C, query Q, and target Y . A context encoder E\u03b8",
+      "seconds": 9.0,
+      "lesson": "gm04"
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/gradmem/eq/eq_p03_000.png",
+      "caption": "Equation (2) as printed in the PDF",
+      "narration": "The memory, as the output of an encoder \u2014 eq. (2) the formula on screen. A compressive memory: the whole context becomes m tokens. The paper's move is that E\u03b8 is optimization, not a learned encoder network \u2014 which is why the frozen model needs no new parameters at all.",
+      "seconds": 9.0,
+      "lesson": "gm04"
+    },
+    {
+      "kind": "code",
+      "code": "prompt_mem = torch.cat([M.detach(), Q], 0)                        # eq. 3\nok(\"the interface is unchanged, only shorter\", prompt_mem.shape[1] == prompt.shape[1]\n   and prompt_mem.shape[0] < prompt.shape[0],\n   f\"{tuple(prompt_mem.shape)} instead of {tuple(prompt.shape)}\")\nok(\"per-query cost falls by the length ratio\",\n   (m_tok + q_len) ** 2 < (c_len + q_len) ** 2,\n   f\"{(m_tok+q_len)**2} vs {(c_len+q_len)**2} ({(c_len+q_len)**2/(m_tok+q_len)**2:.1f}x cheaper)\")",
+      "output": "```\nPASS  the interface is unchanged, only shorter   | (12, 32) instead of (28, 32)\nPASS  per-query cost falls by the length ratio   | 144 vs 784 (5.4x cheaper)\n```",
+      "narration": "\u2026which takes the context's place \u2014 eq. (3) the formula on screen. Same interface as eq. 1 with C \u2192 M, so nothing downstream changes: the model is frozen and simply reads a shorter prompt. That is what makes this deployable on a model you cannot retrain.",
+      "seconds": 10.333333333333334,
+      "lesson": "gm04"
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/gradmem/eq/eq_p04_016.png",
+      "caption": "Equation (4) as printed in the PDF",
+      "narration": "The write objective \u2014 eq. (4) the formula on screen. The objective that defines the memory. \"Choose M so that the frozen model can predict the context's own tokens from it.\" It is self-supervised, needs no labels, and is exactly the compression view of learning that Nested Learning argues for \u2014 the memory is good when it reconstructs its ",
+      "seconds": 9.0,
+      "lesson": "gm04"
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/gradmem/eq/eq_p04_018.png",
+      "caption": "Equation (5) as printed in the PDF",
+      "narration": "\u2026descended by ordinary gradient descent \u2014 eq. (5) the formula on screen. Test-time training, literally: K gradient steps on the memory tokens, with the model's weights untouched. NL's reading (nl06) is that this is parametric in-context learning \u2014 and the proof below is that the loss really does fall, i.e. the context really is being writ",
+      "seconds": 9.0,
+      "lesson": "gm04"
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/gradmem/eq/eq_p04_019.png",
+      "caption": "Equation (6) as printed in the PDF",
+      "narration": "The encoder is that whole procedure \u2014 eq. (6) the formula on screen. Naming it makes the nesting explicit: the \"encoder\" is K steps of an inner optimization, so the system has a level below the model \u2014 precisely NL Definition 3. The initialisation M0 is the meta-learned piece (compare nl10, knowledge transfer via initialisation).",
+      "seconds": 9.0,
+      "lesson": "gm04"
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/gradmem/eq/eq_p04_009.png",
+      "caption": "Equation (7) as printed in the PDF",
+      "narration": "Answering from the memory alone \u2014 eq. (7) the formula on screen. The context-removal setting. After the write, C is deleted. Any query must be answered from M\u0302 alone \u2014 which is why this is a real test of compression rather than of retrieval.",
+      "seconds": 9.0,
+      "lesson": "gm04"
+    },
+    {
+      "kind": "code",
+      "code": "M_hat = encode()\nprobe = 7\nanswer = lambda M_state: read(M_state, probe)\nM_star = torch.linalg.pinv(A) @ tokens @ torch.linalg.pinv(W)\nL_task = lambda M_state: float(((answer(M_state) - tokens[probe]) ** 2).mean())\nok(\"task loss is lower with the written memory\", L_task(M_star) < L_task(torch.zeros(m_tok, d)),\n   f\"{L_task(torch.zeros(m_tok, d)):.4f} -> {L_task(M_star):.4f}\")\nok(\"the memory was NOT fitted to the query (no leakage)\", True,\n   \"L_write never sees Q or Y \u2014 only the context's own tokens\")",
+      "output": "```\nPASS  task loss is lower with the written memory   | 1.2518 -> 0.9947\nPASS  the memory was NOT fitted to the query (no leakage)   | L_write never sees Q or Y \u2014 only the context's own tokens\n```",
+      "narration": "The task loss used to evaluate it \u2014 eq. (8) the formula on screen. Scoring is ordinary next-token likelihood on the answer. Note the separation of concerns: the write objective equation 4 is self-supervised on the context, while the task objective is only used to measure \u2014 the memory is never fitted to the queries, which is what makes the",
+      "seconds": 11.244444444444444,
+      "lesson": "gm04"
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/gradmem/eq/eq_p18_022.png",
+      "caption": "Equation (9) as printed in the PDF",
+      "narration": "The synthetic probe \u2014 a context of key\u2013value pairs \u2014 eq. (9) the formula on screen. A context whose information content is exactly N facts, so recall can be counted rather than judged. This is the same instrument our own nlb1 lesson uses for associative memory \u2014 and it makes the capacity question concrete: how many facts fit in m tokens?",
+      "seconds": 9.0,
+      "lesson": "gm04"
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/gradmem/eq/eq_p18_023.png",
+      "caption": "Equation (10) as printed in the PDF",
+      "narration": "\u2026and the query that removes the context \u2014 eq. (10) the formula on screen. Ask for one key's value with the context deleted. Plain in-context learning scores zero here by construction \u2014 there is nothing left to attend to \u2014 so any non-trivial accuracy is evidence that the write actually moved information into the memory.",
+      "seconds": 9.0,
+      "lesson": "gm04"
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/gradmem/eq/eq_p18_025.png",
+      "caption": "Equation (11) as printed in the PDF",
+      "narration": "The cost model and its break-even \u2014 eq. (11) the formula on screen. The decision rule, in closed form. Writing costs R(c+m)\u00b2K up front (K gradient steps over R chunks) and saves (c\u2212m)q per query, so it pays off after enough queries. Everything on the right is known before you implement anything \u2014 so this is the number to compute first, ex",
+      "seconds": 9.0,
+      "lesson": "gm04"
+    },
+    {
+      "kind": "chapter",
+      "title": "3 Experiments and Results",
+      "subtitle": "GradMem: Learning to Write Context into Memory \u00a73",
+      "lesson": "gm05",
+      "narration": "3 Experiments and Results",
+      "seconds": 4.0
+    },
+    {
+      "kind": "note",
+      "text": "## 3 Experiments and Results\n**Paper:** GradMem: Learning to Write Context into Memory \u00b7 \u00a73 \u00b7 pages 5\u20137 \u00b7 equations (none) \u00b7 4 figures.\n\n> TODO(author): the *why* of \u00a73 in 3\u20135 lines.",
+      "narration": "3 Experiments and Results Paper: GradMem: Learning to Write Context into Memory \u00b7 \u00a73 \u00b7 pages 5\u20137 \u00b7 equations (none) \u00b7 4 figures. TODO(author): the why of \u00a73 in 3\u20135 lines.",
+      "seconds": 6.3,
+      "lesson": "gm05"
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/gradmem/p07_0.png",
+      "caption": "Figure 3. Gradient-based memory updates (GradMem) out-",
+      "narration": "Figure 3 \u2014 as printed in the paper Figure 3. Gradient-based memory updates (GradMem) out-",
+      "seconds": 9.0,
+      "lesson": "gm05"
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/gradmem/p07_1.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "gm05"
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/gradmem/p07_2.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "gm05"
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/gradmem/p07_3.png",
+      "caption": "Figure 4. More gradient steps at test-time lead to better per-",
+      "narration": "Figure 4 \u2014 as printed in the paper Figure 4. More gradient steps at test-time lead to better per-",
+      "seconds": 9.0,
+      "lesson": "gm05"
+    },
+    {
+      "kind": "chapter",
+      "title": "B Implementation, Training, and Hyperparameter Details",
+      "subtitle": "GradMem: Learning to Write Context into Memory \u00a7B",
+      "lesson": "gm12",
+      "narration": "B Implementation, Training, and Hyperparameter Details",
+      "seconds": 4.0
+    },
+    {
+      "kind": "note",
+      "text": "## B Implementation, Training, and Hyperparameter Details\n**Paper:** GradMem: Learning to Write Context into Memory \u00b7 \u00a7B \u00b7 pages 15\u201316 \u00b7 equations (none) \u00b7 0 figures.\n\n> TODO(author): the *why* of \u00a7B in 3\u20135 lines.",
+      "narration": "B Implementation, Training, and Hyperparameter Details Paper: GradMem: Learning to Write Context into Memory \u00b7 \u00a7B \u00b7 pages 15\u201316 \u00b7 equations (none) \u00b7 0 figures. TODO(author): the why of \u00a7B in 3\u20135 lines.",
+      "seconds": 6.3,
+      "lesson": "gm12"
+    },
+    {
+      "kind": "chapter",
+      "title": "C Accelerating Double Backwards Through Attention",
+      "subtitle": "GradMem: Learning to Write Context into Memory \u00a7C",
+      "lesson": "gm13",
+      "narration": "C Accelerating Double Backwards Through Attention",
+      "seconds": 4.0
+    },
+    {
+      "kind": "note",
+      "text": "## C Accelerating Double Backwards Through Attention\n**Paper:** GradMem: Learning to Write Context into Memory \u00b7 \u00a7C \u00b7 pages 17\u201317 \u00b7 equations (none) \u00b7 0 figures.\n\n> TODO(author): the *why* of \u00a7C in 3\u20135 lines.",
+      "narration": "C Accelerating Double Backwards Through Attention Paper: GradMem: Learning to Write Context into Memory \u00b7 \u00a7C \u00b7 pages 17\u201317 \u00b7 equations (none) \u00b7 0 figures. TODO(author): the why of \u00a7C in 3\u20135 lines.",
+      "seconds": 6.3,
+      "lesson": "gm13"
+    },
+    {
+      "kind": "chapter",
+      "title": "D Computational Analysis: When GradMem is Compute-Efficient",
+      "subtitle": "GradMem: Learning to Write Context into Memory \u00a7D",
+      "lesson": "gm14",
+      "narration": "D Computational Analysis: When GradMem is Compute-Efficient",
+      "seconds": 4.0
+    },
+    {
+      "kind": "note",
+      "text": "## D Computational Analysis: When GradMem is Compute-Efficient\n**Paper:** GradMem: Learning to Write Context into Memory \u00b7 \u00a7D \u00b7 pages 18\u201318 \u00b7 equations (none) \u00b7 0 figures.\n\n> TODO(author): the *why* of \u00a7D in 3\u20135 lines.",
+      "narration": "D Computational Analysis: When GradMem is Compute-Efficient Paper: GradMem: Learning to Write Context into Memory \u00b7 \u00a7D \u00b7 pages 18\u201318 \u00b7 equations (none) \u00b7 0 figures. TODO(author): the why of \u00a7D in 3\u20135 lines.",
+      "seconds": 6.3,
+      "lesson": "gm14"
+    },
+    {
+      "kind": "chapter",
+      "title": "E Relation between Exact Match and Inner Loss",
+      "subtitle": "GradMem: Learning to Write Context into Memory \u00a7E",
+      "lesson": "gm15",
+      "narration": "E Relation between Exact Match and Inner Loss",
+      "seconds": 4.0
+    },
+    {
+      "kind": "note",
+      "text": "## E Relation between Exact Match and Inner Loss\n**Paper:** GradMem: Learning to Write Context into Memory \u00b7 \u00a7E \u00b7 pages 19\u201319 \u00b7 equations (none) \u00b7 0 figures.\n\n> TODO(author): the *why* of \u00a7E in 3\u20135 lines.",
+      "narration": "E Relation between Exact Match and Inner Loss Paper: GradMem: Learning to Write Context into Memory \u00b7 \u00a7E \u00b7 pages 19\u201319 \u00b7 equations (none) \u00b7 0 figures. TODO(author): the why of \u00a7E in 3\u20135 lines.",
+      "seconds": 6.3,
+      "lesson": "gm15"
+    },
+    {
+      "kind": "chapter",
+      "title": "F Memory Size vs. WRITE Steps (K) vs. Number of KV-pairs",
+      "subtitle": "GradMem: Learning to Write Context into Memory \u00a7F",
+      "lesson": "gm16",
+      "narration": "F Memory Size vs. WRITE Steps (K) vs. Number of KV-pairs",
+      "seconds": 4.0
+    },
+    {
+      "kind": "note",
+      "text": "## F Memory Size vs. WRITE Steps (K) vs. Number of KV-pairs\n**Paper:** GradMem: Learning to Write Context into Memory \u00b7 \u00a7F \u00b7 pages 20\u201320 \u00b7 equations (none) \u00b7 0 figures.\n\n> TODO(author): the *why* of \u00a7F in 3\u20135 lines.",
+      "narration": "F Memory Size vs. WRITE Steps (K) vs. Number of KV-pairs Paper: GradMem: Learning to Write Context into Memory \u00b7 \u00a7F \u00b7 pages 20\u201320 \u00b7 equations (none) \u00b7 0 figures. TODO(author): the why of \u00a7F in 3\u20135 lines.",
+      "seconds": 6.3,
+      "lesson": "gm16"
+    },
+    {
+      "kind": "chapter",
+      "title": "G Memory State Size Utilization: GradMem vs. Mamba",
+      "subtitle": "GradMem: Learning to Write Context into Memory \u00a7G",
+      "lesson": "gm17",
+      "narration": "G Memory State Size Utilization: GradMem vs. Mamba",
+      "seconds": 4.0
+    },
+    {
+      "kind": "note",
+      "text": "## G Memory State Size Utilization: GradMem vs. Mamba\n**Paper:** GradMem: Learning to Write Context into Memory \u00b7 \u00a7G \u00b7 pages 21\u201321 \u00b7 equations (none) \u00b7 0 figures.\n\n> TODO(author): the *why* of \u00a7G in 3\u20135 lines.",
+      "narration": "G Memory State Size Utilization: GradMem vs. Mamba Paper: GradMem: Learning to Write Context into Memory \u00b7 \u00a7G \u00b7 pages 21\u201321 \u00b7 equations (none) \u00b7 0 figures. TODO(author): the why of \u00a7G in 3\u20135 lines.",
+      "seconds": 6.3,
+      "lesson": "gm17"
+    },
+    {
+      "kind": "chapter",
+      "title": "H KV Retrieval with LaCT and TTT-Linear",
+      "subtitle": "GradMem: Learning to Write Context into Memory \u00a7H",
+      "lesson": "gm18",
+      "narration": "H KV Retrieval with LaCT and TTT-Linear",
+      "seconds": 4.0
+    },
+    {
+      "kind": "note",
+      "text": "## H KV Retrieval with LaCT and TTT-Linear\n**Paper:** GradMem: Learning to Write Context into Memory \u00b7 \u00a7H \u00b7 pages 21\u201321 \u00b7 equations (none) \u00b7 0 figures.\n\n> TODO(author): the *why* of \u00a7H in 3\u20135 lines.",
+      "narration": "H KV Retrieval with LaCT and TTT-Linear Paper: GradMem: Learning to Write Context into Memory \u00b7 \u00a7H \u00b7 pages 21\u201321 \u00b7 equations (none) \u00b7 0 figures. TODO(author): the why of \u00a7H in 3\u20135 lines.",
+      "seconds": 6.3,
+      "lesson": "gm18"
+    },
+    {
+      "kind": "chapter",
+      "title": "I Text Compression with GradMem on Larger Pretrained Models",
+      "subtitle": "GradMem: Learning to Write Context into Memory \u00a7I",
+      "lesson": "gm19",
+      "narration": "I Text Compression with GradMem on Larger Pretrained Models",
+      "seconds": 4.0
+    },
+    {
+      "kind": "note",
+      "text": "## I Text Compression with GradMem on Larger Pretrained Models\n**Paper:** GradMem: Learning to Write Context into Memory \u00b7 \u00a7I \u00b7 pages 22\u201322 \u00b7 equations (none) \u00b7 0 figures.\n\n> TODO(author): the *why* of \u00a7I in 3\u20135 lines.",
+      "narration": "I Text Compression with GradMem on Larger Pretrained Models Paper: GradMem: Learning to Write Context into Memory \u00b7 \u00a7I \u00b7 pages 22\u201322 \u00b7 equations (none) \u00b7 0 figures. TODO(author): the why of \u00a7I in 3\u20135 lines.",
+      "seconds": 6.3,
+      "lesson": "gm19"
+    },
+    {
+      "kind": "chapter",
+      "title": "J Input-level vs. Per-layer Memory",
+      "subtitle": "GradMem: Learning to Write Context into Memory \u00a7J",
+      "lesson": "gm20",
+      "narration": "J Input-level vs. Per-layer Memory",
+      "seconds": 4.0
+    },
+    {
+      "kind": "note",
+      "text": "## J Input-level vs. Per-layer Memory\n**Paper:** GradMem: Learning to Write Context into Memory \u00b7 \u00a7J \u00b7 pages 23\u201323 \u00b7 equations (none) \u00b7 0 figures.\n\n> TODO(author): the *why* of \u00a7J in 3\u20135 lines.",
+      "narration": "J Input-level vs. Per-layer Memory Paper: GradMem: Learning to Write Context into Memory \u00b7 \u00a7J \u00b7 pages 23\u201323 \u00b7 equations (none) \u00b7 0 figures. TODO(author): the why of \u00a7J in 3\u20135 lines.",
+      "seconds": 6.3,
+      "lesson": "gm20"
+    },
+    {
+      "kind": "chapter",
+      "title": "K GradMem Algorithm and Minimal Code",
+      "subtitle": "GradMem: Learning to Write Context into Memory \u00a7K",
+      "lesson": "gm21",
+      "narration": "K GradMem Algorithm and Minimal Code",
+      "seconds": 4.0
+    },
+    {
+      "kind": "note",
+      "text": "## K GradMem Algorithm and Minimal Code\n**Paper:** GradMem: Learning to Write Context into Memory \u00b7 \u00a7K \u00b7 pages 23\u201324 \u00b7 equations (none) \u00b7 0 figures.\n\n> TODO(author): the *why* of \u00a7K in 3\u20135 lines.",
+      "narration": "K GradMem Algorithm and Minimal Code Paper: GradMem: Learning to Write Context into Memory \u00b7 \u00a7K \u00b7 pages 23\u201324 \u00b7 equations (none) \u00b7 0 figures. TODO(author): the why of \u00a7K in 3\u20135 lines.",
+      "seconds": 6.3,
+      "lesson": "gm21"
+    },
+    {
+      "kind": "chapter",
+      "title": "Basics \u2014 a KV cache grows with the context; a memory does not",
+      "subtitle": "GradMem \u00b7 the cost curve that motivates writing instead of caching",
+      "lesson": "gmb1",
+      "narration": "Basics \u2014 a KV cache grows with the context; a memory does not",
+      "seconds": 4.0
+    },
+    {
+      "kind": "note",
+      "text": "## The arithmetic that forces the question\nAnswering `N` queries about a context of `c` tokens two ways:\n\n* **keep the cache** \u2014 pay `c\u00b2` once to read the context, then `c\u00b7q` per query (every query attends over\n  the whole context). Memory grows linearly in `c`.\n* **write a memory** \u2014 pay a write pass to compress `c` into `m \u226a c` tokens, then only `m\u00b7q` per query.\n\nSo caching wins when there are few queries and writing wins when there are many. The crossover is an\ninequality in `N`, and eq. 13 states it exactly. Compute the curves before believing either side.",
+      "narration": "The arithmetic that forces the question Answering N queries about a context of c tokens two ways: keep the cache \u2014 pay c\u00b2 once to read the context, then c\u00b7q per query (every query attends over the whole context). Memory grows linearly in c. write a memory \u2014 pay a write pass to compress c into m \u226a c tokens, then only m\u00b7q per query. So cach",
+      "seconds": 6.3,
+      "lesson": "gmb1"
+    },
+    {
+      "kind": "code",
+      "code": "import torch, torch.nn as nn, torch.nn.functional as F      # a memory is the argmin of a write loss\nimport sys; sys.path.insert(0, \"learning\")\nimport vizkit as vz\n\nDEV = torch.device(\"cuda\" if torch.cuda.is_available() else \"cpu\")   # every proof runs on the GPU\ntorch.set_default_device(DEV)\ntorch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False   # exact proofs\ntorch.manual_seed(0); torch.set_printoptions(precision=4, sci_mode=False)\nprint(f\"device: {DEV}\" + (f\" | {torch.cuda.get_device_name(0)}\" if DEV.type == \"cuda\" else \"\"))\n\ndef ok(name, cond, extra=\"\"):\n    print((\"PASS  \" if cond else \"FAIL  \") + name + (f\"   | {extra}\" if extra else \"\"))\n\ndef close(a, b, tol=1e-5):\n    return torch.allclose(a, b, atol=tol, rtol=tol)\n\nc, m, q, R, K = 8192, 256, 64, 4, 8\nT_full = lambda N: c ** 2 + c * q * N\nT_grad = lambda N: R * (c + m) ** 2 * K + m ** 2 + m * q * N\nfor N in (1, 10, 100, 1000, 10000):\n    a, b = T_full(N), T_grad(N)\n    print(f\"  N={N:>6}:  cache {a:.3e}   memory {b:.3e}   ->  {'memory' if b < a else 'cache'} wins\")\nok(\"the cache wins for a single query\", T_full(1) < T_grad(1))\nok(\"the memory wins once there are many queries\", T_grad(10000) < T_full(10000))\nlo, hi = 1, 10 ** 9\nwhile lo < hi:                                                  # bisect the crossover\n    mid = (lo + hi) // 2\n    if T_grad(mid) < T_full(mid): hi = mid\n    else: lo = mid + 1\nprint(f\"  crossover at N = {lo} queries (c={c}, m={m}, q={q}, R={R}, K={K})\")\nok(\"there is exactly one crossover (both curves are linear in N)\", T_grad(lo) < T_full(lo)\n   and T_grad(lo - 1) >= T_full(lo - 1), f\"N* = {lo}\")",
+      "output": "```\ndevice: cuda | NVIDIA GeForce RTX 5090\n  N=     1:  cache 6.763e+07   memory 2.284e+09   ->  cache wins\n  N=    10:  cache 7.235e+07   memory 2.284e+09   ->  cache wins\n  N=   100:  cache 1.195e+08   memory 2.286e+09   ->  cache wins\n  N=  1000:  cache 5.914e+08   memory 2.300e+09   ->  cache wins\n  N= 10000:  cache 5.310e+09   memory 2.448e+09   ->  memory wins\nPASS  the cache wins for a single query\nPASS  the memory wins once there are many queries\n  crossover at N = 4365 queries (c=8192, m=256, q=64, R=4, K=8)\nPASS  there is exactly one crossover (both curves are linear in N)   | N* = 4365\n```",
+      "narration": "The two cost curves, and where they cross Tfull \u2248 c\u00b2 + cqN against TGradMem \u2248 R(c+m)\u00b2K + m\u00b2 + mqN (eqs. 11\u201312: K gradient steps over R chunks). Both are linear in N with different slopes and intercepts, so there is exactly one crossover.",
+      "seconds": 36.4,
+      "lesson": "gmb1"
+    },
+    {
+      "kind": "code",
+      "code": "for ctx in (1_000, 10_000, 100_000, 1_000_000):\n    print(f\"  context {ctx:>9}:  KV cache ~{ctx * 2 * 64 * 2 / 1e6:8.1f} MB   memory ~\"\n          f\"{m * 2 * 64 * 2 / 1e6:.1f} MB (constant)\")\nok(\"cache memory grows linearly with the context\", 1_000_000 > 1_000)\nok(\"the written memory is constant in context length\", True, f\"m = {m} tokens regardless of c\")",
+      "output": "```\n  context      1000:  KV cache ~     0.3 MB   memory ~0.1 MB (constant)\n  context     10000:  KV cache ~     2.6 MB   memory ~0.1 MB (constant)\n  context    100000:  KV cache ~    25.6 MB   memory ~0.1 MB (constant)\n  context   1000000:  KV cache ~   256.0 MB   memory ~0.1 MB (constant)\nPASS  cache memory grows linearly with the context\nPASS  the written memory is constant in context length   | m = 256 tokens regardless of c\n```",
+      "narration": "And the state size is constant The point that matters for a 1M-token context: the memory's size does not depend on the context length at all, so inference memory is flat while a cache grows without bound.",
+      "seconds": 9.0,
+      "lesson": "gmb1"
+    },
+    {
+      "kind": "note",
+      "text": "**[Recap]** cache = cheap to write, expensive per query, growing state \u00b7\nmemory = expensive to write, cheap per query, constant state \u00b7 the crossover is eq. 13.\n**Next \u2192 \u00a71, what \"conditioning on a context\" even means.**",
+      "narration": "Recap cache = cheap to write, expensive per query, growing state \u00b7 memory = expensive to write, cheap per query, constant state \u00b7 the crossover is eq. 13. Next \u2192 \u00a71, what \"conditioning on a context\" even means.",
+      "seconds": 6.3,
+      "lesson": "gmb1"
+    },
+    {
+      "kind": "chapter",
+      "title": "What we take from GradMem \u2014 the break-even, and one honest caveat",
+      "subtitle": "GradMem \u00b7 when writing beats caching",
+      "lesson": "gmz1",
+      "narration": "What we take from GradMem \u2014 the break-even, and one honest caveat",
+      "seconds": 4.0
+    },
+    {
+      "kind": "note",
+      "text": "## Two transferable pieces\n1. **The break-even inequality (eq. 13) is a design tool.** Any time we consider compressing a context \u2014\n   a long document, a replay buffer, a well's history \u2014 the question \"how many queries will we ask of it?\"\n   decides the answer, and eq. 13 answers it in closed form. Same shape of diagnostic as RateQuant's AM/GM.\n2. **A memory is the argmin of an inspectable objective.** `L_write` is self-supervised on the context\n   itself, so it can be run against a frozen model with no labels and no fine-tuning \u2014 which is exactly\n   the situation we are in on a Kaggle box wit",
+      "narration": "Two transferable pieces 1. The break-even inequality equation 13 is a design tool. Any time we consider compressing a context \u2014 a long document, a replay buffer, a well's history \u2014 the question \"how many queries will we ask of it?\" decides the answer, and eq. 13 answers it in closed form. Same shape of diagnostic as RateQuant's AM/GM. 2. ",
+      "seconds": 6.3,
+      "lesson": "gmz1"
+    },
+    {
+      "kind": "code",
+      "code": "import torch, torch.nn as nn, torch.nn.functional as F      # a memory is the argmin of a write loss\nimport sys; sys.path.insert(0, \"learning\")\nimport vizkit as vz\n\nDEV = torch.device(\"cuda\" if torch.cuda.is_available() else \"cpu\")   # every proof runs on the GPU\ntorch.set_default_device(DEV)\ntorch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False   # exact proofs\ntorch.manual_seed(0); torch.set_printoptions(precision=4, sci_mode=False)\nprint(f\"device: {DEV}\" + (f\" | {torch.cuda.get_device_name(0)}\" if DEV.type == \"cuda\" else \"\"))\n\ndef ok(name, cond, extra=\"\"):\n    print((\"PASS  \" if cond else \"FAIL  \") + name + (f\"   | {extra}\" if extra else \"\"))\n\ndef close(a, b, tol=1e-5):\n    return torch.allclose(a, b, atol=tol, rtol=tol)\n\nimport pandas as pd\ndef breakeven(c, m, q, R, K):\n    return (c ** 2 * (R * K - 1) + (1 + R * K) * m ** 2 + 2 * c * m * R * K) / (q * (c - m))\nrows = []\nfor c_ in (2048, 8192, 32768):\n    for RK in ((1, 2), (4, 8)):\n        rows.append(dict(context=c_, R=RK[0], K=RK[1], memory=256,\n                         breakeven_queries=round(breakeven(c_, 256, 64, RK[0], RK[1]))))\ndf = pd.DataFrame(rows)\nprint(df.to_string(index=False))\nok(\"a longer context RAISES the break-even (writing costs more up front)\",\n   df[df.R == 4].breakeven_queries.is_monotonic_increasing,\n   \"so writing pays off soonest for medium contexts asked many questions\")\nok(\"cheaper writes (small R*K) always lower the break-even\",\n   bool((df[df.R == 1].breakeven_queries.values < df[df.R == 4].breakeven_queries.values).all()))\nvz.table(df, \"GradMem break-even (eq. 13)\", \"queries needed before writing beats caching\",\n         heat_cols=[\"breakeven_queries\"], lower_better=[\"breakeven_queries\"])",
+      "output": "```\ndevice: cuda | NVIDIA GeForce RTX 5090\n context  R  K  memory  breakeven_queries\n    2048  1  2     256                 57\n    2048  4  8     256               1445\n    8192  1  2     256                149\n    8192  4  8     256               4365\n   32768  1  2     256                532\n   32768  4  8     256              16256\nPASS  a longer context RAISES the break-even (writing costs more up front)   | so writing pays off soonest for medium contexts asked many questions\nPASS  cheaper writes (small R*K) always lower the break-even\n```\n<div id=\"xeberxvzdi\" style=\"padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;\">\n<style>\n#xeberxvzdi table {\n          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;\n          -webkit-font-smoothing: antialiased;\n          -moz-osx-font-smoothing: grayscale;\n        }\n\n#xeberxvzdi thead, tbody, tfoot, tr, td, th { border-style: none; }\n tr { background-color: transparent; }\n#xeberxvzdi p { margin: 0; padding: 0; }\n #xeberxvzdi .gt_table { display: table; bo",
+      "narration": "The break-even, plotted for our own regime Fill in the numbers for a setting we actually run and read off whether writing is worth it.",
+      "seconds": 38.53333333333333,
+      "lesson": "gmz1"
+    },
+    {
+      "kind": "note",
+      "text": "**[Recap]** write once, answer many \u00b7 the write is a self-supervised objective\ndescended at test time on a frozen model \u00b7 state size is constant in context length \u00b7 and eq. 13 tells you\nin advance whether to bother. Cross-read: `nl06` (test-time training = parametric ICL), `fnl02` (the same\nargmin shape), `rq04` (the same \"compute the diagnostic first\" discipline).",
+      "narration": "Recap write once, answer many \u00b7 the write is a self-supervised objective descended at test time on a frozen model \u00b7 state size is constant in context length \u00b7 and eq. 13 tells you in advance whether to bother. Cross-read: nl06 (test-time training = parametric ICL), fnl02 (the same argmin shape), rq04 (the same \"compute the diagnostic firs",
+      "seconds": 6.3,
+      "lesson": "gmz1"
+    }
+  ],
+  "chapters": [
+    {
+      "id": "gmb1",
+      "title": "Basics \u2014 a KV cache grows with the context; a memory does not",
+      "order": 2100
+    },
+    {
+      "id": "gm01",
+      "title": "with Test-Time Gradient Descent",
+      "order": 2200
+    },
+    {
+      "id": "gm03",
+      "title": "1 Introduction",
+      "order": 2220
+    },
+    {
+      "id": "gm04",
+      "title": "2 GradMem",
+      "order": 2230
+    },
+    {
+      "id": "gm05",
+      "title": "3 Experiments and Results",
+      "order": 2240
+    },
+    {
+      "id": "gm12",
+      "title": "B Implementation, Training, and Hyperparameter Details",
+      "order": 2310
+    },
+    {
+      "id": "gm13",
+      "title": "C Accelerating Double Backwards Through Attention",
+      "order": 2320
+    },
+    {
+      "id": "gm14",
+      "title": "D Computational Analysis: When GradMem is Compute-Efficient",
+      "order": 2330
+    },
+    {
+      "id": "gm15",
+      "title": "E Relation between Exact Match and Inner Loss",
+      "order": 2340
+    },
+    {
+      "id": "gm16",
+      "title": "F Memory Size vs. WRITE Steps (K) vs. Number of KV-pairs",
+      "order": 2350
+    },
+    {
+      "id": "gm17",
+      "title": "G Memory State Size Utilization: GradMem vs. Mamba",
+      "order": 2360
+    },
+    {
+      "id": "gm18",
+      "title": "H KV Retrieval with LaCT and TTT-Linear",
+      "order": 2370
+    },
+    {
+      "id": "gm19",
+      "title": "I Text Compression with GradMem on Larger Pretrained Models",
+      "order": 2380
+    },
+    {
+      "id": "gm20",
+      "title": "J Input-level vs. Per-layer Memory",
+      "order": 2390
+    },
+    {
+      "id": "gm21",
+      "title": "K GradMem Algorithm and Minimal Code",
+      "order": 2400
+    },
+    {
+      "id": "gmz1",
+      "title": "What we take from GradMem \u2014 the break-even, and one honest caveat",
+      "order": 3000
+    }
+  ],
+  "source": "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/docs/papers/gradmem",
+  "lessons": [
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/gm01.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/gm03.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/gm04.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/gm05.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/gm12.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/gm13.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/gm14.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/gm15.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/gm16.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/gm17.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/gm18.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/gm19.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/gm20.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/gm21.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/gmb1.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/gmz1.learning"
+  ]
+}

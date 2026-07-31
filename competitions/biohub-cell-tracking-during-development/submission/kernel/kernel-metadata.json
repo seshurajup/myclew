@@ -1,0 +1,17 @@
+{
+  "id": "seshurajup/cellmot-submission",
+  "title": "cellmot-submission",
+  "code_file": "kaggle_infer.ipynb",
+  "language": "python",
+  "kernel_type": "notebook",
+  "is_private": true,
+  "enable_gpu": true,
+  "enable_internet": false,
+  "dataset_sources": [
+    "seshurajup/cellmot-inference-bundle"
+  ],
+  "competition_sources": [
+    "biohub-cell-tracking-during-development"
+  ],
+  "model_sources": []
+}

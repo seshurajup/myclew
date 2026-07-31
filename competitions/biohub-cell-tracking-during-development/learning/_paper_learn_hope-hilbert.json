@@ -1,0 +1,43 @@
+{
+  "slug": "hope-hilbert",
+  "lessons": 12,
+  "ids": [
+    "hpeb1",
+    "hpe01",
+    "hpe03",
+    "hpe04",
+    "hpe05",
+    "hpe06",
+    "hpe07",
+    "hpe08",
+    "hpe09",
+    "hpe10",
+    "hpe11",
+    "hpez1"
+  ],
+  "coverage": {
+    "total": 27,
+    "placed": 27,
+    "missing": [],
+    "taught": 27,
+    "untaught": [],
+    "proven": 27,
+    "unproven": [],
+    "cropped": 40,
+    "figures": 2,
+    "figures_placed": 2,
+    "lessons": 10
+  },
+  "curriculum": {
+    "appended": true,
+    "section": "HOPE (2026) \u2014 neurons as functions, compression as projection",
+    "lessons": 12
+  },
+  "pruned": [],
+  "code_cells": 33,
+  "cells_with_output": 33,
+  "silent_lessons": [],
+  "out_dir": "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated",
+  "assets": "learning/assets/hope-hilbert",
+  "python": "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/research/cellmot_venv/bin/python"
+}

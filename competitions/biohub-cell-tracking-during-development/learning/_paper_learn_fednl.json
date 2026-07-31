@@ -1,0 +1,39 @@
+{
+  "slug": "fednl",
+  "lessons": 8,
+  "ids": [
+    "fnlb1",
+    "fnl01",
+    "fnl03",
+    "fnl04",
+    "fnl05",
+    "fnl06",
+    "fnl10",
+    "fnlz1"
+  ],
+  "coverage": {
+    "total": 14,
+    "placed": 14,
+    "missing": [],
+    "taught": 14,
+    "untaught": [],
+    "proven": 14,
+    "unproven": [],
+    "cropped": 9,
+    "figures": 8,
+    "figures_placed": 8,
+    "lessons": 6
+  },
+  "curriculum": {
+    "appended": true,
+    "section": "Federated Nested Learning (2026) \u2014 the third level, proved in PyTorch",
+    "lessons": 8
+  },
+  "pruned": [],
+  "code_cells": 17,
+  "cells_with_output": 17,
+  "silent_lessons": [],
+  "out_dir": "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated",
+  "assets": "learning/assets/fednl",
+  "python": "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/research/cellmot_venv/bin/python"
+}

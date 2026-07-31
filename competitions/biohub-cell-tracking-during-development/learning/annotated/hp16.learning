@@ -1,0 +1,176 @@
+@ id: hp16
+@ order: 1150
+@ title: B Implementation Notes
+@ subtitle: Hilbert Operator for Progressive Encoding (HOPE) §B
+@ source: docs/papers/hope-hilbert/hope-hilbert.md
+
+--- note
+## B Implementation Notes
+**Paper:** Hilbert Operator for Progressive Encoding (HOPE) · §B · pages 38–41 · 3 numbered equation(s), 0 figure(s).
+
+> TODO(author): the *why* of this section in 3–5 lines, then teach each formula below.
+> Source markdown: `docs/papers/hope-hilbert/hope-hilbert.md`
+
+--- note
+### Equation (36)
+
+$$
+^{init} \DeltaP= \|W_{in}\|_{0} + \|W_{out}\|_{0} + \|\theta_{aux}\|_{0} \tag{36}
+$$
+
+> TODO(author): what each symbol is, what it *does*, and why the paper needs it.
+
+--- code
+# TODO(author): the equation (36) in runnable PyTorch, then assert it matches the paper.
+
+--- image
+learning/assets/hope-hilbert/eq/eq_p38_198.png
+Equation (36) as rendered in the PDF
+
+--- note
+### Equation (37)
+
+$$
+= \|W_{1}\|_{0} + \|W_{2}\|_{0} + \|\theta_{aux}\|_{0}(37) ^{evict} \tag{37}
+$$
+
+> TODO(author): what each symbol is, what it *does*, and why the paper needs it.
+
+--- code
+# TODO(author): the equation (37) in runnable PyTorch, then assert it matches the paper.
+
+--- image
+learning/assets/hope-hilbert/eq/eq_p39_199.png
+Equation (37) as rendered in the PDF
+
+--- note
+### Unnumbered formula
+
+$$
+W^{(l)}
+$$
+
+> TODO(author): what each symbol is, what it *does*, and why the paper needs it.
+
+--- code
+# TODO(author): the unnumbered formula in runnable PyTorch, then assert it matches the paper.
+
+--- image
+learning/assets/hope-hilbert/eq/eq_p39_200.png
+Unnumbered formula as rendered in the PDF
+
+--- note
+### Unnumbered formula
+
+$$
++ \|f_{j}\|^{2} ^{\mathcal{H}}
+$$
+
+> TODO(author): what each symbol is, what it *does*, and why the paper needs it.
+
+--- code
+# TODO(author): the unnumbered formula in runnable PyTorch, then assert it matches the paper.
+
+--- image
+learning/assets/hope-hilbert/eq/eq_p40_201.png
+Unnumbered formula as rendered in the PDF
+
+--- note
+### Unnumbered formula
+
+$$
+\sqrt
+$$
+
+> TODO(author): what each symbol is, what it *does*, and why the paper needs it.
+
+--- code
+# TODO(author): the unnumbered formula in runnable PyTorch, then assert it matches the paper.
+
+--- image
+learning/assets/hope-hilbert/eq/eq_p41_202.png
+Unnumbered formula as rendered in the PDF
+
+--- note
+### Unnumbered formula
+
+$$
+\sqrt
+$$
+
+> TODO(author): what each symbol is, what it *does*, and why the paper needs it.
+
+--- code
+# TODO(author): the unnumbered formula in runnable PyTorch, then assert it matches the paper.
+
+--- image
+learning/assets/hope-hilbert/eq/eq_p41_203.png
+Unnumbered formula as rendered in the PDF
+
+--- note
+### Unnumbered formula
+
+$$
+\sqrt \epsilon
+$$
+
+> TODO(author): what each symbol is, what it *does*, and why the paper needs it.
+
+--- code
+# TODO(author): the unnumbered formula in runnable PyTorch, then assert it matches the paper.
+
+--- image
+learning/assets/hope-hilbert/eq/eq_p41_204.png
+Unnumbered formula as rendered in the PDF
+
+--- note
+### Unnumbered formula
+
+$$
+\mu_{p}=⇒\mu_{p}=
+$$
+
+> TODO(author): what each symbol is, what it *does*, and why the paper needs it.
+
+--- code
+# TODO(author): the unnumbered formula in runnable PyTorch, then assert it matches the paper.
+
+--- image
+learning/assets/hope-hilbert/eq/eq_p41_205.png
+Unnumbered formula as rendered in the PDF
+
+--- note
+### Unnumbered formula
+
+$$
+_{p}-(\gamma^{2}
+$$
+
+> TODO(author): what each symbol is, what it *does*, and why the paper needs it.
+
+--- code
+# TODO(author): the unnumbered formula in runnable PyTorch, then assert it matches the paper.
+
+--- image
+learning/assets/hope-hilbert/eq/eq_p41_206.png
+Unnumbered formula as rendered in the PDF
+
+--- note
+### Equation (42)
+
+$$
+_{p}-\epsilon) = \epsilon \tag{42}
+$$
+
+> TODO(author): what each symbol is, what it *does*, and why the paper needs it.
+
+--- code
+# TODO(author): the equation (42) in runnable PyTorch, then assert it matches the paper.
+
+--- image
+learning/assets/hope-hilbert/eq/eq_p41_207.png
+Equation (42) as rendered in the PDF
+
+--- note
+**[Recap]** TODO(author): 3 bullets — the claim, the mechanism, the consequence for our own models.
+

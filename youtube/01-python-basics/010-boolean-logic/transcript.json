@@ -1,0 +1,42 @@
+[
+  {
+    "text": "Comparisons are the heart of decision-making, and every one of them produces a simple True or False.",
+    "until_line": 6
+  },
+  {
+    "text": "Less-than, double-equals for equality, and exclamation-equals for not-equal — the basic building blocks.",
+    "until_line": 6
+  },
+  {
+    "text": "[chuckle] You can combine several conditions with and and or, [sniff] and flip any result with not.",
+    "until_line": 9
+  },
+  {
+    "text": "And needs both sides true, or needs only one side true, and not simply reverses whatever it's given.",
+    "until_line": 9
+  },
+  {
+    "text": "Now here's something Python does that surprises newcomers — truthiness.",
+    "until_line": 15
+  },
+  {
+    "text": "Certain values count as falsy even though they aren't literally False — zero, an empty string, an empty list.",
+    "until_line": 15
+  },
+  {
+    "text": "[groan] And any value with actual content is truthy — a non-empty string, a list with items inside.",
+    "until_line": 15
+  },
+  {
+    "text": "That lets you write clean checks like just 'if my_list' instead of comparing its length to zero.",
+    "until_line": 15
+  },
+  {
+    "text": "One last subtlety: and and or short-circuit — if the left side of an and is already False, Python never even runs the right side.",
+    "until_line": 24
+  },
+  {
+    "text": "Video 11 tackles for loops. Tell me in the comments if this clicked.",
+    "until_line": 24
+  }
+]

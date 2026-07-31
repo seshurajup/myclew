@@ -1,0 +1,123 @@
+@ id: lfmz1
+@ order: 3400
+@ title: What we take from it
+@ subtitle: LFM2.5-Encoders → our own long-sequence work
+@ source: docs/papers/lfm25-encoders/model_card.md
+
+--- note
+## The transferable claim, and its precondition
+Stripped of branding, the lesson is one sentence: **if your sequences are long, replacing most attention
+layers with short convolutions is a bigger win than optimising the attention you have** — and the win grows
+where parallelism is scarce (CPU, edge, a 2×T4 Kaggle box).
+
+Its precondition is equally important. Everything measured here says the advantage is a *long-context*
+advantage:
+
+* at L=128 the hybrid saves little (unit 11) — the quadratic term is not yet dominant;
+* the crossover where a conv layer beats an attention layer was measured directly (unit 15);
+* a stack of ten width-3 convolutions reaches ±10 tokens (unit 9), so the six attention layers are
+  mandatory, not optional. A design that dropped them entirely would be a different, worse model.
+
+So the adoption rule is: **measure your own crossover before restructuring anything.** That is the same
+discipline as our `order_sensitivity` gate for tabfm's view-ensembling — a mechanism that works only under a
+condition should ship with the condition attached, not with the marketing number.
+
+**Not claimed:** any accuracy result, and any reproduction of the ModernBERT comparison. We built the
+architecture from the published config and timed it; we never ran the checkpoint.
+
+--- note
+### The rule, as a function — and a correction worth making explicit
+The obvious version of this helper computes the MAC saving and calls it a day. Writing it out shows why that
+is wrong: because a short conv's MACs are negligible next to attention's at *any* length, the MAC ratio
+collapses to `n_attn / n_layers` — about 62% saved, almost independently of L. So arithmetic alone says
+"always adopt", which contradicts unit 15's measurement that a conv layer only overtakes an attention layer
+past a certain length.
+
+The resolution is that at short lengths wall-clock is dominated by kernel-launch and memory overhead, not by
+MACs. So the honest helper reports the MAC saving *and* requires a measured `crossover_len` — it refuses to
+give a verdict from arithmetic it cannot support.
+
+--- code
+import json, math, time, warnings
+warnings.filterwarnings("ignore")
+import torch, torch.nn as nn, torch.nn.functional as F
+from pathlib import Path
+
+DEV = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+torch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False   # exact proofs
+torch.manual_seed(0); torch.set_printoptions(precision=4, sci_mode=False)
+print(f"device: {DEV}" + (f" | {torch.cuda.get_device_name(0)}" if DEV.type == "cuda" else ""))
+
+CFG = json.loads(Path("docs/papers/lfm25-encoders/models/LFM2.5-Encoder-350M.config.json").read_text())
+CFG_S = json.loads(Path("docs/papers/lfm25-encoders/models/LFM2.5-Encoder-230M.config.json").read_text())
+
+def ok(name, cond, extra=""):
+    print(("PASS  " if cond else "FAIL  ") + name + (f"   | {extra}" if extra else ""))
+
+def hybrid_worth_it(L, d=1024, k=3, n_layers=16, n_attn=6, crossover_len=None):
+    """Should you replace (n_layers - n_attn) attention layers with short convs at length L?
+
+    Returns the MAC saving AND a verdict that is only given when a MEASURED crossover length is supplied,
+    because the MAC saving alone would say yes at every length (see the note above).
+    """
+    a1, c1 = 2 * L * L * d, L * d * k
+    hybrid = n_attn * a1 + (n_layers - n_attn) * c1
+    saving = 1 - hybrid / (n_layers * a1)
+    verdict = "measure your crossover first" if crossover_len is None else (
+        "ADOPT" if L >= crossover_len else "too short — overhead dominates")
+    return {"L": L, "mac_saving": saving, "per_layer_macs": a1 / c1,
+            "asymptote": n_attn / n_layers, "verdict": verdict}
+
+print("  MAC saving is nearly LENGTH-INDEPENDENT — which is why it cannot be the gate:")
+for L in (128, 512, 2048, 8192):
+    r = hybrid_worth_it(L)
+    print(f"    L={L:>5}: saving {r['mac_saving']:>6.2%}  per-layer MACs {r['per_layer_macs']:>8.0f}x")
+ok("the MAC saving barely moves with length",
+   abs(hybrid_worth_it(8192)["mac_saving"] - hybrid_worth_it(128)["mac_saving"]) < 0.02,
+   f"{hybrid_worth_it(128)['mac_saving']:.2%} at 128 vs "
+   f"{hybrid_worth_it(8192)['mac_saving']:.2%} at 8192")
+ok("because it collapses to n_attn / n_layers", abs(
+    hybrid_worth_it(8192)["mac_saving"] - (1 - hybrid_worth_it(8192)["asymptote"])) < 0.01,
+   f"asymptote = 1 - {hybrid_worth_it(8192)['asymptote']:.3f}")
+ok("so with no measurement the helper REFUSES to give a verdict",
+   hybrid_worth_it(512)["verdict"] == "measure your crossover first")
+
+print("\n  with a measured crossover (unit 15 measured it on this GPU at L ~ 256):")
+for L in (128, 512, 8192):
+    print(f"    L={L:>5}: {hybrid_worth_it(L, crossover_len=256)['verdict']}")
+ok("below the measured crossover it says no", "too short" in
+   hybrid_worth_it(128, crossover_len=256)["verdict"])
+ok("above it, adopt", hybrid_worth_it(8192, crossover_len=256)["verdict"] == "ADOPT")
+print("\nOur own long-sequence work (volume-time, 199x100 frames) is exactly the regime where this applies")
+print("— and exactly the regime where a 2xT4 has too little parallelism to hide a quadratic term.")
+
+--- output
+```
+device: cuda | NVIDIA GeForce RTX 5090
+  MAC saving is nearly LENGTH-INDEPENDENT — which is why it cannot be the gate:
+    L=  128: saving 61.77%  per-layer MACs       85x
+    L=  512: saving 62.32%  per-layer MACs      341x
+    L= 2048: saving 62.45%  per-layer MACs     1365x
+    L= 8192: saving 62.49%  per-layer MACs     5461x
+PASS  the MAC saving barely moves with length   | 61.77% at 128 vs 62.49% at 8192
+PASS  because it collapses to n_attn / n_layers   | asymptote = 1 - 0.375
+PASS  so with no measurement the helper REFUSES to give a verdict
+
+  with a measured crossover (unit 15 measured it on this GPU at L ~ 256):
+    L=  128: too short — overhead dominates
+    L=  512: ADOPT
+    L= 8192: ADOPT
+PASS  below the measured crossover it says no
+PASS  above it, adopt
+
+Our own long-sequence work (volume-time, 199x100 frames) is exactly the regime where this applies
+— and exactly the regime where a 2xT4 has too little parallelism to hide a quadratic term.
+```
+
+--- note
+**[Recap]** 10 conv + 6 attention = 62% of the depth never builds an L×L matrix
+(unit 10) · a width-3 kernel reaches ±1 per layer, so attention is mandatory (units 6, 9) · the saving is a
+long-context saving with a measured crossover (units 11, 15) · and it is larger on CPU, where there is no
+parallelism to hide behind (unit 18). Cross-read: `rfmz1` (deleting a component rather than tuning it) and
+`tfmz1` (ship the mechanism with its precondition attached).
+

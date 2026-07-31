@@ -1,0 +1,42 @@
+[
+  {
+    "text": "Composition builds complex objects by combining simpler ones, instead of inheriting from them.",
+    "until_line": 7
+  },
+  {
+    "text": "Where inheritance is an is-a relationship, composition is a has-a relationship.",
+    "until_line": 7
+  },
+  {
+    "text": "A Car isn't a kind of engine — a Car has an engine, so it holds one as an attribute.",
+    "until_line": 7
+  },
+  {
+    "text": "[chuckle] Car's drive method delegates to the engine, calling its start and adding its own behavior.",
+    "until_line": 9
+  },
+  {
+    "text": "So the car cooperates with its engine part, each doing its own job.",
+    "until_line": 12
+  },
+  {
+    "text": "[sniff] The beauty is flexibility — you can swap the engine for a totally different one at runtime.",
+    "until_line": 18
+  },
+  {
+    "text": "Here we replace the engine with an electric one, and Car's drive keeps working without any changes.",
+    "until_line": 19
+  },
+  {
+    "text": "[sigh] The users of Car never notice — they just call drive, and the new part slots right in.",
+    "until_line": 19
+  },
+  {
+    "text": "[groan] Many designers favor composition over inheritance, because loosely-coupled parts are easier to change and test.",
+    "until_line": 20
+  },
+  {
+    "text": "Video 51 tackles multiple inheritance. Follow so you don't miss it.",
+    "until_line": 20
+  }
+]

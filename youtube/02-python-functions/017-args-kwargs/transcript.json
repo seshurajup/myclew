@@ -1,0 +1,42 @@
+[
+  {
+    "text": "Sometimes you don't know how many arguments a function will get — that's exactly what star-args solves.",
+    "until_line": 2
+  },
+  {
+    "text": "Put a single star before a parameter, and Python collects every extra positional argument into a tuple called numbers.",
+    "until_line": 2
+  },
+  {
+    "text": "So sum_all works with five numbers, or two, or any count you throw at it.",
+    "until_line": 6
+  },
+  {
+    "text": "[sniff] Double-star kwargs does the same for keyword arguments, gathering them into a dictionary.",
+    "until_line": 6
+  },
+  {
+    "text": "Here print_info accepts any named values and loops over them as key-value pairs.",
+    "until_line": 11
+  },
+  {
+    "text": "You can combine all three — regular parameters, star-args, and double-star kwargs — in a single function.",
+    "until_line": 17
+  },
+  {
+    "text": "[chuckle] The order matters though: normal parameters first, then star-args, then double-star kwargs at the very end.",
+    "until_line": 17
+  },
+  {
+    "text": "And the star works in reverse too — put a star before a list when calling, and Python unpacks it into separate arguments.",
+    "until_line": 21
+  },
+  {
+    "text": "[groan] That unpacking trick is everywhere in real Python code, so it's well worth getting comfortable with it.",
+    "until_line": 21
+  },
+  {
+    "text": "Up next, lambdas. Comment PYTHON if you want the cheat sheet.",
+    "until_line": 21
+  }
+]

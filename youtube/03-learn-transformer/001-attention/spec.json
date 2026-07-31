@@ -1,0 +1,12 @@
+{
+  "language": "python",
+  "title": "attention.py",
+  "hook": "Build attention in 4 lines of PyTorch",
+  "playlist": "Learn Transformer",
+  "target_seconds": 90,
+  "tts_engine": "chatterbox",
+  "code_path": "code.py",
+  "transcript_path": "transcript.json",
+  "outputs_path": "outputs.json",
+  "max_seconds": 120
+}

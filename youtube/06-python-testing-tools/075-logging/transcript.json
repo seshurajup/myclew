@@ -1,0 +1,42 @@
+[
+  {
+    "text": "Scattering print statements to debug works, but logging is the professional, far more powerful way.",
+    "until_line": 4
+  },
+  {
+    "text": "You configure it once, choosing a level and a format for every message.",
+    "until_line": 4
+  },
+  {
+    "text": "[chuckle] Logging has levels — debug, info, warning, error — so you can filter by importance.",
+    "until_line": 8
+  },
+  {
+    "text": "Set the level to info, and the noisy debug messages are hidden, while everything important shows.",
+    "until_line": 8
+  },
+  {
+    "text": "[sniff] Each message is tagged with its level, so you instantly see whether it's routine or a real problem.",
+    "until_line": 11
+  },
+  {
+    "text": "Unlike print, logging can add timestamps, module names, and be redirected to files or external systems.",
+    "until_line": 11
+  },
+  {
+    "text": "[sigh] You pass values as arguments, and logging formats them only if the message is actually shown.",
+    "until_line": 16
+  },
+  {
+    "text": "So logging inside your functions gives you a running story of what the program did, and when.",
+    "until_line": 18
+  },
+  {
+    "text": "[groan] In real applications, logging is how you understand and diagnose your software long after it's deployed.",
+    "until_line": 18
+  },
+  {
+    "text": "Video 76 tackles type checking with mypy. Save this one for when you need it.",
+    "until_line": 18
+  }
+]

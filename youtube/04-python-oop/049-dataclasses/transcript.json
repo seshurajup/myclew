@@ -1,0 +1,42 @@
+[
+  {
+    "text": "Writing init, repr, and eq by hand for every simple data class gets tedious — dataclasses do it for you.",
+    "until_line": 7
+  },
+  {
+    "text": "Just add the dataclass decorator and list your fields with type hints, and Python generates the boilerplate.",
+    "until_line": 7
+  },
+  {
+    "text": "You get a constructor, a readable repr, and value-based equality, all for free.",
+    "until_line": 7
+  },
+  {
+    "text": "[chuckle] So printing a product shows a clean summary, and two equal products compare as equal automatically.",
+    "until_line": 7
+  },
+  {
+    "text": "[sniff] For mutable defaults like lists, you use field with default_factory, avoiding a classic shared-state bug.",
+    "until_line": 7
+  },
+  {
+    "text": "Each product gets its own fresh tags list, so appending to one never affects another.",
+    "until_line": 14
+  },
+  {
+    "text": "[sigh] You can also make a dataclass frozen, turning it into an immutable, read-only object.",
+    "until_line": 19
+  },
+  {
+    "text": "A frozen point can't be changed after creation, which makes it safe to use as a dictionary key.",
+    "until_line": 22
+  },
+  {
+    "text": "[groan] Dataclasses cut dozens of lines down to a handful — they're the modern default for data-holding classes.",
+    "until_line": 22
+  },
+  {
+    "text": "composition is next, video number 50. Comment the topic you want after that.",
+    "until_line": 22
+  }
+]

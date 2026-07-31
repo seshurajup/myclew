@@ -1,0 +1,21 @@
+[
+  {
+    "after_line": 11,
+    "text": ">>> Product(name='Book', price=12.99, tags=[])\\n>>> True",
+    "caption": "auto __repr__ and __eq__"
+  },
+  {
+    "after_line": 14,
+    "text": ">>> ['sale']",
+    "caption": "default_factory avoids shared state"
+  },
+  {
+    "after_line": 22,
+    "text": ">>> Point(x=1, y=2)",
+    "caption": "frozen=True → immutable"
+  },
+  {
+    "after_line": 22,
+    "image": "artifacts/terminal.png"
+  }
+]

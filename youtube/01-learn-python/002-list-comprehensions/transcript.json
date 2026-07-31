@@ -1,0 +1,42 @@
+[
+  {
+    "text": "A list comprehension builds a whole list in one readable line, with no append loop required.",
+    "until_line": 1
+  },
+  {
+    "text": "This one squares every number from zero to nine — the expression comes first, then the for.",
+    "until_line": 1
+  },
+  {
+    "text": "Add an if on the end and it becomes a filter, so evens keeps only the multiples of two.",
+    "until_line": 2
+  },
+  {
+    "text": "You can even nest two loops in a single comprehension, left to right, exactly like nested for statements.",
+    "until_line": 3
+  },
+  {
+    "text": "This builds every x y pair where the two differ, skipping the diagonal.",
+    "until_line": 3
+  },
+  {
+    "text": "Read it out loud and it says what it does — give me x times x, for x in range ten.",
+    "until_line": 3
+  },
+  {
+    "text": "Now let's print all three and see exactly what we built.",
+    "until_line": 5
+  },
+  {
+    "text": "Squares, evens and pairs — three data structures, three lines.",
+    "until_line": 7
+  },
+  {
+    "text": "And not a single manual append anywhere.",
+    "until_line": 7
+  },
+  {
+    "text": "Up next, decorators. Follow so you don't miss it.",
+    "until_line": 7
+  }
+]

@@ -1,0 +1,52 @@
+@ id: g403
+@ order: 403
+@ title: Long-context efficiency
+@ subtitle: local:global attention ratios, p-RoPE, and a 37.5% KV-cache cut
+@ source: arxiv 2607.02770
+
+--- note
+## The problem: the KV cache explodes with context
+At inference an autoregressive Transformer caches the **keys and values** of every past token so it
+doesn't recompute them. That **KV cache** grows linearly with context length *and* with the number of
+attention layers — at long context (32k, 128k, 256k) it dominates memory, more than the weights. The
+report calls this "a memory explosion in the KV cache" and attacks it from three angles.
+
+--- note
+## Lever 1 — mostly local (sliding-window) attention
+Most layers use **local sliding-window** attention (cheap, bounded KV) and only a few use **global**
+attention (full context, expensive KV). Gemma 4 keeps a **5:1 local-to-global ratio** for all sizes
+**except E2B, which uses 4:1**. So only 1-in-5 (or 1-in-4) layers pays the full long-context KV cost.
+
+--- note
+## Lever 2 — positional encoding: p-RoPE + split frequencies
+Position is encoded with **p-RoPE** (Barbero et al., 2025) with **p = 0.25 on the global** attention
+layers, and ordinary **RoPE on the local** layers. The **RoPE frequencies** are set to **1M on global**
+layers and **10k on local** layers — a long wavelength for the few layers that must reason across the
+whole context, a short one for the many local layers.
+
+--- note
+## Lever 3 — KV-cache sharing + reusing keys as values
+Two more tricks shrink the *global* KV cache specifically:
+
+- **KV-cache sharing** (Shazeer, 2019): global layers share cache entries. The report gives the
+  sharing ratios **20/35** for E2B and **18/42** for E4B.
+- **Reuse keys as values** in the global attention layers (Kayyam et al., 2026): set **values = keys**,
+  so a global layer stores only *one* tensor instead of two (except in E2B and E4B).
+
+Combined, these reduce the **global KV cache footprint by up to 37.5%** — the headline number. Less KV
+memory means longer usable context on the same hardware, or larger batch at a given context.
+
+--- image
+learning/assets/gemma4/t03_memory.png
+Table 3 — the "+KV Cache" column shows how small the int8 KV cache is at 32k context *after* these optimizations (e.g. +0.05 GB for E2B, +0.28 GB for 12B), relative to the weight footprint. (This table is also the QAT memory table, read in g405.)
+
+--- note
+## Does it actually hold up at long context?
+Yes — the long-context *quality* is measured separately (Table 9). Gemma 4 shows "a leap on
+long-context capabilities" over Gemma 3, with **E4B outperforming Gemma 3 27B**, and the 31B holding
+high accuracy on RULER out to 128k and on MTOB/LOFT retrieval at 128k–256k. Efficiency did not come
+at the cost of long-range ability.
+
+--- image
+learning/assets/gemma4/t09_longctx.png
+Table 9 — long-context benchmarks (RULER, LOFT text-retrieval, GraphWalks, MTOB book-translation) at 32k / 128k / 256k. Read alongside g410. This is the payoff of the three levers above.

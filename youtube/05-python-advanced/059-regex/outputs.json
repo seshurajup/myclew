@@ -1,0 +1,21 @@
+[
+  {
+    "after_line": 6,
+    "text": ">>> ['alice@mail.com', 'bob@work.org']",
+    "caption": "findall extracts all matches"
+  },
+  {
+    "after_line": 11,
+    "text": ">>> 555-1234 555 1234",
+    "caption": "groups capture pieces"
+  },
+  {
+    "after_line": 15,
+    "text": ">>> too many spaces",
+    "caption": "sub replaces matches"
+  },
+  {
+    "after_line": 15,
+    "image": "artifacts/terminal.png"
+  }
+]

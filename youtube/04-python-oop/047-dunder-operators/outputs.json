@@ -1,0 +1,16 @@
+[
+  {
+    "after_line": 17,
+    "text": ">>> Vector(4, 6)",
+    "caption": "__add__ powers the + operator"
+  },
+  {
+    "after_line": 18,
+    "text": ">>> True",
+    "caption": "__eq__ compares by value"
+  },
+  {
+    "after_line": 18,
+    "image": "artifacts/terminal.png"
+  }
+]

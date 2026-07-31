@@ -1,0 +1,49 @@
+# =====================================================================
+# Experiment 2 — STUDENT detector (distilled from the ensemble teacher)
+# Run:  bash start_train.sh config/exp2_student.yml
+# =====================================================================
+name: exp2_student
+
+purpose: >
+  Distill the ensemble TEACHER (DoG + neural union + our linking, golden CV
+  0.8743, proven +0.05 over the 0.82 baseline detector) into a single FAST
+  (1,4,4) student UNet. The teacher generated DENSE pseudo-labels (~24k nodes/
+  dataset = ALL cells, vs the sparse GT's few hundred) — this dense supervision
+  is the real win: it overcomes the sparse-label limit that caps single-detector
+  training. The student runs in ONE forward pass (no TTA, no DoG, no union) so it
+  fits the 12h / 199-dataset Kaggle budget with margin. Success = the student
+  (student detections + our linking) matches/beats the current ensemble 0.8743 on
+  the 12 REAL holdout, at ~1/3 the inference cost. Epochs are NOT fixed at 40 — we
+  watch the MLflow `score` curve and stop when it plateaus.
+
+paths:
+  python:  research/cellmot_venv/bin/python
+  trainer: research/official_repo/scripts/train_unet_transformer.py
+  pythonpath:
+    - research/official_repo/src
+    - research/official_repo/scripts
+    - .
+  data_dir: research/student/pseudo_trainset          # teacher DENSE pseudo-labels (train) + REAL geff (holdout)
+  splits:   research/student/student_splits.json
+
+mlflow:
+  tracking_uri: http://localhost:5000
+  experiment:   kaggle-biohub-detector
+  run_name:     exp2_student_1x4x4_dense
+  log_artifacts: false
+
+gpu:
+  power_limit_w: 400
+
+train:
+  method:          unet_student   # weights -> weights/unet_student/split_0/edge_predictor_best.pth
+  split:           0
+  downsample:      "1,4,4"        # FAST + deployable (same speed as current ensemble detector)
+  epochs:          25             # watch MLflow `score`; kill early if plateaued (NOT a hard 40)
+  lr:              1e-4
+  batch_size:      16             # 1,4,4 -> all (64,64,64) -> big batch OK -> fast epochs
+  num_workers:     6
+  det_loss_weight: 10.0
+  det_neg_weight:  0.01
+  window_size:     2
+  pool_kernel_um:  5.0

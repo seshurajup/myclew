@@ -1,0 +1,10 @@
+# PUBLIC notebook config — **isakatsuyoshi** / rule-based baseline
+name: pub_isakatsuyoshi
+source: **isakatsuyoshi** / rule-based baseline
+family: other
+base: unknown
+lb: 0.826
+golden_cv: None
+mined_params: ""
+run: manual
+score: golden-12 (adj_edge_J + 0.1*div_J), by_embryo

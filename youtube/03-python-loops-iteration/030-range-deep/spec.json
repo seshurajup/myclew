@@ -1,0 +1,14 @@
+{
+  "language": "python",
+  "title": "range_deep.py",
+  "hook": "range() does far more than count",
+  "playlist": "Learn Python",
+  "target_seconds": 90,
+  "max_seconds": 120,
+  "tts_engine": "chatterbox",
+  "music_prompt": "measured, stepping, precise",
+  "code_path": "code.py",
+  "transcript_path": "transcript.json",
+  "outputs_path": "outputs.json",
+  "accent": "teal"
+}

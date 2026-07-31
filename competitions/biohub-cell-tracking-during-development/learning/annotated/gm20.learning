@@ -1,0 +1,12 @@
+@ id: gm20
+@ order: 2390
+@ title: J Input-level vs. Per-layer Memory
+@ subtitle: GradMem: Learning to Write Context into Memory §J
+@ source: docs/papers/gradmem/gradmem.md
+
+--- note
+## J Input-level vs. Per-layer Memory
+**Paper:** GradMem: Learning to Write Context into Memory · §J · pages 23–23 · equations (none) · 0 figures.
+
+> TODO(author): the *why* of §J in 3–5 lines.
+

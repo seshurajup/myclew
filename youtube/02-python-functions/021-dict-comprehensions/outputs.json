@@ -1,0 +1,26 @@
+[
+  {
+    "after_line": 4,
+    "text": ">>> {1: 1, 2: 4, 3: 9, 4: 16, 5: 25}",
+    "caption": "{k: v for ...}"
+  },
+  {
+    "after_line": 7,
+    "text": ">>> {2: 4, 4: 16}",
+    "caption": "filter while building"
+  },
+  {
+    "after_line": 12,
+    "text": ">>> {3: 'apple', 2: 'banana'}",
+    "caption": "invert a dict"
+  },
+  {
+    "after_line": 18,
+    "text": ">>> {'Alice': 30, 'Bob': 25}",
+    "caption": "zip two lists into a dict"
+  },
+  {
+    "after_line": 19,
+    "image": "artifacts/terminal.png"
+  }
+]

@@ -1,0 +1,42 @@
+[
+  {
+    "text": "Good tests avoid slow or unpredictable things like networks and databases — mocking fakes them.",
+    "until_line": 4
+  },
+  {
+    "text": "A Mock is a stand-in object that pretends to be the real thing, but does exactly what you tell it.",
+    "until_line": 4
+  },
+  {
+    "text": "Here we set the fake database's get_user to always return a fixed Alice record.",
+    "until_line": 5
+  },
+  {
+    "text": "[chuckle] So calling it gives that data instantly, with no real database anywhere in sight.",
+    "until_line": 7
+  },
+  {
+    "text": "[sniff] Mocks also record how they were used — whether they were called, and how many times.",
+    "until_line": 9
+  },
+  {
+    "text": "That lets your test verify the code actually reached out to the dependency the right number of times.",
+    "until_line": 9
+  },
+  {
+    "text": "[sigh] patch temporarily replaces a real function during a test, then restores it automatically after.",
+    "until_line": 16
+  },
+  {
+    "text": "Here we freeze time itself, making time dot time return a fixed value so the test is repeatable.",
+    "until_line": 16
+  },
+  {
+    "text": "[groan] Mocking isolates the code under test — you test your logic, not the flaky world around it.",
+    "until_line": 17
+  },
+  {
+    "text": "logging is next, video number 75. Follow so you don't miss it.",
+    "until_line": 17
+  }
+]

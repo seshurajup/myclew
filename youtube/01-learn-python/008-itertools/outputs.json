@@ -1,0 +1,4 @@
+[
+  {"after_line": 6, "text": ">>> [1, 2, 3, 'a', 'b']", "caption": "chain merges iterables lazily"},
+  {"after_line": 7, "text": ">>> [(1, 2), (1, 3), (2, 3)]", "caption": "combinations: order-free pairs"}
+]

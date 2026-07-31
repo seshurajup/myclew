@@ -1,0 +1,152 @@
+[
+  {
+    "n": 1,
+    "latex": "TabFMClassifier(model, n_estimators=32, ...).fit(X, y) -> self",
+    "name": "`fit` stores the context \u2014 it does not train"
+  },
+  {
+    "n": 2,
+    "latex": "clf.predict(X_test) -> np.ndarray     # one forward pass, context rows included",
+    "name": "`predict` is a forward pass over context + queries"
+  },
+  {
+    "n": 3,
+    "latex": "_check_classifier_output_dim(output_dim: int, n_classes: int) -> None",
+    "name": "Guard \u2014 a regression checkpoint used for classification"
+  },
+  {
+    "n": 4,
+    "latex": "_check_regressor_output_dim(output_dim: int) -> None",
+    "name": "\u2026and the mirror guard for regression"
+  },
+  {
+    "n": 5,
+    "latex": "CategoricalOrdinalEncoder(handle_unknown='use_encoded_value', unknown_value=..., min_frequency=None, cat_encoder_mode='appearance')",
+    "name": "Ordinal codes ordered by APPEARANCE, not alphabet"
+  },
+  {
+    "n": 6,
+    "latex": "_looks_like_datetime(X: pd.Series) -> bool",
+    "name": "Lenient datetime detection \u2014 on purpose"
+  },
+  {
+    "n": 7,
+    "latex": "DatetimeTransformer().fit_transform(df) -> ndarray  # + year, month, day, dayofweek",
+    "name": "Datetimes expand to calendar parts"
+  },
+  {
+    "n": 8,
+    "latex": "TransformToNumerical().fit_transform(df) -> ndarray   # sklearn ColumnTransformer inside",
+    "name": "One dispatcher for mixed column types"
+  },
+  {
+    "n": 9,
+    "latex": "UniqueFeatureFilter().fit(X).features_to_keep_ -> bool mask",
+    "name": "Constant columns are dropped"
+  },
+  {
+    "n": 10,
+    "latex": "OutlierRemover(threshold=4.0).fit(X).transform(X)",
+    "name": "Two-stage z-score clipping"
+  },
+  {
+    "n": 11,
+    "latex": "CustomStandardScaler().fit_transform(X)",
+    "name": "A scaler that survives zero variance"
+  },
+  {
+    "n": 12,
+    "latex": "RTDLQuantileTransformer().fit_transform(X)   # noise added at fit, n_quantiles ~ n_rows",
+    "name": "RTDL quantile transform \u2014 noise BEFORE quantiles"
+  },
+  {
+    "n": 13,
+    "latex": "PreprocessingPipeline(normalization_method='none', outlier_threshold=4.0)",
+    "name": "The pipeline clips TEST values to the TRAINING range"
+  },
+  {
+    "n": 14,
+    "latex": "FeatureShuffler(n_features, method='random', random_state=None)",
+    "name": "Feature permutations"
+  },
+  {
+    "n": 15,
+    "latex": "EnsembleGenerator(n_estimators=32, norm_methods=None, feat_shuffle_method='random', class_shift=True, permute_categorical=False, outlier_threshold=4.0, max_num_features=500, n_feature_crosses=0, n_svd_features=0, task='classification')",
+    "name": "The ensemble generator \u2014 views, not models"
+  },
+  {
+    "n": 16,
+    "latex": "_apply_categorical_permutation(X_full, cat_perm) -> None   # in place",
+    "name": "Categorical value permutation"
+  },
+  {
+    "n": 17,
+    "latex": "_append_cross_features(X, cross_pairs: List[Tuple[int,int]]) -> ndarray",
+    "name": "Multiplicative feature crosses"
+  },
+  {
+    "n": 18,
+    "latex": "_append_svd_features(X, n_original_features, svd_pipeline, is_train=False) -> ndarray",
+    "name": "Truncated-SVD features"
+  },
+  {
+    "n": 19,
+    "latex": "_pad_batch_to_multiple_of(x, divisor, constant_value=0) -> ndarray",
+    "name": "Rows padded to a multiple of the block size"
+  },
+  {
+    "n": 20,
+    "latex": "_pad_features(X, target_features) -> ndarray",
+    "name": "Features padded with zeros"
+  },
+  {
+    "n": 21,
+    "latex": "_pad_cat_mask(cat_mask, target_features) -> ndarray[bool]",
+    "name": "The categorical mask pads with FALSE"
+  },
+  {
+    "n": 22,
+    "latex": "M.RMSNorm(dim, eps=1e-6)",
+    "name": "RMSNorm"
+  },
+  {
+    "n": 23,
+    "latex": "M.rope_interleaved(x, base)   \u00b7   M.RoPE(dim, ...)",
+    "name": "Interleaved RoPE"
+  },
+  {
+    "n": 24,
+    "latex": "M.InducedSelfAttentionBlock(d_model, nhead, dim_ff, num_inds, activation='swiglu')",
+    "name": "Induced self-attention \u2014 O(nm) AND row-permutation equivariant"
+  },
+  {
+    "n": 25,
+    "latex": "M.CellEmbedder(embed_dim, max_classes, feature_group_size=3, num_freq=32) \u00b7 M.ColEmbedding(...) \u00b7 M.RowInteraction(d_model, ..., rope_base=100000.0)",
+    "name": "Cell \u2192 column \u2192 row embedding"
+  },
+  {
+    "n": 26,
+    "latex": "M.TabFM(...).forward(x, y, train_size, cat_mask=None, d=None) -> logits",
+    "name": "The shape contract \u2014 and the trap that makes a from-config model BLIND"
+  },
+  {
+    "n": 27,
+    "latex": "M._quantize_tensor(t, dtype=torch.int8) -> QuantizedTensor(data, scale) \u00b7 .dequantize(dt)",
+    "name": "int8 quantisation of the cache"
+  },
+  {
+    "n": 28,
+    "latex": "TabFM.prefill(x, y, cat_mask=None, d=None) -> (logits, {'col1','col2','icl': ICLearningCache})",
+    "name": "`prefill` \u2014 encode the context once"
+  },
+  {
+    "n": 29,
+    "latex": "TabFM.decode(x_test, cache, cat_mask=None, d=None) -> logits",
+    "name": "`decode` \u2014 and the proof it changes nothing"
+  },
+  {
+    "n": 30,
+    "latex": "M.move_cache_to_device(cache, device)",
+    "name": "Moving the cache off the device"
+  }
+]

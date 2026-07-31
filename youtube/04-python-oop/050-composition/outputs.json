@@ -1,0 +1,16 @@
+[
+  {
+    "after_line": 12,
+    "text": ">>> engine running, car moving",
+    "caption": "Car HAS-A Engine"
+  },
+  {
+    "after_line": 19,
+    "text": ">>> silent motor humming, car moving",
+    "caption": "swap the part, no other changes"
+  },
+  {
+    "after_line": 20,
+    "image": "artifacts/terminal.png"
+  }
+]

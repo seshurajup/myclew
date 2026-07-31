@@ -1,0 +1,42 @@
+[
+  {
+    "text": "The with statement guarantees setup and cleanup around a block, and you can build your own.",
+    "until_line": 5
+  },
+  {
+    "text": "A context manager is any class with two dunder methods: enter and exit.",
+    "until_line": 5
+  },
+  {
+    "text": "dunder-enter runs when the block starts — here Timer records the start time.",
+    "until_line": 5
+  },
+  {
+    "text": "[chuckle] dunder-exit runs when the block ends, printing how long the work inside took.",
+    "until_line": 8
+  },
+  {
+    "text": "So the timing logic wraps neatly around whatever code you put in the with block.",
+    "until_line": 13
+  },
+  {
+    "text": "[sniff] The crucial guarantee is that exit runs no matter what — even if an error is raised inside.",
+    "until_line": 19
+  },
+  {
+    "text": "This Guard's exit always cleans up, and by returning true, it can even swallow the exception.",
+    "until_line": 19
+  },
+  {
+    "text": "[sigh] So the ValueError is caught and suppressed, and the program calmly carries on to survived.",
+    "until_line": 24
+  },
+  {
+    "text": "[groan] Context managers are how files, locks, and connections clean themselves up reliably — now you can too.",
+    "until_line": 24
+  },
+  {
+    "text": "callable objects is next, video number 55. Which one do you already use? Comment below.",
+    "until_line": 24
+  }
+]

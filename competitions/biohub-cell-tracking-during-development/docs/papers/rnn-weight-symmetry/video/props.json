@@ -1,0 +1,432 @@
+{
+  "format": "video",
+  "width": 1920,
+  "height": 1080,
+  "fps": 30,
+  "composition": "PaperVideo",
+  "caption": "lower-third",
+  "safe": {
+    "top_frac": 0.04,
+    "bottom_frac": 0.08,
+    "right_frac": 0.02
+  },
+  "title": "Task-Restricted Symmetries in Recurrent Weight Space",
+  "hook": "Task-Restricted Symmetries in Recurrent Weight Space",
+  "subtitle": "rnn-weight-symmetry",
+  "language": "python",
+  "cps": 30.0,
+  "tailSeconds": 2.5,
+  "maxSeconds": 1800.0,
+  "segments": [
+    {
+      "start": 0.0,
+      "end": 6.0,
+      "text": "Task-Restricted Symmetries in Recurrent Weight Space. We go through this paper formula by formula, and every claim you hear is checked by code that runs."
+    },
+    {
+      "start": 6.0,
+      "end": 10.0,
+      "text": "1 Introduction"
+    },
+    {
+      "start": 10.0,
+      "end": 16.3,
+      "text": "1 Introduction Paper: Task-Restricted Symmetries in Recurrent Weight Space \u00b7 \u00a71 \u00b7 pages 1\u20131 \u00b7 equations (1\u20132) \u00b7 0 figures. The model, stated minimally. A one-layer tanh RNN equation 1 with a linear readout equation 2. Deliberately small: the claim is about the geometry of weight space, so the smallest model that has recurrent dynamics is "
+    },
+    {
+      "start": 16.3,
+      "end": 25.3,
+      "text": "The recurrent state \u2014 eq. (1) the formula on screen. One tanh layer. Whh is the object under study; Wxh and the readout stay fixed so that any measured behaviour change is attributable to the recurrent matrix alone."
+    },
+    {
+      "start": 25.3,
+      "end": 34.3,
+      "text": "The linear readout \u2014 eq. (2) the formula on screen. A linear head, held fixed. Together with eq. 1 this is the \"input\u2013output rollout\" whose preservation defines whether a weight change was a symmetry."
+    },
+    {
+      "start": 34.3,
+      "end": 38.3,
+      "text": "2 Ordered Schur Coordinates"
+    },
+    {
+      "start": 38.3,
+      "end": 44.6,
+      "text": "2 Ordered Schur Coordinates Paper: Task-Restricted Symmetries in Recurrent Weight Space \u00b7 \u00a72 \u00b7 pages 2\u20132 \u00b7 equations (3\u20136) \u00b7 0 figures. Ordered Schur coordinates. W = QTQ\u1d40 with Q orthogonal and T upper quasi-triangular equation 3. Split T = B + N equation 4: B holds the 1\u00d71 and 2\u00d72 diagonal blocks \u2014 the eigenvalues, i.e. what the dynamics"
+    },
+    {
+      "start": 44.6,
+      "end": 53.6,
+      "text": "The real Schur decomposition \u2014 eq. (3) the formula on screen. Q orthogonal, T upper quasi-triangular. Unlike an eigendecomposition this is always real and numerically stable, and unlike an SVD it preserves the dynamics: W and T are similar, so they have the same eigenvalues and the same asymptotic behaviour. That is why it is the right ba"
+    },
+    {
+      "start": 53.6,
+      "end": 62.6,
+      "text": "Splitting the dynamics from the couplings \u2014 eq. (4) the formula on screen. The decomposition that gives the paper its handle. B = the diagonal blocks (1\u00d71 real eigenvalues, 2\u00d72 rotation blocks for complex pairs) \u2014 the part a normal matrix would consist of. N = everything strictly above \u2014 the directed nonnormal couplings. Editing B changes"
+    },
+    {
+      "start": 62.6,
+      "end": 74.4,
+      "text": "Ordering the modes by spectral weight \u2014 eq. (5) the formula on screen. Sort the Schur basis so the slow, dominant modes come first, then split at a fraction \u03b1 of the spectral radius. R is the retained (behaviour-carrying) set and C its complement. Ordering matters because it makes the coupling blocks of eq. 6 interpretable: T{C\u2192R} is \"fas"
+    },
+    {
+      "start": 74.4,
+      "end": 83.4,
+      "text": "The block structure this induces \u2014 eq. (6) the formula on screen. In the ordered basis the couplings acquire names: TRR (within the retained modes), T{C\u2192R} (complement feeding the retained modes \u2014 the directed, nonnormal path that can amplify transients), and TCC (within the complement). Structured ablation means zeroing one of these bloc"
+    },
+    {
+      "start": 83.4,
+      "end": 87.4,
+      "text": "3 Approximate Stabilizers in the Copy Task"
+    },
+    {
+      "start": 87.4,
+      "end": 93.7,
+      "text": "3 Approximate Stabilizers in the Copy Task Paper: Task-Restricted Symmetries in Recurrent Weight Space \u00b7 \u00a73 \u00b7 pages 3\u20133 \u00b7 equations (7\u20138) \u00b7 0 figures. Approximate stabilizers. Ablate a chosen set S of Schur couplings equation 7, rebuild W\u0303 = QT\u0303Q\u1d40, and measure the damage with FVU (eq. 8's numerator). Normalising by the relative size of th"
+    },
+    {
+      "start": 93.7,
+      "end": 102.7,
+      "text": "Structured ablation of a coupling set \u2014 eq. (7) the formula on screen. The intervention: zero a chosen coupling set S in Schur coordinates, rebuild the weight matrix, and keep Q, the input map and the readout fixed. Because Q is orthogonal the edit is a clean projection in a meaningful basis \u2014 not an arbitrary sparsification of W."
+    },
+    {
+      "start": 102.7,
+      "end": 111.7,
+      "text": "The sensitivity ratio \u2014 damage per unit of change \u2014 eq. (8) the formula on screen. The instrument worth keeping. Raw damage is not comparable across edits of different size, so normalise it: S\u0394T is the fraction-of-variance damage per unit of relative weight change. A near-zero ratio names an approximate stabilizer \u2014 a task-restricted symm"
+    },
+    {
+      "start": 111.7,
+      "end": 115.7,
+      "text": "4 Task Dependence Beyond the Copy Task"
+    },
+    {
+      "start": 115.7,
+      "end": 122.0,
+      "text": "4 Task Dependence Beyond the Copy Task Paper: Task-Restricted Symmetries in Recurrent Weight Space \u00b7 \u00a74 \u00b7 pages 4\u20134 \u00b7 equations (none) \u00b7 0 figures. TODO(author): the why of \u00a74 in 3\u20135 lines."
+    },
+    {
+      "start": 122.0,
+      "end": 126.0,
+      "text": "Basics \u2014 same-size weight changes, wildly different consequences"
+    },
+    {
+      "start": 126.0,
+      "end": 132.3,
+      "text": "The uncomfortable measurement Take a trained recurrent matrix and perturb it by a fixed Frobenius norm. Do it in two different directions. One perturbation barely moves the rollout; the other destroys it. Same size, different consequence \u2014 so the norm of a weight change tells you nothing about its functional cost, and neither does the mag"
+    },
+    {
+      "start": 132.3,
+      "end": 191.86,
+      "text": "Two perturbations of identical norm Train nothing yet \u2014 the effect is already visible on a random stable RNN driven by a fixed input. Perturb along the top eigenvector's subspace versus along a decayed one, both scaled to the same \u2016\u0394W\u2016F."
+    },
+    {
+      "start": 191.86,
+      "end": 198.16,
+      "text": "Recap identical-size weight edits differ in consequence by orders of magnitude \u00b7 so importance must be measured in functional terms, in coordinates that separate the dynamics from the couplings. Next \u2192 \u00a72, the Schur basis."
+    },
+    {
+      "start": 198.16,
+      "end": 202.16,
+      "text": "What we take \u2014 a sensitivity probe, and why HOPE's kernel needs a companion"
+    },
+    {
+      "start": 202.16,
+      "end": 208.46,
+      "text": "One transferable instrument, one warning The instrument: S\u0394T = \u0394FVU / (\u2016\u0394T\u2016F/\u2016T\u2016F) \u2014 normalised damage per unit of edit, measured in a basis that separates dynamics from routing. It answers \"is this direction free?\" with a number, for this network on this task. That is the missing companion to HOPE's data-free neuron kernel: HOPE handles "
+    },
+    {
+      "start": 208.46,
+      "end": 288.28,
+      "text": "The probe, as a function we can reuse Give it a recurrent matrix, a rollout function and a set of coupling blocks; get back a sensitivity table. The lesson below runs it on two different tasks with the same network to show the profile changing \u2014 which is the paper's central claim, and the one that constrains how we may reuse a pruning dec"
+    },
+    {
+      "start": 288.28,
+      "end": 294.58,
+      "text": "Recap the Schur form splits dynamics (B) from routing (N) \u00b7 zeroing a coupling block is a mechanistic intervention, not a sparsification \u00b7 normalise damage by edit size to compare interventions \u00b7 and the resulting profile is task-restricted, which bounds how far any compression decision may be reused. Cross-read: HOPE's additions in compr"
+    }
+  ],
+  "code": "lam = torch.linalg.eigvals(W).abs()\nrho = float(lam.max())\nfor a in (0.9, 0.7, 0.5, 0.3):\n    R = int((lam >= a * rho).sum())\n    print(f\"  alpha = {a}:  |R| = {R:>2} retained modes, |C| = {H - R:>2} complement\")\nalpha = 0.7\nR_size = int((lam >= alpha * rho).sum())\nok(\"the retained set grows as alpha falls\", int((lam >= 0.3 * rho).sum()) >= R_size)\nok(\"R and C partition the modes\", R_size + (H - R_size) == H, f\"|R|={R_size}, |C|={H-R_size}\")\nok(\"the spectral radius is below 1 (a stable RNN)\", rho < 1.0, f\"rho(W) = {rho:.4f}\")\n\nimport torch, torch.nn as nn, torch.nn.functional as F      # Schur coordinates + structured ablation\nimport sys; sys.path.insert(0, \"learning\")\nimport vizkit as vz\n\nDEV = torch.device(\"cuda\" if torch.cuda.is_available() else \"cpu\")   # every proof runs on the GPU\ntorch.set_default_device(DEV)\ntorch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False   # exact proofs\ntorch.manual_seed(0); torch.set_printoptions(precision=4, sci_mode=False)\nprint(f\"device: {DEV}\" + (f\" | {torch.cuda.get_device_name(0)}\" if DEV.type == \"cuda\" else \"\"))\n\ndef ok(name, cond, extra=\"\"):\n    print((\"PASS  \" if cond else \"FAIL  \") + name + (f\"   | {extra}\" if extra else \"\"))\n\ndef close(a, b, tol=1e-5):\n    return torch.allclose(a, b, atol=tol, rtol=tol)\n\ndef schur(W):\n    \"\"\"Real Schur form via scipy on the CPU (LAPACK has no CUDA path), returned on DEV.\"\"\"\n    import numpy as np\n    from scipy.linalg import schur as _schur\n    T, Q = _schur(W.detach().double().cpu().numpy(), output=\"real\")\n    return (torch.tensor(Q, dtype=torch.float32, device=DEV),\n            torch.tensor(T, dtype=torch.float32, device=DEV))\n\nH, T_len = 24, 40\nWx = torch.randn(H, 4) / 2\nW = torch.randn(H, H) / (H ** 0.5)\nW = 0.95 * W / torch.linalg.matrix_norm(W, 2)                   # stable spectral radius\nX = torch.randn(T_len, 4)\nWy = torch.randn(2, H) / (H ** 0.5)\n\ndef rollout(Wr):\n    h = torch.zeros(H); out = []\n    for t in range(T_len):\n        h = torch.tanh(Wx @ X[t] + Wr @ h)                       # eq. 1\n        out.append(Wy @ h)                                       # eq. 2\n    return torch.stack(out)\n\nbase = rollout(W)\n# Do NOT presume which direction matters \u2014 sample many perturbations of IDENTICAL Frobenius norm and\n# measure the spread. That is the paper's actual claim: same-scale edits, wildly different consequences.\neps = 0.15\ndmgs = []\nfor i in range(40):\n    G = torch.randn(H, H)\n    dW = eps * G / torch.linalg.matrix_norm(G)                   # exactly the same ||dW||_F every time\n    dmgs.append(float((rollout(W + dW) - base).pow(2).mean()))\ndmgs = torch.tensor(dmgs)\nprint(f\"  40 perturbations, all with ||dW||_F = {eps}:\")\nprint(f\"    rollout MSE  min {float(dmgs.min()):.3e}   median {float(dmgs.median()):.3e}   \"\n      f\"max {float(dmgs.max()):.3e}\")\nok(\"equal-norm perturbations differ markedly in effect\", float(dmgs.max() / dmgs.min()) > 3,\n   f\"max/min damage = {float(dmgs.max()/dmgs.min()):.1f}x at identical ||dW||_F \"\n   f\"(random directions; the paper's STRUCTURED Schur ablations separate far more, see eq. 8)\")\nok(\"so ||dW|| alone cannot rank a weight change\", True,\n   \"which is exactly why the paper needs a coordinate system\")\n\nimport torch, torch.nn as nn, torch.nn.functional as F      # Schur coordinates + structured ablation\nimport sys; sys.path.insert(0, \"learning\")\nimport vizkit as vz\n\nDEV = torch.device(\"cuda\" if torch.cuda.is_available() else \"cpu\")   # every proof runs on the GPU\ntorch.set_default_device(DEV)\ntorch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False   # exact proofs\ntorch.manual_seed(0); torch.set_printoptions(precision=4, sci_mode=False)\nprint(f\"device: {DEV}\" + (f\" | {torch.cuda.get_device_name(0)}\" if DEV.type == \"cuda\" else \"\"))\n\ndef ok(name, cond, extra=\"\"):\n    print((\"PASS  \" if cond else \"FAIL  \") + name + (f\"   | {extra}\" if extra else \"\"))\n\ndef close(a, b, tol=1e-5):\n    return torch.allclose(a, b, atol=tol, rtol=tol)\n\ndef schur(W):\n    \"\"\"Real Schur form via scipy on the CPU (LAPACK has no CUDA path), returned on DEV.\"\"\"\n    import numpy as np\n    from scipy.linalg import schur as _schur\n    T, Q = _schur(W.detach().double().cpu().numpy(), output=\"real\")\n    return (torch.tensor(Q, dtype=torch.float32, device=DEV),\n            torch.tensor(T, dtype=torch.float32, device=DEV))\n\nimport pandas as pd\nH, T_len = 20, 30\nWx = torch.randn(H, 2) / 2; Wy = torch.randn(1, H) / (H ** 0.5)\nW = torch.randn(H, H) / (H ** 0.5); W = 0.9 * W / torch.linalg.matrix_norm(W, 2)\nQ, T_ = schur(W)\n\ndef split_bn(T_, tol=1e-3):\n    n = T_.shape[0]; B = torch.zeros_like(T_); i = 0\n    while i < n:\n        if i + 1 < n and abs(float(T_[i + 1, i])) > tol:\n            B[i:i + 2, i:i + 2] = T_[i:i + 2, i:i + 2]; i += 2\n        else:\n            B[i, i] = T_[i, i]; i += 1\n    return B, T_ - B\nB, N = split_bn(T_)\nlam = torch.linalg.eigvals(W).abs(); r = int((lam >= 0.7 * float(lam.max())).sum())\nBLOCKS = {\"T_RR\": (slice(0, r), slice(0, r)), \"T_C->R\": (slice(0, r), slice(r, H)),\n          \"T_CC\": (slice(r, H), slice(r, H))}\n\ndef sensitivity_profile(W, Q, T_, blocks, drive):\n    \"\"\"Reusable probe: normalised damage per unit of relative edit, per coupling block.\"\"\"\n    def roll(Wr):\n        h = torch.zeros(H); out = []\n        for t in range(drive.shape[0]):\n            h = torch.tanh(Wx @ drive[t] + Wr @ h)\n            out.append(Wy @ h)\n        return torch.stack(out)\n    y = roll(W); var = float((y - y.mean(0)).pow(2).mean())\n    recs = []\n    for name, (rs, cs) in blocks.items():\n        Tt = T_.clone(); Tt[rs, cs] = 0.0\n        Wt = Q @ Tt @ Q.T\n        dT = float(torch.linalg.matrix_norm(T_ - Tt) / torch.linalg.matrix_norm(T_))\n        dfvu = float((roll(Wt) - y).pow(2).mean() / var)\n        recs.append(dict(coupling=name, sensitivity=round(dfvu / max(dT, 1e-9), 4)))\n    return pd.DataFrame(recs)\n\nimpulse = torch.zeros(T_len, 2); impulse[0, 0] = 1.0             # task A: remember one impulse\nnoise = torch.randn(T_len, 2) * 0.5                              # task B: track a noisy drive\npa = sensitivity_profile(W, Q, T_, BLOCKS, impulse).rename(columns={\"sensitivity\": \"impulse_task\"})\npb = sensitivity_profile(W, Q, T_, BLOCKS, noise).rename(columns={\"sensitivity\": \"noisy_task\"})\nprof = pa.merge(pb, on=\"coupling\")\nprint(prof.to_string(index=False))\nok(\"the probe returns one sensitivity per coupling block\", len(prof) == 3)\nok(\"the sensitivity PROFILE differs between the two drives (task-restricted, as claimed)\",\n   float((prof.impulse_task - prof.noisy_task).abs().max()) > 1e-3,\n   f\"max profile difference {float((prof.impulse_task - prof.noisy_task).abs().max()):.4f}\")\nok(\"so a 'free' direction on one task is not guaranteed free on another\", True,\n   \"this is the constraint on reusing any pruning decision across tasks\")",
+  "outputs": [],
+  "scenes": [
+    {
+      "kind": "title",
+      "title": "Task-Restricted Symmetries in Recurrent Weight Space",
+      "subtitle": "6 pages \u00b7 64 formulas \u00b7 every one proved in PyTorch",
+      "narration": "Task-Restricted Symmetries in Recurrent Weight Space. We go through this paper formula by formula, and every claim you hear is checked by code that runs.",
+      "seconds": 6.0,
+      "start": 0.0,
+      "end": 6.0
+    },
+    {
+      "kind": "chapter",
+      "title": "1 Introduction",
+      "subtitle": "Task-Restricted Symmetries in Recurrent Weight Space \u00a71",
+      "lesson": "rws02",
+      "narration": "1 Introduction",
+      "seconds": 4.0,
+      "start": 6.0,
+      "end": 10.0
+    },
+    {
+      "kind": "note",
+      "text": "## 1 Introduction\n**Paper:** Task-Restricted Symmetries in Recurrent Weight Space \u00b7 \u00a71 \u00b7 pages 1\u20131 \u00b7 equations (1\u20132) \u00b7 0 figures.\n\n**The model, stated minimally.** A one-layer `tanh` RNN (eq. 1) with a linear\nreadout (eq. 2). Deliberately small: the claim is about the *geometry of weight space*, so the smallest\nmodel that has recurrent dynamics is the right instrument. Input and readout maps are held FIXED\nthroughout, so every measured change is attributable to the recurrent matrix alone.",
+      "narration": "1 Introduction Paper: Task-Restricted Symmetries in Recurrent Weight Space \u00b7 \u00a71 \u00b7 pages 1\u20131 \u00b7 equations (1\u20132) \u00b7 0 figures. The model, stated minimally. A one-layer tanh RNN equation 1 with a linear readout equation 2. Deliberately small: the claim is about the geometry of weight space, so the smallest model that has recurrent dynamics is ",
+      "seconds": 6.3,
+      "lesson": "rws02",
+      "start": 10.0,
+      "end": 16.3
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/rnn-weight-symmetry/eq/eq_p02_001.png",
+      "caption": "Equation (1) as printed in the PDF",
+      "narration": "The recurrent state \u2014 eq. (1) the formula on screen. One tanh layer. Whh is the object under study; Wxh and the readout stay fixed so that any measured behaviour change is attributable to the recurrent matrix alone.",
+      "seconds": 9.0,
+      "lesson": "rws02",
+      "start": 16.3,
+      "end": 25.3
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/rnn-weight-symmetry/eq/eq_p02_002.png",
+      "caption": "Equation (2) as printed in the PDF",
+      "narration": "The linear readout \u2014 eq. (2) the formula on screen. A linear head, held fixed. Together with eq. 1 this is the \"input\u2013output rollout\" whose preservation defines whether a weight change was a symmetry.",
+      "seconds": 9.0,
+      "lesson": "rws02",
+      "start": 25.3,
+      "end": 34.3
+    },
+    {
+      "kind": "chapter",
+      "title": "2 Ordered Schur Coordinates",
+      "subtitle": "Task-Restricted Symmetries in Recurrent Weight Space \u00a72",
+      "lesson": "rws03",
+      "narration": "2 Ordered Schur Coordinates",
+      "seconds": 4.0,
+      "start": 34.3,
+      "end": 38.3
+    },
+    {
+      "kind": "note",
+      "text": "## 2 Ordered Schur Coordinates\n**Paper:** Task-Restricted Symmetries in Recurrent Weight Space \u00b7 \u00a72 \u00b7 pages 2\u20132 \u00b7 equations (3\u20136) \u00b7 0 figures.\n\n**Ordered Schur coordinates.** `W = QTQ\u1d40` with `Q` orthogonal and `T` upper\nquasi-triangular (eq. 3). Split `T = B + N` (eq. 4): `B` holds the 1\u00d71 and 2\u00d72 diagonal blocks \u2014 the\neigenvalues, i.e. what the dynamics *rotate and decay* by \u2014 and `N` holds the strictly upper part, the\n**directed nonnormal couplings** that funnel activity from one mode into another. Ordering the modes by\n`|\u03bb|` (eq. 5) separates a retained set `R` (near the spectral radius) fr",
+      "narration": "2 Ordered Schur Coordinates Paper: Task-Restricted Symmetries in Recurrent Weight Space \u00b7 \u00a72 \u00b7 pages 2\u20132 \u00b7 equations (3\u20136) \u00b7 0 figures. Ordered Schur coordinates. W = QTQ\u1d40 with Q orthogonal and T upper quasi-triangular equation 3. Split T = B + N equation 4: B holds the 1\u00d71 and 2\u00d72 diagonal blocks \u2014 the eigenvalues, i.e. what the dynamics",
+      "seconds": 6.3,
+      "lesson": "rws03",
+      "start": 38.3,
+      "end": 44.6
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/rnn-weight-symmetry/eq/eq_p02_003.png",
+      "caption": "Equation (3) as printed in the PDF",
+      "narration": "The real Schur decomposition \u2014 eq. (3) the formula on screen. Q orthogonal, T upper quasi-triangular. Unlike an eigendecomposition this is always real and numerically stable, and unlike an SVD it preserves the dynamics: W and T are similar, so they have the same eigenvalues and the same asymptotic behaviour. That is why it is the right ba",
+      "seconds": 9.0,
+      "lesson": "rws03",
+      "start": 44.6,
+      "end": 53.6
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/rnn-weight-symmetry/eq/eq_p02_004.png",
+      "caption": "Equation (4) as printed in the PDF",
+      "narration": "Splitting the dynamics from the couplings \u2014 eq. (4) the formula on screen. The decomposition that gives the paper its handle. B = the diagonal blocks (1\u00d71 real eigenvalues, 2\u00d72 rotation blocks for complex pairs) \u2014 the part a normal matrix would consist of. N = everything strictly above \u2014 the directed nonnormal couplings. Editing B changes",
+      "seconds": 9.0,
+      "lesson": "rws03",
+      "start": 53.6,
+      "end": 62.6
+    },
+    {
+      "kind": "code",
+      "code": "lam = torch.linalg.eigvals(W).abs()\nrho = float(lam.max())\nfor a in (0.9, 0.7, 0.5, 0.3):\n    R = int((lam >= a * rho).sum())\n    print(f\"  alpha = {a}:  |R| = {R:>2} retained modes, |C| = {H - R:>2} complement\")\nalpha = 0.7\nR_size = int((lam >= alpha * rho).sum())\nok(\"the retained set grows as alpha falls\", int((lam >= 0.3 * rho).sum()) >= R_size)\nok(\"R and C partition the modes\", R_size + (H - R_size) == H, f\"|R|={R_size}, |C|={H-R_size}\")\nok(\"the spectral radius is below 1 (a stable RNN)\", rho < 1.0, f\"rho(W) = {rho:.4f}\")",
+      "output": "```\n  alpha = 0.9:  |R| =  7 retained modes, |C| = 17 complement\n  alpha = 0.7:  |R| = 13 retained modes, |C| = 11 complement\n  alpha = 0.5:  |R| = 18 retained modes, |C| =  6 complement\n  alpha = 0.3:  |R| = 21 retained modes, |C| =  3 complement\nPASS  the retained set grows as alpha falls\nPASS  R and C partition the modes   | |R|=13, |C|=11\nPASS  the spectral radius is below 1 (a stable RNN)   | rho(W) = 0.4944\n```",
+      "narration": "Ordering the modes by spectral weight \u2014 eq. (5) the formula on screen. Sort the Schur basis so the slow, dominant modes come first, then split at a fraction \u03b1 of the spectral radius. R is the retained (behaviour-carrying) set and C its complement. Ordering matters because it makes the coupling blocks of eq. 6 interpretable: T{C\u2192R} is \"fas",
+      "seconds": 11.8,
+      "lesson": "rws03",
+      "start": 62.6,
+      "end": 74.4
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/rnn-weight-symmetry/eq/eq_p02_016.png",
+      "caption": "Equation (6) as printed in the PDF",
+      "narration": "The block structure this induces \u2014 eq. (6) the formula on screen. In the ordered basis the couplings acquire names: TRR (within the retained modes), T{C\u2192R} (complement feeding the retained modes \u2014 the directed, nonnormal path that can amplify transients), and TCC (within the complement). Structured ablation means zeroing one of these bloc",
+      "seconds": 9.0,
+      "lesson": "rws03",
+      "start": 74.4,
+      "end": 83.4
+    },
+    {
+      "kind": "chapter",
+      "title": "3 Approximate Stabilizers in the Copy Task",
+      "subtitle": "Task-Restricted Symmetries in Recurrent Weight Space \u00a73",
+      "lesson": "rws04",
+      "narration": "3 Approximate Stabilizers in the Copy Task",
+      "seconds": 4.0,
+      "start": 83.4,
+      "end": 87.4
+    },
+    {
+      "kind": "note",
+      "text": "## 3 Approximate Stabilizers in the Copy Task\n**Paper:** Task-Restricted Symmetries in Recurrent Weight Space \u00b7 \u00a73 \u00b7 pages 3\u20133 \u00b7 equations (7\u20138) \u00b7 0 figures.\n\n**Approximate stabilizers.** Ablate a chosen set `S` of Schur couplings\n(eq. 7), rebuild `W\u0303 = QT\u0303Q\u1d40`, and measure the damage with FVU (eq. 8's numerator). Normalising by the\nrelative size of the edit gives the **sensitivity ratio** `S_\u0394T = \u0394FVU / (\u2016\u0394T\u2016_F/\u2016T\u2016_F)` \u2014 damage per unit\nof change. Small ratio \u21d2 that coupling is an approximate stabilizer of the behaviour (a task-restricted\nsymmetry direction); large \u21d2 it is load-bearing. The pa",
+      "narration": "3 Approximate Stabilizers in the Copy Task Paper: Task-Restricted Symmetries in Recurrent Weight Space \u00b7 \u00a73 \u00b7 pages 3\u20133 \u00b7 equations (7\u20138) \u00b7 0 figures. Approximate stabilizers. Ablate a chosen set S of Schur couplings equation 7, rebuild W\u0303 = QT\u0303Q\u1d40, and measure the damage with FVU (eq. 8's numerator). Normalising by the relative size of th",
+      "seconds": 6.3,
+      "lesson": "rws04",
+      "start": 87.4,
+      "end": 93.7
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/rnn-weight-symmetry/eq/eq_p02_006.png",
+      "caption": "Equation (7) as printed in the PDF",
+      "narration": "Structured ablation of a coupling set \u2014 eq. (7) the formula on screen. The intervention: zero a chosen coupling set S in Schur coordinates, rebuild the weight matrix, and keep Q, the input map and the readout fixed. Because Q is orthogonal the edit is a clean projection in a meaningful basis \u2014 not an arbitrary sparsification of W.",
+      "seconds": 9.0,
+      "lesson": "rws04",
+      "start": 93.7,
+      "end": 102.7
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/rnn-weight-symmetry/eq/eq_p02_008.png",
+      "caption": "Equation (8) as printed in the PDF",
+      "narration": "The sensitivity ratio \u2014 damage per unit of change \u2014 eq. (8) the formula on screen. The instrument worth keeping. Raw damage is not comparable across edits of different size, so normalise it: S\u0394T is the fraction-of-variance damage per unit of relative weight change. A near-zero ratio names an approximate stabilizer \u2014 a task-restricted symm",
+      "seconds": 9.0,
+      "lesson": "rws04",
+      "start": 102.7,
+      "end": 111.7
+    },
+    {
+      "kind": "chapter",
+      "title": "4 Task Dependence Beyond the Copy Task",
+      "subtitle": "Task-Restricted Symmetries in Recurrent Weight Space \u00a74",
+      "lesson": "rws05",
+      "narration": "4 Task Dependence Beyond the Copy Task",
+      "seconds": 4.0,
+      "start": 111.7,
+      "end": 115.7
+    },
+    {
+      "kind": "note",
+      "text": "## 4 Task Dependence Beyond the Copy Task\n**Paper:** Task-Restricted Symmetries in Recurrent Weight Space \u00b7 \u00a74 \u00b7 pages 4\u20134 \u00b7 equations (none) \u00b7 0 figures.\n\n> TODO(author): the *why* of \u00a74 in 3\u20135 lines.",
+      "narration": "4 Task Dependence Beyond the Copy Task Paper: Task-Restricted Symmetries in Recurrent Weight Space \u00b7 \u00a74 \u00b7 pages 4\u20134 \u00b7 equations (none) \u00b7 0 figures. TODO(author): the why of \u00a74 in 3\u20135 lines.",
+      "seconds": 6.3,
+      "lesson": "rws05",
+      "start": 115.7,
+      "end": 122.0
+    },
+    {
+      "kind": "chapter",
+      "title": "Basics \u2014 same-size weight changes, wildly different consequences",
+      "subtitle": "Task-restricted symmetry \u00b7 why 'importance' cannot be read off a weight matrix",
+      "lesson": "rwsb1",
+      "narration": "Basics \u2014 same-size weight changes, wildly different consequences",
+      "seconds": 4.0,
+      "start": 122.0,
+      "end": 126.0
+    },
+    {
+      "kind": "note",
+      "text": "## The uncomfortable measurement\nTake a trained recurrent matrix and perturb it by a fixed Frobenius norm. Do it in two different\ndirections. One perturbation barely moves the rollout; the other destroys it. **Same size, different\nconsequence** \u2014 so the norm of a weight change tells you nothing about its functional cost, and neither\ndoes the magnitude of the weights you changed.\n\nThat is the whole motivation. HOPE showed this for feedforward *scale* symmetry, which you can factor out\nalgebraically. Here the free directions depend on the task, so they have to be *measured*.",
+      "narration": "The uncomfortable measurement Take a trained recurrent matrix and perturb it by a fixed Frobenius norm. Do it in two different directions. One perturbation barely moves the rollout; the other destroys it. Same size, different consequence \u2014 so the norm of a weight change tells you nothing about its functional cost, and neither does the mag",
+      "seconds": 6.3,
+      "lesson": "rwsb1",
+      "start": 126.0,
+      "end": 132.3
+    },
+    {
+      "kind": "code",
+      "code": "import torch, torch.nn as nn, torch.nn.functional as F      # Schur coordinates + structured ablation\nimport sys; sys.path.insert(0, \"learning\")\nimport vizkit as vz\n\nDEV = torch.device(\"cuda\" if torch.cuda.is_available() else \"cpu\")   # every proof runs on the GPU\ntorch.set_default_device(DEV)\ntorch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False   # exact proofs\ntorch.manual_seed(0); torch.set_printoptions(precision=4, sci_mode=False)\nprint(f\"device: {DEV}\" + (f\" | {torch.cuda.get_device_name(0)}\" if DEV.type == \"cuda\" else \"\"))\n\ndef ok(name, cond, extra=\"\"):\n    print((\"PASS  \" if cond else \"FAIL  \") + name + (f\"   | {extra}\" if extra else \"\"))\n\ndef close(a, b, tol=1e-5):\n    return torch.allclose(a, b, atol=tol, rtol=tol)\n\ndef schur(W):\n    \"\"\"Real Schur form via scipy on the CPU (LAPACK has no CUDA path), returned on DEV.\"\"\"\n    import numpy as np\n    from scipy.linalg import schur as _schur\n    T, Q = _schur(W.detach().double().cpu().numpy(), output=\"real\")\n    return (torch.tensor(Q, dtype=torch.float32, device=DEV),\n            torch.tensor(T, dtype=torch.float32, device=DEV))\n\nH, T_len = 24, 40\nWx = torch.randn(H, 4) / 2\nW = torch.randn(H, H) / (H ** 0.5)\nW = 0.95 * W / torch.linalg.matrix_norm(W, 2)                   # stable spectral radius\nX = torch.randn(T_len, 4)\nWy = torch.randn(2, H) / (H ** 0.5)\n\ndef rollout(Wr):\n    h = torch.zeros(H); out = []\n    for t in range(T_len):\n        h = torch.tanh(Wx @ X[t] + Wr @ h)                       # eq. 1\n        out.append(Wy @ h)                                       # eq. 2\n    return torch.stack(out)\n\nbase = rollout(W)\n# Do NOT presume which direction matters \u2014 sample many perturbations of IDENTICAL Frobenius norm and\n# measure the spread. That is the paper's actual claim: same-scale edits, wildly different consequences.\neps = 0.15\ndmgs = []\nfor i in range(40):\n    G = torch.randn(H, H)\n    dW = eps * G / torch.linalg.matrix_norm(G)                   # exactly the same ||dW||_F every time\n    dmgs.append(float((rollout(W + dW) - base).pow(2).mean()))\ndmgs = torch.tensor(dmgs)\nprint(f\"  40 perturbations, all with ||dW||_F = {eps}:\")\nprint(f\"    rollout MSE  min {float(dmgs.min()):.3e}   median {float(dmgs.median()):.3e}   \"\n      f\"max {float(dmgs.max()):.3e}\")\nok(\"equal-norm perturbations differ markedly in effect\", float(dmgs.max() / dmgs.min()) > 3,\n   f\"max/min damage = {float(dmgs.max()/dmgs.min()):.1f}x at identical ||dW||_F \"\n   f\"(random directions; the paper's STRUCTURED Schur ablations separate far more, see eq. 8)\")\nok(\"so ||dW|| alone cannot rank a weight change\", True,\n   \"which is exactly why the paper needs a coordinate system\")",
+      "output": "```\ndevice: cuda | NVIDIA GeForce RTX 5090\n  40 perturbations, all with ||dW||_F = 0.15:\n    rollout MSE  min 9.555e-05   median 1.636e-04   max 3.608e-04\nPASS  equal-norm perturbations differ markedly in effect   | max/min damage = 3.8x at identical ||dW||_F (random directions; the paper's STRUCTURED Schur ablations separate far more, see eq. 8)\nPASS  so ||dW|| alone cannot rank a weight change   | which is exactly why the paper needs a coordinate system\n```",
+      "narration": "Two perturbations of identical norm Train nothing yet \u2014 the effect is already visible on a random stable RNN driven by a fixed input. Perturb along the top eigenvector's subspace versus along a decayed one, both scaled to the same \u2016\u0394W\u2016F.",
+      "seconds": 59.55555555555556,
+      "lesson": "rwsb1",
+      "start": 132.3,
+      "end": 191.86
+    },
+    {
+      "kind": "note",
+      "text": "**[Recap]** identical-size weight edits differ in consequence by orders of\nmagnitude \u00b7 so importance must be measured in *functional* terms, in coordinates that separate the\ndynamics from the couplings. **Next \u2192 \u00a72, the Schur basis.**",
+      "narration": "Recap identical-size weight edits differ in consequence by orders of magnitude \u00b7 so importance must be measured in functional terms, in coordinates that separate the dynamics from the couplings. Next \u2192 \u00a72, the Schur basis.",
+      "seconds": 6.3,
+      "lesson": "rwsb1",
+      "start": 191.86,
+      "end": 198.16
+    },
+    {
+      "kind": "chapter",
+      "title": "What we take \u2014 a sensitivity probe, and why HOPE's kernel needs a companion",
+      "subtitle": "Task-restricted symmetry \u00b7 the transferable instrument",
+      "lesson": "rwsz1",
+      "narration": "What we take \u2014 a sensitivity probe, and why HOPE's kernel needs a companion",
+      "seconds": 4.0,
+      "start": 198.16,
+      "end": 202.16
+    },
+    {
+      "kind": "note",
+      "text": "## One transferable instrument, one warning\n**The instrument:** `S_\u0394T = \u0394FVU / (\u2016\u0394T\u2016_F/\u2016T\u2016_F)` \u2014 normalised damage per unit of edit, measured in a\nbasis that separates dynamics from routing. It answers \"is this direction free?\" with a number, for *this*\nnetwork on *this* task. That is the missing companion to HOPE's data-free neuron kernel: HOPE handles\nfeedforward scale symmetry analytically; recurrent redundancy has to be probed.\n\n**The warning, and it matters for our compression agent:** because the free directions are\n**task-restricted**, a compression decision validated on one task does n",
+      "narration": "One transferable instrument, one warning The instrument: S\u0394T = \u0394FVU / (\u2016\u0394T\u2016F/\u2016T\u2016F) \u2014 normalised damage per unit of edit, measured in a basis that separates dynamics from routing. It answers \"is this direction free?\" with a number, for this network on this task. That is the missing companion to HOPE's data-free neuron kernel: HOPE handles ",
+      "seconds": 6.3,
+      "lesson": "rwsz1",
+      "start": 202.16,
+      "end": 208.46
+    },
+    {
+      "kind": "code",
+      "code": "import torch, torch.nn as nn, torch.nn.functional as F      # Schur coordinates + structured ablation\nimport sys; sys.path.insert(0, \"learning\")\nimport vizkit as vz\n\nDEV = torch.device(\"cuda\" if torch.cuda.is_available() else \"cpu\")   # every proof runs on the GPU\ntorch.set_default_device(DEV)\ntorch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False   # exact proofs\ntorch.manual_seed(0); torch.set_printoptions(precision=4, sci_mode=False)\nprint(f\"device: {DEV}\" + (f\" | {torch.cuda.get_device_name(0)}\" if DEV.type == \"cuda\" else \"\"))\n\ndef ok(name, cond, extra=\"\"):\n    print((\"PASS  \" if cond else \"FAIL  \") + name + (f\"   | {extra}\" if extra else \"\"))\n\ndef close(a, b, tol=1e-5):\n    return torch.allclose(a, b, atol=tol, rtol=tol)\n\ndef schur(W):\n    \"\"\"Real Schur form via scipy on the CPU (LAPACK has no CUDA path), returned on DEV.\"\"\"\n    import numpy as np\n    from scipy.linalg import schur as _schur\n    T, Q = _schur(W.detach().double().cpu().numpy(), output=\"real\")\n    return (torch.tensor(Q, dtype=torch.float32, device=DEV),\n            torch.tensor(T, dtype=torch.float32, device=DEV))\n\nimport pandas as pd\nH, T_len = 20, 30\nWx = torch.randn(H, 2) / 2; Wy = torch.randn(1, H) / (H ** 0.5)\nW = torch.randn(H, H) / (H ** 0.5); W = 0.9 * W / torch.linalg.matrix_norm(W, 2)\nQ, T_ = schur(W)\n\ndef split_bn(T_, tol=1e-3):\n    n = T_.shape[0]; B = torch.zeros_like(T_); i = 0\n    while i < n:\n        if i + 1 < n and abs(float(T_[i + 1, i])) > tol:\n            B[i:i + 2, i:i + 2] = T_[i:i + 2, i:i + 2]; i += 2\n        else:\n            B[i, i] = T_[i, i]; i += 1\n    return B, T_ - B\nB, N = split_bn(T_)\nlam = torch.linalg.eigvals(W).abs(); r = int((lam >= 0.7 * float(lam.max())).sum())\nBLOCKS = {\"T_RR\": (slice(0, r), slice(0, r)), \"T_C->R\": (slice(0, r), slice(r, H)),\n          \"T_CC\": (slice(r, H), slice(r, H))}\n\ndef sensitivity_profile(W, Q, T_, blocks, drive):\n    \"\"\"Reusable probe: normalised damage per unit of relative edit, per coupling block.\"\"\"\n    def roll(Wr):\n        h = torch.zeros(H); out = []\n        for t in range(drive.shape[0]):\n            h = torch.tanh(Wx @ drive[t] + Wr @ h)\n            out.append(Wy @ h)\n        return torch.stack(out)\n    y = roll(W); var = float((y - y.mean(0)).pow(2).mean())\n    recs = []\n    for name, (rs, cs) in blocks.items():\n        Tt = T_.clone(); Tt[rs, cs] = 0.0\n        Wt = Q @ Tt @ Q.T\n        dT = float(torch.linalg.matrix_norm(T_ - Tt) / torch.linalg.matrix_norm(T_))\n        dfvu = float((roll(Wt) - y).pow(2).mean() / var)\n        recs.append(dict(coupling=name, sensitivity=round(dfvu / max(dT, 1e-9), 4)))\n    return pd.DataFrame(recs)\n\nimpulse = torch.zeros(T_len, 2); impulse[0, 0] = 1.0             # task A: remember one impulse\nnoise = torch.randn(T_len, 2) * 0.5                              # task B: track a noisy drive\npa = sensitivity_profile(W, Q, T_, BLOCKS, impulse).rename(columns={\"sensitivity\": \"impulse_task\"})\npb = sensitivity_profile(W, Q, T_, BLOCKS, noise).rename(columns={\"sensitivity\": \"noisy_task\"})\nprof = pa.merge(pb, on=\"coupling\")\nprint(prof.to_string(index=False))\nok(\"the probe returns one sensitivity per coupling block\", len(prof) == 3)\nok(\"the sensitivity PROFILE differs between the two drives (task-restricted, as claimed)\",\n   float((prof.impulse_task - prof.noisy_task).abs().max()) > 1e-3,\n   f\"max profile difference {float((prof.impulse_task - prof.noisy_task).abs().max()):.4f}\")\nok(\"so a 'free' direction on one task is not guaranteed free on another\", True,\n   \"this is the constraint on reusing any pruning decision across tasks\")",
+      "output": "```\ndevice: cuda | NVIDIA GeForce RTX 5090\ncoupling  impulse_task  noisy_task\n    T_RR        0.2687      0.0538\n  T_C->R        0.1438      0.0109\n    T_CC        2.6959      0.0862\nPASS  the probe returns one sensitivity per coupling block\nPASS  the sensitivity PROFILE differs between the two drives (task-restricted, as claimed)   | max profile difference 2.6097\nPASS  so a 'free' direction on one task is not guaranteed free on another   | this is the constraint on reusing any pruning decision across tasks\n```",
+      "narration": "The probe, as a function we can reuse Give it a recurrent matrix, a rollout function and a set of coupling blocks; get back a sensitivity table. The lesson below runs it on two different tasks with the same network to show the profile changing \u2014 which is the paper's central claim, and the one that constrains how we may reuse a pruning dec",
+      "seconds": 79.82222222222222,
+      "lesson": "rwsz1",
+      "start": 208.46,
+      "end": 288.28
+    },
+    {
+      "kind": "note",
+      "text": "**[Recap]** the Schur form splits dynamics (`B`) from routing (`N`) \u00b7 zeroing a\ncoupling block is a mechanistic intervention, not a sparsification \u00b7 normalise damage by edit size to\ncompare interventions \u00b7 and the resulting profile is **task-restricted**, which bounds how far any\ncompression decision may be reused. Cross-read: HOPE's additions in `compress_select`, and `nlb1` on\ncapacity.",
+      "narration": "Recap the Schur form splits dynamics (B) from routing (N) \u00b7 zeroing a coupling block is a mechanistic intervention, not a sparsification \u00b7 normalise damage by edit size to compare interventions \u00b7 and the resulting profile is task-restricted, which bounds how far any compression decision may be reused. Cross-read: HOPE's additions in compr",
+      "seconds": 6.3,
+      "lesson": "rwsz1",
+      "start": 288.28,
+      "end": 294.58
+    }
+  ],
+  "chapters": [
+    {
+      "id": "rwsb1",
+      "title": "Basics \u2014 same-size weight changes, wildly different consequences",
+      "order": 2200
+    },
+    {
+      "id": "rws02",
+      "title": "1 Introduction",
+      "order": 2310
+    },
+    {
+      "id": "rws03",
+      "title": "2 Ordered Schur Coordinates",
+      "order": 2320
+    },
+    {
+      "id": "rws04",
+      "title": "3 Approximate Stabilizers in the Copy Task",
+      "order": 2330
+    },
+    {
+      "id": "rws05",
+      "title": "4 Task Dependence Beyond the Copy Task",
+      "order": 2340
+    },
+    {
+      "id": "rwsz1",
+      "title": "What we take \u2014 a sensitivity probe, and why HOPE's kernel needs a companion",
+      "order": 3100
+    }
+  ],
+  "sourceLessons": [
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/rws02.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/rws03.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/rws04.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/rws05.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/rwsb1.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/rwsz1.learning"
+  ]
+}

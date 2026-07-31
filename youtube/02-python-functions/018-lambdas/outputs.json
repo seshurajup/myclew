@@ -1,0 +1,26 @@
+[
+  {
+    "after_line": 5,
+    "text": ">>> 25\\n>>> 10",
+    "caption": "lambda = one-line function"
+  },
+  {
+    "after_line": 10,
+    "text": ">>> [1, 4, 9, 16, 25]",
+    "caption": "lambda passed to map()"
+  },
+  {
+    "after_line": 15,
+    "text": ">>> [(2, 'a'), (1, 'b'), (3, 'c')]",
+    "caption": "lambda as a sort key"
+  },
+  {
+    "after_line": 19,
+    "text": ">>> pass fail",
+    "caption": "conditional inside a lambda"
+  },
+  {
+    "after_line": 19,
+    "image": "artifacts/terminal.png"
+  }
+]

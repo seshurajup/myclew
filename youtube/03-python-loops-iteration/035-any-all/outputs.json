@@ -1,0 +1,31 @@
+[
+  {
+    "after_line": 4,
+    "text": ">>> True",
+    "caption": "all(): every item truthy"
+  },
+  {
+    "after_line": 7,
+    "text": ">>> True",
+    "caption": "any(): at least one truthy"
+  },
+  {
+    "after_line": 11,
+    "text": ">>> False\\n>>> True",
+    "caption": "they short-circuit"
+  },
+  {
+    "after_line": 15,
+    "text": ">>> True",
+    "caption": "great for validation"
+  },
+  {
+    "after_line": 18,
+    "text": ">>> True False",
+    "caption": "empty: all=True, any=False"
+  },
+  {
+    "after_line": 18,
+    "image": "artifacts/terminal.png"
+  }
+]

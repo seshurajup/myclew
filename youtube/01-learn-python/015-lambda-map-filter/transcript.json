@@ -1,0 +1,54 @@
+[
+  {
+    "text": "Lambda, map and filter let you transform a list without writing a loop.",
+    "until_line": 1
+  },
+  {
+    "text": "We start with six numbers to work on.",
+    "until_line": 1
+  },
+  {
+    "text": "A lambda is a function with no name — arguments, colon, and a single expression.",
+    "until_line": 3
+  },
+  {
+    "text": "Map applies that lambda to every element, one at a time.",
+    "until_line": 3
+  },
+  {
+    "text": "There's no return statement, because the expression itself is the return value.",
+    "until_line": 3
+  },
+  {
+    "text": "Filter keeps only the elements where the lambda returns True.",
+    "until_line": 4
+  },
+  {
+    "text": "Here that's the even numbers, since x mod two equals zero.",
+    "until_line": 4
+  },
+  {
+    "text": "Filter keeps the element itself, not the True or False the lambda produced.",
+    "until_line": 4
+  },
+  {
+    "text": "Both are lazy, so list forces them to actually produce their values.",
+    "until_line": 6
+  },
+  {
+    "text": "Squares gives us the six squares, and evens gives us two, four and six.",
+    "until_line": 7
+  },
+  {
+    "text": "And they compose — map times ten over evens, summed in a single expression.",
+    "until_line": 9
+  },
+  {
+    "text": "Twenty plus forty plus sixty is a hundred and twenty.",
+    "until_line": 10
+  },
+  {
+    "text": "Video 16 tackles args and kwargs. Save this one for when you need it.",
+    "until_line": 10
+  }
+]

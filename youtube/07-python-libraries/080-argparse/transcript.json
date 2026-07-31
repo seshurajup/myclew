@@ -1,0 +1,42 @@
+[
+  {
+    "text": "Argparse turns a script into a real command-line tool, with proper arguments and help text.",
+    "until_line": 3
+  },
+  {
+    "text": "You create a parser, giving it a description that shows up in the automatic help message.",
+    "until_line": 3
+  },
+  {
+    "text": "A positional argument, like name, is required and given by position on the command line.",
+    "until_line": 4
+  },
+  {
+    "text": "[chuckle] Optional arguments start with dashes — times takes a number and defaults to one if omitted.",
+    "until_line": 5
+  },
+  {
+    "text": "[sniff] A store-true flag like shout is a simple on-off switch, true when present, false when absent.",
+    "until_line": 6
+  },
+  {
+    "text": "argparse handles all the parsing, type conversion, and validation for you.",
+    "until_line": 9
+  },
+  {
+    "text": "Then you read the results as attributes — args dot name, args dot times, args dot shout.",
+    "until_line": 9
+  },
+  {
+    "text": "[sigh] So this tiny tool greets someone a chosen number of times, optionally shouting.",
+    "until_line": 15
+  },
+  {
+    "text": "[groan] argparse even generates a polished help screen automatically — it's how professional Python command-line tools are built.",
+    "until_line": 15
+  },
+  {
+    "text": "Video 81 tackles the CSV module. Follow so you don't miss it.",
+    "until_line": 15
+  }
+]

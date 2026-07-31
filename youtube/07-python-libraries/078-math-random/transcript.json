@@ -1,0 +1,42 @@
+[
+  {
+    "text": "Two of the most useful standard modules are math for calculations and random for chance.",
+    "until_line": 2
+  },
+  {
+    "text": "math gives you constants like pi and e, ready to use with full precision.",
+    "until_line": 4
+  },
+  {
+    "text": "It also has the functions you'd expect — square roots, factorials, floor and ceiling rounding.",
+    "until_line": 6
+  },
+  {
+    "text": "[chuckle] There are gems tucked in too, like gcd, the greatest common divisor of two numbers.",
+    "until_line": 7
+  },
+  {
+    "text": "[sniff] random generates unpredictable values — but seed it, and the sequence becomes perfectly repeatable.",
+    "until_line": 10
+  },
+  {
+    "text": "That's vital for testing, since you get the same random numbers every run.",
+    "until_line": 10
+  },
+  {
+    "text": "randint rolls a die, choice picks one item, and sample draws several unique ones, like a lottery.",
+    "until_line": 13
+  },
+  {
+    "text": "[sigh] shuffle rearranges a list in place, perfect for dealing cards or randomizing an order.",
+    "until_line": 16
+  },
+  {
+    "text": "[groan] Between math and random, a huge range of numeric and probabilistic tasks are already solved for you.",
+    "until_line": 17
+  },
+  {
+    "text": "In the next one we take on the os and sys modules. Which one do you already use? Comment below.",
+    "until_line": 17
+  }
+]

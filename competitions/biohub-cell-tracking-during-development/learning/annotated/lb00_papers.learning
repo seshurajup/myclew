@@ -1,0 +1,73 @@
+@ id: lb00
+@ order: 39
+@ title: The two source papers, in detail
+@ subtitle: Zebrahub (the data) and Ultrack (the ground-truth method)
+@ source: fleet_agents/research_search.py
+
+--- note
+## Where this competition's data and labels come from
+Two papers define everything about this task. We read them through the `research-search` agent's `fulltext`
+mode (official open-access APIs — NCBI BioC + Europe PMC), so every quote below is verbatim and reproducible,
+not paraphrased from memory.
+--- shape
+DATA → <b>Zebrahub</b> (Cell 2024)<br>LABELS → <b>Ultrack</b> (Nat. Methods 2025)
+
+--- note
+### Paper 1 — Zebrahub (the dataset)
+*"A multimodal zebrafish developmental atlas reveals the state-transition dynamics of late-vertebrate
+pluripotent axial progenitors"* — Lange et al., **Cell**, 2024. It integrates **single-cell RNA-seq** time-course
+data with **light-sheet microscopy lineage reconstructions** across zebrafish development (**~10 hpf → 10 dpf**).
+The **light-sheet movies** are the 3D+time volumes in this competition; the **tracking graphs** are the GT.
+--- shape
+doi 10.1016/j.cell.2024.09.047<br>Cell, 24 Oct 2024<br>single-cell + light-sheet atlas<br>10 hpf → 10 dpf
+
+--- note
+### Paper 2 — Ultrack (the ground-truth method)
+*"Ultrack: pushing the limits of cell tracking across biological scales"* — Royer et al., **Nature Methods**,
+2025 (**PMC12615266, open access**). This is the tracker that produced the GT lineages, and the paper that
+documents the **dual-channel sparse-labeling** protocol behind the sparse annotations.
+--- shape
+doi 10.1038/s41592-025-02778-0<br>PMC12615266 (OA)<br>top CTC scores<br>zebrafish TRA = 0.9989
+
+--- note
+### How Ultrack tracks — multi-hypothesis + ILP
+Ultrack's core idea, verbatim: *"Ultrack considers multiple segment hypotheses instead of prematurely committing
+to a particular choice of segments."* It represents them compactly with **ultrametric contour maps (UCMs)** —
+*"multilevel contour maps"* — so the input is *"two maps for each time frame: (i) a foreground map... and (ii) a
+grayscale image representing the multilevel contour map (UCM)."* Tracking then *"involves solving a complex
+combinatorial problem of selecting and associating the correct cell segments across time"* — an **ILP**.
+--- code
+# Ultrack input per frame:
+foreground_map = "potential cell vs background"      # (i)
+ucm_contour    = "multilevel contour hypotheses"      # (ii) — avoids premature segmentation commitment
+# → ILP selects + links the best segments across time (multi-hypothesis)
+--- shape
+segmentation hypotheses<br>→ UCM (compact)<br>→ ILP select+link<br>= robust to detector errors
+
+--- note
+### Why this matters to us — we already mirror it
+Our `mh-ilp` agent is a small Ultrack: **multi-hypothesis** candidate generation (multiple detector operating
+points) feeding an **ILP** linker. The paper's lesson — *"cell tracking accuracy is compromised when
+segmentation fails"* → hedge with hypotheses — is exactly why our lever is **detection/node recall**, not the
+linker. And the GT-generation method (next lessons) is what makes the labels sparse.
+--- note
+### Two modalities — don't confuse them
+Zebrahub has **two** annotation layers, and only one is our task. **(1) scRNA-seq cell-type / tissue
+annotations** — *"Cell type clustering and annotation... for each developmental stage"* (120,444 cells): the
+categories **CNS, neural crest, periderm, endoderm, notochord, mesenchyme, lateral / paraxial / intermediate
+mesoderm, hematopoietic-vasculature**. **(2) light-sheet tracking** — *"high-resolution light-sheet imaging for
+lineage reconstruction"*: nuclei positions + links. **Our competition is (2) only.**
+--- shape
+(1) scRNA-seq → tissue types<br>(2) light-sheet → tracking<br><b>our task = (2)</b>
+
+--- note
+### Our GT carries NO tissue label
+We verified it directly: every node in a `.geff` has **only** `t, x, y, z` (plus an `estimated_number_of_nodes`
+count). There is **no cell-type / tissue field**. So the ten tissue categories above are *biology from the
+sequencing side* — they are **not** in our data and **not** the label-selection criterion. The sparse labels are
+a **tissue-agnostic random mCherry mosaic** (lb01). Don't try to model tissue type; we can't and needn't.
+--- shape
+geff node props =<br><b>t, x, y, z</b> only<br>→ no tissue type<br>→ detect + link, that's it
+
+--- note
+**Next → lb01: the dual-channel sparse-labeling protocol that made the ~1% GT.**

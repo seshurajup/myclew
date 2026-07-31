@@ -1,0 +1,88 @@
+@ id: nlz2
+@ order: 2110
+@ title: Lineage and reading order — where every piece of Hope came from
+@ subtitle: Nested Learning · the citation graph that matters, and what to read next
+@ source: docs/papers/nested-learning/nested-learning.md
+
+--- note
+## The genealogy of one block
+Hope is an assembly, and each part has a paper behind it. Reading these in this order is the fastest way
+to understand the design space (rather than re-deriving it):
+
+| piece of Hope | comes from | one-line idea |
+|---|---|---|
+| matrix-valued fast weights | Schmidhuber 1992; Hinton & Plaut 1987 | a net writes another net's weights |
+| self-reference | Schmidhuber 1993 (self-referential weight matrix), 2003 (Gödel machines) | generate your own targets |
+| linear attention | Katharopoulos et al. 2020; Schlag et al. 2021 (FWP) | attention without softmax = an RNN |
+| delta rule in RNNs | Prados & Kak 1989; DeltaNet (Schlag 2021), Longhorn, RWKV-7 | erase before you write |
+| Oja's rule | Oja 1982; OjaNet (Irie et al. 2022a) | keep the neuron unit-norm |
+| memory-as-regression | Sun et al. 2024 (TTT); Wang et al. 2025 (test-time regression) | a layer *fits* at test time |
+| deep memory + meta-learned init | Titans (Behrouz et al. 2025c) | make `M₀` learned, not zero |
+| objective zoo (`L_p`, retention) | Miras (Behrouz et al. 2025b) | attentional bias = the objective |
+| windowed updates | Atlas / Omega rule (Behrouz et al. 2025a) | update on a window, not one token |
+| orthogonalised momentum | Muon (Jordan et al. 2024); AdaMuon (Si et al. 2025) | Newton–Schulz the momentum |
+| the optimizers being memories | this paper, Appendix B | Adam = ridge regression on gradients |
+| brain time-scales | Buzsáki 2004; Klinzing 2019; Frey & Morris 1997 | γ/β/δ-θ = different update rates |
+
+--- note
+### The one claim to keep
+Everything above collapses into a single sentence you can apply to any new architecture paper you read.
+
+--- code
+import torch, torch.nn as nn, torch.nn.functional as F      # the whole paper is linear algebra + autograd
+
+import sys; sys.path.insert(0, "learning")
+import vizkit as vz                                            # the shared visual + explainability layer
+
+DEV = torch.device("cuda" if torch.cuda.is_available() else "cpu")   # every proof runs on the GPU
+torch.set_default_device(DEV)                                  # so EVERY tensor/module below is on DEV
+# These cells PROVE matrix identities, so they need full fp32: TF32 truncates the mantissa to 10 bits
+# and an identity that holds to 1e-6 in fp32 only holds to ~1e-3 in TF32. Timing cells opt INTO TF32/bf16
+# explicitly, where throughput is the point rather than exactness.
+torch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False
+torch.manual_seed(0); torch.set_printoptions(precision=4, sci_mode=False)
+print(f"device: {DEV}" + (f" | {torch.cuda.get_device_name(0)}" if DEV.type == "cuda" else ""))
+
+def ok(name, cond, extra=""):                                  # a lesson's PROOF prints PASS/FAIL, never prose
+    print(("PASS  " if cond else "FAIL  ") + name + (f"   | {extra}" if extra else ""))
+
+def close(a, b, tol=1e-5):                                     # float-safe equality for matrix identities
+    return torch.allclose(a, b, atol=tol, rtol=tol)
+
+def newton_schulz(G, steps=5, eps=1e-7):                       # the orthogonalisation used by Muon/M3
+    a, b, c = 3.4445, -4.7750, 2.0315                          # the standard quintic coefficients
+    X = G / (G.norm() + eps)
+    tall = X.shape[0] > X.shape[1]
+    if tall: X = X.T
+    for _ in range(steps):
+        A = X @ X.T; X = a * X + (b * A + c * A @ A) @ X
+    return X.T if tall else X
+
+claim = ("An architecture and its optimizer are the same kind of object - nested associative "
+         "memories that compress their own context - so the real design axes are: objective, "
+         "learning rule, context, and UPDATE FREQUENCY.")
+print(claim)
+axes = ["objective", "learning rule", "context", "update frequency"]
+ok("four design axes, and depth is not one of them", len(axes) == 4 and "depth" not in axes, ", ".join(axes))
+print("\nchecklist for the next paper you read:")
+for a in axes:
+    print(f"  - what is this block's {a}?")
+
+--- output
+```
+device: cuda | NVIDIA GeForce RTX 5090
+An architecture and its optimizer are the same kind of object - nested associative memories that compress their own context - so the real design axes are: objective, learning rule, context, and UPDATE FREQUENCY.
+PASS  four design axes, and depth is not one of them   | objective, learning rule, context, update frequency
+
+checklist for the next paper you read:
+  - what is this block's objective?
+  - what is this block's learning rule?
+  - what is this block's context?
+  - what is this block's update frequency?
+```
+
+--- note
+**[Recap]** Hope is an assembly of well-cited parts; NL is the coordinate system
+that makes the assembly legible. When reading the next sequence-model paper, name its four axes and you
+will know immediately what is new.
+

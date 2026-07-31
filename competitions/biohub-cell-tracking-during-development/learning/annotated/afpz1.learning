@@ -1,0 +1,104 @@
+@ id: afpz1
+@ order: 3700
+@ title: What we adopt — search-with-verifier for a Kaggle fleet
+@ subtitle: the transferable patterns, and where our world falls short of Lean's
+@ source: docs/papers/ai-formal-proof/ai-formal-proof.md
+
+--- note
+## The paper's shape, transplanted
+Strip the mathematics and AlphaProof Nexus is a pattern our fleet already half-implements:
+
+| AlphaProof Nexus | our fleet |
+|---|---|
+| Lean kernel (perfect verifier) | CV score / official scorer (NOISY verifier) |
+| prover subagent (search) | agent pipelines over 320 tools |
+| population DB + dedup | experiment journal + ledger |
+| rater + Elo tournaments | leaderboard + CV↔LB calibration |
+| evolutionary selection | keep/kill of experiment lines |
+| P-UCB budget allocation | GPU-hours across competing ideas |
+
+The one **fundamental** difference sits in the first row, and it changes how much of the rest transfers: a
+CV score is a NOISY, GAMEABLE verifier. Units 2 and 7 are the relevant mathematics — an unfoolable checker
+lets everything downstream be aggressive, while a noisy one demands the amplification discipline (repeats,
+majority, held-out separation) or the population optimises the verifier instead of the goal. That is
+literally what CV-overfitting is.
+
+--- code
+import sys, math, random, torch, torch.nn as nn
+sys.path.insert(0, "learning/paper_packs")
+import afp_engine as A
+from afp_engine import (size, val, rw_at, positions, at, replace, neighbours, check, plant,
+                        bfs, guided, depth, counts, subterms, feats, NF, instances, spearman)
+
+DEV = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+torch.set_default_device(DEV)
+torch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False
+torch.manual_seed(0)
+print(f"device: {DEV}" + (f" | {torch.cuda.get_device_name(0)}" if DEV.type == "cuda" else ""))
+
+def ok(name, cond, extra=""):
+    print(("PASS  " if cond else "FAIL  ") + name + (f"   | {extra}" if extra else ""))
+
+torch.manual_seed(1)
+n_ideas, sigma = 40, 0.30
+true_gain = torch.randn(n_ideas) * 0.1
+noisy_eval = lambda k: true_gain + sigma * torch.randn(n_ideas)
+best = float(true_gain.max())
+exp_pick = {}
+for rep in (1, 3, 9, 27):
+    got = []
+    for trial in range(200):                                  # the EXPECTED value of the selection rule
+        scores = torch.stack([true_gain + sigma * torch.randn(n_ideas)
+                              for _ in range(rep)]).mean(0)
+        got.append(float(true_gain[int(scores.argmax())]))
+    exp_pick[rep] = sum(got) / len(got)
+print(f"  best TRUE gain available: {best:+.3f}")
+for rep, got in exp_pick.items():
+    print(f"  selecting on {rep:>2} eval repeats -> EXPECTED true gain of the pick {got:+.3f}")
+ok("with a NOISY verifier, single-shot selection loses a large slice to the winner's curse",
+   exp_pick[1] < 0.85 * exp_pick[27],
+   f"{exp_pick[1]:+.3f} vs {exp_pick[27]:+.3f} — the fleet's daily hazard, in expectation")
+ok("repeats recover it, exactly like unit 7's majority vote", exp_pick[27] > 0.8 * best,
+   f"27 repeats reach {exp_pick[27]/best:.0%} of the attainable gain")
+ok("Lean needs none of this; Kaggle needs ALL of it", True,
+   "the verifier's noise level decides how much of the paper's aggression is safe to copy")
+
+--- output
+```
+device: cuda | NVIDIA GeForce RTX 5090
+  best TRUE gain available: +0.268
+  selecting on  1 eval repeats -> EXPECTED true gain of the pick +0.112
+  selecting on  3 eval repeats -> EXPECTED true gain of the pick +0.166
+  selecting on  9 eval repeats -> EXPECTED true gain of the pick +0.233
+  selecting on 27 eval repeats -> EXPECTED true gain of the pick +0.254
+PASS  with a NOISY verifier, single-shot selection loses a large slice to the winner's curse   | +0.112 vs +0.254 — the fleet's daily hazard, in expectation
+PASS  repeats recover it, exactly like unit 7's majority vote   | 27 repeats reach 95% of the attainable gain
+PASS  Lean needs none of this; Kaggle needs ALL of it   | the verifier's noise level decides how much of the paper's aggression is safe to copy
+```
+
+--- note
+### The adoption list
+1. **Value-guided search over pipelines** (unit 10 — 8×+ fewer expansions): our `pipeline` and
+   `improve-loop` agents explore configuration space mostly blind; a cheap value model over (state,
+   target-metric) features is the measured lever.
+2. **Attempt memory as a first-class input** (units 3, 12): failed configs must ban their own retries —
+   the journal already stores them; the loop should CONDITION on them.
+3. **Elo over experiment lines** (units 8, 13–14): when two approaches can only be compared pairwise and
+   noisily (LB probes), Bradley–Terry with proximity matchmaking is the principled scoreboard.
+4. **P-UCB for GPU budget** (unit 16): allocating hours across live ideas by q + c·√(Σt)/(t+1) is
+   strictly better than the greedy allocation we default to — and c is a knob we can set from measured
+   variance (unit 11).
+5. **Dedup before statistics** (unit 6): the journal's per-config canonicalisation must fold trivial
+   variants, or every population statistic double-counts.
+
+**Not adopted:** anything requiring the perfect verifier — self-play-style aggressive optimisation against
+the metric is exactly what a noisy CV punishes (the cell above measured why).
+
+--- note
+**[Recap]** a perfect verifier is the domain's superpower (basics, units 1–2) ·
+the agent = propose–validate–revise with memory and sketches, each worth measured solve-rate (units 3–4,
+12) · guidance beats blind search 8×+ on held-out problems (unit 10) · populations are rated by
+Bradley–Terry/Elo with MCMC over tournaments, matchmade for information, evolved under held-out honesty
+(units 6–9, 13–15) · budgets follow P-UCB, not greed (units 11, 16) · and the transfer to OUR fleet is
+gated by verifier noise, quantified in this lesson. Engine: `learning/paper_packs/afp_engine.py`.
+

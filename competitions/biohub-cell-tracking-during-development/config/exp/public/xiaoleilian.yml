@@ -1,0 +1,10 @@
+# PUBLIC notebook config — **xiaoleilian** / classical baseline
+name: pub_xiaoleilian
+source: **xiaoleilian** / classical baseline
+family: other
+base: unknown
+lb: 0.72
+golden_cv: None
+mined_params: ""
+run: manual
+score: golden-12 (adj_edge_J + 0.1*div_J), by_embryo

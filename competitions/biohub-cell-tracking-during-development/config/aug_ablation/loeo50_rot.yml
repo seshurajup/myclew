@@ -1,0 +1,38 @@
+# Step-C AUG-AT-CONVERGENCE: loeo_no_aug + rot at 50ep on fold0 (train 6bba->test 44b6). A/B vs no-aug-50ep.
+# Re-tests the aug on a CONVERGED base (prior 10ep verdicts were confounded by undertraining).
+# = the EXACT embryo-disjoint setup that measured adjJ_44b6~0.023 (the Kaggle-faithful collapse). loeo_no_aug MUST
+# reproduce that ~0.02 floor; loeo_translate_static / loeo_crop_scale judged on adjJ_44b6 LIFT off the floor = NORTH STAR.
+# One-change A/B: identical to loeo_no_aug except the augment entry. crop_scale = DIRECTIONAL density-UP (zoom-out
+# s in [0.5,1.0]) to densify sparse 6bba toward 44b6. FROZEN split is READ-ONLY (referenced, never rewritten). NO Kaggle.
+name: loeo50_rot
+paths:
+  python:  research/cellmot_venv/bin/python
+  trainer: research/official_repo/scripts/train_unet_transformer.py
+  pythonpath: [research/official_repo/src, research/official_repo/scripts, .]
+  data_dir: input/biohub-cell-tracking-during-development/train
+  splits:   learning/ensemble_work/finetune/fleet_loeo_mini.json
+  cache_dir: research/cache/ds1x4x4
+mlflow:
+  tracking_uri: http://localhost:5000
+  experiment:   kaggle-biohub-stagebridge
+  run_name:     loeo50_rot
+  log_artifacts: false
+gpu:
+  power_limit_w: 400
+train:
+  method:          loeo50_rot
+  split:           0
+  downsample:      "1,4,4"
+  epochs:          50         # Step-C aug-at-convergence
+  lr:              1e-4
+  batch_size:      8
+  num_workers:     6
+  det_loss_weight: 10.0
+  det_neg_weight:  0.01
+  window_size:     2
+  pool_kernel_um:  5.0
+  max_iters:       150
+  seed:            1234
+augment:
+  - name: rot90_yx
+    p: 0.5

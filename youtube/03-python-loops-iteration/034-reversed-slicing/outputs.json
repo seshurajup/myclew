@@ -1,0 +1,26 @@
+[
+  {
+    "after_line": 6,
+    "text": ">>> 5 4 3 2 1",
+    "caption": "reversed(): lazy reverse iterator"
+  },
+  {
+    "after_line": 10,
+    "text": ">>> [5, 4, 3, 2, 1]",
+    "caption": "[::-1] makes a reversed copy"
+  },
+  {
+    "after_line": 13,
+    "text": ">>> nohtyp",
+    "caption": "strings reverse the same way"
+  },
+  {
+    "after_line": 16,
+    "text": ">>> 0: 5\\n>>> 1: 4\\n>>> 2: 3\\n>>> 3: 2\\n>>> 4: 1",
+    "caption": "reversed + enumerate"
+  },
+  {
+    "after_line": 16,
+    "image": "artifacts/terminal.png"
+  }
+]

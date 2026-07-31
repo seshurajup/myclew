@@ -1,0 +1,188 @@
+@ id: hpe05
+@ order: 3240
+@ title: 5 A Hilbert Functional Perspective on Neurons
+@ subtitle: Hilbert Operator for Progressive Encoding (HOPE) §5
+@ source: docs/papers/hope-hilbert/hope-hilbert.md
+
+--- note
+## 5 A Hilbert Functional Perspective on Neurons
+**Paper:** Hilbert Operator for Progressive Encoding (HOPE) · §5 · pages 7–9 · equations (3–5) · 0 figures.
+
+**The geometry, in closed form.** With a Gaussian surrogate, ⟨f_i, f_j⟩ =
+E[Ψ(y_i)Ψ(y_j)]·⟨w_out,i, w_out,j⟩ where (y_i, y_j) is bivariate normal — and for ReLU those expectations
+have closed forms: the self-kernel (eq. 3), an effective-correlation change of variables (eq. 4), and the
+arc-cosine cross-kernel (eq. 5). Each is verified against 10⁷-sample Monte-Carlo below; nothing is taken on
+faith.
+
+--- note
+### The self-kernel — capacity in closed form — eq. (3)
+
+$$
+K(i,i) = (\gamma_i^2+\beta_i^2)\,\Phi\!\Big(\frac{\beta_i}{|\gamma_i|}\Big) + \beta_i\,|\gamma_i|\,\phi\!\Big(\frac{\beta_i}{|\gamma_i|}\Big)
+$$
+
+‖f_i‖² per unit output norm: E[ReLU(y)²] for y ~ N(β, γ²), in closed form via the normal
+CDF Φ and PDF φ. This is the number that replaces weight magnitude as "importance" — and being an
+expectation of the FUNCTION, it inherits every invariance §3 established. Verified against 10⁷ Monte-Carlo
+samples across signs and scales of β.
+
+--- code
+import math, torch, torch.nn as nn, torch.nn.functional as F     # neurons as FUNCTIONS
+
+DEV = torch.device("cuda" if torch.cuda.is_available() else "cpu")   # every proof runs on the GPU
+torch.set_default_device(DEV)
+torch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False   # exact proofs
+torch.manual_seed(0); torch.set_printoptions(precision=5, sci_mode=False)
+print(f"device: {DEV}" + (f" | {torch.cuda.get_device_name(0)}" if DEV.type == "cuda" else ""))
+
+SQ2 = math.sqrt(2.0)
+
+def Phi(z):                                          # standard normal CDF
+    return 0.5 * (1.0 + torch.erf(z / SQ2))
+
+def phi(z):                                          # standard normal PDF
+    return torch.exp(-0.5 * z * z) / math.sqrt(2 * math.pi)
+
+def K_self(gamma, beta):                             # eq (3): ||f||^2 per unit output norm
+    r = beta / gamma.abs()
+    return (gamma ** 2 + beta ** 2) * Phi(r) + beta * gamma.abs() * phi(r)
+
+def mc_E(fn, n=10_000_000, chunk=2_000_000):         # big-sample Monte-Carlo expectation
+    tot = 0.0
+    for i in range(0, n, chunk):
+        m = min(chunk, n - i)
+        tot += float(fn(m).sum())
+    return tot / n
+
+def ok(name, cond, extra=""):
+    print(("PASS  " if cond else "FAIL  ") + name + (f"   | {extra}" if extra else ""))
+
+print(f"{'beta':>7} {'gamma':>7} {'closed form':>13} {'Monte-Carlo':>13} {'z-score':>9}")
+worst_z = 0.0
+N_MC = 10_000_000
+for b_, g_ in [(0.0, 1.0), (0.8, 1.3), (-0.9, 0.7), (2.5, 0.5), (-2.0, 1.0)]:
+    beta, gamma = torch.tensor(b_), torch.tensor(g_)
+    cf = float(K_self(gamma, beta))
+    y = F.relu(beta + gamma * torch.randn(N_MC)) ** 2
+    mc, se = float(y.mean()), float(y.std()) / math.sqrt(N_MC)   # the estimator's OWN standard error
+    z = abs(cf - mc) / max(se, 1e-12)
+    worst_z = max(worst_z, z)
+    print(f"{b_:>7.1f} {g_:>7.1f} {cf:>13.6f} {mc:>13.6f} {z:>9.2f}")
+ok("every case agrees within 4 standard errors of ITS OWN estimator", worst_z < 4.0,
+   f"worst z = {worst_z:.2f} — the right yardstick for a tiny K (beta=-2) is MC noise, not a blanket %")
+ok("beta=0 recovers the textbook gamma^2/2", abs(float(K_self(torch.tensor(1.0), torch.tensor(0.0))) - 0.5) < 1e-6,
+   "half the second moment survives rectification")
+ok("a strongly negative beta drives capacity toward 0",
+   float(K_self(torch.tensor(1.0), torch.tensor(-4.0))) < 5e-3,
+   "a neuron that almost never fires almost has no function — the score agrees")
+
+--- output
+```
+device: cuda | NVIDIA GeForce RTX 5090
+   beta   gamma   closed form   Monte-Carlo   z-score
+    0.0     1.0      0.500000      0.499617      1.08
+    0.8     1.3      2.046208      2.047741      1.51
+   -0.9     0.7      0.019078      0.019044      0.90
+    2.5     0.5      6.500000      6.499381      0.78
+   -2.0     1.0      0.005769      0.005810      1.63
+PASS  every case agrees within 4 standard errors of ITS OWN estimator   | worst z = 1.63 — the right yardstick for a tiny K (beta=-2) is MC noise, not a blanket %
+PASS  beta=0 recovers the textbook gamma^2/2   | half the second moment survives rectification
+PASS  a strongly negative beta drives capacity toward 0   | a neuron that almost never fires almost has no function — the score agrees
+```
+
+--- image
+learning/assets/hope-hilbert/eq/eq_p09_034.png
+Equation (3) as printed in the PDF
+
+--- note
+### Effective correlation — the change of variables — eq. (4)
+
+$$
+\rho_{\mathrm{eff}} \triangleq \frac{\langle \mathbf{w}^{\mathrm{eff}}_{i}, \mathbf{w}^{\mathrm{eff}}_{j}\rangle}{\lVert\mathbf{w}^{\mathrm{eff}}_{i}\rVert\,\lVert\mathbf{w}^{\mathrm{eff}}_{j}\rVert},\quad \kappa \triangleq \Big(\frac{\rho_{\mathrm{eff}}}{1-\rho_{\mathrm{eff}}^2}\Big)\Big(\frac{|\gamma_i|}{\lVert\mathbf{w}^{\mathrm{eff}}_{i}\rVert}\Big)\Big(\frac{|\gamma_j|}{\lVert\mathbf{w}^{\mathrm{eff}}_{j}\rVert}\Big),\quad \hat\rho_{ij} \triangleq \frac{2\kappa}{1+\sqrt{1+4\kappa^2}}
+$$
+
+The cross-kernel needs the correlation of the two pre-activations, but each neuron's y has
+its own scale (γ vs ‖w_eff‖). κ packages the raw alignment with both scale ratios, and ρ̂ is the algebraic
+inverse of ρ ↦ ρ/(1−ρ²) applied to κ — which is exactly what the cell proves, along with |ρ̂| < 1 always
+(a correlation must be one).
+
+--- code
+kappa = torch.linspace(-30, 30, 20001)
+rho_hat = 2 * kappa / (1 + torch.sqrt(1 + 4 * kappa ** 2))          # eq. (4)
+back = rho_hat / (1 - rho_hat ** 2)
+ok("rho_hat INVERTS the map rho -> rho/(1-rho^2)", torch.allclose(back, kappa, atol=1e-3),
+   f"max |rho/(1-rho^2) - kappa| = {float((back-kappa).abs().max()):.1e}")
+ok("|rho_hat| < 1 for every kappa — it IS a correlation", float(rho_hat.abs().max()) < 1.0,
+   f"sup |rho_hat| = {float(rho_hat.abs().max()):.6f}")
+ok("it is odd and monotone (order of similarity preserved)",
+   torch.allclose(rho_hat.flip(0), -rho_hat, atol=1e-6) and bool((rho_hat.diff() > 0).all()))
+w_i, w_j = torch.randn(64), torch.randn(64)
+rho_eff = float(F.cosine_similarity(w_i, w_j, dim=0))
+x = torch.randn(2_000_000, 64)
+emp = float(torch.corrcoef(torch.stack([x @ w_i, x @ w_j]))[0, 1])
+ok("rho_eff is exactly the pre-activation correlation under the surrogate",
+   abs(rho_eff - emp) < 2e-3, f"cosine {rho_eff:+.4f} vs measured {emp:+.4f}")
+
+--- output
+```
+PASS  rho_hat INVERTS the map rho -> rho/(1-rho^2)   | max |rho/(1-rho^2) - kappa| = 1.4e-04
+PASS  |rho_hat| < 1 for every kappa — it IS a correlation   | sup |rho_hat| = 0.983472
+PASS  it is odd and monotone (order of similarity preserved)
+PASS  rho_eff is exactly the pre-activation correlation under the surrogate   | cosine -0.0292 vs measured -0.0290
+```
+
+--- note
+### The cross-kernel — the arc-cosine form — eq. (5)
+
+$$
+K(i,j) \approx \frac{1}{\pi}\Big(\sqrt{1-\hat\rho_{ij}^2} + (\pi - \arccos\hat\rho_{ij})\,\hat\rho_{ij}\Big)\sqrt{K(i,i)\,K(j,j)}
+$$
+
+⟨f_i, f_j⟩ per unit output alignment: the arc-cosine kernel of Cho & Saul, reached here as
+the zero-bias approximation (the exact form needs a bivariate normal CDF per pair — prohibitive at network
+scale, says the paper's own footnote). We verify the zero-bias case is EXACT against Monte-Carlo, then
+measure how far nonzero biases push it — the honest size of the approximation the paper chose to accept.
+
+--- code
+def cross_cf(rho, Kii, Kjj):
+    rho = torch.clamp(torch.as_tensor(rho), -1 + 1e-7, 1 - 1e-7)
+    return (torch.sqrt(1 - rho ** 2) + (math.pi - torch.arccos(rho)) * rho) / math.pi            * math.sqrt(Kii * Kjj)
+
+def mc_cross(rho, bi, bj, gi, gj, n=10_000_000):
+    z1 = torch.randn(n)
+    z2 = rho * z1 + math.sqrt(1 - rho ** 2) * torch.randn(n)
+    return float((F.relu(bi + gi * z1) * F.relu(bj + gj * z2)).mean())
+
+print("zero bias — the regime the formula claims exactly:")
+worst = 0.0
+for rho in (-0.8, -0.3, 0.0, 0.5, 0.95):
+    cf = float(cross_cf(rho, 0.5, 0.5))                 # K_self(1,0) = 1/2
+    mc = mc_cross(rho, 0.0, 0.0, 1.0, 1.0)
+    rel = abs(cf - mc) / max(mc, 1e-9); worst = max(worst, rel)
+    print(f"  rho={rho:+.2f}: closed {cf:.6f}  MC {mc:.6f}  rel {rel:.1e}")
+ok("zero-bias arc-cosine is EXACT (to MC noise)", worst < 5e-3, f"worst {worst:.1e}")
+
+print("\nnonzero bias — the approximation's real cost:")
+cf = float(cross_cf(0.5, float(K_self(torch.tensor(1.0), torch.tensor(0.8))),
+                    float(K_self(torch.tensor(1.0), torch.tensor(0.8)))))
+mc = mc_cross(0.5, 0.8, 0.8, 1.0, 1.0)
+err = abs(cf - mc) / mc
+print(f"  beta=0.8: closed {cf:.5f} vs true {mc:.5f}  ({err:.1%} off)")
+ok("with real biases it is an APPROXIMATION, and we measured how much", 0.02 < err < 0.40,
+   f"{err:.1%} at beta=0.8 — tens of percent, traded for avoiding a bivariate CDF per neuron pair")
+
+--- output
+```
+zero bias — the regime the formula claims exactly:
+  rho=-0.80: closed 0.013560  MC 0.013545  rel 1.1e-03
+  rho=-0.30: closed 0.091372  MC 0.091468  rel 1.0e-03
+  rho=+0.00: closed 0.159155  MC 0.159196  rel 2.6e-04
+  rho=+0.50: closed 0.304499  MC 0.304729  rel 7.6e-04
+  rho=+0.95: closed 0.476682  MC 0.476662  rel 4.2e-05
+PASS  zero-bias arc-cosine is EXACT (to MC noise)   | worst 1.1e-03
+
+nonzero bias — the approximation's real cost:
+  beta=0.8: closed 0.92830 vs true 1.16838  (20.5% off)
+PASS  with real biases it is an APPROXIMATION, and we measured how much   | 20.5% at beta=0.8 — tens of percent, traded for avoiding a bivariate CDF per neuron pair
+```
+

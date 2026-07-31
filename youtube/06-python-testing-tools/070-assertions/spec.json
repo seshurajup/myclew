@@ -1,0 +1,14 @@
+{
+  "language": "python",
+  "title": "assertions.py",
+  "hook": "Catch bad data the moment it appears",
+  "playlist": "Learn Python",
+  "target_seconds": 90,
+  "max_seconds": 120,
+  "tts_engine": "chatterbox",
+  "music_prompt": "verifying, checking, careful",
+  "code_path": "code.py",
+  "transcript_path": "transcript.json",
+  "outputs_path": "outputs.json",
+  "accent": "ember"
+}

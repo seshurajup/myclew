@@ -1,0 +1,13 @@
+{
+  "language": "python",
+  "title": "hello_world.py",
+  "hook": "Write your first Python program in 60s",
+  "playlist": "Learn Python",
+  "target_seconds": 75,
+  "tts_engine": "chatterbox",
+  "music_prompt": "soft, welcoming, uplifting lo-fi",
+  "code_path": "code.py",
+  "transcript_path": "transcript.json",
+  "outputs_path": "outputs.json",
+  "accent": "ocean"
+}

@@ -1,0 +1,42 @@
+[
+  {
+    "text": "Just like lists, dictionaries have their own comprehension syntax for building maps in one line.",
+    "until_line": 3
+  },
+  {
+    "text": "The difference is the curly braces and a key-colon-value pair instead of a single expression.",
+    "until_line": 3
+  },
+  {
+    "text": "So this builds a dictionary mapping each number to its square, instantly.",
+    "until_line": 4
+  },
+  {
+    "text": "[chuckle] You can filter as you build, adding an if to keep only the even numbers and their squares.",
+    "until_line": 7
+  },
+  {
+    "text": "A favorite trick is inverting a dictionary — swapping every key with its value.",
+    "until_line": 12
+  },
+  {
+    "text": "[sigh] We loop over the items and simply flip the order, turning prices into a lookup by price.",
+    "until_line": 12
+  },
+  {
+    "text": "And pairing it with zip is incredibly handy — zip stitches two lists together, item by item.",
+    "until_line": 18
+  },
+  {
+    "text": "Here names and ages zip into a single dictionary of people, no loop needed.",
+    "until_line": 18
+  },
+  {
+    "text": "[groan] Dict comprehensions turn what used to be a tedious loop-and-assign into one expressive line.",
+    "until_line": 19
+  },
+  {
+    "text": "Next video: decorators. Save this one for when you need it.",
+    "until_line": 19
+  }
+]

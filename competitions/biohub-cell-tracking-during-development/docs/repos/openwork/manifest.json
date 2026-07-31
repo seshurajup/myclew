@@ -1,0 +1,49 @@
+{
+  "slug": "openwork",
+  "title": "OpenWork (different-ai) \u2014 the two-tool capability contract",
+  "source": "https://github.com/different-ai/openwork",
+  "commit": "ed16748ea5295bcdd3a7afefa085457a1e9359d1",
+  "local": "research/openwork_repo",
+  "kind": "repo",
+  "prefix": "owk",
+  "md": "research/openwork_repo/README.md",
+  "figures": [],
+  "pages": 5,
+  "sections": [
+    {
+      "num": "1",
+      "title": "Why exactly two tools (we have 320 agents)",
+      "page": 1,
+      "level": 1,
+      "units": "search_capabilities + execute_capability"
+    },
+    {
+      "num": "2",
+      "title": "Discovery \u2014 search first, 2-4 keyword variants",
+      "page": 2,
+      "level": 1,
+      "units": "scored matches carrying spec_schema + schema_digest"
+    },
+    {
+      "num": "3",
+      "title": "The retry protocol \u2014 a model may not loop",
+      "page": 3,
+      "level": 1,
+      "units": "correct_arguments vs search_capabilities; same_arguments_retryable=False"
+    },
+    {
+      "num": "4",
+      "title": "One contract, every transport",
+      "page": 4,
+      "level": 1,
+      "units": "Claude \u00b7 Ollama \u00b7 any OpenAI-compatible \u00b7 local HF \u00b7 dummy"
+    },
+    {
+      "num": "5",
+      "title": "What we did NOT adopt",
+      "page": 5,
+      "level": 1,
+      "units": "MCP/OAuth transport, desktop app, cloud org model"
+    }
+  ]
+}

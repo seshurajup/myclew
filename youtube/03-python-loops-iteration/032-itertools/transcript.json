@@ -1,0 +1,42 @@
+[
+  {
+    "text": "The itertools module is a toolbox of iteration superpowers, all lazy and memory-efficient.",
+    "until_line": 1
+  },
+  {
+    "text": "count gives you an endless counter — here starting at one and stepping by two, forever.",
+    "until_line": 5
+  },
+  {
+    "text": "Since it never ends, you pull values with next, taking exactly as many as you want.",
+    "until_line": 6
+  },
+  {
+    "text": "[chuckle] chain glues several sequences together into one smooth stream, without copying them.",
+    "until_line": 9
+  },
+  {
+    "text": "So three separate lists iterate as if they were a single continuous list.",
+    "until_line": 9
+  },
+  {
+    "text": "[sniff] combinations generates every possible pairing from a sequence, order not mattering.",
+    "until_line": 12
+  },
+  {
+    "text": "From A, B, C it produces A-B, A-C, and B-C — incredibly handy for comparisons and puzzles.",
+    "until_line": 12
+  },
+  {
+    "text": "[sigh] cycle repeats a sequence endlessly, so we use islice to safely grab just the first five.",
+    "until_line": 15
+  },
+  {
+    "text": "[groan] itertools turns tricky iteration problems into a single, readable line — it's worth exploring the whole module.",
+    "until_line": 15
+  },
+  {
+    "text": "Up next, sorting by a key. Follow so you don't miss it.",
+    "until_line": 15
+  }
+]

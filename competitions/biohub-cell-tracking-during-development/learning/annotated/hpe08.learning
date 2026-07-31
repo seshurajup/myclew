@@ -1,0 +1,113 @@
+@ id: hpe08
+@ order: 3270
+@ title: 8 Block Eviction
+@ subtitle: Hilbert Operator for Progressive Encoding (HOPE) §8
+@ source: docs/papers/hope-hilbert/hope-hilbert.md
+
+--- note
+## 8 Block Eviction
+**Paper:** Hilbert Operator for Progressive Encoding (HOPE) · §8 · pages 16–17 · equations (19–20) · 0 figures.
+
+**Whole-block eviction.** Deleting a residual block would cost ∞ under Axiom 2 —
+except the skip connection keeps the graph alive. Formalising the macro-state Ω = (Φ, I) with the identity's
+own capacity E_identity yields a closed-form eviction cost (eqs. 19–20) in which the skip's capacity sits in
+the denominator: the stronger the parallel identity signal, the cheaper it is to delete the block it
+bypasses.
+
+--- note
+### Block eviction — the macro cost — eq. (19)
+
+$$
+\mathcal{J}_{\mathrm{evict}} = \sum_{l=1}^{2} \mathcal{J}_{\mathrm{layer}}\big(\Omega^{(l)}_a, \Omega^{(l)}_b\big) = \sum_{l=1}^{2} \frac{N^{(l)}_{\mathrm{active}}\,E^{(l)}_{\mathrm{active}}}{E_{\mathrm{identity}}}
+$$
+
+Deleting a whole layer costs ∞ under Axiom 2 — unless the state includes the skip
+connection running in parallel, whose capacity E_identity keeps the denominator alive. The result: eviction
+cost = (active width × active capacity) / (skip capacity), per internal layer. Behavioural checks below —
+and the structural fact that with no skip the cost correctly returns to ∞.
+
+--- code
+import math, torch, torch.nn as nn, torch.nn.functional as F     # neurons as FUNCTIONS
+
+DEV = torch.device("cuda" if torch.cuda.is_available() else "cpu")   # every proof runs on the GPU
+torch.set_default_device(DEV)
+torch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False   # exact proofs
+torch.manual_seed(0); torch.set_printoptions(precision=5, sci_mode=False)
+print(f"device: {DEV}" + (f" | {torch.cuda.get_device_name(0)}" if DEV.type == "cuda" else ""))
+
+SQ2 = math.sqrt(2.0)
+
+def Phi(z):                                          # standard normal CDF
+    return 0.5 * (1.0 + torch.erf(z / SQ2))
+
+def phi(z):                                          # standard normal PDF
+    return torch.exp(-0.5 * z * z) / math.sqrt(2 * math.pi)
+
+def K_self(gamma, beta):                             # eq (3): ||f||^2 per unit output norm
+    r = beta / gamma.abs()
+    return (gamma ** 2 + beta ** 2) * Phi(r) + beta * gamma.abs() * phi(r)
+
+def mc_E(fn, n=10_000_000, chunk=2_000_000):         # big-sample Monte-Carlo expectation
+    tot = 0.0
+    for i in range(0, n, chunk):
+        m = min(chunk, n - i)
+        tot += float(fn(m).sum())
+    return tot / n
+
+def ok(name, cond, extra=""):
+    print(("PASS  " if cond else "FAIL  ") + name + (f"   | {extra}" if extra else ""))
+
+def J_evict(N_act, E_act, E_id):
+    return sum(n * e / E_id for n, e in zip(N_act, E_act))
+base = J_evict([64, 64], [30.0, 28.0], E_id=50.0)
+ok("a stronger skip makes the SAME block cheaper to evict",
+   J_evict([64, 64], [30.0, 28.0], 100.0) < base,
+   f"{base:.2f} -> {J_evict([64,64],[30.0,28.0],100.0):.2f} when E_identity doubles")
+ok("a block with more live capacity costs more", J_evict([64, 64], [60.0, 56.0], 50.0) > base)
+ok("an emptied block is free", J_evict([0, 0], [0.0, 0.0], 50.0) == 0.0)
+tiny = J_evict([64, 64], [30.0, 28.0], 1e-12)
+ok("no skip (E_identity -> 0) recovers Axiom 2's infinity", tiny > 1e12,
+   f"J -> {tiny:.1e} — you cannot delete a block nothing bypasses")
+
+--- output
+```
+device: cuda | NVIDIA GeForce RTX 5090
+PASS  a stronger skip makes the SAME block cheaper to evict   | 74.24 -> 37.12 when E_identity doubles
+PASS  a block with more live capacity costs more
+PASS  an emptied block is free
+PASS  no skip (E_identity -> 0) recovers Axiom 2's infinity   | J -> 3.7e+15 — you cannot delete a block nothing bypasses
+```
+
+--- note
+### …with the skip's capacity computed, not assumed — eq. (20)
+
+$$
+\mathcal{J}_{\mathrm{evict}} = \frac{\sum_{l=1}^{2} N^{(l)}_{\mathrm{active}}\,E^{(l)}_{\mathrm{active}}}{\sum_{k=1}^{d_{\mathrm{amb}}} \sqrt{\gamma_k^2 + \beta_k^2}}
+$$
+
+E_identity is not a hyper-parameter: each pass-through channel is a LINEAR neuron carrying
+the signal y_k ~ N(β_k, γ_k²), whose Hilbert norm is √E[y²] = √(γ_k²+β_k²) — the linear-Ψ analogue of the
+eq. 3 self-kernel. Monte-Carlo confirms the identity-channel capacity, closing the last free constant in
+the eviction cost.
+
+--- code
+for b_, g_ in [(0.0, 1.0), (0.7, 1.2), (-1.5, 0.4)]:
+    mc = mc_E(lambda m: (b_ + g_ * torch.randn(m)) ** 2, n=4_000_000)
+    cf = b_ ** 2 + g_ ** 2
+    ok(f"identity channel (beta={b_}, gamma={g_}): E[y^2] = beta^2 + gamma^2",
+       abs(mc - cf) / cf < 5e-3, f"MC {mc:.5f} vs {cf:.5f}")
+gam = torch.rand(256) + 0.5; bet = torch.randn(256) * 0.3
+E_id = float(torch.sqrt(gam ** 2 + bet ** 2).sum())
+print(f"  a 256-channel skip: E_identity = {E_id:.2f}")
+ok("the denominator of eq. 19 is now COMPUTED from BN stats", E_id > 0,
+   "sqrt(gamma^2 + beta^2) summed over ambient channels — no knob to tune")
+
+--- output
+```
+PASS  identity channel (beta=0.0, gamma=1.0): E[y^2] = beta^2 + gamma^2   | MC 0.99875 vs 1.00000
+PASS  identity channel (beta=0.7, gamma=1.2): E[y^2] = beta^2 + gamma^2   | MC 1.92879 vs 1.93000
+PASS  identity channel (beta=-1.5, gamma=0.4): E[y^2] = beta^2 + gamma^2   | MC 2.40977 vs 2.41000
+  a 256-channel skip: E_identity = 266.92
+PASS  the denominator of eq. 19 is now COMPUTED from BN stats   | sqrt(gamma^2 + beta^2) summed over ambient channels — no knob to tune
+```
+

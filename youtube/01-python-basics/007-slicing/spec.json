@@ -1,0 +1,13 @@
+{
+  "language": "python",
+  "title": "slicing.py",
+  "hook": "Grab any chunk of a list with two colons",
+  "playlist": "Learn Python",
+  "target_seconds": 90,
+  "tts_engine": "chatterbox",
+  "music_prompt": "flowing, slicing motion, smooth lo-fi",
+  "code_path": "code.py",
+  "transcript_path": "transcript.json",
+  "outputs_path": "outputs.json",
+  "accent": "ocean"
+}

@@ -1,0 +1,42 @@
+[
+  {
+    "text": "Tests often need the same setup — some data, a database, a file — and fixtures provide it cleanly.",
+    "until_line": 6
+  },
+  {
+    "text": "A fixture is a function marked with the fixture decorator that returns whatever your tests need.",
+    "until_line": 6
+  },
+  {
+    "text": "Here sample_users hands back a ready-made list of user dictionaries.",
+    "until_line": 6
+  },
+  {
+    "text": "[chuckle] Any test can request it just by naming it as a parameter — pytest injects the value automatically.",
+    "until_line": 9
+  },
+  {
+    "text": "So both tests receive the same fresh data, without repeating the setup code in each one.",
+    "until_line": 12
+  },
+  {
+    "text": "[sniff] Fixtures can also handle teardown — cleanup that runs after the test, no matter what.",
+    "until_line": 20
+  },
+  {
+    "text": "The yield splits it: everything before prepares, the test runs at the yield, and everything after cleans up.",
+    "until_line": 20
+  },
+  {
+    "text": "[sigh] pytest even ships built-in fixtures like tmp_path, giving each test its own temporary folder.",
+    "until_line": 20
+  },
+  {
+    "text": "[groan] Fixtures keep your tests dry and focused — set up once, reuse everywhere, and clean up reliably.",
+    "until_line": 20
+  },
+  {
+    "text": "In the next one we take on mocking. Comment the topic you want after that.",
+    "until_line": 20
+  }
+]

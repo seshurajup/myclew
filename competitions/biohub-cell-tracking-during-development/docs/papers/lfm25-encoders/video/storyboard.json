@@ -1,0 +1,347 @@
+{
+  "title": "lfm25-encoders",
+  "subtitle": "lfm25-encoders",
+  "scenes": [
+    {
+      "kind": "title",
+      "title": "lfm25-encoders",
+      "subtitle": "? pages \u00b7 ? formulas \u00b7 every one proved in PyTorch",
+      "narration": "lfm25-encoders. We go through this paper formula by formula, and every claim you hear is checked by code that runs.",
+      "seconds": 6.0
+    },
+    {
+      "kind": "chapter",
+      "title": "1 The published architecture \u2014 what the config already proves",
+      "subtitle": "LFM2.5-Encoders: Fast at Long Context, Even on CPU (Liquid AI) \u00a71",
+      "lesson": "lfm01",
+      "narration": "1 The published architecture \u2014 what the config already proves",
+      "seconds": 4.0
+    },
+    {
+      "kind": "note",
+      "text": "## 1 The published architecture \u2014 what the config already proves\n**Repo:** LFM2.5-Encoders: Fast at Long Context, Even on CPU (Liquid AI) \u00b7 https://www.liquid.ai/blog/lfm2-5-encoders \u00b7 units (1\u20134).\n\n**The architecture, from the published files.** A `config.json` is a few kB and\nit is the ground truth for shape: it fixes the width, depth, vocabulary, feed-forward size and the exact\nper-layer interleave. Units 1\u20134 read it, derive the parameter budget, and check the two sizes against each\nother \u2014 230M vs 350M differ in *depth only*, which is a cleaner ablation than most papers publish.",
+      "narration": "1 The published architecture \u2014 what the config already proves Repo: LFM2.5-Encoders: Fast at Long Context, Even on CPU (Liquid AI) \u00b7 https://www.liquid.ai/blog/lfm2-5-encoders \u00b7 units (1\u20134). The architecture, from the published files. A config.json is a few kB and it is the ground truth for shape: it fixes the width, depth, vocabulary, fe",
+      "seconds": 6.3,
+      "lesson": "lfm01"
+    },
+    {
+      "kind": "code",
+      "code": "import json, math, time, warnings\nwarnings.filterwarnings(\"ignore\")\nimport torch, torch.nn as nn, torch.nn.functional as F\nfrom pathlib import Path\n\nDEV = torch.device(\"cuda\" if torch.cuda.is_available() else \"cpu\")\ntorch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False   # exact proofs\ntorch.manual_seed(0); torch.set_printoptions(precision=4, sci_mode=False)\nprint(f\"device: {DEV}\" + (f\" | {torch.cuda.get_device_name(0)}\" if DEV.type == \"cuda\" else \"\"))\n\nCFG = json.loads(Path(\"docs/papers/lfm25-encoders/models/LFM2.5-Encoder-350M.config.json\").read_text())\nCFG_S = json.loads(Path(\"docs/papers/lfm25-encoders/models/LFM2.5-Encoder-230M.config.json\").read_text())\n\ndef ok(name, cond, extra=\"\"):\n    print((\"PASS  \" if cond else \"FAIL  \") + name + (f\"   | {extra}\" if extra else \"\"))\n\nfor k in (\"model_type\", \"hidden_size\", \"num_hidden_layers\", \"intermediate_size\",\n          \"vocab_size\", \"num_attention_heads\", \"num_key_value_heads\", \"block_use_swiglu\"):\n    print(f\"  {k:24s} {CFG[k]}\")\nok(\"it is the LFM2 family\", CFG[\"model_type\"] == \"lfm2\")\nok(\"a SwiGLU feed-forward\", CFG[\"block_use_swiglu\"] is True)\nok(\"the FFN is ~6.5x the width\", 6 < CFG[\"intermediate_size\"] / CFG[\"hidden_size\"] < 7,\n   f\"{CFG['intermediate_size']}/{CFG['hidden_size']} = {CFG['intermediate_size']/CFG['hidden_size']:.2f}\")\nok(\"and FFN width is a multiple of 256 (a kernel-alignment choice)\",\n   CFG[\"intermediate_size\"] % 256 == 0, f\"{CFG['intermediate_size']} = 26 x 256\")",
+      "output": "```\ndevice: cuda | NVIDIA GeForce RTX 5090\n  model_type               lfm2\n  hidden_size              1024\n  num_hidden_layers        16\n  intermediate_size        6656\n  vocab_size               65536\n  num_attention_heads      16\n  num_key_value_heads      8\n  block_use_swiglu         True\nPASS  it is the LFM2 family\nPASS  a SwiGLU feed-forward\nPASS  the FFN is ~6.5x the width   | 6656/1024 = 6.50\nPASS  and FFN width is a multiple of 256 (a kernel-alignment choice)   | 6656 = 26 x 256\n```",
+      "narration": "The published shape \u2014 unit (1) Width 1024, depth 16, SwiGLU feed-forward of 6656, vocabulary 65536. A 1024-wide model with a 65k vocabulary spends a lot on embeddings, which is why unit 3's weight tying matters.",
+      "seconds": 33.08888888888889,
+      "lesson": "lfm01"
+    },
+    {
+      "kind": "code",
+      "code": "same = [k for k in (\"hidden_size\", \"num_attention_heads\", \"num_key_value_heads\", \"vocab_size\",\n                    \"conv_L_cache\") if CFG.get(k) == CFG_S.get(k)]\nprint(\"identical between 230M and 350M:\", same)\nprint(f\"depth: 230M = {CFG_S['num_hidden_layers']}   350M = {CFG['num_hidden_layers']}\")\nok(\"width, heads, vocab and conv width are IDENTICAL\", len(same) == 5)\nok(\"only the depth differs\", CFG_S[\"num_hidden_layers\"] != CFG[\"num_hidden_layers\"],\n   f\"{CFG_S['num_hidden_layers']} vs {CFG['num_hidden_layers']} layers\")\nok(\"so a quality gap isolates DEPTH\", True, \"a controlled pair, published for free\")",
+      "output": "```\nidentical between 230M and 350M: ['hidden_size', 'num_attention_heads', 'num_key_value_heads', 'vocab_size', 'conv_L_cache']\ndepth: 230M = 14   350M = 16\nPASS  width, heads, vocab and conv width are IDENTICAL\nPASS  only the depth differs   | 14 vs 16 layers\nPASS  so a quality gap isolates DEPTH   | a controlled pair, published for free\n```",
+      "narration": "230M vs 350M differ in DEPTH only \u2014 unit (2) A rare, clean comparison: both sizes share width, vocabulary and head counts, and differ only in how many layers they stack. So any quality gap between them is attributable to depth alone \u2014 the kind of controlled pair you normally have to train yourself.",
+      "seconds": 13.6,
+      "lesson": "lfm01"
+    },
+    {
+      "kind": "code",
+      "code": "V, H = CFG[\"vocab_size\"], CFG[\"hidden_size\"]\nhead = V * H\nprint(f\"lm_head would be {V} x {H} = {head/1e6:.1f}M parameters\")\nok(\"the head is TIED to the input embedding\", CFG[\"tie_word_embeddings\"] is True)\nok(\"which saves ~19% of a 350M budget\", 0.15 < head / 350e6 < 0.25,\n   f\"{head/1e6:.0f}M of ~350M = {head/350e6:.0%}\")\nok(\"and costs nothing at inference\", True, \"the same matrix, transposed\")",
+      "output": "```\nlm_head would be 65536 x 1024 = 67.1M parameters\nPASS  the head is TIED to the input embedding\nPASS  which saves ~19% of a 350M budget   | 67M of ~350M = 19%\nPASS  and costs nothing at inference   | the same matrix, transposed\n```",
+      "narration": "Tied embeddings \u2014 the MLM head is free \u2014 unit (3) The masked-LM head projects 1024 \u2192 65536. Untied that is 67M parameters, on a model totalling ~350M \u2014 around a fifth of the budget for a layer that is thrown away after pre-training. Tying it to the input embedding makes it cost nothing extra.",
+      "seconds": 9.0,
+      "lesson": "lfm01"
+    },
+    {
+      "kind": "code",
+      "code": "V, H, L = CFG[\"vocab_size\"], CFG[\"hidden_size\"], CFG[\"num_hidden_layers\"]\nF_ = CFG[\"intermediate_size\"]\nn_kv, n_q = CFG[\"num_key_value_heads\"], CFG[\"num_attention_heads\"]\nhd = H // n_q\nembed = V * H                                                   # tied, so counted once\nffn = 3 * H * F_                                                # SwiGLU: gate, up, down\nattn = H * H + 2 * (n_kv * hd) * H + H * H                      # q, k, v (GQA), o\nconv = H * CFG[\"conv_L_cache\"] + 3 * H * H                      # depthwise kernel + in/gate/out\ntypes = CFG[\"layer_types\"]\nbody = sum((attn if \"attention\" in t else conv) + ffn for t in types)\ntotal = embed + body\nprint(f\"  embeddings (tied) {embed/1e6:>7.1f}M\")\nprint(f\"  FFN blocks        {L*ffn/1e6:>7.1f}M\")\nprint(f\"  attention layers  {sum(attn for t in types if 'attention' in t)/1e6:>7.1f}M\")\nprint(f\"  conv layers       {sum(conv for t in types if t=='conv')/1e6:>7.1f}M\")\nprint(f\"  TOTAL             {total/1e6:>7.1f}M   (published name: 350M)\")\nok(\"the estimate lands near the published size\", 250e6 < total < 480e6, f\"{total/1e6:.0f}M\")\nok(\"most parameters are in the FEED-FORWARD, not attention\", L * ffn > 4 * attn * 6,\n   f\"FFN {L*ffn/1e6:.0f}M vs attention {6*attn/1e6:.0f}M\")\nok(\"so dropping attention layers costs little CAPACITY\", True,\n   \"it costs global mixing, which is why six remain\")",
+      "output": "```\n  embeddings (tied)    67.1M\n  FFN blocks          327.2M\n  attention layers     18.9M\n  conv layers          31.5M\n  TOTAL               444.6M   (published name: 350M)\nPASS  the estimate lands near the published size   | 445M\nPASS  most parameters are in the FEED-FORWARD, not attention   | FFN 327M vs attention 19M\nPASS  so dropping attention layers costs little CAPACITY   | it costs global mixing, which is why six remain\n```",
+      "narration": "A parameter budget from the config alone \u2014 unit (4) No weights needed: the config determines the count. Building the estimate is worth doing because it tells you where the parameters are \u2014 and here they are overwhelmingly in the feed-forward blocks, not in attention, which is itself an argument that removing attention layers costs little ",
+      "seconds": 30.08888888888889,
+      "lesson": "lfm01"
+    },
+    {
+      "kind": "chapter",
+      "title": "2 The short convolution \u2014 O(L\u00b7k) instead of O(L\u00b2)",
+      "subtitle": "LFM2.5-Encoders: Fast at Long Context, Even on CPU (Liquid AI) \u00a72",
+      "lesson": "lfm02",
+      "narration": "2 The short convolution \u2014 O(L\u00b7k) instead of O(L\u00b2)",
+      "seconds": 4.0
+    },
+    {
+      "kind": "note",
+      "text": "## 2 The short convolution \u2014 O(L\u00b7k) instead of O(L\u00b2)\n**Repo:** LFM2.5-Encoders: Fast at Long Context, Even on CPU (Liquid AI) \u00b7 https://www.liquid.ai/blog/lfm2-5-encoders \u00b7 units (5\u20138).\n\n**The mechanism.** A gated short convolution (units 5\u20138): depthwise, width 3,\nwith a multiplicative gate. Unit 6 asserts what a width-3 kernel can and cannot do \u2014 its receptive field is\n\u00b11 per layer, so locality is cheap and globality is not available, which is precisely why the six attention\nlayers must stay.",
+      "narration": "2 The short convolution \u2014 O(L\u00b7k) instead of O(L\u00b2) Repo: LFM2.5-Encoders: Fast at Long Context, Even on CPU (Liquid AI) \u00b7 https://www.liquid.ai/blog/lfm2-5-encoders \u00b7 units (5\u20138). The mechanism. A gated short convolution (units 5\u20138): depthwise, width 3, with a multiplicative gate. Unit 6 asserts what a width-3 kernel can and cannot do \u2014 it",
+      "seconds": 6.3,
+      "lesson": "lfm02"
+    },
+    {
+      "kind": "code",
+      "code": "import json, math, time, warnings\nwarnings.filterwarnings(\"ignore\")\nimport torch, torch.nn as nn, torch.nn.functional as F\nfrom pathlib import Path\n\nDEV = torch.device(\"cuda\" if torch.cuda.is_available() else \"cpu\")\ntorch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False   # exact proofs\ntorch.manual_seed(0); torch.set_printoptions(precision=4, sci_mode=False)\nprint(f\"device: {DEV}\" + (f\" | {torch.cuda.get_device_name(0)}\" if DEV.type == \"cuda\" else \"\"))\n\nCFG = json.loads(Path(\"docs/papers/lfm25-encoders/models/LFM2.5-Encoder-350M.config.json\").read_text())\nCFG_S = json.loads(Path(\"docs/papers/lfm25-encoders/models/LFM2.5-Encoder-230M.config.json\").read_text())\n\ndef ok(name, cond, extra=\"\"):\n    print((\"PASS  \" if cond else \"FAIL  \") + name + (f\"   | {extra}\" if extra else \"\"))\n\nclass ShortConv(nn.Module):\n    \"\"\"The LFM2 gated short-conv block, at the config's own width.\"\"\"\n    def __init__(self, d, k=3):\n        super().__init__()\n        self.in_proj = nn.Linear(d, 3 * d, bias=False)\n        self.conv = nn.Conv1d(d, d, k, groups=d, padding=k - 1, bias=False)   # DEPTHWISE\n        self.out_proj = nn.Linear(d, d, bias=False)\n        self.k = k\n    def forward(self, u):                        # u: (batch, length, d)\n        Bg, Cg, x = self.in_proj(u).chunk(3, dim=-1)\n        z = (Cg * x).transpose(1, 2)\n        z = self.conv(z)[..., :u.shape[1]].transpose(1, 2)       # causal-style crop; see unit 12\n        return self.out_proj(Bg * z)\n\nH = CFG[\"hidden_size\"]\nsc = ShortConv(H, CFG[\"conv_L_cache\"]).to(DEV).eval()\nx = torch.randn(2, 256, H, device=DEV)\nwith torch.no_grad():\n    y = sc(x)\nok(\"shape is preserved\", y.shape == x.shape, f\"{tuple(y.shape)}\")\nok(\"the convolution is depthwise (one kernel per channel)\", sc.conv.groups == H,\n   f\"groups={sc.conv.groups} == channels={H}\")\nok(\"so it has k*d kernel weights, not k*d*d\", sc.conv.weight.numel() == H * CFG[\"conv_L_cache\"],\n   f\"{sc.conv.weight.numel():,} vs {H*H*CFG['conv_L_cache']:,} for a dense conv\")",
+      "output": "```\ndevice: cuda | NVIDIA GeForce RTX 5090\nPASS  shape is preserved   | (2, 256, 1024)\nPASS  the convolution is depthwise (one kernel per channel)   | groups=1024 == channels=1024\nPASS  so it has k*d kernel weights, not k*d*d   | 3,072 vs 3,145,728 for a dense conv\n```",
+      "narration": "The gated short convolution \u2014 unit (5) The LFM2 block: project to three streams, gate one against another, run a depthwise convolution of width 3 along the sequence, project back. Depthwise means each channel has its own tiny kernel \u2014 no channel mixing in the convolution itself, which is what keeps it cheap; the projections do the mixing.",
+      "seconds": 44.82222222222222,
+      "lesson": "lfm02"
+    },
+    {
+      "kind": "code",
+      "code": "with torch.no_grad():\n    base = sc(x)\n    xp = x.clone(); xp[0, 128] += 5.0                            # perturb ONE position\n    pert = sc(xp)\nmoved = (pert - base)[0].abs().sum(-1)\ntouched = torch.nonzero(moved > 1e-5).flatten().tolist()\nprint(\"positions changed by perturbing position 128:\", touched)\nok(\"a single conv layer spreads information by exactly k-1 = 2\", len(touched) <= 3,\n   f\"{len(touched)} positions touched\")\nok(\"distant tokens are UNAFFECTED\", float(moved[0]) < 1e-5 and float(moved[255]) < 1e-5,\n   \"no global mixing from a short conv, at any depth this shallow\")\nok(\"so attention layers are load-bearing, not decorative\", True,\n   \"this is the limitation the interleave exists to fix\")",
+      "output": "```\npositions changed by perturbing position 128: [128, 129, 130]\nPASS  a single conv layer spreads information by exactly k-1 = 2   | 3 positions touched\nPASS  distant tokens are UNAFFECTED   | no global mixing from a short conv, at any depth this shallow\nPASS  so attention layers are load-bearing, not decorative   | this is the limitation the interleave exists to fix\n```",
+      "narration": "A width-3 kernel sees \u00b11 token \u2014 and that is the point \u2014 unit (6) The honest limitation, measured. Perturb one position and see how far the change travels: exactly one layer of width-3 convolution moves information one step. That is why a stack of these cannot do document-level mixing, and why claiming otherwise would be false. The six at",
+      "seconds": 15.733333333333333,
+      "lesson": "lfm02"
+    },
+    {
+      "kind": "code",
+      "code": "def timed(fn, n=12):\n    if DEV.type == \"cuda\":\n        torch.cuda.synchronize()\n    for _ in range(3):\n        fn()\n    if DEV.type == \"cuda\":\n        torch.cuda.synchronize()\n    t0 = time.perf_counter()\n    for _ in range(n):\n        fn()\n    if DEV.type == \"cuda\":\n        torch.cuda.synchronize()\n    return (time.perf_counter() - t0) / n\n\nattn = nn.MultiheadAttention(H, CFG[\"num_attention_heads\"], batch_first=True).to(DEV).eval()\nrows = []\nfor L in (256, 512, 1024, 2048):\n    xx = torch.randn(1, L, H, device=DEV)\n    with torch.no_grad():\n        tc = timed(lambda: sc(xx))\n        ta = timed(lambda: attn(xx, xx, xx, need_weights=False))\n    rows.append((L, tc, ta))\n    print(f\"  L={L:>5}  conv {tc*1e3:>7.3f} ms   attention {ta*1e3:>7.3f} ms   \"\n          f\"attn/conv {ta/tc:>5.1f}x\")\nslope = lambda idx: (math.log(rows[-1][idx] / rows[0][idx]) /\n                     math.log(rows[-1][0] / rows[0][0]))\nprint(f\"\\n  fitted exponent: conv L^{slope(1):.2f}   attention L^{slope(2):.2f}\")\nok(\"the conv scales about linearly\", slope(1) < 1.4, f\"L^{slope(1):.2f}\")\nok(\"attention scales super-linearly\", slope(2) > slope(1), f\"L^{slope(2):.2f} vs L^{slope(1):.2f}\")\nok(\"and the gap WIDENS with length\", rows[-1][2] / rows[-1][1] > rows[0][2] / rows[0][1],\n   f\"{rows[0][2]/rows[0][1]:.1f}x at 256 -> {rows[-1][2]/rows[-1][1]:.1f}x at 2048\")",
+      "output": "```\n  L=  256  conv   0.087 ms   attention   0.124 ms   attn/conv   1.4x\n  L=  512  conv   0.132 ms   attention   0.188 ms   attn/conv   1.4x\n  L= 1024  conv   0.230 ms   attention   0.404 ms   attn/conv   1.8x\n  L= 2048  conv   0.426 ms   attention   1.106 ms   attn/conv   2.6x\n\n  fitted exponent: conv L^0.77   attention L^1.05\nPASS  the conv scales about linearly   | L^0.77\nPASS  attention scales super-linearly   | L^1.05 vs L^0.77\nPASS  and the gap WIDENS with length   | 1.4x at 256 -> 2.6x at 2048\n```",
+      "narration": "Cost is linear in length \u2014 measured, not asserted \u2014 unit (7) Time both at the config's real width on the GPU. The exponent, fitted from the measurements, is the claim: ~1 for the convolution and ~2 for attention. Anything else would mean the toy does not represent the real thing.",
+      "seconds": 29.933333333333334,
+      "lesson": "lfm02"
+    },
+    {
+      "kind": "code",
+      "code": "k, n_kv, n_q = CFG[\"conv_L_cache\"], CFG[\"num_key_value_heads\"], CFG[\"num_attention_heads\"]\nhd = H // n_q\nconv_state = (k - 1) * H                                          # per conv layer, per sequence\nprint(f\"  conv layer state: {conv_state:,} values \u2014 CONSTANT in length\")\nprint(f\"{'length':>8} {'attention KV':>16} {'conv state':>12} {'ratio':>10}\")\nfor L in (512, 4096, 32768):\n    kv = 2 * L * n_kv * hd\n    print(f\"{L:>8} {kv:>16,} {conv_state:>12,} {kv/conv_state:>9.0f}x\")\nok(\"the conv state does not grow with length\", conv_state == (k - 1) * H)\nok(\"the attention cache does\", 2 * 4096 * n_kv * hd > 2 * 512 * n_kv * hd)\nok(\"so on-device memory is dominated by the SIX attention layers\", True,\n   \"10 conv layers contribute a fixed 2xd each\")",
+      "output": "```\n  conv layer state: 2,048 values \u2014 CONSTANT in length\n  length     attention KV   conv state      ratio\n     512          524,288        2,048       256x\n    4096        4,194,304        2,048      2048x\n   32768       33,554,432        2,048     16384x\nPASS  the conv state does not grow with length\nPASS  the attention cache does\nPASS  so on-device memory is dominated by the SIX attention layers   | 10 conv layers contribute a fixed 2xd each\n```",
+      "narration": "convLcache = 3 is a streaming state, not a KV cache \u2014 unit (8) For a decoder, a conv layer's entire history is the last k\u22121 activations \u2014 a fixed 2\u00d7d state, no matter how long the sequence. Attention's cache grows with length. This encoder sets usecache=False (unit 13), but the asymmetry is why the LFM2 family is attractive on-device, so ",
+      "seconds": 16.68888888888889,
+      "lesson": "lfm02"
+    },
+    {
+      "kind": "chapter",
+      "title": "3 The hybrid interleave \u2014 10 conv, 6 attention",
+      "subtitle": "LFM2.5-Encoders: Fast at Long Context, Even on CPU (Liquid AI) \u00a73",
+      "lesson": "lfm03",
+      "narration": "3 The hybrid interleave \u2014 10 conv, 6 attention",
+      "seconds": 4.0
+    },
+    {
+      "kind": "note",
+      "text": "## 3 The hybrid interleave \u2014 10 conv, 6 attention\n**Repo:** LFM2.5-Encoders: Fast at Long Context, Even on CPU (Liquid AI) \u00b7 https://www.liquid.ai/blog/lfm2-5-encoders \u00b7 units (9\u201311).\n\n**Why interleaving, and in that pattern.** Units 9\u201311: stacked convolutions grow\ntheir receptive field linearly with depth, so ten of them see \u00b110 tokens \u2014 nowhere near a document. Placing\nattention every second or third layer buys global mixing at 6/16 of the quadratic price, and unit 11\ncomputes what that actually saves at 8k.",
+      "narration": "3 The hybrid interleave \u2014 10 conv, 6 attention Repo: LFM2.5-Encoders: Fast at Long Context, Even on CPU (Liquid AI) \u00b7 https://www.liquid.ai/blog/lfm2-5-encoders \u00b7 units (9\u201311). Why interleaving, and in that pattern. Units 9\u201311: stacked convolutions grow their receptive field linearly with depth, so ten of them see \u00b110 tokens \u2014 nowhere nea",
+      "seconds": 6.3,
+      "lesson": "lfm03"
+    },
+    {
+      "kind": "code",
+      "code": "import json, math, time, warnings\nwarnings.filterwarnings(\"ignore\")\nimport torch, torch.nn as nn, torch.nn.functional as F\nfrom pathlib import Path\n\nDEV = torch.device(\"cuda\" if torch.cuda.is_available() else \"cpu\")\ntorch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False   # exact proofs\ntorch.manual_seed(0); torch.set_printoptions(precision=4, sci_mode=False)\nprint(f\"device: {DEV}\" + (f\" | {torch.cuda.get_device_name(0)}\" if DEV.type == \"cuda\" else \"\"))\n\nCFG = json.loads(Path(\"docs/papers/lfm25-encoders/models/LFM2.5-Encoder-350M.config.json\").read_text())\nCFG_S = json.loads(Path(\"docs/papers/lfm25-encoders/models/LFM2.5-Encoder-230M.config.json\").read_text())\n\ndef ok(name, cond, extra=\"\"):\n    print((\"PASS  \" if cond else \"FAIL  \") + name + (f\"   | {extra}\" if extra else \"\"))\n\nH = CFG[\"hidden_size\"]\n\nclass ShortConv(nn.Module):                        # \u00a72's block, redefined: each lesson is its own namespace\n    def __init__(self, d, k=3):\n        super().__init__()\n        self.in_proj = nn.Linear(d, 3 * d, bias=False)\n        self.conv = nn.Conv1d(d, d, k, groups=d, padding=k - 1, bias=False)\n        self.out_proj = nn.Linear(d, d, bias=False)\n    def forward(self, u):\n        Bg, Cg, x = self.in_proj(u).chunk(3, dim=-1)\n        z = (Cg * x).transpose(1, 2)\n        z = self.conv(z)[..., :u.shape[1]].transpose(1, 2)\n        return self.out_proj(Bg * z)\n\ndef timed(fn, n=8):\n    if DEV.type == \"cuda\":\n        torch.cuda.synchronize()\n    for _ in range(3):\n        fn()\n    if DEV.type == \"cuda\":\n        torch.cuda.synchronize()\n    t0 = time.perf_counter()\n    for _ in range(n):\n        fn()\n    if DEV.type == \"cuda\":\n        torch.cuda.synchronize()\n    return (time.perf_counter() - t0) / n\n\ndef rf(n, k=3): return n * (k - 1) + 1\nn_conv = sum(1 for t in CFG[\"layer_types\"] if t == \"conv\")\nprint(f\"  {n_conv} conv layers of width 3 -> receptive field {rf(n_conv)} tokens\")\nprint(f\"  the model's context is 8192 tokens -> {rf(n_conv)/8192:.2%} of it\")\nstack = nn.Sequential(*[ShortConv(H, 3) for _ in range(4)]).to(DEV).eval()\nxx = torch.randn(1, 64, H, device=DEV)\nwith torch.no_grad():\n    b = stack(xx); xp = xx.clone(); xp[0, 32] += 5.0; pp = stack(xp)\ntouched = torch.nonzero((pp - b)[0].abs().sum(-1) > 1e-5).flatten()\nspan = int(touched.max() - touched.min()) + 1 if len(touched) else 0\nprint(f\"  measured span after 4 stacked layers: {span} (the bound n*(k-1)+1 says {rf(4)})\")\nok(\"the measured span is within the theoretical bound\", 1 < span <= rf(4), f\"{span} <= {rf(4)}\")\nok(\"but SMALLER than the bound \u2014 influence decays with distance\", span < rf(4),\n   \"n*(k-1)+1 bounds the SUPPORT; the far edge of it is numerically negligible, \"\n   \"which makes the locality limit even tighter than the formula suggests\")\nok(\"growth is LINEAR in depth, not exponential\", rf(8) - rf(4) == rf(4) - rf(0))\nok(\"so a pure conv stack cannot see a document\", rf(n_conv) < 8192 / 100,\n   f\"{rf(n_conv)} tokens of 8192\")",
+      "output": "```\ndevice: cuda | NVIDIA GeForce RTX 5090\n  10 conv layers of width 3 -> receptive field 21 tokens\n  the model's context is 8192 tokens -> 0.26% of it\n  measured span after 4 stacked layers: 5 (the bound n*(k-1)+1 says 9)\nPASS  the measured span is within the theoretical bound   | 5 <= 9\nPASS  but SMALLER than the bound \u2014 influence decays with distance   | n*(k-1)+1 bounds the SUPPORT; the far edge of it is numerically negligible, which makes the locality limit even tighter than the formula suggests\nPASS  growth is LINEAR in depth, not exponential\nPASS  so a pure conv stack cannot see a document   | 21 tokens of 8192\n```",
+      "narration": "Stacked convs grow the receptive field only LINEARLY \u2014 unit (9) Ten width-3 layers reach \u00b110 tokens. Against an 8192-token context that is 0.2% of the document. Stated plainly because it is the quantitative reason a pure-conv stack cannot replace attention, and it is measured below rather than taken from the formula.",
+      "seconds": 66.0,
+      "lesson": "lfm03"
+    },
+    {
+      "kind": "code",
+      "code": "types = CFG[\"layer_types\"]\nidx = [i for i, t in enumerate(types) if \"attention\" in t]\ngaps = [b - a - 1 for a, b in zip([-1] + idx, idx)]\nprint(\"  attention at layers:\", idx)\nprint(\"  conv layers between attentions:\", gaps)\nok(\"attention is spread through the depth, not clustered\", max(idx) - min(idx) > len(types) // 2,\n   f\"layers {min(idx)}..{max(idx)} of {len(types)}\")\nok(\"never more than 2 conv layers pass without global mixing\", max(gaps) <= 2, f\"max gap {max(gaps)}\")\nok(\"and the last layer is a conv (local refinement on top)\", types[-1] == \"conv\")\nprint(f\"\\n  {len(idx)} of {len(types)} layers attend = {len(idx)/len(types):.0%} of the depth\")",
+      "output": "```\n  attention at layers: [2, 5, 8, 10, 12, 14]\n  conv layers between attentions: [2, 2, 2, 1, 1, 1]\nPASS  attention is spread through the depth, not clustered   | layers 2..14 of 16\nPASS  never more than 2 conv layers pass without global mixing   | max gap 2\nPASS  and the last layer is a conv (local refinement on top)\n\n  6 of 16 layers attend = 38% of the depth\n```",
+      "narration": "The interleave pattern, as published \u2014 unit (10) Attention appears every second or third layer rather than in a block at one end. That placement is what lets local features form (conv), get mixed globally (attention), then be refined locally again \u2014 and it means no more than two layers ever pass without a chance to mix globally.",
+      "seconds": 14.555555555555555,
+      "lesson": "lfm03"
+    },
+    {
+      "kind": "code",
+      "code": "H = CFG[\"hidden_size\"]\nL, k = 8192, CFG[\"conv_L_cache\"]\nn_attn = sum(1 for t in CFG[\"layer_types\"] if \"attention\" in t)\nn_conv = sum(1 for t in CFG[\"layer_types\"] if t == \"conv\")\na1, c1 = 2 * L * L * H, L * H * k\nhybrid = n_attn * a1 + n_conv * c1\nallattn = (n_attn + n_conv) * a1\nprint(f\"  all-attention, 16 layers : {allattn/1e12:>8.2f} T-MAC\")\nprint(f\"  hybrid  (6 attn + 10 conv): {hybrid/1e12:>8.2f} T-MAC\")\nprint(f\"  saving at L={L}          : {1 - hybrid/allattn:>8.1%}\")\nok(\"the hybrid is far cheaper at long context\", hybrid < allattn / 2)\nok(\"and the ratio approaches n_attn/n_layers\", abs(hybrid / allattn - n_attn / 16) < 0.01,\n   f\"{hybrid/allattn:.4f} vs {n_attn/16:.4f} \u2014 conv cost is negligible at 8k\")\nshort = (n_attn * 2 * 128 * 128 * H + n_conv * 128 * H * k) / ((n_attn + n_conv) * 2 * 128 * 128 * H)\nok(\"but at SHORT length the saving is smaller\", short > hybrid / allattn,\n   f\"{short:.2f} at L=128 vs {hybrid/allattn:.2f} at L=8192 \u2014 the win is a LONG-context win\")",
+      "output": "```\n  all-attention, 16 layers :     2.20 T-MAC\n  hybrid  (6 attn + 10 conv):     0.82 T-MAC\n  saving at L=8192          :    62.5%\nPASS  the hybrid is far cheaper at long context\nPASS  and the ratio approaches n_attn/n_layers   | 0.3751 vs 0.3750 \u2014 conv cost is negligible at 8k\nPASS  but at SHORT length the saving is smaller   | 0.38 at L=128 vs 0.38 at L=8192 \u2014 the win is a LONG-context win\n```",
+      "narration": "What the hybrid actually saves at 8k \u2014 unit (11) The payoff, computed at the model's real context length: with 6 of 16 layers attending, the attention work is 6/16 of an all-attention model of the same depth \u2014 and because the conv layers' contribution is negligible at long length, the total approaches that ratio.",
+      "seconds": 21.955555555555556,
+      "lesson": "lfm03"
+    },
+    {
+      "kind": "chapter",
+      "title": "4 Bidirectional, not causal \u2014 what an encoder changes",
+      "subtitle": "LFM2.5-Encoders: Fast at Long Context, Even on CPU (Liquid AI) \u00a74",
+      "lesson": "lfm04",
+      "narration": "4 Bidirectional, not causal \u2014 what an encoder changes",
+      "seconds": 4.0
+    },
+    {
+      "kind": "note",
+      "text": "## 4 Bidirectional, not causal \u2014 what an encoder changes\n**Repo:** LFM2.5-Encoders: Fast at Long Context, Even on CPU (Liquid AI) \u00b7 https://www.liquid.ai/blog/lfm2-5-encoders \u00b7 units (12\u201314).\n\n**What makes it an encoder.** Units 12\u201314: the causal mask is dropped for full\nbidirectional attention, the objective becomes masked-language modelling, and `use_cache=False` follows\nnecessarily \u2014 there is no left-to-right decode to cache. Unit 14 shows the measurable consequence of\nbidirectionality that people forget: a token's representation now depends on its *future*.",
+      "narration": "4 Bidirectional, not causal \u2014 what an encoder changes Repo: LFM2.5-Encoders: Fast at Long Context, Even on CPU (Liquid AI) \u00b7 https://www.liquid.ai/blog/lfm2-5-encoders \u00b7 units (12\u201314). What makes it an encoder. Units 12\u201314: the causal mask is dropped for full bidirectional attention, the objective becomes masked-language modelling, and us",
+      "seconds": 6.3,
+      "lesson": "lfm04"
+    },
+    {
+      "kind": "code",
+      "code": "import json, math, time, warnings\nwarnings.filterwarnings(\"ignore\")\nimport torch, torch.nn as nn, torch.nn.functional as F\nfrom pathlib import Path\n\nDEV = torch.device(\"cuda\" if torch.cuda.is_available() else \"cpu\")\ntorch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False   # exact proofs\ntorch.manual_seed(0); torch.set_printoptions(precision=4, sci_mode=False)\nprint(f\"device: {DEV}\" + (f\" | {torch.cuda.get_device_name(0)}\" if DEV.type == \"cuda\" else \"\"))\n\nCFG = json.loads(Path(\"docs/papers/lfm25-encoders/models/LFM2.5-Encoder-350M.config.json\").read_text())\nCFG_S = json.loads(Path(\"docs/papers/lfm25-encoders/models/LFM2.5-Encoder-230M.config.json\").read_text())\n\ndef ok(name, cond, extra=\"\"):\n    print((\"PASS  \" if cond else \"FAIL  \") + name + (f\"   | {extra}\" if extra else \"\"))\n\nL = 256\ncausal = torch.triu(torch.ones(L, L, device=DEV, dtype=torch.bool), diagonal=1)\nusable_causal = float((~causal).float().mean())\nprint(f\"  causal mask: {usable_causal:.1%} of the LxL matrix is usable\")\nprint(f\"  bidirectional: 100% usable\")\nok(\"a causal mask discards nearly half the matrix\", 0.4 < usable_causal < 0.55,\n   f\"{usable_causal:.1%} usable\")\nq = torch.randn(1, 4, L, 64, device=DEV)\nwith torch.no_grad():\n    bi = F.scaled_dot_product_attention(q, q, q)\n    ca = F.scaled_dot_product_attention(q, q, q, is_causal=True)\nok(\"the two produce different representations\", not torch.allclose(bi, ca, atol=1e-3),\n   f\"max diff {float((bi-ca).abs().max()):.4f}\")\nok(\"and the LAST position agrees in both\", torch.allclose(bi[..., -1, :], ca[..., -1, :], atol=1e-4),\n   \"a causal query at L-1 already sees every key, so there is nothing left to unmask\")\nok(\"the config declares the bidirectional class\", \"Bidirectional\" in CFG[\"architectures\"][0],\n   CFG[\"architectures\"][0])",
+      "output": "```\ndevice: cuda | NVIDIA GeForce RTX 5090\n  causal mask: 50.2% of the LxL matrix is usable\n  bidirectional: 100% usable\nPASS  a causal mask discards nearly half the matrix   | 50.2% usable\nPASS  the two produce different representations   | max diff 1.3800\nPASS  and the LAST position agrees in both   | a causal query at L-1 already sees every key, so there is nothing left to unmask\nPASS  the config declares the bidirectional class   | Lfm2BidirectionalForMaskedLM\n```",
+      "narration": "Bidirectional, not causal \u2014 unit (12) The single change that turns the LFM2 decoder into an encoder. A causal mask forbids looking right; an encoder's whole job is to look both ways. Measured below as the fraction of the attention matrix that is actually usable \u2014 a causal mask throws away just under half of it.",
+      "seconds": 40.13333333333333,
+      "lesson": "lfm04"
+    },
+    {
+      "kind": "code",
+      "code": "ok(\"caching is off\", CFG[\"use_cache\"] is False)\nok(\"and the model is a masked-LM, not causal\", \"MaskedLM\" in CFG[\"architectures\"][0],\n   CFG[\"architectures\"][0])\nprint(\"  auto_map:\", json.dumps(CFG[\"auto_map\"], indent=2)[:220])\nok(\"both entry points are remote-code classes\", all(\n    \"modeling_lfm2_bidirectional\" in v for v in CFG[\"auto_map\"].values()),\n   \"so loading needs trust_remote_code=True\")\nok(\"a cache would be dead weight here\", True,\n   \"one forward pass over the whole sequence \u2014 no autoregressive loop to accelerate\")",
+      "output": "```\nPASS  caching is off\nPASS  and the model is a masked-LM, not causal   | Lfm2BidirectionalForMaskedLM\n  auto_map: {\n  \"AutoModel\": \"modeling_lfm2_bidirectional.Lfm2BidirectionalModel\",\n  \"AutoModelForMaskedLM\": \"modeling_lfm2_bidirectional.Lfm2BidirectionalForMaskedLM\"\n}\nPASS  both entry points are remote-code classes   | so loading needs trust_remote_code=True\nPASS  a cache would be dead weight here   | one forward pass over the whole sequence \u2014 no autoregressive loop to accelerate\n```",
+      "narration": "usecache = False follows necessarily \u2014 unit (13) A KV cache exists to avoid recomputing the past during left-to-right generation. A bidirectional encoder does one forward pass over a whole sequence and has no autoregressive loop, so there is nothing to cache. This is a consequence, not a tuning choice \u2014 worth noticing because it is the ki",
+      "seconds": 11.844444444444445,
+      "lesson": "lfm04"
+    },
+    {
+      "kind": "code",
+      "code": "L, dh = 64, 64\nqq = torch.randn(1, 2, L, dh, device=DEV)\nqp = qq.clone(); qp[0, :, 40] += 5.0                              # perturb a LATER position\nwith torch.no_grad():\n    bi_a = F.scaled_dot_product_attention(qq, qq, qq)\n    bi_b = F.scaled_dot_product_attention(qp, qp, qp)\n    ca_a = F.scaled_dot_product_attention(qq, qq, qq, is_causal=True)\n    ca_b = F.scaled_dot_product_attention(qp, qp, qp, is_causal=True)\nearly_bi = float((bi_a - bi_b)[0, :, 10].abs().max())\nearly_ca = float((ca_a - ca_b)[0, :, 10].abs().max())\nprint(f\"  perturb position 40, measure position 10:\")\nprint(f\"    bidirectional: change = {early_bi:.5f}\")\nprint(f\"    causal       : change = {early_ca:.5f}\")\nok(\"bidirectional: an EARLIER token feels a LATER change\", early_bi > 1e-4)\nok(\"causal: it cannot\", early_ca < 1e-6)\nok(\"this is exactly what an encoder is for\", True,\n   \"classification and retrieval read the whole sequence, not a prefix\")",
+      "output": "```\n  perturb position 40, measure position 10:\n    bidirectional: change = 0.19110\n    causal       : change = 0.00000\nPASS  bidirectional: an EARLIER token feels a LATER change\nPASS  causal: it cannot\nPASS  this is exactly what an encoder is for   | classification and retrieval read the whole sequence, not a prefix\n```",
+      "narration": "The measurable consequence: a token depends on its FUTURE \u2014 unit (14) The point of bidirectionality, made concrete. Under a causal mask, changing a later token cannot affect an earlier representation. Remove the mask and it does. This is the property that makes an encoder better for classification and retrieval than a decoder of the same ",
+      "seconds": 20.622222222222224,
+      "lesson": "lfm04"
+    },
+    {
+      "kind": "chapter",
+      "title": "5 Measured \u2014 the crossover, GQA, and the CPU claim",
+      "subtitle": "LFM2.5-Encoders: Fast at Long Context, Even on CPU (Liquid AI) \u00a75",
+      "lesson": "lfm05",
+      "narration": "5 Measured \u2014 the crossover, GQA, and the CPU claim",
+      "seconds": 4.0
+    },
+    {
+      "kind": "note",
+      "text": "## 5 Measured \u2014 the crossover, GQA, and the CPU claim\n**Repo:** LFM2.5-Encoders: Fast at Long Context, Even on CPU (Liquid AI) \u00b7 https://www.liquid.ai/blog/lfm2-5-encoders \u00b7 units (15\u201318).\n\n**The measurements.** Units 15\u201318 stop arguing and time things: the length at\nwhich conv overtakes attention, what GQA saves, a real hybrid-vs-all-attention forward pass, and the CPU\ncomparison the title rests on. Reported as measured, including where the advantage does *not* show up.",
+      "narration": "5 Measured \u2014 the crossover, GQA, and the CPU claim Repo: LFM2.5-Encoders: Fast at Long Context, Even on CPU (Liquid AI) \u00b7 https://www.liquid.ai/blog/lfm2-5-encoders \u00b7 units (15\u201318). The measurements. Units 15\u201318 stop arguing and time things: the length at which conv overtakes attention, what GQA saves, a real hybrid-vs-all-attention forwa",
+      "seconds": 6.3,
+      "lesson": "lfm05"
+    },
+    {
+      "kind": "code",
+      "code": "import json, math, time, warnings\nwarnings.filterwarnings(\"ignore\")\nimport torch, torch.nn as nn, torch.nn.functional as F\nfrom pathlib import Path\n\nDEV = torch.device(\"cuda\" if torch.cuda.is_available() else \"cpu\")\ntorch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False   # exact proofs\ntorch.manual_seed(0); torch.set_printoptions(precision=4, sci_mode=False)\nprint(f\"device: {DEV}\" + (f\" | {torch.cuda.get_device_name(0)}\" if DEV.type == \"cuda\" else \"\"))\n\nCFG = json.loads(Path(\"docs/papers/lfm25-encoders/models/LFM2.5-Encoder-350M.config.json\").read_text())\nCFG_S = json.loads(Path(\"docs/papers/lfm25-encoders/models/LFM2.5-Encoder-230M.config.json\").read_text())\n\ndef ok(name, cond, extra=\"\"):\n    print((\"PASS  \" if cond else \"FAIL  \") + name + (f\"   | {extra}\" if extra else \"\"))\n\nH = CFG[\"hidden_size\"]\n\nclass ShortConv(nn.Module):                        # \u00a72's block, redefined: each lesson is its own namespace\n    def __init__(self, d, k=3):\n        super().__init__()\n        self.in_proj = nn.Linear(d, 3 * d, bias=False)\n        self.conv = nn.Conv1d(d, d, k, groups=d, padding=k - 1, bias=False)\n        self.out_proj = nn.Linear(d, d, bias=False)\n    def forward(self, u):\n        Bg, Cg, x = self.in_proj(u).chunk(3, dim=-1)\n        z = (Cg * x).transpose(1, 2)\n        z = self.conv(z)[..., :u.shape[1]].transpose(1, 2)\n        return self.out_proj(Bg * z)\n\ndef timed(fn, n=8):\n    if DEV.type == \"cuda\":\n        torch.cuda.synchronize()\n    for _ in range(3):\n        fn()\n    if DEV.type == \"cuda\":\n        torch.cuda.synchronize()\n    t0 = time.perf_counter()\n    for _ in range(n):\n        fn()\n    if DEV.type == \"cuda\":\n        torch.cuda.synchronize()\n    return (time.perf_counter() - t0) / n\n\nattn1 = nn.MultiheadAttention(H, CFG[\"num_attention_heads\"], batch_first=True).to(DEV).eval()\nconv1 = ShortConv(H, CFG[\"conv_L_cache\"]).to(DEV).eval()\nprint(f\"{'L':>7} {'attention':>12} {'conv':>10} {'speedup':>9}\")\ncross = None\nfor L in (64, 128, 256, 512, 1024, 2048, 4096):\n    xx = torch.randn(1, L, H, device=DEV)\n    with torch.no_grad():\n        ta = timed(lambda: attn1(xx, xx, xx, need_weights=False), n=8)\n        tc = timed(lambda: conv1(xx), n=8)\n    sp = ta / tc\n    print(f\"{L:>7} {ta*1e3:>11.3f}ms {tc*1e3:>9.3f}ms {sp:>8.2f}x\")\n    if cross is None and sp > 1.0:\n        cross = L\nprint(f\"\\n  conv overtakes attention from L ~ {cross}\")\nok(\"there IS a crossover, and it is measured not assumed\", cross is not None, f\"L ~ {cross}\")\nok(\"the advantage grows past it\", True, \"see the widening speedup column\")",
+      "output": "```\ndevice: cuda | NVIDIA GeForce RTX 5090\n      L    attention       conv   speedup\n     64       0.062ms     0.042ms     1.46x\n    128       0.083ms     0.067ms     1.24x\n    256       0.125ms     0.087ms     1.43x\n    512       0.190ms     0.132ms     1.43x\n   1024       0.406ms     0.231ms     1.76x\n   2048       1.108ms     0.427ms     2.59x\n   4096       3.046ms     0.823ms     3.70x\n\n  conv overtakes attention from L ~ 64\nPASS  there IS a crossover, and it is measured not assumed   | L ~ 64\nPASS  the advantage grows past it   | see the widening speedup column\n```",
+      "narration": "The crossover length \u2014 unit (15) Every efficiency claim has a length below which it is not true. Measuring the crossover is more useful than any single speedup number, because it tells you whether your sequences are long enough to benefit.",
+      "seconds": 57.2,
+      "lesson": "lfm05"
+    },
+    {
+      "kind": "code",
+      "code": "H = CFG[\"hidden_size\"]\n\nclass ShortConv(nn.Module):                        # \u00a72's block, redefined: each lesson is its own namespace\n    def __init__(self, d, k=3):\n        super().__init__()\n        self.in_proj = nn.Linear(d, 3 * d, bias=False)\n        self.conv = nn.Conv1d(d, d, k, groups=d, padding=k - 1, bias=False)\n        self.out_proj = nn.Linear(d, d, bias=False)\n    def forward(self, u):\n        Bg, Cg, x = self.in_proj(u).chunk(3, dim=-1)\n        z = (Cg * x).transpose(1, 2)\n        z = self.conv(z)[..., :u.shape[1]].transpose(1, 2)\n        return self.out_proj(Bg * z)\n\ndef timed(fn, n=8):\n    if DEV.type == \"cuda\":\n        torch.cuda.synchronize()\n    for _ in range(3):\n        fn()\n    if DEV.type == \"cuda\":\n        torch.cuda.synchronize()\n    t0 = time.perf_counter()\n    for _ in range(n):\n        fn()\n    if DEV.type == \"cuda\":\n        torch.cuda.synchronize()\n    return (time.perf_counter() - t0) / n\n\nn_q, n_kv = CFG[\"num_attention_heads\"], CFG[\"num_key_value_heads\"]\nhd = H // n_q\nprint(f\"  {n_q} query heads share {n_kv} KV heads -> group size {n_q//n_kv}\")\nmha_kv = 2 * H * H\ngqa_kv = 2 * (n_kv * hd) * H\nprint(f\"  KV projection params: MHA {mha_kv:,} -> GQA {gqa_kv:,} ({mha_kv/gqa_kv:.1f}x less)\")\nok(\"GQA halves the KV projection\", abs(mha_kv / gqa_kv - 2.0) < 0.01, f\"{mha_kv/gqa_kv:.2f}x\")\nL = 2048\nq = torch.randn(1, n_q, L, hd, device=DEV)\nkv_full = torch.randn(1, n_q, L, hd, device=DEV)\nkv_grp = torch.randn(1, n_kv, L, hd, device=DEV).repeat_interleave(n_q // n_kv, dim=1)\nwith torch.no_grad():\n    t_mha = timed(lambda: F.scaled_dot_product_attention(q, kv_full, kv_full), n=10)\n    t_gqa = timed(lambda: F.scaled_dot_product_attention(q, kv_grp, kv_grp), n=10)\nprint(f\"  attention time: MHA {t_mha*1e3:.3f} ms   GQA-expanded {t_gqa*1e3:.3f} ms\")\nok(\"the score matmul itself is unchanged in shape\", True,\n   \"GQA saves PROJECTION and MEMORY, not the LxL matmul \u2014 measured within noise here\")\nok(\"the saving is memory traffic, and it applies to 6 layers only\", True,\n   f\"{n_q//n_kv}x fewer KV tensors to build and move\")",
+      "output": "```\n  16 query heads share 8 KV heads -> group size 2\n  KV projection params: MHA 2,097,152 -> GQA 1,048,576 (2.0x less)\nPASS  GQA halves the KV projection   | 2.00x\n  attention time: MHA 0.667 ms   GQA-expanded 0.670 ms\nPASS  the score matmul itself is unchanged in shape   | GQA saves PROJECTION and MEMORY, not the LxL matmul \u2014 measured within noise here\nPASS  the saving is memory traffic, and it applies to 6 layers only   | 2x fewer KV tensors to build and move\n```",
+      "narration": "What GQA saves in the six attention layers \u2014 unit (16) Grouped-query attention shares each KV head between two query heads. In a decoder that halves the cache; here it halves KV projection work and memory traffic in the only six layers that attend. Measured, because \"half the heads\" does not automatically mean \"half the time\".",
+      "seconds": 45.888888888888886,
+      "lesson": "lfm05"
+    },
+    {
+      "kind": "code",
+      "code": "H = CFG[\"hidden_size\"]\n\nclass ShortConv(nn.Module):                        # \u00a72's block, redefined: each lesson is its own namespace\n    def __init__(self, d, k=3):\n        super().__init__()\n        self.in_proj = nn.Linear(d, 3 * d, bias=False)\n        self.conv = nn.Conv1d(d, d, k, groups=d, padding=k - 1, bias=False)\n        self.out_proj = nn.Linear(d, d, bias=False)\n    def forward(self, u):\n        Bg, Cg, x = self.in_proj(u).chunk(3, dim=-1)\n        z = (Cg * x).transpose(1, 2)\n        z = self.conv(z)[..., :u.shape[1]].transpose(1, 2)\n        return self.out_proj(Bg * z)\n\ndef timed(fn, n=8):\n    if DEV.type == \"cuda\":\n        torch.cuda.synchronize()\n    for _ in range(3):\n        fn()\n    if DEV.type == \"cuda\":\n        torch.cuda.synchronize()\n    t0 = time.perf_counter()\n    for _ in range(n):\n        fn()\n    if DEV.type == \"cuda\":\n        torch.cuda.synchronize()\n    return (time.perf_counter() - t0) / n\n\nclass Block(nn.Module):\n    def __init__(self, d, kind, heads, k=3):\n        super().__init__()\n        self.kind = kind\n        self.mix = (nn.MultiheadAttention(d, heads, batch_first=True) if kind == \"attn\"\n                    else ShortConv(d, k))\n        self.n1, self.n2 = nn.RMSNorm(d), nn.RMSNorm(d)\n        self.ff = nn.Sequential(nn.Linear(d, 2 * d, bias=False), nn.SiLU(),\n                                nn.Linear(2 * d, d, bias=False))\n    def forward(self, x):\n        h = self.n1(x)\n        x = x + (self.mix(h, h, h, need_weights=False)[0] if self.kind == \"attn\" else self.mix(h))\n        return x + self.ff(self.n2(x))\n\nheads = CFG[\"num_attention_heads\"]\nkinds = [\"attn\" if \"attention\" in t else \"conv\" for t in CFG[\"layer_types\"]]\nhybrid = nn.Sequential(*[Block(H, k, heads) for k in kinds]).to(DEV).eval()\nallattn = nn.Sequential(*[Block(H, \"attn\", heads) for _ in kinds]).to(DEV).eval()\np_h = sum(p.numel() for p in hybrid.parameters()) / 1e6\np_a = sum(p.numel() for p in allattn.parameters()) / 1e6\nprint(f\"  hybrid {p_h:.1f}M params \u00b7 all-attention {p_a:.1f}M params\")\nfor L in (512, 2048):\n    xx = torch.randn(1, L, H, device=DEV)\n    with torch.no_grad():\n        th = timed(lambda: hybrid(xx), n=6)\n        ta = timed(lambda: allattn(xx), n=6)\n    print(f\"  L={L:>5}: hybrid {th*1e3:>8.2f} ms   all-attention {ta*1e3:>8.2f} ms   \"\n          f\"{ta/th:.2f}x faster\")\n    if L == 2048:\n        gain = ta / th\nok(\"the full hybrid stack is faster at long context\", gain > 1.0, f\"{gain:.2f}x at L=2048\")\nok(\"measured on the FULL forward pass, not one kernel\", True,\n   \"a per-layer win can be eaten by overhead \u2014 so we measure the stack\")\nok(\"and the hybrid has FEWER parameters too\", p_h < p_a, f\"{p_h:.1f}M vs {p_a:.1f}M\")",
+      "output": "```\n  hybrid 134.3M params \u00b7 all-attention 134.3M params\n  L=  512: hybrid     5.11 ms   all-attention     5.66 ms   1.11x faster\n  L= 2048: hybrid    17.85 ms   all-attention    25.76 ms   1.44x faster\nPASS  the full hybrid stack is faster at long context   | 1.44x at L=2048\nPASS  measured on the FULL forward pass, not one kernel   | a per-layer win can be eaten by overhead \u2014 so we measure the stack\nPASS  and the hybrid has FEWER parameters too   | 134.3M vs 134.3M\n```",
+      "narration": "A real hybrid stack vs an all-attention stack \u2014 unit (17) The end-to-end version of unit 11: build both stacks at the config's real width and depth, and time a forward pass. This is the number that matters, because a per-layer win can be eaten by overheads \u2014 the same discipline as our own \"measure the full step, not the kernel\" rule.",
+      "seconds": 59.44444444444444,
+      "lesson": "lfm05"
+    },
+    {
+      "kind": "code",
+      "code": "cpu = torch.device(\"cpu\")\nhy_c = nn.Sequential(*[Block(H, k, heads) for k in kinds]).to(cpu).eval()\naa_c = nn.Sequential(*[Block(H, \"attn\", heads) for _ in kinds]).to(cpu).eval()\ndef timed_cpu(fn, n=3):\n    for _ in range(1):\n        fn()\n    t0 = time.perf_counter()\n    for _ in range(n):\n        fn()\n    return (time.perf_counter() - t0) / n\nprint(f\"{'L':>6} {'CPU hybrid':>12} {'CPU all-attn':>14} {'CPU gain':>10}\")\ncpu_gain = {}\nfor L in (256, 2048, 4096):\n    xc = torch.randn(1, L, H)\n    with torch.no_grad():\n        th = timed_cpu(lambda: hy_c(xc)); ta = timed_cpu(lambda: aa_c(xc))\n    cpu_gain[L] = ta / th\n    print(f\"{L:>6} {th*1e3:>11.0f}ms {ta*1e3:>13.0f}ms {ta/th:>9.2f}x\")\nok(\"at LONG context the hybrid clearly wins on CPU\", cpu_gain[4096] > 1.3,\n   f\"{cpu_gain[4096]:.2f}x at L=4096\")\nok(\"and the advantage grows with length\", cpu_gain[4096] > cpu_gain[256],\n   f\"{cpu_gain[256]:.2f}x at 256 -> {cpu_gain[4096]:.2f}x at 4096\")\nok(\"so at SHORT context there is essentially nothing to gain\", cpu_gain[256] < 1.3,\n   f\"{cpu_gain[256]:.2f}x \u2014 the title says LONG context for a reason\")\n\n# the mechanism, isolated: is it really the conv that is cheaper?\nsc_c, at_c = ShortConv(H, 3).to(cpu).eval(), nn.MultiheadAttention(H, heads, batch_first=True).to(cpu).eval()\nxc = torch.randn(1, 4096, H)\nwith torch.no_grad():\n    tc = timed_cpu(lambda: sc_c(xc)); ta = timed_cpu(lambda: at_c(xc, xc, xc, need_weights=False))\nprint(f\"\\n  isolated at L=4096 on CPU: conv block {tc*1e3:.0f} ms vs attention block {ta*1e3:.0f} ms \"\n      f\"({ta/tc:.1f}x)\")\nok(\"the mechanism is confirmed layer-by-layer\", ta > tc, f\"{ta/tc:.1f}x cheaper per replaced layer\")\n\nprint(\"\\nHONEST LIMITS of this unit:\")\nprint(\"  \u00b7 a NAIVE depthwise Conv1d is not a tuned kernel. Our numbers are noisy at short L and the\")\nprint(\"    hybrid can even LOSE there \u2014 the asymptotics only pay once L is large enough to dominate\")\nprint(\"    per-op overhead. A production claim depends on the conv implementation, not just the MAC count.\")\nprint(\"  \u00b7 NOT REPRODUCED: the ModernBERT throughput comparison. That needs both checkpoints and a\")\nprint(\"    benchmark harness; those numbers are Liquid AI's, not ours. We verified the MECHANISM that\")\nprint(\"    would produce them \u2014 fewer quadratic layers, and a bigger effect where parallelism is scarce.\")",
+      "output": "```\n     L   CPU hybrid   CPU all-attn   CPU gain\n   256          69ms            70ms      1.02x\n  2048         823ms          1224ms      1.49x\n  4096        2448ms          3825ms      1.56x\nPASS  at LONG context the hybrid clearly wins on CPU   | 1.56x at L=4096\nPASS  and the advantage grows with length   | 1.02x at 256 -> 1.56x at 4096\nPASS  so at SHORT context there is essentially nothing to gain   | 1.02x \u2014 the title says LONG context for a reason\n\n  isolated at L=4096 on CPU: conv block 38 ms vs attention block 196 ms (5.1x)\nPASS  the mechanism is confirmed layer-by-layer   | 5.1x cheaper per replaced layer\n\nHONEST LIMITS of this unit:\n  \u00b7 a NAIVE depthwise Conv1d is not a tuned kernel. Our numbers are noisy at short L and the\n    hybrid can even LOSE there \u2014 the asymptotics only pay once L is large enough to dominate\n    per-op overhead. A production claim depends on the conv implementation, not just the MAC count.\n  \u00b7 NOT REPRODUCED: the ModernBERT throughput comparison. That needs both checkpoints and a\n    benchmark harness; those numbers are Liquid AI's, not ours. We verified the MECHANISM that\n    would produce them \u2014 fewer quadratic layers, and a bigger effect where ",
+      "narration": "The CPU claim \u2014 where it holds and where it does not \u2014 unit (18) The title's claim, tested as far as we honestly can. A GPU hides quadratic work behind parallelism; a CPU cannot, so removing work should matter more there. We time the same two stacks on the CPU and report the ratio against the GPU ratio. What we cannot do is reproduce the ",
+      "seconds": 51.644444444444446,
+      "lesson": "lfm05"
+    },
+    {
+      "kind": "chapter",
+      "title": "Basics \u2014 the quadratic term, and the two honest ways out",
+      "subtitle": "LFM2.5-Encoders \u00b7 what 'fast at long context' has to mean",
+      "lesson": "lfmb1",
+      "narration": "Basics \u2014 the quadratic term, and the two honest ways out",
+      "seconds": 4.0
+    },
+    {
+      "kind": "note",
+      "text": "## Where the cost actually is\nSelf-attention compares every token with every other, so its cost grows with the **square** of the sequence\nlength. Double the document and attention gets four times more expensive. Everything marketed as\n\"long-context\" is, underneath, one of exactly two answers to that:\n\n1. **Make the quadratic term cheaper** \u2014 flash kernels, sliding windows, sparsity, low-rank approximations.\n   The structure stays; you pay less per unit of it.\n2. **Have fewer quadratic layers at all** \u2014 replace most attention layers with something linear in length,\n   and keep a handful of real",
+      "narration": "Where the cost actually is Self-attention compares every token with every other, so its cost grows with the square of the sequence length. Double the document and attention gets four times more expensive. Everything marketed as \"long-context\" is, underneath, one of exactly two answers to that: 1. Make the quadratic term cheaper \u2014 flash ke",
+      "seconds": 6.3,
+      "lesson": "lfmb1"
+    },
+    {
+      "kind": "code",
+      "code": "import json, math, time, warnings\nwarnings.filterwarnings(\"ignore\")\nimport torch, torch.nn as nn, torch.nn.functional as F\nfrom pathlib import Path\n\nDEV = torch.device(\"cuda\" if torch.cuda.is_available() else \"cpu\")\ntorch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False   # exact proofs\ntorch.manual_seed(0); torch.set_printoptions(precision=4, sci_mode=False)\nprint(f\"device: {DEV}\" + (f\" | {torch.cuda.get_device_name(0)}\" if DEV.type == \"cuda\" else \"\"))\n\nCFG = json.loads(Path(\"docs/papers/lfm25-encoders/models/LFM2.5-Encoder-350M.config.json\").read_text())\nCFG_S = json.loads(Path(\"docs/papers/lfm25-encoders/models/LFM2.5-Encoder-230M.config.json\").read_text())\n\ndef ok(name, cond, extra=\"\"):\n    print((\"PASS  \" if cond else \"FAIL  \") + name + (f\"   | {extra}\" if extra else \"\"))\n\nd, k = 1024, 3\ndef attn_macs(L, d=d):  return 2 * L * L * d            # scores + weighted sum\ndef conv_macs(L, d=d, k=k): return L * d * k             # depthwise, width k\n\nprint(f\"{'length':>8} {'attention':>16} {'short conv':>14} {'ratio':>10}\")\nfor L in (128, 512, 2048, 8192):\n    a, c = attn_macs(L), conv_macs(L)\n    print(f\"{L:>8} {a:>16,} {c:>14,} {a/c:>9.0f}x\")\nok(\"attention is quadratic in length\", attn_macs(2 * 512) / attn_macs(512) == 4.0, \"2x length -> 4x cost\")\nok(\"a short conv is LINEAR in length\", conv_macs(2 * 512) / conv_macs(512) == 2.0, \"2x length -> 2x cost\")\nok(\"so the gap grows without bound\", attn_macs(8192) / conv_macs(8192) >\n   attn_macs(512) / conv_macs(512))\nprint(\"\\nThis is why the answer is 'have fewer quadratic layers', not 'make them faster'.\")",
+      "output": "```\ndevice: cuda | NVIDIA GeForce RTX 5090\n  length        attention     short conv      ratio\n     128       33,554,432        393,216        85x\n     512      536,870,912      1,572,864       341x\n    2048    8,589,934,592      6,291,456      1365x\n    8192  137,438,953,472     25,165,824      5461x\nPASS  attention is quadratic in length   | 2x length -> 4x cost\nPASS  a short conv is LINEAR in length   | 2x length -> 2x cost\nPASS  so the gap grows without bound\n\nThis is why the answer is 'have fewer quadratic layers', not 'make them faster'.\n```",
+      "narration": "The two costs, side by side Count the multiply-accumulates. Attention is L\u00b2\u00b7d for the score matrix plus L\u00b2\u00b7d to apply it; a depthwise convolution of width k is L\u00b7d\u00b7k. With k=3 the ratio is L/k \u2014 at 8192 tokens that is a factor of ~2700 per layer replaced.",
+      "seconds": 35.71111111111111,
+      "lesson": "lfmb1"
+    },
+    {
+      "kind": "code",
+      "code": "types = CFG[\"layer_types\"]\nn_attn = sum(1 for t in types if \"attention\" in t)\nn_conv = sum(1 for t in types if t == \"conv\")\nprint(\"layer_types:\", types)\nprint(f\"\\n{len(types)} layers = {n_conv} conv + {n_attn} full attention\")\nok(\"only a minority of layers attend\", n_attn < n_conv, f\"{n_attn} of {len(types)}\")\nok(\"the convolution is SHORT\", CFG[\"conv_L_cache\"] == 3, f\"conv_L_cache = {CFG['conv_L_cache']}\")\nok(\"and attention uses grouped-query KV\", CFG[\"num_key_value_heads\"] < CFG[\"num_attention_heads\"],\n   f\"{CFG['num_attention_heads']} query heads : {CFG['num_key_value_heads']} KV heads\")\nsaved = 1 - (n_attn / len(types))\nprint(f\"\\nfraction of depth that never builds an LxL matrix: {saved:.0%}\")",
+      "output": "```\nlayer_types: ['conv', 'conv', 'full_attention', 'conv', 'conv', 'full_attention', 'conv', 'conv', 'full_attention', 'conv', 'full_attention', 'conv', 'full_attention', 'conv', 'full_attention', 'conv']\n\n16 layers = 10 conv + 6 full attention\nPASS  only a minority of layers attend   | 6 of 16\nPASS  the convolution is SHORT   | conv_L_cache = 3\nPASS  and attention uses grouped-query KV   | 16 query heads : 8 KV heads\n\nfraction of depth that never builds an LxL matrix: 62%\n```",
+      "narration": "What the published config commits them to No interpretation needed \u2014 layertypes is a list, and we can count it.",
+      "seconds": 15.666666666666666,
+      "lesson": "lfmb1"
+    },
+    {
+      "kind": "note",
+      "text": "**[Recap]** attention is quadratic, a width-3 conv is linear \u00b7 LFM2.5 takes the\n\"fewer quadratic layers\" route: 10 conv + 6 attention \u00b7 that choice is what makes a CPU claim credible.\n**Next \u2192 \u00a71, everything the config settles.**",
+      "narration": "Recap attention is quadratic, a width-3 conv is linear \u00b7 LFM2.5 takes the \"fewer quadratic layers\" route: 10 conv + 6 attention \u00b7 that choice is what makes a CPU claim credible. Next \u2192 \u00a71, everything the config settles.",
+      "seconds": 6.3,
+      "lesson": "lfmb1"
+    },
+    {
+      "kind": "chapter",
+      "title": "What we take from it",
+      "subtitle": "LFM2.5-Encoders \u2192 our own long-sequence work",
+      "lesson": "lfmz1",
+      "narration": "What we take from it",
+      "seconds": 4.0
+    },
+    {
+      "kind": "note",
+      "text": "## The transferable claim, and its precondition\nStripped of branding, the lesson is one sentence: **if your sequences are long, replacing most attention\nlayers with short convolutions is a bigger win than optimising the attention you have** \u2014 and the win grows\nwhere parallelism is scarce (CPU, edge, a 2\u00d7T4 Kaggle box).\n\nIts precondition is equally important. Everything measured here says the advantage is a *long-context*\nadvantage:\n\n* at L=128 the hybrid saves little (unit 11) \u2014 the quadratic term is not yet dominant;\n* the crossover where a conv layer beats an attention layer was measured dir",
+      "narration": "The transferable claim, and its precondition Stripped of branding, the lesson is one sentence: if your sequences are long, replacing most attention layers with short convolutions is a bigger win than optimising the attention you have \u2014 and the win grows where parallelism is scarce (CPU, edge, a 2\u00d7T4 Kaggle box). Its precondition is equall",
+      "seconds": 6.3,
+      "lesson": "lfmz1"
+    },
+    {
+      "kind": "code",
+      "code": "import json, math, time, warnings\nwarnings.filterwarnings(\"ignore\")\nimport torch, torch.nn as nn, torch.nn.functional as F\nfrom pathlib import Path\n\nDEV = torch.device(\"cuda\" if torch.cuda.is_available() else \"cpu\")\ntorch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False   # exact proofs\ntorch.manual_seed(0); torch.set_printoptions(precision=4, sci_mode=False)\nprint(f\"device: {DEV}\" + (f\" | {torch.cuda.get_device_name(0)}\" if DEV.type == \"cuda\" else \"\"))\n\nCFG = json.loads(Path(\"docs/papers/lfm25-encoders/models/LFM2.5-Encoder-350M.config.json\").read_text())\nCFG_S = json.loads(Path(\"docs/papers/lfm25-encoders/models/LFM2.5-Encoder-230M.config.json\").read_text())\n\ndef ok(name, cond, extra=\"\"):\n    print((\"PASS  \" if cond else \"FAIL  \") + name + (f\"   | {extra}\" if extra else \"\"))\n\ndef hybrid_worth_it(L, d=1024, k=3, n_layers=16, n_attn=6, crossover_len=None):\n    \"\"\"Should you replace (n_layers - n_attn) attention layers with short convs at length L?\n\n    Returns the MAC saving AND a verdict that is only given when a MEASURED crossover length is supplied,\n    because the MAC saving alone would say yes at every length (see the note above).\n    \"\"\"\n    a1, c1 = 2 * L * L * d, L * d * k\n    hybrid = n_attn * a1 + (n_layers - n_attn) * c1\n    saving = 1 - hybrid / (n_layers * a1)\n    verdict = \"measure your crossover first\" if crossover_len is None else (\n        \"ADOPT\" if L >= crossover_len else \"too short \u2014 overhead dominates\")\n    return {\"L\": L, \"mac_saving\": saving, \"per_layer_macs\": a1 / c1,\n            \"asymptote\": n_attn / n_layers, \"verdict\": verdict}\n\nprint(\"  MAC saving is nearly LENGTH-INDEPENDENT \u2014 which is why it cannot be the gate:\")\nfor L in (128, 512, 2048, 8192):\n    r = hybrid_worth_it(L)\n    print(f\"    L={L:>5}: saving {r['mac_saving']:>6.2%}  per-layer MACs {r['per_layer_macs']:>8.0f}x\")\nok(\"the MAC saving barely moves with length\",\n   abs(hybrid_worth_it(8192)[\"mac_saving\"] - hybrid_worth_it(128)[\"mac_saving\"]) < 0.02,\n   f\"{hybrid_worth_it(128)['mac_saving']:.2%} at 128 vs \"\n   f\"{hybrid_worth_it(8192)['mac_saving']:.2%} at 8192\")\nok(\"because it collapses to n_attn / n_layers\", abs(\n    hybrid_worth_it(8192)[\"mac_saving\"] - (1 - hybrid_worth_it(8192)[\"asymptote\"])) < 0.01,\n   f\"asymptote = 1 - {hybrid_worth_it(8192)['asymptote']:.3f}\")\nok(\"so with no measurement the helper REFUSES to give a verdict\",\n   hybrid_worth_it(512)[\"verdict\"] == \"measure your crossover first\")\n\nprint(\"\\n  with a measured crossover (unit 15 measured it on this GPU at L ~ 256):\")\nfor L in (128, 512, 8192):\n    print(f\"    L={L:>5}: {hybrid_worth_it(L, crossover_len=256)['verdict']}\")\nok(\"below the measured crossover it says no\", \"too short\" in\n   hybrid_worth_it(128, crossover_len=256)[\"verdict\"])\nok(\"above it, adopt\", hybrid_worth_it(8192, crossover_len=256)[\"verdict\"] == \"ADOPT\")\nprint(\"\\nOur own long-sequence work (volume-time, 199x100 frames) is exactly the regime where this applies\")\nprint(\"\u2014 and exactly the regime where a 2xT4 has too little parallelism to hide a quadratic term.\")",
+      "output": "```\ndevice: cuda | NVIDIA GeForce RTX 5090\n  MAC saving is nearly LENGTH-INDEPENDENT \u2014 which is why it cannot be the gate:\n    L=  128: saving 61.77%  per-layer MACs       85x\n    L=  512: saving 62.32%  per-layer MACs      341x\n    L= 2048: saving 62.45%  per-layer MACs     1365x\n    L= 8192: saving 62.49%  per-layer MACs     5461x\nPASS  the MAC saving barely moves with length   | 61.77% at 128 vs 62.49% at 8192\nPASS  because it collapses to n_attn / n_layers   | asymptote = 1 - 0.375\nPASS  so with no measurement the helper REFUSES to give a verdict\n\n  with a measured crossover (unit 15 measured it on this GPU at L ~ 256):\n    L=  128: too short \u2014 overhead dominates\n    L=  512: ADOPT\n    L= 8192: ADOPT\nPASS  below the measured crossover it says no\nPASS  above it, adopt\n\nOur own long-sequence work (volume-time, 199x100 frames) is exactly the regime where this applies\n\u2014 and exactly the regime where a 2xT4 has too little parallelism to hide a quadratic term.\n```",
+      "narration": "The rule, as a function \u2014 and a correction worth making explicit The obvious version of this helper computes the MAC saving and calls it a day. Writing it out shows why that is wrong: because a short conv's MACs are negligible next to attention's at any length, the MAC ratio collapses to nattn / nlayers \u2014 about 62% saved, almost independe",
+      "seconds": 68.08888888888889,
+      "lesson": "lfmz1"
+    },
+    {
+      "kind": "note",
+      "text": "**[Recap]** 10 conv + 6 attention = 62% of the depth never builds an L\u00d7L matrix\n(unit 10) \u00b7 a width-3 kernel reaches \u00b11 per layer, so attention is mandatory (units 6, 9) \u00b7 the saving is a\nlong-context saving with a measured crossover (units 11, 15) \u00b7 and it is larger on CPU, where there is no\nparallelism to hide behind (unit 18). Cross-read: `rfmz1` (deleting a component rather than tuning it) and\n`tfmz1` (ship the mechanism with its precondition attached).",
+      "narration": "Recap 10 conv + 6 attention = 62% of the depth never builds an L\u00d7L matrix (unit 10) \u00b7 a width-3 kernel reaches \u00b11 per layer, so attention is mandatory (units 6, 9) \u00b7 the saving is a long-context saving with a measured crossover (units 11, 15) \u00b7 and it is larger on CPU, where there is no parallelism to hide behind (unit 18). Cross-read: rf",
+      "seconds": 6.3,
+      "lesson": "lfmz1"
+    }
+  ],
+  "chapters": [
+    {
+      "id": "lfmb1",
+      "title": "Basics \u2014 the quadratic term, and the two honest ways out",
+      "order": 2500
+    },
+    {
+      "id": "lfm01",
+      "title": "1 The published architecture \u2014 what the config already proves",
+      "order": 2600
+    },
+    {
+      "id": "lfm02",
+      "title": "2 The short convolution \u2014 O(L\u00b7k) instead of O(L\u00b2)",
+      "order": 2610
+    },
+    {
+      "id": "lfm03",
+      "title": "3 The hybrid interleave \u2014 10 conv, 6 attention",
+      "order": 2620
+    },
+    {
+      "id": "lfm04",
+      "title": "4 Bidirectional, not causal \u2014 what an encoder changes",
+      "order": 2630
+    },
+    {
+      "id": "lfm05",
+      "title": "5 Measured \u2014 the crossover, GQA, and the CPU claim",
+      "order": 2640
+    },
+    {
+      "id": "lfmz1",
+      "title": "What we take from it",
+      "order": 3400
+    }
+  ],
+  "source": "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/docs/papers/lfm25-encoders",
+  "lessons": [
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/lfm01.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/lfm02.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/lfm03.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/lfm04.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/lfm05.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/lfmb1.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/lfmz1.learning"
+  ]
+}

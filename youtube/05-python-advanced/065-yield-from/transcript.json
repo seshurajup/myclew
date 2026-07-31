@@ -1,0 +1,42 @@
+[
+  {
+    "text": "When one generator needs to produce values from another, yield from makes it effortless.",
+    "until_line": 11
+  },
+  {
+    "text": "Instead of looping and yielding each item by hand, yield from streams an entire generator straight through.",
+    "until_line": 11
+  },
+  {
+    "text": "Here combined yields all the letters, then all the numbers, as one seamless sequence.",
+    "until_line": 13
+  },
+  {
+    "text": "[chuckle] It's like splicing several generators together into a single flat stream of values.",
+    "until_line": 13
+  },
+  {
+    "text": "[sniff] yield from truly shines with recursion, like flattening a deeply nested list.",
+    "until_line": 21
+  },
+  {
+    "text": "When flatten hits a sublist, it recursively delegates to itself with yield from.",
+    "until_line": 21
+  },
+  {
+    "text": "Each nested level streams its values up through the chain, no matter how deep the nesting goes.",
+    "until_line": 21
+  },
+  {
+    "text": "[sigh] So a tangled structure of lists within lists comes out as one clean, flat sequence.",
+    "until_line": 23
+  },
+  {
+    "text": "[groan] yield from turns awkward nested generator loops into a single, expressive line.",
+    "until_line": 23
+  },
+  {
+    "text": "Video 66 tackles decorators with arguments. Comment PYTHON if you want the cheat sheet.",
+    "until_line": 23
+  }
+]

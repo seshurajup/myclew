@@ -1,0 +1,230 @@
+@ id: rq11
+@ order: 2200
+@ title: B Proofs
+@ subtitle: RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory §B
+@ source: docs/papers/ratequant/ratequant.md
+
+--- note
+## B Proofs
+**Paper:** RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory · §B · pages 14–14 · equations (10–15) · 0 figures.
+
+**Appendix B — the proofs, and they are short.** The Lagrangian (eq. 10), the
+per-head first-order condition (eq. 11), the same condition for a per-head exponential model (eqs. 12–13),
+Jensen's inequality (eq. 14) — which is where AM/GM comes from — and the AM/GM identity itself (eq. 15).
+The convexity that makes all of this legitimate is eq. 16's diminishing-returns property: each additional
+bit buys strictly less than the previous one.
+
+--- note
+### Appendix B — the general Lagrangian — eq. (10)
+
+$$
+\mathcal{L}(b,\lambda) = \sum_{i=1}^{N} w_i D_i(b_i) + \lambda\Big(\sum_{i=1}^{N} b_i - N\bar{b}\Big)
+$$
+
+The same Lagrangian with a *general* per-head distortion `D_i`, so the result does not
+depend on the exponential model — only on convexity and monotonicity.
+
+--- code
+import torch, torch.nn as nn, torch.nn.functional as F      # bit allocation is one Lagrange multiplier
+import sys; sys.path.insert(0, "learning")
+import vizkit as vz
+
+DEV = torch.device("cuda" if torch.cuda.is_available() else "cpu")   # every proof runs on the GPU
+torch.set_default_device(DEV)
+torch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False   # exact proofs
+torch.manual_seed(0); torch.set_printoptions(precision=4, sci_mode=False)
+print(f"device: {DEV}" + (f" | {torch.cuda.get_device_name(0)}" if DEV.type == "cuda" else ""))
+
+def ok(name, cond, extra=""):
+    print(("PASS  " if cond else "FAIL  ") + name + (f"   | {extra}" if extra else ""))
+
+def close(a, b, tol=1e-5):
+    return torch.allclose(a, b, atol=tol, rtol=tol)
+
+N = 16; alpha, beta = 1.0, 4.0                                   # this lesson's own setup
+w = torch.distributions.LogNormal(0.0, 1.2).sample((N,))
+B = 4.0 * N; bbar = B / N
+D = lambda b: alpha * beta ** (-b)
+J = lambda b: float((w * D(b)).sum())
+b_uniform = torch.full((N,), bbar)
+b_star = bbar + (torch.log(w) - torch.log(w).mean()) / torch.log(torch.tensor(beta))
+am = float(w.mean()); gm = float(torch.exp(torch.log(w).mean()))
+b_min, b_max = 2.0, 8.0
+Dgen = [lambda b, a=float(ai), bb=float(bi): a * torch.exp(-bb * b)
+        for ai, bi in zip(torch.rand(N) + 0.5, torch.rand(N) * 0.8 + 1.0)]
+Jgen = lambda b: float(sum(w[i] * Dgen[i](b[i]) for i in range(N)))
+ok("a general per-head distortion still gives a finite objective", 0 < Jgen(b_uniform) < float('inf'),
+   f"J_gen(uniform) = {Jgen(b_uniform):.5f}")
+
+--- output
+```
+device: cuda | NVIDIA GeForce RTX 5090
+PASS  a general per-head distortion still gives a finite objective   | J_gen(uniform) = 0.22525
+```
+
+--- image
+learning/assets/ratequant/eq/eq_p26_120.png
+Equation (10) as printed in the PDF
+
+--- note
+### …and its first-order condition — eq. (11)
+
+$$
+w_iD_i'(b_i) + \lambda = 0 \;\;\Longrightarrow\;\; D_i'(b_i) = -\frac{\lambda}{w_i}
+$$
+
+Every head is pushed to the bit-width where its **marginal** distortion reduction,
+weighted by importance, equals one common `λ`. This is the general water-filling statement; the
+exponential model is only what makes it solvable in closed form.
+
+--- code
+bg = b_uniform.clone().requires_grad_(True)
+Jt = sum(w[i] * Dgen[i](bg[i]) for i in range(N))
+Jt.backward()
+ok("marginal gains are NOT equal at a uniform allocation (so uniform is not optimal)",
+   float(bg.grad.std() / bg.grad.abs().mean()) > 0.05,
+   f"relative spread {float(bg.grad.std()/bg.grad.abs().mean()):.3f}")
+print("equalising those marginals is exactly what the multiplier does")
+
+--- output
+```
+PASS  marginal gains are NOT equal at a uniform allocation (so uniform is not optimal)   | relative spread 1.768
+equalising those marginals is exactly what the multiplier does
+```
+
+--- note
+### The per-head exponential condition — eq. (12)
+
+$$
+\alpha_i\beta_i\,e^{-\beta_ib_i^{*}} = \frac{\lambda}{w_i}
+$$
+
+With `D_i(b) = α_i e^{-β_i b}` the condition is explicit per head — heads may now have
+*different* curve steepness `β_i`, which matters in practice because some heads' caches tolerate
+quantisation far better than others.
+
+--- code
+ai = torch.rand(N) + 0.5
+bi = torch.rand(N) * 0.8 + 1.0
+lam2 = 0.05
+b_opt = (torch.log(w * ai * bi / lam2)) / bi                     # eq. 13
+lhs = ai * bi * torch.exp(-bi * b_opt)
+ok("the stationarity condition holds per head", close(lhs, lam2 / w, 1e-4),
+   f"max relative error {float(((lhs - lam2/w).abs()/(lam2/w)).max()):.2e}")
+
+--- output
+```
+PASS  the stationarity condition holds per head   | max relative error 2.17e-07
+```
+
+--- image
+learning/assets/ratequant/eq/eq_p27_130.png
+Equation (12) as printed in the PDF
+
+--- note
+### …solved for the bits — eq. (13)
+
+$$
+b_i^{*} = \frac{1}{\beta_i}\ln\frac{w_i\alpha_i\beta_i}{\lambda}
+$$
+
+The general closed form. Still logarithmic in importance, but now scaled by each head's
+own curve steepness `1/β_i` — a head whose distortion falls slowly gets *more* bits for the same
+importance. `λ` is again set by the budget.
+
+--- code
+def alloc(lam):
+    return (torch.log(w * ai * bi / lam)) / bi
+lo, hi = 1e-8, 1e3
+for _ in range(80):                                              # bisect lambda for the budget
+    mid = (lo * hi) ** 0.5
+    if float(alloc(mid).clamp(b_min, b_max).sum()) > B: lo = mid
+    else: hi = mid
+b_gen = alloc((lo * hi) ** 0.5).clamp(b_min, b_max)
+ok("the budget is met with per-head curve steepness", abs(float(b_gen.sum()) - B) < 0.2,
+   f"sum {float(b_gen.sum()):.2f} vs {B}")
+# a raw correlation confounds importance with curve shape, so CONTROL for importance: two heads with
+# identical w and different beta_i, allocated by eq. 13 at the same multiplier
+w_eq = torch.tensor([1.0, 1.0]); a_eq = torch.tensor([1.0, 1.0])
+b_steep, b_flat = torch.tensor(2.0), torch.tensor(0.8)           # flat = distortion falls slowly
+bits_pair = torch.stack([torch.log(w_eq[0] * a_eq[0] * b_steep / 0.05) / b_steep,
+                         torch.log(w_eq[1] * a_eq[1] * b_flat / 0.05) / b_flat])
+ok("at EQUAL importance, the flatter distortion curve earns more bits",
+   float(bits_pair[1]) > float(bits_pair[0]),
+   f"steep beta={float(b_steep)} -> {float(bits_pair[0]):.2f} bits; "
+   f"flat beta={float(b_flat)} -> {float(bits_pair[1]):.2f} bits")
+ok("and importance still dominates the overall ranking",
+   float(torch.corrcoef(torch.stack([torch.log(w), b_gen]))[0, 1]) > 0.4,
+   f"corr(log w, bits) = {float(torch.corrcoef(torch.stack([torch.log(w), b_gen]))[0,1]):+.3f}")
+
+--- output
+```
+PASS  the budget is met with per-head curve steepness   | sum 64.00 vs 64.0
+PASS  at EQUAL importance, the flatter distortion curve earns more bits   | steep beta=2.0 -> 1.84 bits; flat beta=0.800000011920929 -> 3.47 bits
+PASS  and importance still dominates the overall ranking   | corr(log w, bits) = +0.804
+```
+
+--- image
+learning/assets/ratequant/eq/eq_p27_139.png
+Equation (13) as printed in the PDF
+
+--- note
+### Jensen's inequality — the source of the AM/GM bound — eq. (14)
+
+$$
+\mathbb{E}\big[f(X)\big] \;\ge\; f\big(\mathbb{E}[X]\big)\qquad (f\text{ convex})
+$$
+
+The one-line reason mixed precision can never lose: applying Jensen to `exp` over the
+log-importances gives arithmetic ≥ geometric mean, hence `J_u/J* ≥ 1`.
+
+--- code
+X = torch.log(w)
+lhs = float(torch.exp(X).mean())                                 # E[f(X)], f = exp (convex)
+rhs = float(torch.exp(X.mean()))                                 # f(E[X])
+ok("Jensen holds for exp on this sample", lhs >= rhs - 1e-9, f"E[e^X] {lhs:.4f} >= e^E[X] {rhs:.4f}")
+ok("equality only when the importances are identical",
+   abs(float(torch.exp(torch.zeros(N)).mean()) - float(torch.exp(torch.zeros(N).mean()))) < 1e-9)
+
+--- output
+```
+PASS  Jensen holds for exp on this sample   | E[e^X] 1.9974 >= e^E[X] 0.7550
+PASS  equality only when the importances are identical
+```
+
+--- image
+learning/assets/ratequant/eq/eq_p27_146.png
+Equation (14) as printed in the PDF
+
+--- note
+### The AM/GM identity, written out — eq. (15)
+
+$$
+\frac{\mathrm{AM}}{\mathrm{GM}} = \frac{\frac{1}{N}\sum_i w_i}{\big(\prod_i w_i\big)^{1/N}} = \exp\Big(\ln\bar{w} - \overline{\ln w}\Big) \;\ge\; 1
+$$
+
+The suboptimality factor as an explicit formula — and it is precisely the *log-variance*
+of the importances to leading order, so the gain from mixed precision grows with how unequal your heads
+are. That is the diagnostic to compute before implementing anything.
+
+--- code
+ratio = float(torch.exp(torch.log(w.mean()) - torch.log(w).mean()))
+ok("the exp-of-log-gap form matches AM/GM", abs(ratio - am / gm) < 1e-5, f"{ratio:.5f}")
+import math
+approx = math.exp(0.5 * float(torch.log(w).var(unbiased=False)))
+ok("to leading order it is exp(var of log w / 2)", abs(approx - ratio) / ratio < 0.35,
+   f"exp(varlog/2) = {approx:.3f} vs exact {ratio:.3f}")
+print(f"  diagnostic: log-variance {float(torch.log(w).var(unbiased=False)):.3f} "
+      f"-> expect about {ratio:.2f}x from mixed precision")
+
+--- output
+```
+PASS  the exp-of-log-gap form matches AM/GM   | 2.64566
+PASS  to leading order it is exp(var of log w / 2)   | exp(varlog/2) = 2.505 vs exact 2.646
+  diagnostic: log-variance 1.837 -> expect about 2.65x from mixed precision
+```
+
+--- image
+learning/assets/ratequant/eq/eq_p27_147.png
+Equation (15) as printed in the PDF
+

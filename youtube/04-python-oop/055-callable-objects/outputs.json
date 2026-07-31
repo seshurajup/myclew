@@ -1,0 +1,16 @@
+[
+  {
+    "after_line": 12,
+    "text": ">>> 20\\n>>> 30",
+    "caption": "__call__ makes objects callable"
+  },
+  {
+    "after_line": 23,
+    "text": ">>> 1 2 3",
+    "caption": "a callable that remembers state"
+  },
+  {
+    "after_line": 23,
+    "image": "artifacts/terminal.png"
+  }
+]

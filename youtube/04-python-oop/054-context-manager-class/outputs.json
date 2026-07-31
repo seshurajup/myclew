@@ -1,0 +1,17 @@
+[
+  {
+    "after_line": 13,
+    "text": ">>> elapsed: 0.0...s\\n>>> 499999500000",
+    "caption": "__enter__ / __exit__ wrap the block"
+  },
+  {
+    "after_line": 24,
+    "text": ">>> cleanup ran; error was ...\\n>>> survived",
+    "caption": "__exit__ runs even on error",
+    "volatile": true
+  },
+  {
+    "after_line": 24,
+    "image": "artifacts/terminal.png"
+  }
+]

@@ -1,0 +1,46 @@
+[
+  {
+    "text": "Lists are ordered collections of items, wrapped in square brackets and separated by commas.",
+    "until_line": 3
+  },
+  {
+    "text": "Each item can be any type, [shush] numbers, strings, floats, booleans, even mixed together.",
+    "until_line": 3
+  },
+  {
+    "text": "Print a list and you see all its elements at once.",
+    "until_line": 8
+  },
+  {
+    "text": "Lists can even hold other lists, letting you build tables and grids nested inside one another.",
+    "until_line": 8
+  },
+  {
+    "text": "Len tells you how many items are in the list.",
+    "until_line": 8
+  },
+  {
+    "text": "Unlike strings, lists are mutable — append adds a new item straight onto the end.",
+    "until_line": 11
+  },
+  {
+    "text": "[sniff] And remove deletes the first matching item it finds.",
+    "until_line": 14
+  },
+  {
+    "text": "[cough] You can also count how many times a value appears, or find its position with the index method.",
+    "until_line": 14
+  },
+  {
+    "text": "The in keyword checks membership instantly, and plus concatenates two lists into a new one.",
+    "until_line": 18
+  },
+  {
+    "text": "Finally, sort rearranges the list in place, [chuckle] reverse equals True flips it largest to smallest.",
+    "until_line": 24
+  },
+  {
+    "text": "Video 6 tackles indexing. Comment PYTHON if you want the cheat sheet.",
+    "until_line": 24
+  }
+]

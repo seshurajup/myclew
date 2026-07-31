@@ -1,0 +1,10 @@
+# PUBLIC notebook config — **beicicc (Kun Zhang)** submitted best
+name: pub_beicicc (Kun Zhang) submitte
+source: **beicicc (Kun Zhang)** submitted best
+family: learned-graph
+base: pilkwang_learned_graph
+lb: 0.893
+golden_cv: 0.8708
+mined_params: ""
+run: inference
+score: golden-12 (adj_edge_J + 0.1*div_J), by_embryo

@@ -1,0 +1,42 @@
+[
+  {
+    "text": "Any and all let you ask a yes-or-no question about an entire sequence at once.",
+    "until_line": 1
+  },
+  {
+    "text": "all returns true only when every single item is truthy — here, only if all the numbers are even.",
+    "until_line": 4
+  },
+  {
+    "text": "[chuckle] any is the opposite mood — it returns true if even one item passes the test.",
+    "until_line": 7
+  },
+  {
+    "text": "So any of the numbers being greater than five is enough to make it true.",
+    "until_line": 7
+  },
+  {
+    "text": "[sniff] Both are smart and short-circuit — all stops at the first false, any stops at the first true.",
+    "until_line": 11
+  },
+  {
+    "text": "That makes them fast even over huge sequences, since they quit as soon as the answer is settled.",
+    "until_line": 11
+  },
+  {
+    "text": "[sigh] They pair perfectly with a generator expression for validation, like checking every password is long enough.",
+    "until_line": 15
+  },
+  {
+    "text": "One quirk worth memorizing: on an empty sequence, all is true and any is false.",
+    "until_line": 18
+  },
+  {
+    "text": "[groan] any and all replace clunky loops-with-a-flag with one line that says exactly what you mean.",
+    "until_line": 18
+  },
+  {
+    "text": "Video 36 tackles nested loops. Comment PYTHON if you want the cheat sheet.",
+    "until_line": 18
+  }
+]

@@ -1,0 +1,16 @@
+[
+  {
+    "after_line": 15,
+    "text": ">>> abstract: Can't instantiate abstract class...",
+    "caption": "abstract classes can't be created"
+  },
+  {
+    "after_line": 17,
+    "text": ">>> Paid 50 by card",
+    "caption": "concrete subclass fulfills the contract"
+  },
+  {
+    "after_line": 18,
+    "image": "artifacts/terminal.png"
+  }
+]

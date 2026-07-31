@@ -1,0 +1,49 @@
+@ id: g407
+@ order: 407
+@ title: Vision & audio encoders (the non-12B sizes)
+@ subtitle: variable-aspect-ratio ViTs and a slimmed USM audio conformer
+@ source: arxiv 2607.02770
+
+--- note
+## Where encoders are used
+Every size **except the unified 12B** (g406) uses **separate, frozen** vision and audio encoders,
+kept frozen during pre-training. E2B and E4B carry a **150M** vision encoder; the larger models use a
+**550M** one. E2B and E4B carry a **305M** audio encoder.
+
+--- image
+learning/assets/gemma4/t10_vis_enc.png
+Table 10 — vision encoder architecture. The 550M encoder: d_model 1152, d_MLP 4304, 16 heads, 27 layers. The 150M encoder: d_model 768, d_MLP 3072, 12 heads, 16 layers. Both are Vision Transformers with patch size 16.
+
+--- note
+## Vision encoder: a variable-aspect-ratio ViT
+Both encoders are **Vision Transformers** (Dosovitskiy et al., 2021) with **patch size 16**. Two design
+points:
+
+- **Variable aspect ratios** — instead of a fixed square input, images keep their shape (Figure 2 /
+  Algorithm 1). Position is encoded with **axial 2D-RoPE** (Heo et al., 2024, non-causal attention)
+  **plus 2D absolute positional embeddings**.
+- **A token budget** — the number of vision tokens N_max is restricted to **{70, 140, 280, 560, 1120}**.
+  Higher budget = higher resolution = more compute. Benchmarks are reported at the max (1120) and, in
+  Table 12, at a low budget (280).
+
+--- image
+learning/assets/gemma4/fig2_resize.png
+Figure 2 — aspect-ratio-preserving image resizing (with Table 10 above it for reference). The astronaut-otter image (572×1024, 1:1.79) is resized mostly aspect-preserving, then split into patches; here patch_size=16, pooling_kernel_size=3, max_soft_tokens=10 → 2×4 pooled patches → 72 raw 16px patches → pooled 3×3 → 8 soft tokens fed to the LLM backbone.
+
+--- image
+learning/assets/gemma4/alg1_resize.png
+Algorithm 1 — the resizing math. With pooled-patch size m = k·p and a token budget T = N_max·m², compute an ideal scale f = √(T/(H·W)), scale H and W, round each down to a multiple of m, then bicubic-resize. This is how an arbitrary-shape image is fit under the token budget while preserving aspect ratio.
+
+--- note
+## Audio encoder: a slimmed USM conformer
+E2B and E4B use a **305M** audio encoder that processes audio in **40 ms chunks** with **Mel-filterbank
+inputs**. It is based on the **Universal Speech Model** (USM; Zhang et al., 2023): **two downsampling
+convolution layers** followed by **twelve Conformer layers** (Gulati et al., 2020). Notable choices:
+
+- **No vector quantization** — the LLM ingests the encoder's **continuous representations** directly.
+- **55% fewer parameters** than Gemma 3n (from **680M → 305M**), yet audio quality improves (g410).
+- Weights are **frozen** during pre-training, like the vision encoder.
+
+--- image
+learning/assets/gemma4/t12_vis_lowres.png
+Table 12 — vision benchmark scores at the low token budget N_max = 280 (thinking), the appendix counterpart to Table 6's full-resolution (1120) numbers. Lower resolution costs accuracy (compare with Table 6 in g410), which is the point of exposing a token-budget knob.

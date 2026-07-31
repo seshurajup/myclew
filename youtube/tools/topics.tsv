@@ -1,0 +1,102 @@
+001-hello-world	hello world
+002-variables-assignment	variables and assignment
+003-numbers-math	numbers and math
+004-strings-basics	string basics
+005-lists-intro	lists
+006-indexing-access	indexing
+007-slicing	slicing
+008-dicts-intro	dictionaries
+009-if-conditionals	if and else
+010-boolean-logic	boolean logic
+011-for-loops	for loops
+012-while-loops	while loops
+013-functions-intro	functions
+014-error-handling	error handling
+015-input-output	input and output
+016-function-params	function parameters
+017-args-kwargs	args and kwargs
+018-lambdas	lambdas
+019-map-filter	map and filter
+020-list-comprehensions	list comprehensions
+021-dict-comprehensions	dict comprehensions
+022-decorators-intro	decorators
+023-closures	closures
+024-generators	generators
+025-recursion	recursion
+026-scope-locals-globals	variable scope
+027-type-hints	type hints
+028-enumerate	enumerate
+029-zip	zip
+030-range-deep	the range function
+031-iterators	iterators
+032-itertools	itertools
+033-sorted-key	sorting by a key
+034-reversed-slicing	reversing sequences
+035-any-all	any and all
+036-nested-loops	nested loops
+037-loop-patterns	loop patterns
+038-classes-intro	classes
+039-instance-attributes	instance attributes
+040-methods	methods
+041-encapsulation	encapsulation
+042-properties	properties
+043-inheritance	inheritance
+044-super	the super function
+045-polymorphism	polymorphism
+046-dunder-str	dunder str and repr
+047-dunder-operators	operator overloading
+048-abstract-classes	abstract classes
+049-dataclasses	dataclasses
+050-composition	composition
+051-multiple-inheritance	multiple inheritance
+052-enums	enums
+053-slots	slots
+054-context-manager-class	context manager classes
+055-callable-objects	callable objects
+056-contextlib	contextlib
+057-functools	functools
+058-collections	the collections module
+059-regex	regular expressions
+060-datetime	dates and times
+061-json	JSON
+062-file-io	file input and output
+063-pathlib	pathlib
+064-custom-exceptions	custom exceptions
+065-yield-from	yield from
+066-decorators-with-args	decorators with arguments
+067-walrus	the walrus operator
+068-unpacking	advanced unpacking
+069-fstrings-advanced	advanced f-strings
+070-assertions	assertions
+071-unittest	unittest
+072-pytest	pytest
+073-fixtures	pytest fixtures
+074-mocking	mocking
+075-logging	logging
+076-type-checking	type checking with mypy
+077-timeit-profiling	profiling and timeit
+078-math-random	math and random
+079-os-sys	the os and sys modules
+080-argparse	argparse
+081-csv	the CSV module
+001-fibonacci	Fibonacci
+002-list-comprehensions	list comprehensions
+003-decorators	decorators
+004-generators	generators
+005-context-managers	context managers
+006-dataclasses	dataclasses
+007-error-handling	error handling
+008-itertools	itertools
+009-fstrings	f-strings
+010-walrus	the walrus operator
+011-type-hints	type hints
+012-enumerate-zip	enumerate and zip
+013-counter	Counter
+014-defaultdict	defaultdict
+015-lambda-map-filter	lambda, map and filter
+016-args-kwargs	args and kwargs
+017-unpacking	unpacking
+018-sets	sets
+019-sorting-key	sorting by a key
+020-pathlib	pathlib
+001-attention	attention

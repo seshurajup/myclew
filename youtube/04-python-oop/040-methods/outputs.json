@@ -1,0 +1,11 @@
+[
+  {
+    "after_line": 24,
+    "text": ">>> 12.57\\n>>> 1\\n>>> A round shape",
+    "caption": "instance / class / static methods"
+  },
+  {
+    "after_line": 24,
+    "image": "artifacts/terminal.png"
+  }
+]

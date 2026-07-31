@@ -1,0 +1,42 @@
+[
+  {
+    "text": "Inheritance lets a new class build on an existing one, reusing its code instead of repeating it.",
+    "until_line": 5
+  },
+  {
+    "text": "Animal is our base class, with a name and a generic speak method.",
+    "until_line": 5
+  },
+  {
+    "text": "Dog and Cat inherit from Animal by naming it in parentheses — they get its init and attributes for free.",
+    "until_line": 9
+  },
+  {
+    "text": "[chuckle] But each subclass overrides speak with its own version, so a dog barks and a cat meows.",
+    "until_line": 13
+  },
+  {
+    "text": "Notice neither Dog nor Cat rewrites init — they simply inherit it from Animal.",
+    "until_line": 13
+  },
+  {
+    "text": "[sniff] So creating a Dog still sets the name, using the parent's constructor automatically.",
+    "until_line": 16
+  },
+  {
+    "text": "Each object then speaks in its own way, while sharing the common structure.",
+    "until_line": 18
+  },
+  {
+    "text": "[sigh] The relationship is is-a — a Dog is an Animal, which isinstance confirms as true.",
+    "until_line": 21
+  },
+  {
+    "text": "[groan] Inheritance shines when several classes share behavior — write it once in the parent, specialize only what differs.",
+    "until_line": 21
+  },
+  {
+    "text": "In the next one we take on the super function. Comment the topic you want after that.",
+    "until_line": 21
+  }
+]

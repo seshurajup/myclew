@@ -1,0 +1,10 @@
+# PUBLIC notebook config — josephadamski91/biohub-praxel-0-902-exact-reproduction
+name: pub_biohub-praxel-0-902-exac
+source: josephadamski91/biohub-praxel-0-902-exact-reproduction
+family: learned-graph
+base: pilkwang_learned_graph
+lb: 0.902
+golden_cv: 0.8708
+mined_params: "motion_um=['.', '0', '0.05', '1', '1.0']; division=['SAFE_DIV', 'add_safe_divisions', 'safe_div']; augs=['flip', 'rot90']; arch=['ILP', 'ilp', 'unet_transformer']; min_track_len=['1', '4', '6']"
+run: inference
+score: golden-12 (adj_edge_J + 0.1*div_J), by_embryo

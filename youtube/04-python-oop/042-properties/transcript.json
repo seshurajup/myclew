@@ -1,0 +1,42 @@
+[
+  {
+    "text": "A property lets an attribute look like plain data, but secretly run code when you read or write it.",
+    "until_line": 7
+  },
+  {
+    "text": "The at-property decorator turns celsius into a getter — you access it with no parentheses, like an attribute.",
+    "until_line": 7
+  },
+  {
+    "text": "[chuckle] The matching setter runs whenever you assign to it, letting you validate the new value first.",
+    "until_line": 13
+  },
+  {
+    "text": "Here the setter rejects any temperature below absolute zero, protecting your object from impossible data.",
+    "until_line": 13
+  },
+  {
+    "text": "[sniff] Properties are also perfect for computed values that depend on other attributes.",
+    "until_line": 17
+  },
+  {
+    "text": "fahrenheit isn't stored anywhere — it's calculated fresh from celsius every time you ask.",
+    "until_line": 17
+  },
+  {
+    "text": "So reading t dot fahrenheit runs the conversion on the spot, always up to date.",
+    "until_line": 21
+  },
+  {
+    "text": "[sigh] Assign a new celsius, and fahrenheit instantly reflects it, because it's recomputed from the source.",
+    "until_line": 24
+  },
+  {
+    "text": "[groan] Properties give you the clean syntax of attributes with the safety and smarts of methods — the best of both.",
+    "until_line": 24
+  },
+  {
+    "text": "Up next, inheritance. Which one do you already use? Comment below.",
+    "until_line": 24
+  }
+]

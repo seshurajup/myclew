@@ -1,0 +1,59 @@
+# =====================================================================
+# RECALL-recovery RE-DETECT on the pilkwang SUPPORT-PACK weights (golden-12).
+#
+# Goal (leader/human 2026-07-09): node_recall is saturated ~0.977-0.988 on the cached
+# pilk pipeline, but node_rec^2 still gives recall real leverage (0.984->1.0 alone ~0.91).
+# A REAL GPU re-detect at a LOWER decode threshold recovers the last ~1.6% missed nuclei
+# (dim/crowded) that the cached preds can't (BIOHUB_DET_THRESHOLD is a NO-OP on cache — it
+# only bites at DETECTION time, which is what this config drives). Then re-run ILP + the
+# mtl10/gap6.0 post-proc, and CANONICALLY score on full-12 (score_golden12_official.py),
+# promote only if > the EXP_154 0.8837 bar.
+#
+# OPTION-(a) WEIGHTS MECHANISM (predict_and_score.sh UNMODIFIED):
+#   train.method = pilk_redetect  →  predict_and_score.sh resolves
+#     research/official_repo/weights/pilk_redetect/split_0/edge_predictor_best.pth
+#   which is a SYMLINK to research/pilkwang_support_pack/weights/unet_transformer/split_0/
+#   edge_predictor_best.pth (+ its config.json, downsample [1,4,4]). So the SUPPORT-PACK
+#   checkpoint is used without editing the shared script and without touching official_repo's
+#   own method weights. PROOF: readlink -f research/official_repo/weights/pilk_redetect/split_0/edge_predictor_best.pth
+#
+# NOTE (det-threshold blocker): predict_and_score.sh hardwires `--det-threshold 0.99`. The
+# recall-tilt (0.985/0.98/0.97 sweep) needs a threshold-parameterised predict path — see the
+# design note; that piece is pending leader's approval of the minimal non-breaking mechanism.
+# Run (fleet, once approved):  kind=score  spec={"config":"config/pilk_redetect.yml","method":"pilk_redetect"}
+# =====================================================================
+name: pilk_redetect
+
+purpose: >
+  Recall-recovery GPU re-detect on the pilkwang support-pack UNet weights, scored canonically on
+  golden-12. Lower decode threshold to recover missed nuclei at saturated-recall margin, re-ILP +
+  mtl10/gap6.0 post-proc, promote only past the 0.8837 canonical bar.
+
+paths:
+  python:  research/cellmot_venv/bin/python
+  trainer: research/official_repo/scripts/train_unet_transformer.py   # unused here (predict+score only)
+  pythonpath:
+    - research/official_repo/src
+    - research/official_repo/scripts
+    - .
+  data_dir: input/biohub-cell-tracking-during-development/train
+  splits:   learning/ensemble_work/golden12_splits.json    # PREDICT+SCORE on golden-12 (6 44b6 + 6 6bba)
+  cache_dir: research/cache/ds1x4x4
+
+mlflow:
+  tracking_uri: http://localhost:5000
+  experiment:   kaggle-biohub-cell-tracking
+  run_name:     pilk_redetect_g12
+  log_artifacts: false
+
+gpu:
+  power_limit_w: 400
+
+train:
+  method:          pilk_redetect      # -> official_repo/weights/pilk_redetect/split_0 (symlink to support-pack)
+  split:           0
+  downsample:      "1,4,4"            # matches support-pack config.json (NOT the 1,2,2 trap)
+  batch_size:      8                  # dense 44b6 fold OOMs 32GB @ bs16 (only relevant if we ever fine-tune)
+  window_size:     2
+  pool_kernel_um:  5.0                # pilkwang value; 3.0 over-detects (~x1.3 nodes -> adjJ ~0.75)
+  det_threshold:   0.985             # RECALL-tilt target (blocked in shared script @0.99 — see note; sweep 0.985/0.98/0.97)

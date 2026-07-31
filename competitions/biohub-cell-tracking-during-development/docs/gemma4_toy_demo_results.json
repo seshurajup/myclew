@@ -1,0 +1,164 @@
+{
+  "repo": "unsloth/gemma-4-E2B-it",
+  "model_loaded": true,
+  "blocked_reason": null,
+  "config": {
+    "model_type": "gemma4",
+    "architecture": "Gemma4ForConditionalGeneration",
+    "n_params": 5104297504,
+    "n_layers": 35,
+    "hidden": 1536,
+    "n_heads": 8,
+    "n_kv_heads": 1,
+    "head_dim": 256,
+    "vocab": 262144,
+    "sliding_window": 512,
+    "n_kv_shared_layers": 20,
+    "max_position": 131072,
+    "enable_moe": false,
+    "num_experts": null,
+    "layer_types": [
+      "sliding_attention",
+      "sliding_attention",
+      "sliding_attention",
+      "sliding_attention",
+      "full_attention",
+      "sliding_attention",
+      "sliding_attention",
+      "sliding_attention",
+      "sliding_attention",
+      "full_attention",
+      "sliding_attention",
+      "sliding_attention",
+      "sliding_attention",
+      "sliding_attention",
+      "full_attention",
+      "sliding_attention",
+      "sliding_attention",
+      "sliding_attention",
+      "sliding_attention",
+      "full_attention",
+      "sliding_attention",
+      "sliding_attention",
+      "sliding_attention",
+      "sliding_attention",
+      "full_attention",
+      "sliding_attention",
+      "sliding_attention",
+      "sliding_attention",
+      "sliding_attention",
+      "full_attention",
+      "sliding_attention",
+      "sliding_attention",
+      "sliding_attention",
+      "sliding_attention",
+      "full_attention"
+    ]
+  },
+  "inference": [
+    {
+      "question": "Janet\u2019s ducks lay 16 eggs per day. She eats three for breakfast every morning and bakes muffins for her friends every day with four. She sells the remainder at the farmers' market daily for $2 per fresh duck egg. How much in dollars does she make every day at the farmers' market?",
+      "gold": 18,
+      "generated": "Here is the step-by-step solution:\n\n1.  **Calculate the total number of eggs laid per day:**\n    Janet's ducks lay 16 eggs per day.\n\n2.  **Calculate the number of eggs she eats for breakfast:**\n    She eats 3 eggs for breakfast every morning.\n\n3.  **Calculate the number of eggs she bakes for friends:**\n    She bakes 4 eggs for her friends every day.\n\n4.  **Calculate the total number of eggs used (eaten or baked):**\n    Total eggs used = Eggs eaten + Eggs baked\n    Total eggs used = $3 + 4 = 7$ eggs.\n\n5.  **Calculate the number of remaining eggs sold:**\n    Remaining eggs = Total eggs laid - Total eggs used\n    Remaining eggs = $16 - 7 = 9$ eggs.\n\n6.  **Calculate the total money she makes from selling the eggs:**\n    She sells the remainder at the farmers' market for $\\$2$ per egg.\n    Money made = Remaining eggs $\\times$ Price per egg\n    Money made = $9 \\times \\$2 = \\$18$.\n\nThe amount Janet makes every day at",
+      "predicted": 18,
+      "correct": true,
+      "gen_seconds": 3.89,
+      "new_tokens": 256
+    },
+    {
+      "question": "A robe takes 2 bolts of blue fiber and half that much white fiber.  How many bolts in total does it take?",
+      "gold": 3,
+      "generated": "Here is the step-by-step solution:\n\n1.  **Identify the amount of blue fiber:** The robe takes 2 bolts of blue fiber.\n2.  **Calculate the amount of white fiber:** The robe takes half that much white fiber as blue fiber.\n    *   White fiber = $\\frac{1}{2} \\times (\\text{Bolts of blue fiber})$\n    *   White fiber = $\\frac{1}{2} \\times 2$ bolts\n    *   White fiber = 1 bolt\n3.  **Calculate the total number of bolts:** Add the bolts of blue fiber and the bolts of white fiber.\n    *   Total bolts = Bolts of blue fiber + Bolts of white fiber\n    *   Total bolts = $2 + 1$\n    *   Total bolts = 3\n\n3",
+      "predicted": 3,
+      "correct": true,
+      "gen_seconds": 2.49,
+      "new_tokens": 177
+    },
+    {
+      "question": "Josh decides to try flipping a house.  He buys a house for $80,000 and then puts in $50,000 in repairs.  This increased the value of the house by 150%.  How much profit did he make?",
+      "gold": 70000,
+      "generated": "Here is the step-by-step solution:\n\n**1. Calculate the total cost of the house:**\nJosh bought the house for $\\$80,000$ and put in $\\$50,000$ for repairs.\n$$\\text{Total Cost} = \\text{Purchase Price} + \\text{Repair Costs}$$\n$$\\text{Total Cost} = \\$80,000 + \\$50,000 = \\$130,000$$\n\n**2. Calculate the increase in value:**\nThe problem states that the repairs increased the value of the house by $150\\%$. This increase is based on the original purchase price.\n$$\\text{Increase in Value} = 150\\% \\text{ of } \\$80,000$$\n$$\\text{Increase in Value} = 1.50 \\times \\$80,000$$\n$$\\text{Increase in Value} = \\$120,000$$\n\n**3. Calculate the final value of the house:**\n$$\\text{Final Value} = \\text{Original Purchase Price} + \\text{Increase in Value}$$\n$$\\text{Final Value} =",
+      "predicted": 3,
+      "correct": false,
+      "gen_seconds": 3.6,
+      "new_tokens": 256
+    },
+    {
+      "question": "James decides to run 3 sprints 3 times a week.  He runs 60 meters each sprint.  How many total meters does he run a week?",
+      "gold": 540,
+      "generated": "Here is the step-by-step solution:\n\n1.  **Calculate the total meters run in one sprint session:**\n    James runs 3 sprints, and each sprint is 60 meters.\n    Meters per session = Number of sprints $\\times$ Meters per sprint\n    Meters per session = $3 \\times 60 \\text{ meters} = 180 \\text{ meters}$\n\n2.  **Calculate the total meters run per week:**\n    James runs 3 times per week.\n    Total meters per week = Meters per session $\\times$ Number of times per week\n    Total meters per week = $180 \\text{ meters/session} \\times 3 \\text{ sessions/week} = 540 \\text{ meters}$\n\n**Final Answer:**\n540",
+      "predicted": 540,
+      "correct": true,
+      "gen_seconds": 2.55,
+      "new_tokens": 177
+    },
+    {
+      "question": "Every day, Wendi feeds each of her chickens three cups of mixed chicken feed, containing seeds, mealworms and vegetables to help keep them healthy.  She gives the chickens their feed in three separate meals. In the morning, she gives her flock of chickens 15 cups of feed.  In the afternoon, she gives her chickens another 25 cups of feed.  How many cups of feed does she need to give her chickens in the final meal of the day if the size of Wendi's flock is 20 chickens?",
+      "gold": 20,
+      "generated": "Here is the step-by-step solution:\n\n**1. Determine the total daily feed required per chicken:**\nEach chicken needs 3 cups of mixed feed per day.\n\n**2. Determine the total daily feed required for the entire flock:**\nThe flock size is 20 chickens.\nTotal daily feed needed = (Cups per chicken) $\\times$ (Number of chickens)\nTotal daily feed needed = $3 \\text{ cups/chicken} \\times 20 \\text{ chickens} = 60 \\text{ cups}$\n\n**3. Calculate the total amount of feed already given:**\nFeed given in the morning = 15 cups\nFeed given in the afternoon = 25 cups\nTotal feed given so far = $15 \\text{ cups} + 25 \\text{ cups} = 40 \\text{ cups}$\n\n**4. Calculate the remaining feed needed for the final meal:**\nFeed needed in the final meal = (Total daily feed required) - (Total feed already given)\nFeed needed in the final meal = $60 \\text{ cups} - 40 \\text{ cups} = 20 \\text{ cups}$\n\n**Answer:**",
+      "predicted": 20,
+      "correct": true,
+      "gen_seconds": 3.61,
+      "new_tokens": 256
+    }
+  ],
+  "gsm8k_accuracy": "4/5",
+  "agents": {
+    "moe_inference_cost": {
+      "e2b_dense": {
+        "note": "E2B has no MoE block -> dense (active==total)",
+        "msg": "moe-inference-cost: 5.10B active / 5.10B total (compute 100.0% of dense-total \u2192 1.0\u00d7 cheaper compute), but 5.10B must stay resident",
+        "data": {
+          "active_b": 5.104297504,
+          "total_b": 5.104297504,
+          "compute_ratio": 1.0,
+          "per_token_flops": 10208595008.0,
+          "memory_params": 5104297504.0,
+          "speedup_vs_dense_total": 1.0
+        }
+      },
+      "a4b_moe": {
+        "note": "real 26B-A4B geometry (128 experts, top-8, moe_inter=704, 30 layers); expert_params from config, shared derived from published 26B total",
+        "expert_params": 178421760,
+        "shared_params": 3162014720.0,
+        "msg": "moe-inference-cost: 4.59B active / 26.00B total (compute 17.7% of dense-total \u2192 5.7\u00d7 cheaper compute), but 26.00B must stay resident",
+        "data": {
+          "active_b": 4.5893888,
+          "total_b": 26.0,
+          "compute_ratio": 0.17651495384615384,
+          "per_token_flops": 9178777600.0,
+          "memory_params": 26000000000.0,
+          "speedup_vs_dense_total": 5.665242395675869
+        }
+      }
+    },
+    "kv_cache_longctx": {
+      "seq_len": 32768,
+      "local_global_ratio": 4,
+      "window": 512,
+      "kv_shared_layers": 20,
+      "msg": "kv-cache-longctx: 0.073 GB @ 32768 ctx (7 global / 28 local layers); global-KV cut 75.0%, total cut 93.8% vs naive",
+      "data": {
+        "total_gb": 0.07340032,
+        "total_bytes": 73400320.0,
+        "global_kv_reduction": 0.75,
+        "total_reduction_vs_naive": 0.9375,
+        "n_global": 7,
+        "n_local": 28
+      }
+    },
+    "mtp_speculative_decode": {
+      "drafter_params": 76000000.0,
+      "base_params": 5104297504,
+      "cost_ratio": 0.0149,
+      "alpha": 0.8,
+      "msg": "mtp-speculative-decode: \u03b1=0.80 \u2192 best \u03b3=12 gives 4.73 tok/verify, 4.01\u00d7 decode speedup (c=0.0149)",
+      "data": {
+        "best_gamma": 12,
+        "best_speedup": 4.008417113213438,
+        "expected_tokens": 4.725122093056001,
+        "speedup": 4.008417113213438
+      }
+    }
+  }
+}

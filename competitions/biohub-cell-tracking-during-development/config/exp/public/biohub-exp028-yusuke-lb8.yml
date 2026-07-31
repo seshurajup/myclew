@@ -1,0 +1,10 @@
+# PUBLIC notebook config — beicicc/biohub-exp028-yusuke-lb873-repro
+name: pub_biohub-exp028-yusuke-lb8
+source: beicicc/biohub-exp028-yusuke-lb873-repro
+family: learned-graph
+base: pilkwang_learned_graph
+lb: None
+golden_cv: 0.8708
+mined_params: "motion_um=['.', '0', '0.05', '1', '5.8', '6.2', '6.8', '7.2']; division=['SAFE_DIV', 'add_safe_divisions', 'safe_div']; arch=['ILP', 'ilp', 'unet_transformer']"
+run: inference
+score: golden-12 (adj_edge_J + 0.1*div_J), by_embryo

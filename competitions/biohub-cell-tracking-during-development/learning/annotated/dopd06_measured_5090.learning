@@ -1,0 +1,81 @@
+@ id: dopd06
+@ order: 625
+@ title: We RAN it — weak-to-strong reproduced on the RTX 5090 (no verl/vLLM)
+@ subtitle: a real on-policy Δ_T-reward loop beats the weak teacher AND endpoint distillation, measured
+@ source: experiments/direct_opd_toy.py → docs/direct_opd_toy_proof.json
+
+--- note
+## Why this lesson exists (proof, not citation)
+dopd01–dopd05 explain the paper and its code. This lesson is **our own measured proof on the RTX 5090** that
+the **core mechanism actually reproduces** — a stronger student, trained with Direct-OPD's Δ_T implicit-reward
+transfer, ends up **better than the weak RL teacher AND better than standard endpoint distillation**. verl +
+vLLM are far too heavy to install for a background study, so we built a **faithful tiny on-policy RL loop in
+pure torch** (ABI: numpy 2.2.6 / torch 2.8.0+cu128 / cv2 untouched) and measured it, deterministic seeds.
+
+--- note
+## First: the Δ_T reward is byte-identical to the repo
+Before any training, `experiments/direct_opd_toy.py` mirrors verl's `_compute_delta_opd_rm_scores` and asserts
+it reproduces the repo's own unit-test vectors (`tests/test_delta_opd_reward.py`) — the student-weighted
+teacher log-ratio, the −inf candidate masking, the detachment — **exactly**. Printed:
+`[Δ_T numerics vs repo unit-test vectors] identical = True`. So our reward function *is* the paper's, not an
+approximation.
+
+--- note
+## The toy task (a controllable weak-to-strong setup)
+A tiny autoregressive policy over (context, position, prev-token); reward = fraction of positions emitting the
+hidden correct token. The task is **split into two skills** so "weak-to-strong" is well-defined:
+- **SFT positions** — the demonstrator is informative, so a **capable** model learns them by imitation. This is
+  the strong base the student has and the low-capacity (d=3) teacher does not.
+- **RL positions** — the demonstrator is correctness-agnostic, so the answer is discoverable **only through
+  reward** (RL). This is the direction the weak teacher discovers and transfers.
+We train: a **weak teacher** (RL/GRPO → its ceiling), a **strong student reference** (SFT base), then three
+students from that base — **endpoint distillation** (KL to teacher endpoint), **Direct-OPD** (on-policy Δ_T
+reward, KL-leashed to the student ref), and an **oracle** (student direct-RL, for scale).
+
+--- image
+learning/assets/direct-opd/dopd_measured.png
+Measured, 8 seeds, greedy reward. Weak-teacher RL ceiling 0.536 (red) ≪ student base 0.698 (blue). Endpoint
+distillation collapses the strong student onto the weak ceiling (grey 0.535 ≈ red). Direct-OPD (green 0.611)
+holds well above both. Oracle 0.973 (purple) = the student's own attainable ceiling.
+
+--- note
+## The measured result (mean ± std over 8 seeds)
+| policy | greedy reward | note |
+|---|---|---|
+| weak teacher (ref) | 0.240 ± 0.038 | before its RL |
+| **weak teacher (post-RL)** | **0.536 ± 0.040** | the ceiling to beat |
+| strong student (ref/base) | 0.698 ± 0.012 | SFT base, stronger than the teacher |
+| **endpoint distillation** | **0.535 ± 0.042** | dragged DOWN to the weak ceiling (−0.163 vs base) |
+| **Direct-OPD (direction)** | **0.611 ± 0.044** | **beats teacher +0.074 & endpoint +0.076** |
+| student oracle (direct-RL) | 0.973 ± 0.021 | the student's own ceiling |
+
+**Paired (same task instance per seed):** Direct-OPD > endpoint distillation in **7/8** seeds and > the weak
+teacher in **7/8** seeds. The claim `weak_to_strong_reproduced = True`. GPU during the run: **44% mean / 56%
+peak util** — honestly *launch-bound* on a deliberately tiny model (as with our BitNet toy, lbq07), but bf16 +
+TF32 + matmul-high from `hardware_tune.load_config()` are applied; `diagnose_live` confirms it is compute-mixed,
+not data-bound. Whole thing runs in ~55 s.
+
+--- note
+## What the numbers teach (grounded, and honest about limits)
+1. **Endpoint distillation imports the ceiling — measured.** Copying the weak teacher's endpoint pulled the
+   strong 0.698 student down to 0.535 (≈ the teacher) in **every** seed. This is exactly the failure mode
+   Direct-OPD is designed to avoid, and we see it directly.
+2. **Direction transfer beats it — measured, robustly.** The identical student, trained on the *direction* Δ_T
+   on-policy with a firm KL leash to its own base, retains far more of its base and lands at 0.611 — above both
+   the weak teacher and endpoint distillation, 7/8 seeds. That is the paper's central claim, on our GPU.
+3. **The KL leash is load-bearing, not a detail.** Sweeping the leash: too weak (coef 0.05) and the weak
+   teacher's Δ_T *corrupts* the student's base (Direct-OPD fell to ~0.48, below endpoint); firm (coef 0.5–1.0)
+   and it preserves the base while importing the direction. This matches why the repo uses a strong *adaptive*
+   KL (coef 0.5–2.5).
+4. **Honest boundary.** With this **very weak (d=3)** teacher, Direct-OPD does **not** exceed the student's own
+   SFT base (0.611 < 0.698, 0/8) — the teacher's direction is net-neutral on skills the student already had. In
+   a **smaller base-gap** regime (a shorter SFT prefix) we measured Direct-OPD *also* edging past the base
+   (0.575 vs 0.550). So "beats the weak teacher and endpoint distillation" is the robust result; "beats its own
+   base" is real but regime-dependent — we report both rather than overclaim.
+
+--- note
+## Reproduce it
+`PYTHONPATH=tools/researchpapers python experiments/direct_opd_toy.py` → `docs/direct_opd_toy_proof.json`
+(knobs via `DOPD_*` env: `DOPD_NSFT`, `DOPD_OKL`, `DOPD_DW`, `DOPD_SEEDS`, …); then
+`python experiments/direct_opd_make_figures.py` → the two assets above. Δ_T-numerics assertion runs first, so a
+green run also proves the reward matches verl's.

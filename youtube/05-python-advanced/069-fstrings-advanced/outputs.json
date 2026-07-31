@@ -1,0 +1,21 @@
+[
+  {
+    "after_line": 4,
+    "text": ">>> Alice     |    91.5",
+    "caption": "alignment and width"
+  },
+  {
+    "after_line": 9,
+    "text": ">>> 91.5\\n>>> 25.6%\\n>>> 1,234,567",
+    "caption": "decimals, percent, commas"
+  },
+  {
+    "after_line": 13,
+    "text": ">>> x=42",
+    "caption": "{x=} shows name and value"
+  },
+  {
+    "after_line": 16,
+    "image": "artifacts/terminal.png"
+  }
+]

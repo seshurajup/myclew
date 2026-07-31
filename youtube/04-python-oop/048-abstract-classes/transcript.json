@@ -1,0 +1,42 @@
+[
+  {
+    "text": "An abstract class defines a contract that its subclasses must fulfill, but can't be used on its own.",
+    "until_line": 6
+  },
+  {
+    "text": "You inherit from ABC, the abstract base class, and mark required methods with the abstractmethod decorator.",
+    "until_line": 6
+  },
+  {
+    "text": "Payment declares that every payment type must have a pay method, but gives no implementation itself.",
+    "until_line": 6
+  },
+  {
+    "text": "[chuckle] Card is a concrete subclass — it actually implements pay, so it's complete and usable.",
+    "until_line": 10
+  },
+  {
+    "text": "[sniff] Try to create a Payment directly, and Python refuses with a TypeError.",
+    "until_line": 15
+  },
+  {
+    "text": "That's the whole point — the abstract class exists only to be extended, never instantiated raw.",
+    "until_line": 15
+  },
+  {
+    "text": "It guarantees that anyone building a payment type won't forget the essential pay method.",
+    "until_line": 17
+  },
+  {
+    "text": "[sigh] Card, having fulfilled the contract, works perfectly and processes the payment.",
+    "until_line": 17
+  },
+  {
+    "text": "[groan] Abstract classes are how you design safe, consistent plugin systems — define the interface, enforce it everywhere.",
+    "until_line": 18
+  },
+  {
+    "text": "In the next one we take on dataclasses. Which one do you already use? Comment below.",
+    "until_line": 18
+  }
+]

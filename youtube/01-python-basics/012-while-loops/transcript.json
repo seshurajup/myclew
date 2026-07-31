@@ -1,0 +1,42 @@
+[
+  {
+    "text": "While loops keep repeating as long as their condition stays true — perfect when you don't know the count in advance.",
+    "until_line": 4
+  },
+  {
+    "text": "We start count at zero, and bump it up by one each pass with the plus-equals shortcut.",
+    "until_line": 4
+  },
+  {
+    "text": "The loop stops the instant count reaches five, [sniff] because then the condition becomes false.",
+    "until_line": 4
+  },
+  {
+    "text": "One warning — if the condition never becomes false, you get an infinite loop that runs forever.",
+    "until_line": 9
+  },
+  {
+    "text": "This second example simulates reading input over and over until the user finally types quit.",
+    "until_line": 9
+  },
+  {
+    "text": "Sometimes you want to bail out early — break exits the loop immediately, even a while True infinite loop.",
+    "until_line": 17
+  },
+  {
+    "text": "[cough] Continue is the opposite — it skips just the rest of this pass and jumps ahead to the next iteration.",
+    "until_line": 25
+  },
+  {
+    "text": "Here continue skips the even numbers, so only the odds ever get printed.",
+    "until_line": 25
+  },
+  {
+    "text": "[chuckle] And a lesser-known trick — while loops support an else clause that runs only if the loop finished naturally, without a break.",
+    "until_line": 32
+  },
+  {
+    "text": "Up next, functions. Which one do you already use? Comment below.",
+    "until_line": 32
+  }
+]

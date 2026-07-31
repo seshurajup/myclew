@@ -1,0 +1,42 @@
+[
+  {
+    "text": "Python's unpacking lets you pull sequences apart in remarkably flexible ways.",
+    "until_line": 2
+  },
+  {
+    "text": "A star in the middle captures everything between the first and last items into a list.",
+    "until_line": 2
+  },
+  {
+    "text": "So first grabs one, last grabs five, and middle scoops up everything in between.",
+    "until_line": 3
+  },
+  {
+    "text": "[chuckle] Unpacking also gives you the famous one-line swap — no temporary variable needed.",
+    "until_line": 7
+  },
+  {
+    "text": "Python evaluates the right side first, then assigns, so a and b trade places instantly.",
+    "until_line": 8
+  },
+  {
+    "text": "[sniff] The double-star unpacks dictionaries, letting you merge several into one new dictionary.",
+    "until_line": 13
+  },
+  {
+    "text": "Later keys win over earlier ones, and you can add fresh keys right in the same expression.",
+    "until_line": 14
+  },
+  {
+    "text": "[sigh] A single star does the same for lists, splicing multiple sequences into one flat list.",
+    "until_line": 17
+  },
+  {
+    "text": "[groan] Star and double-star unpacking make merging, splitting, and rearranging data wonderfully concise.",
+    "until_line": 17
+  },
+  {
+    "text": "In the next one we take on advanced f-strings. Follow so you don't miss it.",
+    "until_line": 17
+  }
+]

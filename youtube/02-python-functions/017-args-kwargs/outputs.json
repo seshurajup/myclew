@@ -1,0 +1,26 @@
+[
+  {
+    "after_line": 9,
+    "text": ">>> 15\\n>>> 30",
+    "caption": "*args collects extra positionals"
+  },
+  {
+    "after_line": 11,
+    "text": ">>> name: Alice\\n>>> age: 25\\n>>> city: NYC",
+    "caption": "**kwargs collects keywords"
+  },
+  {
+    "after_line": 17,
+    "text": ">>> Exam -> 240 {'term': 'Fall', 'year': 2026}",
+    "caption": "combine all three"
+  },
+  {
+    "after_line": 21,
+    "text": ">>> 6",
+    "caption": "*nums unpacks a list into args"
+  },
+  {
+    "after_line": 21,
+    "image": "artifacts/terminal.png"
+  }
+]

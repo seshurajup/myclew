@@ -1,0 +1,12 @@
+@ id: rq25
+@ order: 2340
+@ title: P Implementation Details
+@ subtitle: RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory §P
+@ source: docs/papers/ratequant/ratequant.md
+
+--- note
+## P Implementation Details
+**Paper:** RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory · §P · pages 20–20 · equations (none) · 0 figures.
+
+> TODO(author): the *why* of §P in 3–5 lines.
+

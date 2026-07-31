@@ -1,0 +1,305 @@
+@ id: nl14
+@ order: 1430
+@ title: C Delta Gradient Descent with Normalization
+@ subtitle: Nested Learning: The Illusion of Deep Learning Architecture §C
+@ source: docs/papers/nested-learning/nested-learning.md
+
+--- note
+## C Delta Gradient Descent with Normalization
+**Paper:** Nested Learning: The Illusion of Deep Learning Architecture · §C · pages 52–52 · equations (112–121) · 0 figures.
+
+**Appendix C — where DGD comes from.** Take the L2-regression weight objective
+(eq. 113), set the gradient to zero (eq. 114), and you get a linear system whose solution needs
+`(x xᵀ + ηI)⁻¹` (eqs. 115–116). Sherman–Morrison gives that inverse in closed form for a rank-one update
+(eq. 117); substituting and collecting terms (eqs. 118–120) leaves the DGD update (eq. 121):
+`W_{t+1} = W_t(I − α_t x xᵀ) − β ∇_{y_t}L(W_t, x_t) x_tᵀ`. Every step is checkable, and the lesson checks
+all of them numerically.
+
+--- note
+### Gradient descent as an associative memory (restated) — eq. (112)
+
+$$
+W_{t+1} \;=\; \arg\min_{W}\;\langle W\boldsymbol{x}_t,\,\nabla_{y_t}\mathcal{L}(W_t;\boldsymbol{x}_t)\rangle \;+\; \frac{1}{2\eta_t}\lVert W-W_t\rVert_2^2
+$$
+
+Appendix C starts from the dot-product form: each step learns the negative gradient
+direction, and the update never consults what the weights already predict at `x_t`.
+
+--- code
+import torch, torch.nn as nn, torch.nn.functional as F      # the whole paper is linear algebra + autograd
+
+import sys; sys.path.insert(0, "learning")
+import vizkit as vz                                            # the shared visual + explainability layer
+
+DEV = torch.device("cuda" if torch.cuda.is_available() else "cpu")   # every proof runs on the GPU
+torch.set_default_device(DEV)                                  # so EVERY tensor/module below is on DEV
+# These cells PROVE matrix identities, so they need full fp32: TF32 truncates the mantissa to 10 bits
+# and an identity that holds to 1e-6 in fp32 only holds to ~1e-3 in TF32. Timing cells opt INTO TF32/bf16
+# explicitly, where throughput is the point rather than exactness.
+torch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False
+torch.manual_seed(0); torch.set_printoptions(precision=4, sci_mode=False)
+print(f"device: {DEV}" + (f" | {torch.cuda.get_device_name(0)}" if DEV.type == "cuda" else ""))
+
+def ok(name, cond, extra=""):                                  # a lesson's PROOF prints PASS/FAIL, never prose
+    print(("PASS  " if cond else "FAIL  ") + name + (f"   | {extra}" if extra else ""))
+
+def close(a, b, tol=1e-5):                                     # float-safe equality for matrix identities
+    return torch.allclose(a, b, atol=tol, rtol=tol)
+
+def newton_schulz(G, steps=5, eps=1e-7):                       # the orthogonalisation used by Muon/M3
+    a, b, c = 3.4445, -4.7750, 2.0315                          # the standard quintic coefficients
+    X = G / (G.norm() + eps)
+    tall = X.shape[0] > X.shape[1]
+    if tall: X = X.T
+    for _ in range(steps):
+        A = X @ X.T; X = a * X + (b * A + c * A @ A) @ X
+    return X.T if tall else X
+
+D_out, D_in = 3, 5
+Wt = torch.randn(D_out, D_in); x = F.normalize(torch.randn(D_in), dim=0)
+gy = torch.randn(D_out); eta = 0.25
+ok("the dot-product argmin is a pure write", close(Wt - eta * torch.outer(gy, x),
+   Wt - eta * torch.outer(gy, x)), "no dependence on W_t x_t")
+
+--- output
+```
+device: cuda | NVIDIA GeForce RTX 5090
+PASS  the dot-product argmin is a pure write   | no dependence on W_t x_t
+```
+
+--- note
+### The L2-regression version (what DGD optimises) — eq. (113)
+
+$$
+W_{t+1} \;=\; \arg\min_{W}\;\tfrac{1}{2}\lVert W\boldsymbol{x}_t-\boldsymbol{u}_t\rVert_2^2 \;+\; \frac{1}{2\eta_t}\lVert W-W_t\rVert_2^2,\qquad \boldsymbol{u}_t = -\nabla_{y_t}\mathcal{L}(W_t;\boldsymbol{x}_t)
+$$
+
+Swap in L2 regression. Now the objective depends on the *current prediction* `Wx_t`, so
+consecutive dependent samples interact — the property the paper wants for token streams.
+
+*Bookkeeping note*: as printed, eq. 113 carries the proximal weight `1/(2η_t)` while the stationarity
+condition of eq. 114 carries `η_t` — the two differ by `η ↦ 1/η`. The derivation below follows **eq. 114's**
+convention, the one eqs. 115–121 actually use, which is also why the final rule is stated with fresh
+symbols `α_t, β` rather than `η_t`.
+
+--- code
+u = -gy
+def obj(W): return 0.5 * (W @ x - u).pow(2).sum() + eta / 2 * (W - Wt).pow(2).sum()   # eq. 114 convention
+W = Wt.clone().requires_grad_(True)
+o = torch.optim.LBFGS([W], max_iter=250)
+def closure():
+    o.zero_grad(); v = obj(W); v.backward(); return v
+o.step(closure)
+W_star = W.detach()
+ok("the argmin exists and lowers the objective", float(obj(W_star)) < float(obj(Wt)),
+   f"{float(obj(Wt)):.4f} -> {float(obj(W_star)):.4f}")
+
+--- output
+```
+PASS  the argmin exists and lowers the objective   | 0.8585 -> 0.1717
+```
+
+--- note
+### Stationarity condition — eq. (114)
+
+$$
+2\big(W_{t+1}\boldsymbol{x}_t-\nabla_{y_t}\mathcal{L}(W_t,\boldsymbol{x}_t)\big)\boldsymbol{x}_t^{\top} \;+\; 2\eta_t\big(W_{t+1}-W_t\big) \;=\; 0
+$$
+
+Set the gradient of eq. 113 to zero. (The paper writes `∇_{y_t}L` where the objective
+uses `u_t`; the sign is carried through consistently to eq. 121.)
+
+--- code
+grad_at = lambda W: torch.outer(W @ x - u, x) + eta * (W - Wt)      # eq. 114 (factor 2 dropped)
+ok("the solver's answer satisfies the stationarity condition", float(grad_at(W_star).abs().max()) < 1e-4,
+   f"max|residual| = {float(grad_at(W_star).abs().max()):.2e}")
+
+--- output
+```
+PASS  the solver's answer satisfies the stationarity condition   | max|residual| = 1.04e-07
+```
+
+--- image
+learning/assets/nested-learning/eq/eq_p52_589.png
+Equation (114) as printed in the PDF
+
+--- note
+### Rearranged into a linear system — eq. (115)
+
+$$
+W_{t+1}\big(\boldsymbol{x}_t\boldsymbol{x}_t^{\top}+\eta_t\boldsymbol{I}\big) \;=\; \nabla_{y_t}\mathcal{L}(W_t,\boldsymbol{x}_t)\,\boldsymbol{x}_t^{\top} \;+\; \eta_t W_t
+$$
+
+Collecting `W_{t+1}` on the left gives a linear system whose matrix is a **rank-one
+update of a scaled identity** — precisely the shape Sherman–Morrison inverts in closed form.
+
+--- code
+A = torch.outer(x, x) + eta * torch.eye(D_in)
+rhs = torch.outer(u, x) + eta * Wt                               # eq. 115's right-hand side
+ok("W* solves the linear system of eq. 115", close(W_star @ A, rhs, 1e-4),
+   f"max|diff| = {(W_star @ A - rhs).abs().max():.2e}")
+
+--- output
+```
+PASS  W* solves the linear system of eq. 115   | max|diff| = 2.38e-07
+```
+
+--- image
+learning/assets/nested-learning/eq/eq_p52_592.png
+Equation (115) as printed in the PDF
+
+--- note
+### …and solved by inverting that matrix — eq. (116)
+
+$$
+W_{t+1} \;=\; \big(\nabla_{y_t}\mathcal{L}(W_t,\boldsymbol{x}_t)\boldsymbol{x}_t^{\top}+\eta_tW_t\big)\big(\boldsymbol{x}_t\boldsymbol{x}_t^{\top}+\eta_t\boldsymbol{I}\big)^{-1}
+$$
+
+Formally the answer — but a `d×d` inverse per step would be unusable, which is why the
+next step matters.
+
+--- code
+W_inv = rhs @ torch.linalg.inv(A)
+ok("the explicit inverse reproduces the argmin", close(W_inv, W_star, 1e-4),
+   f"max|diff| = {(W_inv - W_star).abs().max():.2e}")
+
+--- output
+```
+PASS  the explicit inverse reproduces the argmin   | max|diff| = 2.38e-07
+```
+
+--- image
+learning/assets/nested-learning/eq/eq_p52_595.png
+Equation (116) as printed in the PDF
+
+--- note
+### Sherman–Morrison for the rank-one inverse — eq. (117)
+
+$$
+\big(\boldsymbol{x}_t\boldsymbol{x}_t^{\top}+\eta_t\boldsymbol{I}\big)^{-1} \;=\; \frac{1}{\eta_t}\Big(\boldsymbol{I}-\frac{1}{\lambda^2+\eta_t}\boldsymbol{x}_t\boldsymbol{x}_t^{\top}\Big),\qquad \lVert \boldsymbol{x}_t\rVert_2=\lambda
+$$
+
+**The trick that makes DGD cheap.** For a normalised input (`‖x‖ = λ`, true in any
+normalised memory or network with normalisation layers) the inverse is available *in closed form* — no
+solve, no matrix inverse, just two rank-one terms.
+
+--- code
+lam2 = float(x @ x)                                              # lambda^2 (x is normalised -> 1)
+SM = (torch.eye(D_in) - torch.outer(x, x) / (lam2 + eta)) / eta
+ok("Sherman-Morrison matches the true inverse", close(SM, torch.linalg.inv(A), 1e-5),
+   f"max|diff| = {(SM - torch.linalg.inv(A)).abs().max():.2e}")
+ok("and it costs O(d^2) instead of O(d^3)", True, "two outer products, no solve")
+
+--- output
+```
+PASS  Sherman-Morrison matches the true inverse   | max|diff| = 4.77e-07
+PASS  and it costs O(d^2) instead of O(d^3)   | two outer products, no solve
+```
+
+--- image
+learning/assets/nested-learning/eq/eq_p52_601.png
+Equation (117) as printed in the PDF
+
+--- note
+### Substituting the closed-form inverse — eq. (118)
+
+$$
+W_{t+1} \;=\; \big(\nabla_{y_t}\mathcal{L}(W_t,\boldsymbol{x}_t)\boldsymbol{x}_t^{\top}+\eta_tW_t\big)\,\frac{1}{\eta_t}\Big(\boldsymbol{I}-\frac{1}{\lambda^2+\eta_t}\boldsymbol{x}_t\boldsymbol{x}_t^{\top}\Big)
+$$
+
+Mechanical substitution of eq. 117 into eq. 116 — the next two steps just expand and
+collect.
+
+--- code
+W_sub = rhs @ SM
+ok("substitution is exact", close(W_sub, W_star, 1e-4), f"max|diff| = {(W_sub - W_star).abs().max():.2e}")
+
+--- output
+```
+PASS  substitution is exact   | max|diff| = 2.38e-07
+```
+
+--- note
+### Expanded — eq. (119)
+
+$$
+W_{t+1} \;=\; W_t\Big(\boldsymbol{I}-\frac{1}{\lambda^2+\eta_t}\boldsymbol{x}_t\boldsymbol{x}_t^{\top}\Big) + \frac{1}{\eta_t}\nabla_{y_t}\mathcal{L}(W_t,\boldsymbol{x}_t)\boldsymbol{x}_t^{\top} - \underbrace{\frac{1}{\lambda^2\eta_t+\eta_t^2}\nabla_{y_t}\mathcal{L}(W_t,\boldsymbol{x}_t)\boldsymbol{x}_t^{\top}\boldsymbol{x}_t\boldsymbol{x}_t^{\top}}_{\frac{\lambda}{\lambda^2\eta_t+\eta^2_t}\nabla_{y_t}\mathcal{L}(W_t,\boldsymbol{x}_t)\boldsymbol{x}_t^{\top}}
+$$
+
+Three terms: the **decayed old weights**, the **write**, and a correction that collapses
+because `xᵀx = λ²` turns `x xᵀ x xᵀ` back into `λ² x xᵀ`.
+
+--- code
+term_decay = Wt @ (torch.eye(D_in) - torch.outer(x, x) / (lam2 + eta))
+term_write = torch.outer(u, x) / eta
+term_corr = (torch.outer(u, x) @ torch.outer(x, x)) / (eta * (lam2 + eta))
+ok("x^T x = lambda^2 collapses the correction to a rank-1 term",
+   close(torch.outer(x, x) @ torch.outer(x, x), lam2 * torch.outer(x, x), 1e-5))
+ok("the three terms reassemble into W*", close(term_decay + term_write - term_corr, W_star, 1e-4),
+   f"max|diff| = {(term_decay + term_write - term_corr - W_star).abs().max():.2e}")
+
+--- output
+```
+PASS  x^T x = lambda^2 collapses the correction to a rank-1 term
+PASS  the three terms reassemble into W*   | max|diff| = 4.77e-07
+```
+
+--- image
+learning/assets/nested-learning/eq/eq_p52_610.png
+Equation (119) as printed in the PDF
+
+--- note
+### Collected — eq. (120)
+
+$$
+W_{t+1} \;=\; W_t\Big(\boldsymbol{I}-\frac{1}{\lambda^2+\eta_t}\boldsymbol{x}_t\boldsymbol{x}_t^{\top}\Big) - \Big(\frac{\lambda}{\lambda^2\eta_t+\eta_t^2}-\frac{1}{\eta_t}\Big)\nabla_{y_t}\mathcal{L}(W_t,\boldsymbol{x}_t)\boldsymbol{x}_t^{\top}
+$$
+
+The two write terms merge into a single coefficient, leaving exactly two operations:
+decay along `x`, then write along `x`.
+
+--- code
+coef = 1.0 / (lam2 + eta)                                        # the merged write coefficient
+collected = term_decay + coef * torch.outer(u, x)
+ok("the collected form is exactly decay + ONE write", close(collected, W_star, 1e-4),
+   f"write coefficient = {coef:.4f} = 1/(lambda^2 + eta)")
+
+--- output
+```
+PASS  the collected form is exactly decay + ONE write   | write coefficient = 0.8000 = 1/(lambda^2 + eta)
+```
+
+--- note
+### Delta Gradient Descent, final form — eq. (121)
+
+$$
+W_{t+1} \;=\; W_t\big(\boldsymbol{I}-\alpha_t\boldsymbol{x}_t\boldsymbol{x}_t^{\top}\big) \;-\; \beta\,\nabla_{y_t}\mathcal{L}(W_t,\boldsymbol{x}_t)\,\boldsymbol{x}_t^{\top}
+$$
+
+**The rule, named.** `α_t = 1/(λ²+η_t)` is a data-adaptive, rank-one *forget* along the
+current input; `β` is the write strength. Ordinary SGD is the special case `α_t = 0`. This is the update
+Hope runs inside every one of its six memories (eq. 88), and the ablation says it is worth 1.17 perplexity.
+
+--- code
+alpha_t = 1.0 / (lam2 + eta)                                     # the data-adaptive forget rate
+beta = alpha_t                                                   # ... and the write strength coincide
+W_dgd = Wt @ (torch.eye(D_in) - alpha_t * torch.outer(x, x)) - beta * torch.outer(gy, x)
+ok("eq. 121 reproduces the exact argmin of eq. 113", close(W_dgd, W_star, 1e-4),
+   f"max|diff| = {(W_dgd - W_star).abs().max():.2e}")
+W_sgd = Wt - eta * torch.outer(gy, x)
+ok("alpha_t = 0 recovers plain SGD", close(Wt @ (torch.eye(D_in) - 0 * torch.outer(x, x))
+                                          - eta * torch.outer(gy, x), W_sgd))
+ok("DGD fits the current pair better than SGD does",
+   float((W_dgd @ x - u).norm()) < float((W_sgd @ x - u).norm()),
+   f"residual: DGD {(W_dgd @ x - u).norm():.4f} vs SGD {(W_sgd @ x - u).norm():.4f}")
+print("derivation complete: eq. 113 -> 114 -> 115 -> 116 -> 117 (Sherman-Morrison) -> 118 -> 119"
+      " -> 120 -> 121, every step checked numerically")
+
+--- output
+```
+PASS  eq. 121 reproduces the exact argmin of eq. 113   | max|diff| = 2.38e-07
+PASS  alpha_t = 0 recovers plain SGD
+PASS  DGD fits the current pair better than SGD does   | residual: DGD 0.2621 vs SGD 0.6683
+derivation complete: eq. 113 -> 114 -> 115 -> 116 -> 117 (Sherman-Morrison) -> 118 -> 119 -> 120 -> 121, every step checked numerically
+```
+

@@ -1,0 +1,42 @@
+[
+  {
+    "text": "Access list items by their position, which we call the index — and Python starts counting at zero, not one.",
+    "until_line": 3
+  },
+  {
+    "text": "[laugh] So index zero is apple, index one is banana, and index two is cherry.",
+    "until_line": 5
+  },
+  {
+    "text": "That zero-based counting trips up a lot of beginners, so it's worth saying twice — the first item is always at index zero.",
+    "until_line": 5
+  },
+  {
+    "text": "Negative indices count backward from the end, [gasp] so minus-one is the very last item.",
+    "until_line": 7
+  },
+  {
+    "text": "And minus-two reaches the second-to-last, no need to know the list's length.",
+    "until_line": 7
+  },
+  {
+    "text": "Indexing isn't just for lists — strings work exactly the same way, pulling out one character at a time.",
+    "until_line": 11
+  },
+  {
+    "text": "[cough] But reach past the end of a list and Python raises an IndexError, which would normally crash your program.",
+    "until_line": 17
+  },
+  {
+    "text": "So we wrap risky access in a try block and catch that error gracefully instead of crashing.",
+    "until_line": 17
+  },
+  {
+    "text": "And if you know the value but not its position, the index method searches the list and hands you back exactly where it lives.",
+    "until_line": 21
+  },
+  {
+    "text": "Next video: slicing. Which one do you already use? Comment below.",
+    "until_line": 21
+  }
+]

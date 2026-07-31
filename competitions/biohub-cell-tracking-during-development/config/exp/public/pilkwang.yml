@@ -1,0 +1,10 @@
+# PUBLIC notebook config — **pilkwang** / data-model EDA-baseline
+name: pub_pilkwang
+source: **pilkwang** / data-model EDA-baseline
+family: rule-based-DoG
+base: dog_hungarian
+lb: None
+golden_cv: None
+mined_params: ""
+run: rule-based-dog
+score: golden-12 (adj_edge_J + 0.1*div_J), by_embryo

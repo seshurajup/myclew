@@ -1,0 +1,16 @@
+[
+  {
+    "after_line": 16,
+    "text": ">>> swimming\\n>>> flying\\n>>> quack",
+    "caption": "abilities from both parents"
+  },
+  {
+    "after_line": 19,
+    "text": ">>> ['Duck', 'Swimmer', 'Flyer', 'object']",
+    "caption": "the MRO lookup path"
+  },
+  {
+    "after_line": 19,
+    "image": "artifacts/terminal.png"
+  }
+]

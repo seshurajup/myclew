@@ -1,0 +1,13 @@
+{
+  "language": "python",
+  "title": "for_loops.py",
+  "hook": "Stop repeating yourself, use a for loop",
+  "playlist": "Learn Python",
+  "target_seconds": 90,
+  "tts_engine": "chatterbox",
+  "music_prompt": "repetitive, flowing, rhythmic lo-fi",
+  "code_path": "code.py",
+  "transcript_path": "transcript.json",
+  "outputs_path": "outputs.json",
+  "accent": "ocean"
+}

@@ -1,0 +1,14 @@
+{
+  "language": "python",
+  "title": "math_random.py",
+  "hook": "Roll dice and shuffle, nothing to install",
+  "playlist": "Learn Python",
+  "target_seconds": 90,
+  "max_seconds": 120,
+  "tts_engine": "chatterbox",
+  "music_prompt": "calculating, chance, versatile",
+  "code_path": "code.py",
+  "transcript_path": "transcript.json",
+  "outputs_path": "outputs.json",
+  "accent": "slate"
+}

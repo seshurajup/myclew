@@ -1,0 +1,14 @@
+{
+  "language": "python",
+  "title": "polymorphism.py",
+  "hook": "Swap the object, keep the interface",
+  "playlist": "Learn Python",
+  "target_seconds": 90,
+  "max_seconds": 120,
+  "tts_engine": "chatterbox",
+  "music_prompt": "versatile, unified, flowing",
+  "code_path": "code.py",
+  "transcript_path": "transcript.json",
+  "outputs_path": "outputs.json",
+  "accent": "amber"
+}

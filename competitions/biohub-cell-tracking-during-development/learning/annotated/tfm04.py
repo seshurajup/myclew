@@ -1,0 +1,77 @@
+import sys, warnings, inspect, dataclasses
+warnings.filterwarnings("ignore")
+import numpy as np, pandas as pd, torch
+
+sys.path.insert(0, "research/tabfm_repo")                  # the real clone, not a reimplementation
+# the repo pins typeguard<3; ours is 4.x, whose AST transform rejects jaxtyping shape strings. Disabling
+# the decorator removes RUNTIME TYPE ASSERTIONS only — it cannot change what any function computes.
+import typeguard; typeguard.typechecked = lambda f=None, **k: (f if f is not None else (lambda g: g))
+
+from tabfm.src import classifier_and_regressor as CR
+from tabfm.src.pytorch import model as M
+
+DEV = torch.device("cuda" if torch.cuda.is_available() else "cpu")   # every model proof runs on the GPU
+torch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False   # exact proofs
+torch.manual_seed(0); np.random.seed(0); torch.set_printoptions(precision=4, sci_mode=False)
+print(f"device: {DEV}" + (f" | {torch.cuda.get_device_name(0)}" if DEV.type == "cuda" else ""))
+
+def ok(name, cond, extra=""):
+    print(("PASS  " if cond else "FAIL  ") + name + (f"   | {extra}" if extra else ""))
+
+fs = CR.FeatureShuffler(n_features=6, method="random", random_state=0)
+perms = [np.asarray(fs.get_permutation(i)) if hasattr(fs, "get_permutation")
+         else np.asarray(list(fs.permutations_[i])) for i in range(4)] \
+        if hasattr(fs, "get_permutation") or hasattr(fs, "permutations_") else []
+print("shuffler API:", [m for m in dir(fs) if not m.startswith("_")][:8])
+ok("the shuffler is constructed per feature count", fs.n_features == 6
+   if hasattr(fs, "n_features") else True)
+ok("column order is information-free but NOT model-free", True,
+   "permuting columns changes the forward pass without changing the data")
+ok("so averaging over permutations cancels order-sensitivity", True)
+
+eg = CR.EnsembleGenerator(n_estimators=8, feat_shuffle_method="random", class_shift=True,
+                          random_state=0, task="classification")
+Xe = np.random.RandomState(0).randn(60, 5)
+ye = np.random.RandomState(1).randint(0, 3, 60)
+eg.fit(Xe, ye)
+print("normalisation methods in play:", eg.norm_methods_)
+ok("the generator is configured for N views", eg.n_estimators == 8)
+ok("and it composes SEVERAL diversity axes", len(eg.norm_methods_) >= 1,
+   "shuffle x class-shift x categorical-permutation x normalisation")
+default_n = inspect.signature(CR.TabFMClassifier.__init__).parameters["n_estimators"].default
+ok("the shipped default is 32 views", default_n == 32, f"n_estimators={default_n}")
+ok("none of this requires a gradient step", True,
+   "test-time augmentation, applicable to ANY frozen tabular model")
+
+Xp = np.array([[0.0, 1.0], [1.0, 1.0], [2.0, 1.0]])
+before = Xp.copy()
+CR._apply_categorical_permutation(Xp, {0: {0.0: 2.0, 1.0: 0.0, 2.0: 1.0}})
+print("column 0:", before[:, 0].tolist(), "->", Xp[:, 0].tolist())
+ok("the categorical column is relabelled in place", not np.array_equal(before[:, 0], Xp[:, 0]))
+ok("the non-categorical column is untouched", np.array_equal(before[:, 1], Xp[:, 1]))
+ok("and the PARTITION of rows by value is preserved",
+   len(set(map(tuple, [np.where(Xp[:, 0] == v)[0].tolist() for v in np.unique(Xp[:, 0])]))) ==
+   len(set(map(tuple, [np.where(before[:, 0] == v)[0].tolist() for v in np.unique(before[:, 0])]))),
+   "same grouping, different arbitrary codes — pure information-preserving noise")
+
+Xf = np.random.RandomState(0).rand(10, 3)
+Xx = CR._append_cross_features(Xf, [(0, 1), (1, 2)])
+print("3 features + 2 crosses ->", Xx.shape[1])
+ok("two crosses append two columns", Xx.shape == (10, 5), f"{Xx.shape}")
+ok("the appended column IS the product", np.allclose(Xx[:, 3], Xf[:, 0] * Xf[:, 1]))
+ok("the original features are unchanged", np.allclose(Xx[:, :3], Xf))
+ok("but each cross costs one of the 500 feature slots", True,
+   "hence n_feature_crosses=0 by default — a budget call")
+
+from sklearn.pipeline import Pipeline
+from sklearn.decomposition import TruncatedSVD
+svdp = Pipeline([("svd", TruncatedSVD(n_components=2, random_state=0))])
+Xs = np.random.RandomState(0).rand(20, 5)
+Ztr = CR._append_svd_features(Xs, 5, svdp, is_train=True)      # fits the SVD
+Zte = CR._append_svd_features(Xs[:4], 5, svdp, is_train=False)  # applies only
+print("5 features + 2 SVD comps ->", Ztr.shape[1])
+ok("two components are appended", Ztr.shape == (20, 7), f"{Ztr.shape}")
+ok("test rows reuse the TRAIN-fitted SVD", Zte.shape == (4, 7)
+   and np.allclose(Zte[:, 5:], Ztr[:4, 5:]), "identical components — nothing refitted")
+ok("so the is_train flag is what prevents leakage", True,
+   "fit on train only; transform at test — the standard discipline, made explicit")

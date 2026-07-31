@@ -1,0 +1,77 @@
+@ id: pt01
+@ order: 10
+@ title: nn.Module & the conv block
+@ subtitle: The exact _conv_block from temporal_unet.py — run on a real frame
+@ source: research/pilkwang_support_pack/repo/src/biohub_tracking/models/temporal_unet.py
+
+--- note
+## The conv block
+The detector turns a 3-D microscope volume into a per-voxel "is a nucleus here?" score, using a
+stack of **conv blocks**. Master this one block and the U-Net is just this repeated. Below, the
+*exact* `_conv_block` from `temporal_unet.py` runs on a real frame of `6bba_062c8d37` — every
+shape is the real captured output.
+
+--- note
+### Load a real frame
+Read one timepoint, downsample `(1,4,4)` (→ isotropic 1.625 µm, like the detector), make it a
+`(B, C, Z, Y, X)` tensor.
+
+--- code
+import torch, numpy as np, zarr                                     # tensors, arrays, on-disk reader
+vol = np.asarray(zarr.open(f"{TRAIN}/6bba_062c8d37.zarr/0")[0]).astype(np.float32)  # real frame (Z,Y,X)
+vol = vol[:, ::4, ::4]                                                # downsample Y,X by 4 -> isotropic grid
+x = torch.from_numpy(vol)[None, None]                                # add batch+channel -> (B,C,Z,Y,X)
+x                                                                    # the real input tensor
+
+--- output
+```
+torch.Size((1, 1, 64, 64, 64))  dtype=torch.float32
+```
+
+--- note
+### The real conv block — Conv → BN → ReLU, twice
+**[PyTorch]** 32 learned 3×3×3 filters turn 1 channel into 32 feature channels.
+**[Domain]** *3-D* because a nucleus spans several z-planes. **[Data]** `padding=1` keeps the
+volume the same size (a score at every voxel). **[Craft]** `bias=False` — a BatchNorm follows and
+would cancel it. Run it and read the real output shape.
+
+--- code
+import torch.nn as nn                                        # neural-net layers
+def conv_block(in_channels, out_channels):                     # the exact _conv_block from temporal_unet.py
+    return nn.Sequential(                                       # chain the 6 layers
+        nn.Conv3d(in_channels, out_channels, 3, padding=1, bias=False),  # 3x3x3 conv, keep size, no bias
+        nn.BatchNorm3d(out_channels),                          # normalise each channel across the batch
+        nn.ReLU(inplace=True),                                 # nonlinearity max(x,0), reuse memory
+        nn.Conv3d(out_channels, out_channels, 3, padding=1, bias=False),  # second conv -> 5x5x5 view
+        nn.BatchNorm3d(out_channels),                          # normalise again
+        nn.ReLU(inplace=True),                                 # nonlinearity again
+    )
+block = conv_block(1, 32).eval()                               # build: 1 -> 32 channels, eval mode
+y = block(x)                                                   # run the real frame through it
+y                                                              # the real output tensor (channels 1->32, space kept)
+
+--- output
+```
+torch.Size((1, 32, 64, 64, 64))  dtype=torch.float32
+```
+
+--- shape
+in `(B,1,Z,Y,X)`<br>→ out `(B,`**`32`**`,Z,Y,X)`<br>spatial kept, channels 1→32
+
+--- note
+### How many parameters?
+The block's learnable weights (filter weights + BN scale/shift) — what the optimiser trains.
+
+--- code
+sum(p.numel() for p in block.parameters())   # total trainable params in this one block
+
+--- output
+```
+28640
+```
+
+--- note
+**[Recap]** `nn.Sequential` chains layers · `Conv3d(k=3,pad=1,bias=False)` learns
+3-D filters and keeps size · `BatchNorm3d` stabilises · `ReLU` adds nonlinearity · twice → a
+5×5×5 receptive field (covers a whole nucleus). **Next → pt02: the U-Net shape.**
+

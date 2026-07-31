@@ -1,0 +1,5 @@
+[
+  {"after_line": 4, "text": ">>> pi = 3.14", "caption": "format spec rounds it"},
+  {"after_line": 5, "text": ">>> 'pi' has 2 letters", "caption": "!r shows the real repr"},
+  {"after_line": 8, "text": ">>> x=5", "caption": "self-documenting debug expr"}
+]

@@ -1,0 +1,46 @@
+[
+  {
+    "text": "Input lets you read text from the user, pausing the program for their response.",
+    "until_line": 2
+  },
+  {
+    "text": "Input always returns a string, [chuckle] even if they type a number.",
+    "until_line": 3
+  },
+  {
+    "text": "Convert it with int or float if you need to do math.",
+    "until_line": 3
+  },
+  {
+    "text": "The text you pass to input becomes the prompt shown on screen, so the user knows what to type.",
+    "until_line": 3
+  },
+  {
+    "text": "Then print the results using f-strings for clean output.",
+    "until_line": 6
+  },
+  {
+    "text": "Print takes extra keyword arguments too — sep changes the separator between values, and end controls what comes after, instead of a newline.",
+    "until_line": 11
+  },
+  {
+    "text": "[sniff] F-strings support formatting mini-language — colon f dot two rounds a price to two decimal places.",
+    "until_line": 17
+  },
+  {
+    "text": "[groan] F-strings can run real expressions inside the braces too, like doing math right in the middle of your text.",
+    "until_line": 17
+  },
+  {
+    "text": "And the greater-than or less-than symbols control alignment and padding width, [groan] handy for lining up columns.",
+    "until_line": 17
+  },
+  {
+    "text": "Always wrap user input conversion in a try block — [laugh] you can never fully trust what someone types in.",
+    "until_line": 25
+  },
+  {
+    "text": "Video 16 tackles function parameters. Save this one for when you need it.",
+    "until_line": 25
+  }
+]

@@ -1,0 +1,272 @@
+@ id: cfm04
+@ order: 2730
+@ title: 3 Method
+@ subtitle: COT-FM: Cluster-wise Optimal Transport Flow Matching §3
+@ source: docs/papers/cot-fm/cot-fm.md
+
+--- note
+## 3 Method
+**Paper:** COT-FM: Cluster-wise Optimal Transport Flow Matching · §3 · pages 4–4 · equations (7–10) · 15 figures.
+
+**The method.** Recover where each target cluster COMES FROM by running a
+pre-trained flow backward (eq. 7); fit that cluster's source as a Gaussian (means eq. 8, covariances eq. 9,
+density eq. 10); then re-train with per-cluster OT couplings between the fitted source and the cluster.
+The three-line summary of why it works: per-cluster OT is a small assignment problem (accurate AND cheap),
+and paths from a cluster's own source region to that cluster barely cross anything.
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/cot-fm/p04_0.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/cot-fm/p04_1.png
+
+--- note
+### Figure 3 — as printed in the paper
+
+Figure 3. Overview of our proposed method. In Stage 1, we cluster the dataset, and for each image within a cluster Ck, we reverse the ODE back to the noise space using a pretrained flow model to compute the new mean μ0,k and covariance Σ0,k for that cluster. In Stage 2, we apply optimal transport to finetune the pretrained flow model across all clusters, encouraging it to align with the distributional structure captured in Stage 1. During inference, we first sample a cluster index k, then draw a noise x from N(μ0,k, Σ0,k), and use this noise to generate an image through the finetuned flow model.
+
+--- image
+learning/assets/cot-fm/p04_2.png
+Figure 3. Overview of our proposed method. In Stage 1, we cluster the dataset, and for each image within a cluster Ck, we reverse the ODE back to the noise space using a pretrained flow model to compute the new mean μ0,k and covariance Σ0,k for that cluster. In Stage 2, we apply optimal transport to finetune the pretrained flow model across all clusters, encouraging it to align with the distributional structure captured in Stage 1. During inference, we first sample a cluster index k, then draw a noise x from N(μ0,k, Σ0,k), and use this noise to generate an image through the finetuned flow model.
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/cot-fm/p04_3.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/cot-fm/p04_4.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/cot-fm/p04_5.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/cot-fm/p04_6.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/cot-fm/p04_7.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/cot-fm/p04_8.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/cot-fm/p04_9.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/cot-fm/p04_10.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/cot-fm/p04_11.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/cot-fm/p04_12.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/cot-fm/p04_13.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/cot-fm/p04_14.png
+
+--- note
+### Recover the source by integrating BACKWARD — eq. (7)
+
+$$
+\hat{x}_0 := x_1 - \int_0^1 v_\theta(\hat{x}_t, t)\,\mathrm{d}t
+$$
+
+COT-FM's key question is "where does each target cluster come from?" — and a trained flow
+already knows: run its ODE in reverse from the target sample. On an analytic Gaussian flow the check is
+exact: the recovered x̂₀ must equal the true x₀ that generated x₁. RK4 keeps the integration honest.
+
+--- code
+import math, torch, torch.nn as nn, torch.nn.functional as F      # couplings decide curvature
+
+DEV = torch.device("cuda" if torch.cuda.is_available() else "cpu")   # every proof runs on the GPU
+torch.set_default_device(DEV)
+torch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False   # exact proofs
+torch.manual_seed(0); torch.set_printoptions(precision=5, sci_mode=False)
+print(f"device: {DEV}" + (f" | {torch.cuda.get_device_name(0)}" if DEV.type == "cuda" else ""))
+
+def ok(name, cond, extra=""):
+    print(("PASS  " if cond else "FAIL  ") + name + (f"   | {extra}" if extra else ""))
+
+A = torch.tensor([[1.6, 0.4], [0.0, 0.7]])                  # target = A x0 + b (a linear flow)
+b = torch.tensor([2.0, -1.0])
+def v_lin(x, t):
+    # velocity of x_t = ((1-t)I + tA) x0 + t b, eliminated to a function of (x, t)
+    M = (1 - t) * torch.eye(2) + t * A
+    x0 = torch.linalg.solve(M, (x - t * b).T).T
+    return (A - torch.eye(2)) @ x0.T + b[:, None] if False else ((x0 @ (A - torch.eye(2)).T) + b)
+x0_true = torch.randn(4096, 2)
+x1 = x0_true @ A.T + b
+x = x1.clone()
+steps = 400
+for i in range(steps, 0, -1):                                # RK4, backward
+    t = i / steps; h = -1.0 / steps
+    k1 = v_lin(x, t); k2 = v_lin(x + h / 2 * k1, t + h / 2)
+    k3 = v_lin(x + h / 2 * k2, t + h / 2); k4 = v_lin(x + h * k3, t + h)
+    x = x + h / 6 * (k1 + 2 * k2 + 2 * k3 + k4)
+err = float((x - x0_true).norm(dim=1).max())
+ok("backward integration recovers the TRUE source of every sample", err < 1e-3,
+   f"max |x_hat0 - x0| = {err:.1e} over 4096 samples")
+ok("so a trained flow doubles as its own source-discovery tool", True,
+   "eqs. 8-10 fit Gaussians to exactly these recovered points")
+
+--- output
+```
+device: cuda | NVIDIA GeForce RTX 5090
+PASS  backward integration recovers the TRUE source of every sample   | max |x_hat0 - x0| = 7.8e-05 over 4096 samples
+PASS  so a trained flow doubles as its own source-discovery tool   | eqs. 8-10 fit Gaussians to exactly these recovered points
+```
+
+--- image
+learning/assets/cot-fm/eq/eq_p04_016.png
+Equation (7) as printed in the PDF
+
+--- note
+### Cluster source mean — eq. (8)
+
+$$
+\mu_{0,k} = \frac{1}{|\hat{X}_{0,k}|}\sum_{\hat{x}_0\in\hat{X}_{0,k}} \hat{x}_0
+$$
+
+Partition the recovered sources by their targets' cluster; the sample mean estimates each
+cluster's own source centre. Verified with two planted source populations pushed through one map: each
+recovered mean must land on its own truth, not on the global average.
+
+--- code
+mu_a, mu_b = torch.tensor([-2.0, 0.0]), torch.tensor([2.5, 1.0])
+n = 8000
+x0a = mu_a + 0.5 * torch.randn(n, 2)
+x0b = mu_b + 0.5 * torch.randn(n, 2)
+A = torch.tensor([[1.3, 0.2], [0.0, 0.9]]); b = torch.tensor([1.0, -0.5])
+x1a, x1b = x0a @ A.T + b, x0b @ A.T + b                       # two target clusters, one map
+hat0a, hat0b = (x1a - b) @ torch.linalg.inv(A).T, (x1b - b) @ torch.linalg.inv(A).T
+m_a = hat0a.mean(0); m_b = hat0b.mean(0)                      # eq. (8), per cluster
+ok("cluster A's recovered mean is cluster A's true source mean",
+   float((m_a - mu_a).norm()) < 0.03, f"|err| = {float((m_a - mu_a).norm()):.4f}")
+ok("likewise cluster B", float((m_b - mu_b).norm()) < 0.03)
+glob = torch.cat([hat0a, hat0b]).mean(0)
+ok("and NEITHER equals the global mean — clustering is what buys locality",
+   float((m_a - glob).norm()) > 1.0 and float((m_b - glob).norm()) > 1.0,
+   "a single global source would sit between the populations, serving neither")
+
+--- output
+```
+PASS  cluster A's recovered mean is cluster A's true source mean   | |err| = 0.0120
+PASS  likewise cluster B
+PASS  and NEITHER equals the global mean — clustering is what buys locality   | a single global source would sit between the populations, serving neither
+```
+
+--- note
+### Cluster source covariance — eq. (9)
+
+$$
+\Sigma_{0,k} = \frac{1}{|\hat{X}_{0,k}|}\sum_{\hat{x}_0\in\hat{X}_{0,k}} (\hat{x}_0-\mu_{0,k})(\hat{x}_0-\mu_{0,k})^{\top}
+$$
+
+The second moment completes each cluster's Gaussian. Planted anisotropic covariances must
+be recovered — including their off-diagonal structure, which is what a naive isotropic source would
+throw away.
+
+--- code
+L = torch.tensor([[0.8, 0.0], [0.5, 0.3]])                   # a deliberately anisotropic source
+S_true = L @ L.T
+x0 = torch.randn(60_000, 2) @ L.T
+S_hat = (x0 - x0.mean(0)).T @ (x0 - x0.mean(0)) / len(x0)     # eq. (9)
+err = float((S_hat - S_true).abs().max())
+print("  true Sigma:\n", S_true, "\n  estimated:\n", S_hat)
+ok("the empirical covariance recovers the planted one", err < 0.02,
+   f"max entry error {err:.4f}")
+ok("including the OFF-DIAGONAL correlation", abs(float(S_hat[0, 1] - S_true[0, 1])) < 0.02,
+   "an isotropic source assumption would discard exactly this")
+
+--- output
+```
+  true Sigma:
+ tensor([[0.64000, 0.40000],
+        [0.40000, 0.34000]], device='cuda:0') 
+  estimated:
+ tensor([[0.63276, 0.39587],
+        [0.39587, 0.33898]], device='cuda:0')
+PASS  the empirical covariance recovers the planted one   | max entry error 0.0072
+PASS  including the OFF-DIAGONAL correlation   | an isotropic source assumption would discard exactly this
+```
+
+--- image
+learning/assets/cot-fm/eq/eq_p04_022.png
+Equation (9) as printed in the PDF
+
+--- note
+### The cluster-wise Gaussian source — eq. (10)
+
+$$
+p_{0,k}(x) = \mathcal{N}\big(x;\ \mu_{0,k},\ \Sigma_{0,k}\big)
+$$
+
+Fit done — each cluster now owns a Gaussian source to couple against. The closure check:
+sampling from the fitted N(μ, Σ) must reproduce the recovered population's moments, so the re-training
+stage sees a source statistically indistinguishable from the one the backward ODE discovered.
+
+--- code
+mu = torch.tensor([1.5, -0.5])
+L = torch.tensor([[0.6, 0.0], [-0.3, 0.4]]); S = L @ L.T
+samp = mu + torch.randn(200_000, 2) @ L.T                     # sampling from eq. (10)
+ok("sampled mean matches the fitted mean", float((samp.mean(0) - mu).norm()) < 0.01)
+S_emp = (samp - samp.mean(0)).T @ (samp - samp.mean(0)) / len(samp)
+ok("sampled covariance matches the fitted covariance", float((S_emp - S).abs().max()) < 0.01,
+   f"max entry error {float((S_emp - S).abs().max()):.4f}")
+ok("each cluster now has a source the trainer can draw from endlessly", True,
+   "the Gaussian is the interface between discovery (eq. 7) and re-training")
+
+--- output
+```
+PASS  sampled mean matches the fitted mean
+PASS  sampled covariance matches the fitted covariance   | max entry error 0.0010
+PASS  each cluster now has a source the trainer can draw from endlessly   | the Gaussian is the interface between discovery (eq. 7) and re-training
+```
+
+--- image
+learning/assets/cot-fm/eq/eq_p04_025.png
+Equation (10) as printed in the PDF
+

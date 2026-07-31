@@ -1,0 +1,1352 @@
+[
+  {
+    "n": null,
+    "page": 3,
+    "latex": "_{i} \\gets _{|\\mathcal{D}|}^{1}",
+    "raw": "i \u2190 1 |D|",
+    "image": "assets/eq/eq_p03_000.png",
+    "y0": 142.22377014160156,
+    "y1": 156.4651641845703
+  },
+  {
+    "n": null,
+    "page": 3,
+    "latex": "_{T}^{1}",
+    "raw": "1 T",
+    "image": "assets/eq/eq_p03_001.png",
+    "y0": 142.2237091064453,
+    "y1": 156.5555419921875
+  },
+  {
+    "n": null,
+    "page": 3,
+    "latex": "_{i} \\gets _{|\\mathcal{D}|}^{1}",
+    "raw": "i \u2190 1 |D|",
+    "image": "assets/eq/eq_p03_002.png",
+    "y0": 142.22364807128906,
+    "y1": 156.4651641845703
+  },
+  {
+    "n": null,
+    "page": 3,
+    "latex": "_{T}^{1}",
+    "raw": "1 T",
+    "image": "assets/eq/eq_p03_003.png",
+    "y0": 142.2237091064453,
+    "y1": 156.5555419921875
+  },
+  {
+    "n": null,
+    "page": 3,
+    "latex": "_{t} \\|\\nabla _{Ki,t}\\mathcal{L}\\|^{2};w^{V}",
+    "raw": "t \u2225\u2207Ki,tL\u22252; wV",
+    "image": "assets/eq/eq_p03_004.png",
+    "y0": 142.53065490722656,
+    "y1": 156.63235473632812
+  },
+  {
+    "n": null,
+    "page": 3,
+    "latex": "_{t} \\|\\nabla _{Vi,t}\\mathcal{L}\\|^{2}",
+    "raw": "t \u2225\u2207Vi,tL\u22252",
+    "image": "assets/eq/eq_p03_005.png",
+    "y0": 142.53065490722656,
+    "y1": 156.63235473632812
+  },
+  {
+    "n": null,
+    "page": 3,
+    "latex": "P",
+    "raw": "P",
+    "image": "assets/eq/eq_p03_006.png",
+    "y0": 143.5012969970703,
+    "y1": 153.46389770507812
+  },
+  {
+    "n": null,
+    "page": 3,
+    "latex": "P",
+    "raw": "P",
+    "image": "assets/eq/eq_p03_007.png",
+    "y0": 143.5012969970703,
+    "y1": 153.46389770507812
+  },
+  {
+    "n": null,
+    "page": 3,
+    "latex": "P",
+    "raw": "P",
+    "image": "assets/eq/eq_p03_008.png",
+    "y0": 143.5012969970703,
+    "y1": 153.46389770507812
+  },
+  {
+    "n": null,
+    "page": 3,
+    "latex": "P",
+    "raw": "P",
+    "image": "assets/eq/eq_p03_009.png",
+    "y0": 143.5012969970703,
+    "y1": 153.46389770507812
+  },
+  {
+    "n": null,
+    "page": 3,
+    "latex": "^{x\\in \\mathcal{D}}",
+    "raw": "x\u2208D",
+    "image": "assets/eq/eq_p03_010.png",
+    "y0": 149.04434204101562,
+    "y1": 156.1085205078125
+  },
+  {
+    "n": null,
+    "page": 3,
+    "latex": "^{x\\in \\mathcal{D}}",
+    "raw": "x\u2208D",
+    "image": "assets/eq/eq_p03_011.png",
+    "y0": 149.04434204101562,
+    "y1": 156.1085205078125
+  },
+  {
+    "n": null,
+    "page": 3,
+    "latex": "X^{N}",
+    "raw": "N X",
+    "image": "assets/eq/eq_p03_012.png",
+    "y0": 642.9497680664062,
+    "y1": 660.7279663085938
+  },
+  {
+    "n": null,
+    "page": 3,
+    "latex": "X^{N}",
+    "raw": "N X",
+    "image": "assets/eq/eq_p03_013.png",
+    "y0": 642.9497680664062,
+    "y1": 660.7279663085938
+  },
+  {
+    "n": null,
+    "page": 3,
+    "latex": "min\\mathcal{J} (b) \u225c _{b\\in R}^{N}",
+    "raw": "min b\u2208RN J (b) \u225c",
+    "image": "assets/eq/eq_p03_014.png",
+    "y0": 650.8904418945312,
+    "y1": 669.4335327148438
+  },
+  {
+    "n": null,
+    "page": 3,
+    "latex": "w_{i} \\cdot D(b_{i})s.t.",
+    "raw": "wi \u00b7 D(bi) s.t.",
+    "image": "assets/eq/eq_p03_015.png",
+    "y0": 652.9378051757812,
+    "y1": 664.3944091796875
+  },
+  {
+    "n": "1",
+    "page": 3,
+    "latex": "b_{i} = B,b_{min} \\le b_{i} \\le b_{max} \\tag{1}",
+    "raw": "bi = B, bmin \u2264bi \u2264bmax (1)",
+    "image": "assets/eq/eq_p03_016.png",
+    "y0": 652.9378051757812,
+    "y1": 664.5234985351562
+  },
+  {
+    "n": null,
+    "page": 3,
+    "latex": "^{i=1}",
+    "raw": "i=1",
+    "image": "assets/eq/eq_p03_017.png",
+    "y0": 667.1577758789062,
+    "y1": 674.131591796875
+  },
+  {
+    "n": null,
+    "page": 3,
+    "latex": "^{i=1}",
+    "raw": "i=1",
+    "image": "assets/eq/eq_p03_018.png",
+    "y0": 667.1577758789062,
+    "y1": 674.131591796875
+  },
+  {
+    "n": null,
+    "page": 3,
+    "latex": "ln w_{i} -ln w _{i} = \u0304b +",
+    "raw": "i =  \u0304b + ln wi \u2212ln w",
+    "image": "assets/eq/eq_p03_019.png",
+    "y0": 701.5548095703125,
+    "y1": 720.8494873046875
+  },
+  {
+    "n": null,
+    "page": 3,
+    "latex": "b^{\u2217}",
+    "raw": "b\u2217",
+    "image": "assets/eq/eq_p03_020.png",
+    "y0": 706.5563354492188,
+    "y1": 718.3865356445312
+  },
+  {
+    "n": null,
+    "page": 4,
+    "latex": "P",
+    "raw": "P",
+    "image": "assets/eq/eq_p04_021.png",
+    "y0": 73.86836242675781,
+    "y1": 83.83096313476562
+  },
+  {
+    "n": null,
+    "page": 4,
+    "latex": "_{j} ln w_{j}.",
+    "raw": "j ln wj.",
+    "image": "assets/eq/eq_p04_022.png",
+    "y0": 74.17698669433594,
+    "y1": 87.1275634765625
+  },
+  {
+    "n": null,
+    "page": 4,
+    "latex": "^{N}",
+    "raw": "N",
+    "image": "assets/eq/eq_p04_023.png",
+    "y0": 79.94776916503906,
+    "y1": 86.92156219482422
+  },
+  {
+    "n": null,
+    "page": 4,
+    "latex": "\\mathcal{J}_{u}w \u0304 = \\mathcal{J}^{\u2217}",
+    "raw": "Ju J \u2217=  \u0304w",
+    "image": "assets/eq/eq_p04_024.png",
+    "y0": 277.6258239746094,
+    "y1": 301.1614074707031
+  },
+  {
+    "n": "3",
+    "page": 4,
+    "latex": "\\ge 1(3) we \\tag{3}",
+    "raw": "ew \u22651 (3)",
+    "image": "assets/eq/eq_p04_025.png",
+    "y0": 284.36480712890625,
+    "y1": 308.4539489746094
+  },
+  {
+    "n": null,
+    "page": 4,
+    "latex": "P",
+    "raw": "P",
+    "image": "assets/eq/eq_p04_026.png",
+    "y0": 306.2783508300781,
+    "y1": 316.2409362792969
+  },
+  {
+    "n": null,
+    "page": 4,
+    "latex": "Corollary 4. If ln w_{i} \\sim \\mathcal{N}(\\mu, \\sigma^{2}), then \\mathcal{J}_{u}/\\mathcal{J}^{\u2217}= exp(\\sigma^{2}/2).",
+    "raw": "Corollary 4. If ln wi \u223cN(\u03bc, \u03c32), then Ju/J \u2217= exp(\u03c32/2).",
+    "image": "assets/eq/eq_p04_027.png",
+    "y0": 395.3384094238281,
+    "y1": 408.0364074707031
+  },
+  {
+    "n": null,
+    "page": 4,
+    "latex": "P_{T}",
+    "raw": "PT",
+    "image": "assets/eq/eq_p04_028.png",
+    "y0": 462.790771484375,
+    "y1": 475.1179504394531
+  },
+  {
+    "n": null,
+    "page": 4,
+    "latex": "_{l,h} = E_{x\\sim \\mathcal{D}}[^{1}",
+    "raw": "l,h = Ex\u223cD[ 1",
+    "image": "assets/eq/eq_p04_029.png",
+    "y0": 463.2874450683594,
+    "y1": 478.24853515625
+  },
+  {
+    "n": null,
+    "page": 4,
+    "latex": "_{t=1} \\|\\partial\\mathcal{L}/\\partialK_{l,h,t}\\|^{2}] and analogously w^{V}",
+    "raw": "t=1 \u2225\u2202L/\u2202Kl,h,t\u22252] and analogously wV",
+    "image": "assets/eq/eq_p04_030.png",
+    "y0": 464.18475341796875,
+    "y1": 478.2864074707031
+  },
+  {
+    "n": null,
+    "page": 4,
+    "latex": "^{T}",
+    "raw": "T",
+    "image": "assets/eq/eq_p04_031.png",
+    "y0": 471.2357482910156,
+    "y1": 478.2095642089844
+  },
+  {
+    "n": null,
+    "page": 4,
+    "latex": "_{l,h}[w^{K}",
+    "raw": "l,h[wK",
+    "image": "assets/eq/eq_p04_032.png",
+    "y0": 492.9427185058594,
+    "y1": 506.52154541015625
+  },
+  {
+    "n": null,
+    "page": 4,
+    "latex": "_{l,h} \\cdot D(b^{K}",
+    "raw": "l,h \u00b7 D(bK",
+    "image": "assets/eq/eq_p04_033.png",
+    "y0": 492.9427185058594,
+    "y1": 506.87738037109375
+  },
+  {
+    "n": null,
+    "page": 4,
+    "latex": "_{l,h}) + w^{V}",
+    "raw": "l,h) + wV",
+    "image": "assets/eq/eq_p04_034.png",
+    "y0": 494.222900390625,
+    "y1": 517.907470703125
+  },
+  {
+    "n": null,
+    "page": 4,
+    "latex": "_{l,h} \\cdot D(b^{V}",
+    "raw": "l,h \u00b7 D(bV",
+    "image": "assets/eq/eq_p04_035.png",
+    "y0": 506.66473388671875,
+    "y1": 520.5994262695312
+  },
+  {
+    "n": null,
+    "page": 4,
+    "latex": "_{l,h})].",
+    "raw": "l,h)].",
+    "image": "assets/eq/eq_p04_036.png",
+    "y0": 507.94488525390625,
+    "y1": 520.0755615234375
+  },
+  {
+    "n": null,
+    "page": 5,
+    "latex": "_{i=1}[w^{K}",
+    "raw": "i=1[wK",
+    "image": "assets/eq/eq_p05_037.png",
+    "y0": 553.7737426757812,
+    "y1": 567.3515625
+  },
+  {
+    "n": null,
+    "page": 5,
+    "latex": "_{i} D^{K}",
+    "raw": "i DK",
+    "image": "assets/eq/eq_p05_038.png",
+    "y0": 553.7737426757812,
+    "y1": 567.6094970703125
+  },
+  {
+    "n": null,
+    "page": 5,
+    "latex": "_{i} (b^{K}",
+    "raw": "i (bK",
+    "image": "assets/eq/eq_p05_039.png",
+    "y0": 553.7737426757812,
+    "y1": 567.6094970703125
+  },
+  {
+    "n": null,
+    "page": 5,
+    "latex": "_{i} )+w^{V}",
+    "raw": "i )+wV",
+    "image": "assets/eq/eq_p05_040.png",
+    "y0": 553.7737426757812,
+    "y1": 567.6094970703125
+  },
+  {
+    "n": null,
+    "page": 5,
+    "latex": "_{i} D^{V}",
+    "raw": "i DV",
+    "image": "assets/eq/eq_p05_041.png",
+    "y0": 553.7737426757812,
+    "y1": 567.6094970703125
+  },
+  {
+    "n": null,
+    "page": 5,
+    "latex": "_{i} (b^{V}",
+    "raw": "i (bV",
+    "image": "assets/eq/eq_p05_042.png",
+    "y0": 553.7737426757812,
+    "y1": 567.6094970703125
+  },
+  {
+    "n": null,
+    "page": 5,
+    "latex": "_{i}(b^{K}",
+    "raw": "i(bK",
+    "image": "assets/eq/eq_p05_043.png",
+    "y0": 553.7737426757812,
+    "y1": 567.3515625
+  },
+  {
+    "n": null,
+    "page": 5,
+    "latex": "_{i} +b^{V}",
+    "raw": "i +bV",
+    "image": "assets/eq/eq_p05_044.png",
+    "y0": 553.7737426757812,
+    "y1": 567.6094970703125
+  },
+  {
+    "n": null,
+    "page": 5,
+    "latex": "_{i} < b_{min} or b^{\u2217}",
+    "raw": "i < bmin or b\u2217",
+    "image": "assets/eq/eq_p05_045.png",
+    "y0": 594.9283447265625,
+    "y1": 608.8544921875
+  },
+  {
+    "n": null,
+    "page": 14,
+    "latex": "X^{N}",
+    "raw": "N X",
+    "image": "assets/eq/eq_p14_046.png",
+    "y0": 138.4326934814453,
+    "y1": 156.21188354492188
+  },
+  {
+    "n": null,
+    "page": 14,
+    "latex": "X^{N}",
+    "raw": "N X",
+    "image": "assets/eq/eq_p14_047.png",
+    "y0": 138.4326934814453,
+    "y1": 156.21188354492188
+  },
+  {
+    "n": null,
+    "page": 14,
+    "latex": "w_{i}\\alpha\\beta^{-bi}s.t.",
+    "raw": "wi\u03b1\u03b2\u2212bi s.t.",
+    "image": "assets/eq/eq_p14_048.png",
+    "y0": 146.68228149414062,
+    "y1": 159.3544921875
+  },
+  {
+    "n": null,
+    "page": 14,
+    "latex": "b_{i} = B,b_{min} \\le b_{i} \\le b_{max}",
+    "raw": "bi = B, bmin \u2264bi \u2264bmax",
+    "image": "assets/eq/eq_p14_049.png",
+    "y0": 148.4217071533203,
+    "y1": 160.0074462890625
+  },
+  {
+    "n": null,
+    "page": 14,
+    "latex": "^{i=1}",
+    "raw": "i=1",
+    "image": "assets/eq/eq_p14_050.png",
+    "y0": 162.6407012939453,
+    "y1": 169.614501953125
+  },
+  {
+    "n": null,
+    "page": 14,
+    "latex": "^{i=1}",
+    "raw": "i=1",
+    "image": "assets/eq/eq_p14_051.png",
+    "y0": 162.6407012939453,
+    "y1": 169.614501953125
+  },
+  {
+    "n": null,
+    "page": 14,
+    "latex": "X",
+    "raw": "X",
+    "image": "assets/eq/eq_p14_052.png",
+    "y0": 200.27919006347656,
+    "y1": 217.81277465820312
+  },
+  {
+    "n": null,
+    "page": 14,
+    "latex": "!",
+    "raw": "!",
+    "image": "assets/eq/eq_p14_053.png",
+    "y0": 200.2791290283203,
+    "y1": 210.24172973632812
+  },
+  {
+    "n": null,
+    "page": 14,
+    "latex": "^{-bi} w_{i}\\alpha\\beta+ \\lambda",
+    "raw": "wi\u03b1\u03b2\u2212bi + \u03bb",
+    "image": "assets/eq/eq_p14_054.png",
+    "y0": 207.03477478027344,
+    "y1": 220.9554443359375
+  },
+  {
+    "n": null,
+    "page": 14,
+    "latex": "X",
+    "raw": "X",
+    "image": "assets/eq/eq_p14_055.png",
+    "y0": 207.85023498535156,
+    "y1": 217.81283569335938
+  },
+  {
+    "n": null,
+    "page": 14,
+    "latex": "X",
+    "raw": "X",
+    "image": "assets/eq/eq_p14_056.png",
+    "y0": 207.85011291503906,
+    "y1": 217.81271362304688
+  },
+  {
+    "n": null,
+    "page": 14,
+    "latex": "X",
+    "raw": "X",
+    "image": "assets/eq/eq_p14_057.png",
+    "y0": 207.8500518798828,
+    "y1": 217.81265258789062
+  },
+  {
+    "n": null,
+    "page": 14,
+    "latex": "\\mathcal{L} =",
+    "raw": "L =",
+    "image": "assets/eq/eq_p14_058.png",
+    "y0": 210.02272033691406,
+    "y1": 220.11444091796875
+  },
+  {
+    "n": null,
+    "page": 14,
+    "latex": "b_{i} -B",
+    "raw": "bi \u2212B",
+    "image": "assets/eq/eq_p14_059.png",
+    "y0": 210.02259826660156,
+    "y1": 221.47921752929688
+  },
+  {
+    "n": null,
+    "page": 14,
+    "latex": "\\mu_{i}(b_{min} -b_{i}) +",
+    "raw": "\u03bci(bmin \u2212bi) +",
+    "image": "assets/eq/eq_p14_060.png",
+    "y0": 210.0225372314453,
+    "y1": 221.47915649414062
+  },
+  {
+    "n": null,
+    "page": 14,
+    "latex": "\\nu_{i}(b_{i} -b_{max})",
+    "raw": "\u03bdi(bi \u2212bmax)",
+    "image": "assets/eq/eq_p14_061.png",
+    "y0": 210.02247619628906,
+    "y1": 221.47909545898438
+  },
+  {
+    "n": null,
+    "page": 14,
+    "latex": "^{i}",
+    "raw": "i",
+    "image": "assets/eq/eq_p14_062.png",
+    "y0": 224.2426300048828,
+    "y1": 231.2164306640625
+  },
+  {
+    "n": null,
+    "page": 14,
+    "latex": "^{i}",
+    "raw": "i",
+    "image": "assets/eq/eq_p14_063.png",
+    "y0": 224.24256896972656,
+    "y1": 231.21636962890625
+  },
+  {
+    "n": null,
+    "page": 14,
+    "latex": "^{i}",
+    "raw": "i",
+    "image": "assets/eq/eq_p14_064.png",
+    "y0": 224.2425079345703,
+    "y1": 231.21630859375
+  },
+  {
+    "n": null,
+    "page": 14,
+    "latex": "^{i}",
+    "raw": "i",
+    "image": "assets/eq/eq_p14_065.png",
+    "y0": 224.24244689941406,
+    "y1": 231.21624755859375
+  },
+  {
+    "n": null,
+    "page": 14,
+    "latex": "^{-bi} Stationarity: -w^{i}\\alpha(ln \\beta)\\beta+ \\lambda -\\mu^{i} + \\nu^{i} = 0 with complementary slackness \\mu^{i}(b^{min} -b^{i}) = 0, \\nu_{i}(b_{i} -b_{max}) = 0.",
+    "raw": "Stationarity: \u2212wi\u03b1(ln \u03b2)\u03b2\u2212bi + \u03bb \u2212\u03bci + \u03bdi = 0 with complementary slackness \u03bci(bmin \u2212bi) = 0, \u03bdi(bi \u2212bmax) = 0.",
+    "image": "assets/eq/eq_p14_066.png",
+    "y0": 237.1998748779297,
+    "y1": 262.0553894042969
+  },
+  {
+    "n": null,
+    "page": 14,
+    "latex": "_{i} < b_{max} (so \\mu_{i} = \\nu_{i} = 0):",
+    "raw": "i < bmax (so \u03bci = \u03bdi = 0):",
+    "image": "assets/eq/eq_p14_067.png",
+    "y0": 268.5709228515625,
+    "y1": 281.12652587890625
+  },
+  {
+    "n": null,
+    "page": 14,
+    "latex": "ln(w_{i}\\alpha ln \\beta) -ln \\lambda ^{-bi} w_{i}\\alpha(ln \\beta)\\beta= \\lambda =\u21d2b_{i} =",
+    "raw": "wi\u03b1(ln \u03b2)\u03b2\u2212bi = \u03bb =\u21d2bi = ln(wi\u03b1 ln \u03b2) \u2212ln \u03bb",
+    "image": "assets/eq/eq_p14_068.png",
+    "y0": 286.9648132324219,
+    "y1": 305.2904968261719
+  },
+  {
+    "n": null,
+    "page": 14,
+    "latex": "ln \\beta",
+    "raw": "ln \u03b2",
+    "image": "assets/eq/eq_p14_069.png",
+    "y0": 300.66693115234375,
+    "y1": 310.6295166015625
+  },
+  {
+    "n": null,
+    "page": 14,
+    "latex": "\u0304 _{i} = \u0304b + (Y^{i} -Y )/ ln \\beta into \\mathcal{J}^{\u2217}:",
+    "raw": "i =  \u0304b + (Yi \u2212 \u0304Y )/ ln \u03b2 into J \u2217:",
+    "image": "assets/eq/eq_p14_070.png",
+    "y0": 432.323974609375,
+    "y1": 447.508544921875
+  },
+  {
+    "n": null,
+    "page": 14,
+    "latex": "^{Y}_{i}^{- \u0304b-(Y}_{i}^{-Y \u0304 )/ ln \\beta} ^{- \u0304b} e\\beta= \\alpha\\betae",
+    "raw": "eYi\u03b2\u2212 \u0304b\u2212(Yi\u2212 \u0304Y )/ ln \u03b2 = \u03b1\u03b2\u2212 \u0304be",
+    "image": "assets/eq/eq_p14_071.png",
+    "y0": 452.3509521484375,
+    "y1": 466.42755126953125
+  },
+  {
+    "n": "4",
+    "page": 14,
+    "latex": "^{- \u0304b} 1 = N\\alpha\\betawe \\tag{4}",
+    "raw": "1 = N\u03b1\u03b2\u2212 \u0304b ew (4)",
+    "image": "assets/eq/eq_p14_072.png",
+    "y0": 452.84674072265625,
+    "y1": 473.5909423828125
+  },
+  {
+    "n": null,
+    "page": 14,
+    "latex": "X ^{Y \u0304}",
+    "raw": "\u0304Y X",
+    "image": "assets/eq/eq_p14_073.png",
+    "y0": 452.9247741699219,
+    "y1": 469.4769592285156
+  },
+  {
+    "n": null,
+    "page": 14,
+    "latex": "X",
+    "raw": "X",
+    "image": "assets/eq/eq_p14_074.png",
+    "y0": 454.16339111328125,
+    "y1": 464.1259765625
+  },
+  {
+    "n": null,
+    "page": 14,
+    "latex": "\\mathcal{J}^{\u2217}= \\alpha",
+    "raw": "J \u2217= \u03b1",
+    "image": "assets/eq/eq_p14_075.png",
+    "y0": 454.5964050292969,
+    "y1": 466.42755126953125
+  },
+  {
+    "n": null,
+    "page": 14,
+    "latex": "^{i}",
+    "raw": "i",
+    "image": "assets/eq/eq_p14_076.png",
+    "y0": 470.5547790527344,
+    "y1": 477.5285949707031
+  },
+  {
+    "n": null,
+    "page": 14,
+    "latex": "^{i}",
+    "raw": "i",
+    "image": "assets/eq/eq_p14_077.png",
+    "y0": 470.55474853515625,
+    "y1": 477.528564453125
+  },
+  {
+    "n": null,
+    "page": 14,
+    "latex": "^{-x/ ln \\beta} ^{-x} ^{Y \u0304} ^{\u2217} where we used \\beta= eand we = e. Hence \\mathcal{J}_{u}/\\mathcal{J}= w/ \u0304 ew \\ge 1 by AM-GM.",
+    "raw": "where we used \u03b2\u2212x/ ln \u03b2 = e\u2212x and ew = e  \u0304Y . Hence Ju/J \u2217=  \u0304w/ ew \u22651 by AM-GM.",
+    "image": "assets/eq/eq_p14_078.png",
+    "y0": 483.43994140625,
+    "y1": 504.18194580078125
+  },
+  {
+    "n": null,
+    "page": 14,
+    "latex": "For log-normal weights Y_{i} \\sim \\mathcal{N}(\\mu, \\sigma^{2}): w/ \u0304 ew \\to exp(\\sigma^{2}/2).",
+    "raw": "For log-normal weights Yi \u223cN(\u03bc, \u03c32):  \u0304w/ ew \u2192exp(\u03c32/2).",
+    "image": "assets/eq/eq_p14_079.png",
+    "y0": 502.1647644042969,
+    "y1": 520.5699462890625
+  },
+  {
+    "n": null,
+    "page": 14,
+    "latex": "P_{bi-bmin}",
+    "raw": "Pbi\u2212bmin",
+    "image": "assets/eq/eq_p14_080.png",
+    "y0": 561.4263305664062,
+    "y1": 573.843994140625
+  },
+  {
+    "n": null,
+    "page": 14,
+    "latex": "^{i}",
+    "raw": "i",
+    "image": "assets/eq/eq_p14_081.png",
+    "y0": 569.5147094726562,
+    "y1": 576.488525390625
+  },
+  {
+    "n": null,
+    "page": 14,
+    "latex": "\u02c6^{K} Replacing K^{l,h} with K^{l,h} = K^{l,h} + \\delta",
+    "raw": "Replacing Kl,h with \u02c6Kl,h = Kl,h + \u03b4K",
+    "image": "assets/eq/eq_p14_082.png",
+    "y0": 631.4879150390625,
+    "y1": 645.7210083007812
+  },
+  {
+    "n": null,
+    "page": 14,
+    "latex": "_{K}1 \\langle \\nabla _{K}\\mathcal{L}, \\delta\\rangle +",
+    "raw": "\u27e8\u2207KL, \u03b4K\u27e9+ 1",
+    "image": "assets/eq/eq_p14_083.png",
+    "y0": 653.0889282226562,
+    "y1": 670.633544921875
+  },
+  {
+    "n": null,
+    "page": 14,
+    "latex": "^{KT} H^{KK} (\\delta)\\delta 2",
+    "raw": "2(\u03b4K)T HK\u03b4K",
+    "image": "assets/eq/eq_p14_084.png",
+    "y0": 655.7159423828125,
+    "y1": 676.62548828125
+  },
+  {
+    "n": null,
+    "page": 14,
+    "latex": "\\mathcal{L}(\\theta\u02c6) -\\mathcal{L}(\\theta) \\approx",
+    "raw": "L(\u02c6\u03b8) \u2212L(\u03b8) \u2248",
+    "image": "assets/eq/eq_p14_085.png",
+    "y0": 657.1998901367188,
+    "y1": 669.79150390625
+  },
+  {
+    "n": null,
+    "page": 14,
+    "latex": "X",
+    "raw": "X",
+    "image": "assets/eq/eq_p14_086.png",
+    "y0": 657.5283203125,
+    "y1": 667.490966796875
+  },
+  {
+    "n": null,
+    "page": 14,
+    "latex": "^{l,h}",
+    "raw": "l,h",
+    "image": "assets/eq/eq_p14_087.png",
+    "y0": 674.147705078125,
+    "y1": 681.1215209960938
+  },
+  {
+    "n": null,
+    "page": 14,
+    "latex": "_{l,h}) \u221dT \\cdot d_{K} \\cdot w^{K}",
+    "raw": "l,h) \u221dT \u00b7 dK \u00b7 wK",
+    "image": "assets/eq/eq_p14_088.png",
+    "y0": 699.0057373046875,
+    "y1": 712.4165649414062
+  },
+  {
+    "n": null,
+    "page": 15,
+    "latex": "_{Quantizer\\alpha\\betaR}^{2}_{\\alpha\\betaR}^{2}",
+    "raw": "Quantizer \u03b1 \u03b2 R2 \u03b1 \u03b2 R2",
+    "image": "assets/eq/eq_p15_089.png",
+    "y0": 195.9483184814453,
+    "y1": 206.59539794921875
+  },
+  {
+    "n": null,
+    "page": 23,
+    "latex": "^{3:} Initialize max-heap H with entries (g_{i}, i) where g_{i} = w_{i} \\cdot \\alpha_{i}\\beta_{i}^{-bmin}(1 -\\beta^{-1}",
+    "raw": "3: Initialize max-heap H with entries (gi, i) where gi = wi \u00b7 \u03b1i\u03b2\u2212bmin i (1 \u2212\u03b2\u22121",
+    "image": "assets/eq/eq_p23_090.png",
+    "y0": 134.81137084960938,
+    "y1": 149.08050537109375
+  },
+  {
+    "n": null,
+    "page": 23,
+    "latex": "_{i}) ^{4:} while R > 0 do ^{5:}(g_{i}^{\u2217}, i^{\u2217}) \\gets pop(H) {Head with max marginal gain} ^{6:}b_{i}^{\u2217}\\gets b_{i}^{\u2217}+ 1; R \\gets R -1 ^{7:}if b_{i}^{\u2217}< b_{max} then",
+    "raw": "i ) 4: while R > 0 do 5: (gi\u2217, i\u2217) \u2190pop(H) {Head with max marginal gain} 6: bi\u2217\u2190bi\u2217+ 1; R \u2190R \u22121 7: if bi\u2217< bmax then",
+    "image": "assets/eq/eq_p23_091.png",
+    "y0": 136.99388122558594,
+    "y1": 192.22706604003906
+  },
+  {
+    "n": null,
+    "page": 23,
+    "latex": "_{i\u2217}\\gets w_{i}^{\u2217}\\cdot \\alpha_{i}^{\u2217}\\beta^{-bi\u2217}",
+    "raw": "i\u2217\u2190wi\u2217\u00b7 \u03b1i\u2217\u03b2\u2212bi\u2217",
+    "image": "assets/eq/eq_p23_092.png",
+    "y0": 190.20932006835938,
+    "y1": 204.68048095703125
+  },
+  {
+    "n": null,
+    "page": 23,
+    "latex": "_{i\u2217}(1 -\\beta^{-1}",
+    "raw": "i\u2217 (1 \u2212\u03b2\u22121",
+    "image": "assets/eq/eq_p23_093.png",
+    "y0": 190.76138305664062,
+    "y1": 204.86456298828125
+  },
+  {
+    "n": null,
+    "page": 23,
+    "latex": "^{8:}g^{\u2032}",
+    "raw": "8: g\u2032",
+    "image": "assets/eq/eq_p23_094.png",
+    "y0": 191.40731811523438,
+    "y1": 202.740478515625
+  },
+  {
+    "n": null,
+    "page": 23,
+    "latex": "_{i\u2217}) ^{9:}push (g^{\u2032}",
+    "raw": "i\u2217) 9: push (g\u2032",
+    "image": "assets/eq/eq_p23_095.png",
+    "y0": 192.77793884277344,
+    "y1": 213.88009643554688
+  },
+  {
+    "n": null,
+    "page": 26,
+    "latex": "X^{N}",
+    "raw": "N X",
+    "image": "assets/eq/eq_p26_096.png",
+    "y0": 346.7487487792969,
+    "y1": 364.5279541015625
+  },
+  {
+    "n": null,
+    "page": 26,
+    "latex": "X^{N}",
+    "raw": "N X",
+    "image": "assets/eq/eq_p26_097.png",
+    "y0": 346.748779296875,
+    "y1": 364.5279846191406
+  },
+  {
+    "n": null,
+    "page": 26,
+    "latex": "!",
+    "raw": "!",
+    "image": "assets/eq/eq_p26_098.png",
+    "y0": 346.993408203125,
+    "y1": 356.95599365234375
+  },
+  {
+    "n": null,
+    "page": 26,
+    "latex": "\u0304 b^{i} -Nb",
+    "raw": "bi \u2212N \u0304b",
+    "image": "assets/eq/eq_p26_099.png",
+    "y0": 354.23797607421875,
+    "y1": 368.1944274902344
+  },
+  {
+    "n": null,
+    "page": 26,
+    "latex": "\\mathcal{L}(b, \\lambda) =",
+    "raw": "L(b, \u03bb) =",
+    "image": "assets/eq/eq_p26_100.png",
+    "y0": 356.7378234863281,
+    "y1": 366.82952880859375
+  },
+  {
+    "n": "5",
+    "page": 26,
+    "latex": "w_{i}D_{i}(b_{i}) + \\lambda \\tag{5}",
+    "raw": "wiDi(bi) + \u03bb",
+    "image": "assets/eq/eq_p26_101.png",
+    "y0": 356.866943359375,
+    "y1": 367.6705627441406
+  },
+  {
+    "n": null,
+    "page": 26,
+    "latex": "^{i=1}",
+    "raw": "i=1",
+    "image": "assets/eq/eq_p26_102.png",
+    "y0": 370.9567565917969,
+    "y1": 377.9305725097656
+  },
+  {
+    "n": null,
+    "page": 26,
+    "latex": "^{i=1}",
+    "raw": "i=1",
+    "image": "assets/eq/eq_p26_103.png",
+    "y0": 370.956787109375,
+    "y1": 377.93060302734375
+  },
+  {
+    "n": null,
+    "page": 26,
+    "latex": "\\lambda _{i}(b_{i}) = -",
+    "raw": "i(bi) = \u2212\u03bb",
+    "image": "assets/eq/eq_p26_104.png",
+    "y0": 403.2789306640625,
+    "y1": 421.79156494140625
+  },
+  {
+    "n": null,
+    "page": 26,
+    "latex": "w_{i}D^{\u2032}",
+    "raw": "wiD\u2032",
+    "image": "assets/eq/eq_p26_105.png",
+    "y0": 408.15142822265625,
+    "y1": 420.8236083984375
+  },
+  {
+    "n": "6",
+    "page": 26,
+    "latex": "_{i}(b_{i}) + \\lambda = 0\u21d2D^{\u2032} \\tag{6}",
+    "raw": "i(bi) + \u03bb = 0 \u21d2 D\u2032",
+    "image": "assets/eq/eq_p26_106.png",
+    "y0": 408.1513977050781,
+    "y1": 421.7915954589844
+  },
+  {
+    "n": null,
+    "page": 26,
+    "latex": "w_{i}",
+    "raw": "wi",
+    "image": "assets/eq/eq_p26_107.png",
+    "y0": 416.8529357910156,
+    "y1": 427.6575622558594
+  },
+  {
+    "n": null,
+    "page": 26,
+    "latex": "_{i}(b) = -\\alpha_{i}\\beta_{i}e^{-\\betaib}, yielding:",
+    "raw": "i(b) = \u2212\u03b1i\u03b2ie\u2212\u03b2ib, yielding:",
+    "image": "assets/eq/eq_p26_108.png",
+    "y0": 433.826416015625,
+    "y1": 447.09857177734375
+  },
+  {
+    "n": null,
+    "page": 26,
+    "latex": "\\lambda ^{i} =",
+    "raw": "i = \u03bb",
+    "image": "assets/eq/eq_p26_109.png",
+    "y0": 453.09796142578125,
+    "y1": 469.800537109375
+  },
+  {
+    "n": "7",
+    "page": 26,
+    "latex": "\\alpha_{i}\\beta_{i}e^{-\\betaib\u2217} \\tag{7}",
+    "raw": "\u03b1i\u03b2ie\u2212\u03b2ib\u2217",
+    "image": "assets/eq/eq_p26_110.png",
+    "y0": 456.5464172363281,
+    "y1": 470.642578125
+  },
+  {
+    "n": null,
+    "page": 26,
+    "latex": "w_{i}",
+    "raw": "wi",
+    "image": "assets/eq/eq_p26_111.png",
+    "y0": 466.67193603515625,
+    "y1": 477.4755554199219
+  },
+  {
+    "n": null,
+    "page": 26,
+    "latex": "w_{i}\\alpha_{i}\\beta_{i} ln",
+    "raw": "ln wi\u03b1i\u03b2i",
+    "image": "assets/eq/eq_p26_112.png",
+    "y0": 494.0138854980469,
+    "y1": 510.7154846191406
+  },
+  {
+    "n": null,
+    "page": 26,
+    "latex": "b^{\u2217}",
+    "raw": "b\u2217",
+    "image": "assets/eq/eq_p26_113.png",
+    "y0": 498.8853454589844,
+    "y1": 510.7154846191406
+  },
+  {
+    "n": null,
+    "page": 26,
+    "latex": "\\beta_{i}",
+    "raw": "\u03b2i",
+    "image": "assets/eq/eq_p26_114.png",
+    "y0": 507.5869140625,
+    "y1": 518.3915405273438
+  },
+  {
+    "n": "9",
+    "page": 26,
+    "latex": "E[f(X)] \\ge f(E[X]) \\tag{9}",
+    "raw": "E[f(X)] \u2265f(E[X]) (9)",
+    "image": "assets/eq/eq_p26_115.png",
+    "y0": 559.9913940429688,
+    "y1": 572.3610229492188
+  },
+  {
+    "n": null,
+    "page": 26,
+    "latex": "!",
+    "raw": "!",
+    "image": "assets/eq/eq_p26_116.png",
+    "y0": 595.80126953125,
+    "y1": 605.763916015625
+  },
+  {
+    "n": null,
+    "page": 26,
+    "latex": "_{N}^{1}",
+    "raw": "1 N",
+    "image": "assets/eq/eq_p26_117.png",
+    "y0": 596.7667846679688,
+    "y1": 611.0985717773438
+  },
+  {
+    "n": null,
+    "page": 26,
+    "latex": "P",
+    "raw": "P",
+    "image": "assets/eq/eq_p26_118.png",
+    "y0": 598.0443115234375,
+    "y1": 608.0069580078125
+  },
+  {
+    "n": null,
+    "page": 26,
+    "latex": "_{i} w_{i}",
+    "raw": "i wi",
+    "image": "assets/eq/eq_p26_119.png",
+    "y0": 598.3529052734375,
+    "y1": 611.3045043945312
+  },
+  {
+    "n": "10",
+    "page": 26,
+    "latex": "1 N \\tag{10}",
+    "raw": "1 N",
+    "image": "assets/eq/eq_p26_120.png",
+    "y0": 598.9339599609375,
+    "y1": 622.4705200195312
+  },
+  {
+    "n": null,
+    "page": 26,
+    "latex": "1 ln w_{i} -ln",
+    "raw": "ln wi \u2212ln 1",
+    "image": "assets/eq/eq_p26_121.png",
+    "y0": 598.9338989257812,
+    "y1": 617.0023803710938
+  },
+  {
+    "n": null,
+    "page": 26,
+    "latex": "X",
+    "raw": "X",
+    "image": "assets/eq/eq_p26_122.png",
+    "y0": 603.373291015625,
+    "y1": 613.3359375
+  },
+  {
+    "n": null,
+    "page": 26,
+    "latex": "X",
+    "raw": "X",
+    "image": "assets/eq/eq_p26_123.png",
+    "y0": 603.373291015625,
+    "y1": 613.3359375
+  },
+  {
+    "n": null,
+    "page": 26,
+    "latex": "= exp ^{1/N} _{i} w_{i})",
+    "raw": "i wi)1/N = exp",
+    "image": "assets/eq/eq_p26_124.png",
+    "y0": 605.6739501953125,
+    "y1": 627.76953125
+  },
+  {
+    "n": null,
+    "page": 26,
+    "latex": "w_{i}",
+    "raw": "wi",
+    "image": "assets/eq/eq_p26_125.png",
+    "y0": 605.6738891601562,
+    "y1": 616.478515625
+  },
+  {
+    "n": null,
+    "page": 26,
+    "latex": "N",
+    "raw": "N",
+    "image": "assets/eq/eq_p26_126.png",
+    "y0": 612.5079345703125,
+    "y1": 622.4705200195312
+  },
+  {
+    "n": null,
+    "page": 26,
+    "latex": "Q (",
+    "raw": "(Q",
+    "image": "assets/eq/eq_p26_127.png",
+    "y0": 614.5093383789062,
+    "y1": 624.780517578125
+  },
+  {
+    "n": null,
+    "page": 26,
+    "latex": "^{i}",
+    "raw": "i",
+    "image": "assets/eq/eq_p26_128.png",
+    "y0": 619.7647094726562,
+    "y1": 626.738525390625
+  },
+  {
+    "n": null,
+    "page": 26,
+    "latex": "^{i}",
+    "raw": "i",
+    "image": "assets/eq/eq_p26_129.png",
+    "y0": 619.7647094726562,
+    "y1": 626.738525390625
+  },
+  {
+    "n": "12",
+    "page": 27,
+    "latex": "\\partial\\mathcal{L} \\partialK_{i} \\tag{12}",
+    "raw": "\u2202L \u2202Ki",
+    "image": "assets/eq/eq_p27_130.png",
+    "y0": 126.5808334350586,
+    "y1": 151.0875244140625
+  },
+  {
+    "n": null,
+    "page": 27,
+    "latex": "\\partial\\mathcal{L} \\partialV_{i}",
+    "raw": "\u2202L \u2202Vi",
+    "image": "assets/eq/eq_p27_131.png",
+    "y0": 126.5808334350586,
+    "y1": 151.0875244140625
+  },
+  {
+    "n": null,
+    "page": 27,
+    "latex": "w^{K}",
+    "raw": "wK",
+    "image": "assets/eq/eq_p27_132.png",
+    "y0": 131.67176818847656,
+    "y1": 143.4114990234375
+  },
+  {
+    "n": null,
+    "page": 27,
+    "latex": ",w^{V}",
+    "raw": ", wV",
+    "image": "assets/eq/eq_p27_133.png",
+    "y0": 131.67176818847656,
+    "y1": 143.4114990234375
+  },
+  {
+    "n": null,
+    "page": 27,
+    "latex": "_{i} =",
+    "raw": "i =",
+    "image": "assets/eq/eq_p27_134.png",
+    "y0": 133.4488983154297,
+    "y1": 145.87451171875
+  },
+  {
+    "n": null,
+    "page": 27,
+    "latex": "_{i} =",
+    "raw": "i =",
+    "image": "assets/eq/eq_p27_135.png",
+    "y0": 133.4488983154297,
+    "y1": 145.87451171875
+  },
+  {
+    "n": null,
+    "page": 27,
+    "latex": "^{F}",
+    "raw": "F",
+    "image": "assets/eq/eq_p27_136.png",
+    "y0": 145.7477569580078,
+    "y1": 152.7215576171875
+  },
+  {
+    "n": null,
+    "page": 27,
+    "latex": "^{F}",
+    "raw": "F",
+    "image": "assets/eq/eq_p27_137.png",
+    "y0": 145.7477569580078,
+    "y1": 152.7215576171875
+  },
+  {
+    "n": null,
+    "page": 27,
+    "latex": "X^{T}",
+    "raw": "T X",
+    "image": "assets/eq/eq_p27_138.png",
+    "y0": 427.791748046875,
+    "y1": 445.5709533691406
+  },
+  {
+    "n": "13",
+    "page": 27,
+    "latex": "\\partial\\mathcal{L}_{t} \\partialK_{i,:t} \\tag{13}",
+    "raw": "\u2202Lt \u2202Ki,:t",
+    "image": "assets/eq/eq_p27_139.png",
+    "y0": 431.0398254394531,
+    "y1": 455.5465393066406
+  },
+  {
+    "n": null,
+    "page": 27,
+    "latex": "1 w_{i} =",
+    "raw": "wi = 1",
+    "image": "assets/eq/eq_p27_140.png",
+    "y0": 431.1689453125,
+    "y1": 449.3655090332031
+  },
+  {
+    "n": null,
+    "page": 27,
+    "latex": "T",
+    "raw": "T",
+    "image": "assets/eq/eq_p27_141.png",
+    "y0": 444.742919921875,
+    "y1": 454.70550537109375
+  },
+  {
+    "n": null,
+    "page": 27,
+    "latex": "^{F}",
+    "raw": "F",
+    "image": "assets/eq/eq_p27_142.png",
+    "y0": 450.4267272949219,
+    "y1": 457.4005432128906
+  },
+  {
+    "n": null,
+    "page": 27,
+    "latex": "^{t=1}",
+    "raw": "t=1",
+    "image": "assets/eq/eq_p27_143.png",
+    "y0": 451.8787536621094,
+    "y1": 458.8525695800781
+  },
+  {
+    "n": null,
+    "page": 27,
+    "latex": "x_{b-1} - \\cdot (21) max(|x|)",
+    "raw": "\u0012 x max(|x|) \u00b7 (2b\u22121 \u22121)",
+    "image": "assets/eq/eq_p27_144.png",
+    "y0": 527.3123168945312,
+    "y1": 550.9935302734375
+  },
+  {
+    "n": null,
+    "page": 27,
+    "latex": "",
+    "raw": "\u0013",
+    "image": "assets/eq/eq_p27_145.png",
+    "y0": 527.3123168945312,
+    "y1": 537.2749633789062
+  },
+  {
+    "n": "14",
+    "page": 27,
+    "latex": "max(|x|) \\cdot (14) 2^{b-1} -1 \\tag{14}",
+    "raw": "\u00b7 max(|x|) 2b\u22121 \u22121 (14)",
+    "image": "assets/eq/eq_p27_146.png",
+    "y0": 527.3278198242188,
+    "y1": 550.9935302734375
+  },
+  {
+    "n": "15",
+    "page": 27,
+    "latex": "\u02c6\u02c6 K^{:,j} = Q^{b}(K^{:,j}, scale^{j}),V^{t,:} = Q^{b}(V^{t,:}, scale^{t}) \\tag{15}",
+    "raw": "\u02c6K:,j = Qb(K:,j, scalej), \u02c6Vt,: = Qb(Vt,:, scalet) (15)",
+    "image": "assets/eq/eq_p27_147.png",
+    "y0": 614.9159545898438,
+    "y1": 628.8905029296875
+  },
+  {
+    "n": "16",
+    "page": 27,
+    "latex": "X\u02c6 = Q_{b}(X \\cdot R) \\cdot R^{T} \\tag{16}",
+    "raw": "\u02c6X = Qb(X \u00b7 R) \u00b7 RT (16)",
+    "image": "assets/eq/eq_p27_148.png",
+    "y0": 680.9369506835938,
+    "y1": 694.2595825195312
+  },
+  {
+    "n": null,
+    "page": 28,
+    "latex": "^{Quantizer\\beta}_{K}^{\\beta}_{V}^{\\alpha}_{K}^{\\alpha}_{V}",
+    "raw": "Quantizer \u03b2K \u03b2V \u03b1K \u03b1V",
+    "image": "assets/eq/eq_p28_149.png",
+    "y0": 463.783447265625,
+    "y1": 473.0928955078125
+  }
+]

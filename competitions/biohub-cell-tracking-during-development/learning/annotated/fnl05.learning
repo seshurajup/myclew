@@ -1,0 +1,21 @@
+@ id: fnl05
+@ order: 2040
+@ title: 3 Experiments
+@ subtitle: Federated Nested Learning: Collaborative Training of §3
+@ source: docs/papers/fednl/fednl.md
+
+--- note
+## 3 Experiments
+**Paper:** Federated Nested Learning: Collaborative Training of · §3 · pages 7–9 · equations (none) · 1 figures.
+
+> TODO(author): the *why* of §3 in 3–5 lines.
+
+--- note
+### Figure 4 — as printed in the paper
+
+Figure 4: NIAH accuracy by target insertion depth, averaged over the seven needle clients.
+
+--- image
+learning/assets/fednl/p09_0.png
+Figure 4: NIAH accuracy by target insertion depth, averaged over the seven needle clients.
+

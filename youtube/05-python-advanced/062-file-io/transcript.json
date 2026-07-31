@@ -1,0 +1,42 @@
+[
+  {
+    "text": "Reading and writing files is how your programs remember data after they stop running.",
+    "until_line": 4
+  },
+  {
+    "text": "The with statement is the right way to open a file — it automatically closes it when you're done.",
+    "until_line": 4
+  },
+  {
+    "text": "Opening in write mode, with a w, we write two lines to a fresh file.",
+    "until_line": 4
+  },
+  {
+    "text": "[chuckle] Write mode erases any existing content first, so be careful — it starts from a blank slate.",
+    "until_line": 4
+  },
+  {
+    "text": "[sniff] To read, open the file with no mode, and read pulls the entire contents as one string.",
+    "until_line": 8
+  },
+  {
+    "text": "But for large files, looping line by line is far more memory-friendly.",
+    "until_line": 13
+  },
+  {
+    "text": "Each iteration hands you one line, and strip removes the trailing newline.",
+    "until_line": 13
+  },
+  {
+    "text": "[sigh] Append mode, with an a, adds to the end of a file without erasing what's already there.",
+    "until_line": 17
+  },
+  {
+    "text": "[groan] Always use with when handling files — it guarantees they close properly, even if an error strikes.",
+    "until_line": 17
+  },
+  {
+    "text": "Up next, pathlib. Follow so you don't miss it.",
+    "until_line": 17
+  }
+]

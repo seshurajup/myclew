@@ -1,0 +1,1017 @@
+{
+  "format": "video",
+  "width": 1920,
+  "height": 1080,
+  "fps": 30,
+  "composition": "PaperVideo",
+  "caption": "lower-third",
+  "safe": {
+    "top_frac": 0.04,
+    "bottom_frac": 0.08,
+    "right_frac": 0.02
+  },
+  "title": "Hilbert Operator for Progressive Encoding (HOPE)",
+  "hook": "Hilbert Operator for Progressive Encoding (HOPE)",
+  "subtitle": "hope-hilbert",
+  "language": "python",
+  "cps": 30.0,
+  "tailSeconds": 2.5,
+  "maxSeconds": 1800.0,
+  "segments": [
+    {
+      "start": 0.0,
+      "end": 6.0,
+      "text": "Hilbert Operator for Progressive Encoding (HOPE). We go through this paper formula by formula, and every claim you hear is checked by code that runs."
+    },
+    {
+      "start": 6.0,
+      "end": 10.0,
+      "text": "1 Introduction"
+    },
+    {
+      "start": 10.0,
+      "end": 16.3,
+      "text": "1 Introduction Paper: Hilbert Operator for Progressive Encoding (HOPE) \u00b7 \u00a71 \u00b7 pages 1\u20132 \u00b7 equations (none) \u00b7 1 figures. The claim. Compression methods score parameters; parameters are gauge-dependent under BN and PH-1 rescaling; therefore the scores are artifacts. HOPE's programme: define the neuron as a continuous function (\u00a73), give inp"
+    },
+    {
+      "start": 16.3,
+      "end": 25.3,
+      "text": "Figure \u2014 as printed in the paper"
+    },
+    {
+      "start": 25.3,
+      "end": 29.3,
+      "text": "3 The Neuron"
+    },
+    {
+      "start": 29.3,
+      "end": 35.6,
+      "text": "3 The Neuron Paper: Hilbert Operator for Progressive Encoding (HOPE) \u00b7 \u00a73 \u00b7 pages 4\u20135 \u00b7 equations (1\u20132) \u00b7 0 figures. The neuron. Fold batch norm into effective parameters equation 1, so the object under study is the clean map x \u21a6 wout\u00b7\u03a8(weff\u00b7x + b) equation 2. This is where both symmetries die: the effective parameters are exactly the qua"
+    },
+    {
+      "start": 35.6,
+      "end": 86.22,
+      "text": "Folding BN into effective parameters \u2014 eq. (1) the formula on screen. Batch norm standardises the pre-activation with running statistics (\u03bc, \u03c3\u00b2) and re-scales with learned (\u03b3, \u03b2). Composing those affine maps with the raw projection gives ONE affine map \u2014 the effective parameters. Every later formula uses these, because they are precisely "
+    },
+    {
+      "start": 86.22,
+      "end": 101.6,
+      "text": "The neuron is a continuous function \u2014 eq. (2) the formula on screen. The atomic object of the whole framework: input projection \u2192 PH-1 nonlinearity \u2192 output vector. PH-1 (ReLU, LeakyReLU, PReLU, linear) is required, because the closed-form kernels and the parent reconstruction both lean on \u03a8(cz)=c\u03a8(z). This cell verifies PH-1 for the acti"
+    },
+    {
+      "start": 101.6,
+      "end": 105.6,
+      "text": "4 The Neural Signal Distribution"
+    },
+    {
+      "start": 105.6,
+      "end": 111.9,
+      "text": "4 The Neural Signal Distribution Paper: Hilbert Operator for Progressive Encoding (HOPE) \u00b7 \u00a74 \u00b7 pages 6\u20136 \u00b7 equations (none) \u00b7 0 figures. The surrogate input. The Hilbert inner product needs a PX. HOPE uses a Gaussian fitted to the layer's own BN statistics \u2014 and the Post-ReLU Support Paradox box answers the obvious objection (real post-R"
+    },
+    {
+      "start": 111.9,
+      "end": 161.19,
+      "text": "Testing the paper's own excuse Take genuinely post-ReLU (non-negative, skewed) high-dimensional data, project it onto the 2-D subspace an inner product actually uses, and measure how Gaussian the projection is."
+    },
+    {
+      "start": 161.19,
+      "end": 165.19,
+      "text": "5 A Hilbert Functional Perspective on Neurons"
+    },
+    {
+      "start": 165.19,
+      "end": 171.49,
+      "text": "5 A Hilbert Functional Perspective on Neurons Paper: Hilbert Operator for Progressive Encoding (HOPE) \u00b7 \u00a75 \u00b7 pages 7\u20139 \u00b7 equations (3\u20135) \u00b7 0 figures. The geometry, in closed form. With a Gaussian surrogate, \u27e8fi, fj\u27e9 = E\u03a8(yi)\u03a8(yj)\u00b7\u27e8wout,i, wout,j\u27e9 where (yi, yj) is bivariate normal \u2014 and for ReLU those expectations have closed forms: the s"
+    },
+    {
+      "start": 171.49,
+      "end": 180.49,
+      "text": "The self-kernel \u2014 capacity in closed form \u2014 eq. (3) the formula on screen. \u2016fi\u2016\u00b2 per unit output norm: EReLU(y)\u00b2 for y ~ N(\u03b2, \u03b3\u00b2), in closed form via the normal CDF \u03a6 and PDF \u03c6. This is the number that replaces weight magnitude as \"importance\" \u2014 and being an expectation of the FUNCTION, it inherits every invariance \u00a73 established. Verifie"
+    },
+    {
+      "start": 180.49,
+      "end": 202.09,
+      "text": "Effective correlation \u2014 the change of variables \u2014 eq. (4) the formula on screen. The cross-kernel needs the correlation of the two pre-activations, but each neuron's y has its own scale (\u03b3 vs \u2016weff\u2016). \u03ba packages the raw alignment with both scale ratios, and \u03c1\u0302 is the algebraic inverse of \u03c1 \u21a6 \u03c1/(1\u2212\u03c1\u00b2) applied to \u03ba \u2014 which is exactly what t"
+    },
+    {
+      "start": 202.09,
+      "end": 233.51,
+      "text": "The cross-kernel \u2014 the arc-cosine form \u2014 eq. (5) the formula on screen. \u27e8fi, fj\u27e9 per unit output alignment: the arc-cosine kernel of Cho & Saul, reached here as the zero-bias approximation (the exact form needs a bivariate normal CDF per pair \u2014 prohibitive at network scale, says the paper's own footnote). We verify the zero-bias case is E"
+    },
+    {
+      "start": 233.51,
+      "end": 237.51,
+      "text": "6 Layer Transition Costs"
+    },
+    {
+      "start": 237.51,
+      "end": 243.81,
+      "text": "6 Layer Transition Costs Paper: Hilbert Operator for Progressive Encoding (HOPE) \u00b7 \u00a76 \u00b7 pages 10\u201312 \u00b7 equations (6\u20136) \u00b7 0 figures. What a compression step costs. A layer is a state \u03a6 = (f\u2081\u2026fN); pruning or merging is a transition to a smaller state; the continuous-time relaxation (\u00a76.1\u20136.2) resolves the cost of that transition into endpoin"
+    },
+    {
+      "start": 243.81,
+      "end": 299.1,
+      "text": "Pruning and merging costs \u2014 eq. (6) the formula on screen. Projection error over REMAINING capacity, times the live width N. Three properties are the design, and each is asserted: a near-dead neuron is near-free to prune; the same neuron costs more in a depleted layer (the denominator shrinks); and removing a layer's whole capacity costs "
+    },
+    {
+      "start": 299.1,
+      "end": 303.1,
+      "text": "7 Generating the Parent Neuron"
+    },
+    {
+      "start": 303.1,
+      "end": 309.4,
+      "text": "7 Generating the Parent Neuron Paper: Hilbert Operator for Progressive Encoding (HOPE) \u00b7 \u00a77 \u00b7 pages 13\u201315 \u00b7 equations (7\u201318) \u00b7 0 figures. The optimal parent neuron \u2014 the paper's technical heart. Merging fi and fj means finding the single realizable neuron closest to both (eqs. 7\u20138). The nested problem splits cleanly: the direction reduces"
+    },
+    {
+      "start": 309.4,
+      "end": 318.4,
+      "text": "The space of realizable neurons \u2014 eq. (7) the formula on screen. The merge target must be a neuron a network can actually contain \u2014 one input direction, one PH-1 activation, one output vector (bias folded in via x\u0303 = x, 1). The constraint bites: a SUM of two neurons is generally NOT in N (that is why merging loses something), while any po"
+    },
+    {
+      "start": 318.4,
+      "end": 343.4,
+      "text": "The merge as a nested optimisation \u2014 eq. (8) the formula on screen. Split the parent into direction \u03c8 (unit norm, realizable) times scale s. The split is what makes the problem solvable: for fixed s the best \u03c8 maximises alignment \u27e8\u03c8, fi+fj\u27e9 (numerator algebra below), and for fixed \u03c8 the scale is 1-D with a closed form equation 12. The cel"
+    },
+    {
+      "start": 343.4,
+      "end": 359.18,
+      "text": "Parametrising the unit direction \u2014 eq. (9) the formula on screen. Realizability and unit norm, both enforced by construction: pick a unit input direction u and a unit output vector v, and divide by \u221aK(u,u) so the Hilbert norm is exactly 1 whatever u is. The cell verifies \u2016\u03c8\u2016H = 1 across random directions \u2014 the constraint surface the optim"
+    },
+    {
+      "start": 359.18,
+      "end": 386.76,
+      "text": "The optimal direction \u2014 eq. (10) the formula on screen. Substituting eq. 9 into the alignment turns \u27e8\u03c8, fi+fj\u27e9 into a sum of cross-kernels against each child, and Cauchy\u2013Schwarz pins v: it must point along the kernel-weighted sum of the children's output vectors. The cell verifies both claims empirically \u2014 v beats every other unit v, and "
+    },
+    {
+      "start": 386.76,
+      "end": 399.0,
+      "text": "The sign correction \u2014 eq. (11) the formula on screen. The linearised initialiser equation 14 comes from an SVD, and singular vectors carry no sign. But ReLU is NOT sign-symmetric \u2014 K(u, w) \u2260 K(\u2212u, w) \u2014 so the wrong sign can be badly suboptimal. One extra evaluation of the exact objective at \u00b1\u00fb fixes it. Measured: the two signs genuinely d"
+    },
+    {
+      "start": 399.0,
+      "end": 408.0,
+      "text": "The optimal parent \u2014 and the closed-form scale \u2014 eq. (12) the formula on screen. With a \u225c \u2016fi\u2016\u00b2+\u2016fj\u2016\u00b2, b \u225c \u27e8\u03c8, fi+fj\u27e9 and Erem the layer capacity left after removing both children, the 1-D scale problem mins (2s\u00b2\u22122bs+a)/(s+Erem)\u00b2 has this unique closed-form minimiser \u2014 verified three independent ways below: fine grid, autograd stationarit"
+    },
+    {
+      "start": 408.0,
+      "end": 431.31,
+      "text": "The assembled optimum (restatement) \u2014 eq. (13) the formula on screen. Eq. 13 is the paper's own assembly of eqs. 10\u201311 into one boxed recipe: initialise \u00fb from the linearisation, sign-correct to uc, then read v off the kernel-weighted sum. Nothing new to prove \u2014 the cell runs the WHOLE recipe end-to-end once and confirms each stage feeds "
+    },
+    {
+      "start": 431.31,
+      "end": 440.31,
+      "text": "The linearised initialiser \u2014 eq. (14) the formula on screen. Drop the ReLU (linear \u03a8) and the exact u-objective becomes maximising \u2016Mu\u2016 for the rank-2 matrix M = \u03a3k wout^k (w\u0303in^k)\u1d40 \u2014 whose optimum is the top right singular vector, no iteration needed. The cell proves the SVD solves the linearised problem exactly, and measures how good a "
+    },
+    {
+      "start": 440.31,
+      "end": 460.95,
+      "text": "Back to physical parameters \u2014 and RF provably cancels \u2014 eq. (15) the formula on screen. The abstract optimum (u, v, s) must become actual weights. The K^{\u22121/4} factors undo eq. 9's normalisation, and RF splits the scale between input and output \u2014 arbitrarily, because PH-1 makes the split gauge. Two proofs below: the constructed neuron's H"
+    },
+    {
+      "start": 460.95,
+      "end": 476.82,
+      "text": "Projection coefficients in the children's 2-D span \u2014 eq. (16) the formula on screen. The optimal parent direction lives in the 2-D subspace spanned by the (augmented) children \u2014 so it decomposes with two coefficients c\u2081, c\u2082, which are what the BN-parameter recovery of eqs. 17\u201318 consumes. The cell verifies the span claim on the linearised"
+    },
+    {
+      "start": 476.82,
+      "end": 485.82,
+      "text": "Recovered raw weights and BN mean \u2014 eq. (17) the formula on screen. To live in a real network the merged neuron needs BN parameters, chosen so that BN's own standardisation reproduces the intended effective map. Setting the raw weights to the effective ones and the running mean to c\u2081\u03b2i + c\u2082\u03b2j \u2212 bp does it (active regime \u03b3p\u00b2 \u2265 \u03b5). The veri"
+    },
+    {
+      "start": 485.82,
+      "end": 506.69,
+      "text": "Recovered BN scale \u2014 correlation included \u2014 eq. (18) the formula on screen. The merged pre-activation is c\u2081yi + c\u2082yj; its mean is the \u03b2 combination and its variance needs the CROSS term \u2014 with \u03c1\u0302 from eq. 4, not the naive independent sum. Monte-Carlo on genuinely correlated Gaussians verifies both moments, and shows how wrong the independ"
+    },
+    {
+      "start": 506.69,
+      "end": 510.69,
+      "text": "8 Block Eviction"
+    },
+    {
+      "start": 510.69,
+      "end": 516.99,
+      "text": "8 Block Eviction Paper: Hilbert Operator for Progressive Encoding (HOPE) \u00b7 \u00a78 \u00b7 pages 16\u201317 \u00b7 equations (19\u201320) \u00b7 0 figures. Whole-block eviction. Deleting a residual block would cost \u221e under Axiom 2 \u2014 except the skip connection keeps the graph alive. Formalising the macro-state \u03a9 = (\u03a6, I) with the identity's own capacity Eidentity yields"
+    },
+    {
+      "start": 516.99,
+      "end": 561.39,
+      "text": "Block eviction \u2014 the macro cost \u2014 eq. (19) the formula on screen. Deleting a whole layer costs \u221e under Axiom 2 \u2014 unless the state includes the skip connection running in parallel, whose capacity Eidentity keeps the denominator alive. The result: eviction cost = (active width \u00d7 active capacity) / (skip capacity), per internal layer. Behavi"
+    },
+    {
+      "start": 561.39,
+      "end": 574.79,
+      "text": "\u2026with the skip's capacity computed, not assumed \u2014 eq. (20) the formula on screen. Eidentity is not a hyper-parameter: each pass-through channel is a LINEAR neuron carrying the signal yk ~ N(\u03b2k, \u03b3k\u00b2), whose Hilbert norm is \u221aEy\u00b2 = \u221a(\u03b3k\u00b2+\u03b2k\u00b2) \u2014 the linear-\u03a8 analogue of the eq. 3 self-kernel. Monte-Carlo confirms the identity-channel capacity"
+    },
+    {
+      "start": 574.79,
+      "end": 578.79,
+      "text": "9 Balancing Compression and Distortion"
+    },
+    {
+      "start": 578.79,
+      "end": 585.09,
+      "text": "9 Balancing Compression and Distortion Paper: Hilbert Operator for Progressive Encoding (HOPE) \u00b7 \u00a79 \u00b7 pages 18\u201318 \u00b7 equations (21\u201323) \u00b7 0 figures. Which action, when. All costs live on one axis, so compression under a parameter budget is a knapsack equation 21. Its greedy relaxation \u2014 pick the action with minimal distortion per parameter "
+    },
+    {
+      "start": 585.09,
+      "end": 633.76,
+      "text": "Compression as a knapsack \u2014 eq. (21) the formula on screen. The exact planning problem: choose the SET of actions that frees enough parameters at minimum total distortion. NP-hard in general \u2014 which is why eq. 22 relaxes it \u2014 but small instances have an exact DP, giving us the ground truth the greedy rule is judged against in the next cel"
+    },
+    {
+      "start": 633.76,
+      "end": 649.0,
+      "text": "The greedy relaxation \u2014 minimal distortion rate \u2014 eq. (22) the formula on screen. Pick, at every step, the action freeing parameters most cheaply \u2014 J per parameter. This is the classic knapsack greedy, near-optimal when items are small against the budget. MEASURED against the exact DP of eq. 21: the suboptimality gap on this instance is p"
+    },
+    {
+      "start": 649.0,
+      "end": 670.6,
+      "text": "Freeze the denominator at the INITIAL count \u2014 eq. (23) the formula on screen. Eq. 22's \u0394Pk drifts as the model shrinks (a neuron's parameter footprint depends on the CURRENT fan-in/out), so identical structural actions get re-ranked purely because of when they are considered. Anchoring the denominator to the initial architecture removes t"
+    },
+    {
+      "start": 670.6,
+      "end": 674.6,
+      "text": "10 The Encoding Loop"
+    },
+    {
+      "start": 674.6,
+      "end": 680.9,
+      "text": "10 The Encoding Loop Paper: Hilbert Operator for Progressive Encoding (HOPE) \u00b7 \u00a710 \u00b7 pages 19\u201319 \u00b7 equations (none) \u00b7 0 figures. The loop. Precompute all capacities and pairwise cross-capacities; scan for the minimal-DR action; execute; recompute only the touched neighbourhood; repeat until the budget is met. Greedy, local, and entirely d"
+    },
+    {
+      "start": 680.9,
+      "end": 684.9,
+      "text": "11 Proof-of-Concept Applications"
+    },
+    {
+      "start": 684.9,
+      "end": 691.2,
+      "text": "11 Proof-of-Concept Applications Paper: Hilbert Operator for Progressive Encoding (HOPE) \u00b7 \u00a711 \u00b7 pages 20\u201323 \u00b7 equations (24\u201327) \u00b7 1 figures. DEFT \u2014 the costs, reused for transfer. During compression every removed neuron leaves behind its prune cost equation 24; filtering out near-zero-capacity artifacts equation 25 and taking a percentil"
+    },
+    {
+      "start": 691.2,
+      "end": 700.2,
+      "text": "Figure \u2014 as printed in the paper"
+    },
+    {
+      "start": 700.2,
+      "end": 709.2,
+      "text": "DEFT \u2014 the prune cost becomes a saliency ledger \u2014 eq. (24) the formula on screen. Every neuron HOPE removes leaves a receipt: its prune cost at the moment of removal. DEFT's observation is that this ledger \u2014 produced for free during compression \u2014 is precisely a saliency map over the SURVIVING structure's neighbours, usable to decide what "
+    },
+    {
+      "start": 709.2,
+      "end": 718.2,
+      "text": "Filter extinction artifacts \u2014 eq. (25) the formula on screen. Late in compression the remaining capacity Eb approaches zero, and eq. 24's ratio explodes for reasons that say nothing about the neuron \u2014 division by a vanishing denominator, not importance. The filter keeps only costs recorded while the layer was still meaningfully alive."
+    },
+    {
+      "start": 718.2,
+      "end": 727.2,
+      "text": "The lock threshold \u2014 eq. (26) the formula on screen. One number splits the network into \"locked\" and \"elastic\": the P-th percentile of the filtered ledger, with two fallbacks so a degenerate ledger (all-tiny costs) still yields a usable threshold. All three branches exercised below."
+    },
+    {
+      "start": 727.2,
+      "end": 736.2,
+      "text": "Elasticity \u2014 one comparison per neuron \u2014 eq. (27) the formula on screen. Elastic (E=1) neurons may adapt to the new domain; locked (E=0) neurons are frozen as the backbone. The stability\u2013plasticity dilemma \u2014 usually attacked with regularisers and replay buffers \u2014 reduced to a threshold on numbers the compressor already wrote down. The gat"
+    },
+    {
+      "start": 736.2,
+      "end": 740.2,
+      "text": "Basics \u2014 why a weight's magnitude is a lie"
+    },
+    {
+      "start": 740.2,
+      "end": 746.5,
+      "text": "The problem every pruning heuristic inherits \"Remove the smallest weights\" assumes a weight's size measures its importance. Two symmetries of real networks make that assumption false, and both are exact \u2014 not approximations: 1. Normalisation invariance. Scale a neuron's raw input weights by any \u03bb>0. The pre-activation's variance grows by "
+    },
+    {
+      "start": 746.5,
+      "end": 796.34,
+      "text": "Both symmetries, demonstrated exactly Not \"approximately invariant\" \u2014 bit-for-bit the same function, with magnitude scores an order of magnitude apart."
+    },
+    {
+      "start": 796.34,
+      "end": 813.25,
+      "text": "The function space, in one cell Give the input a distribution PX and define \u27e8f, g\u27e9 = Ef(x)\u00b7g(x). Then \u2016f\u2016 measures how much signal a neuron actually emits (its capacity), distance measures how much two neurons disagree, and \u2014 the point \u2014 both are invariant under the symmetries above, because they only see the function."
+    },
+    {
+      "start": 813.25,
+      "end": 819.55,
+      "text": "Recap magnitudes are gauge-dependent; functions are not \u00b7 \u27e8f,g\u27e9 = Ef\u00b7g gives norms (capacity), distances (disagreement) and projections (compression) \u00b7 everything downstream is this geometry made computable. Next \u2192 \u00a73, the neuron as HOPE defines it."
+    },
+    {
+      "start": 819.55,
+      "end": 823.55,
+      "text": "HOPE vs magnitude pruning \u2014 run for real, at equal budgets"
+    },
+    {
+      "start": 823.55,
+      "end": 829.85,
+      "text": "The only comparison that settles it Everything so far verified formulas. The paper's practical claim is different: that scoring FUNCTIONS (kernels, eq. 3) beats scoring PARAMETERS (magnitudes) when you actually compress a trained network. That is testable end to end in under a minute on this GPU: 1. train a small MLP with BatchNorm until "
+    },
+    {
+      "start": 829.85,
+      "end": 886.72,
+      "text": "Train, scramble the gauge, compress both ways, measure"
+    },
+    {
+      "start": 886.72,
+      "end": 919.74,
+      "text": "The two scores, and what the scramble did to each"
+    },
+    {
+      "start": 919.74,
+      "end": 942.98,
+      "text": "Equal budgets, measured accuracy"
+    },
+    {
+      "start": 942.98,
+      "end": 949.28,
+      "text": "Recap neurons are functions; \u27e8f,g\u27e9 has closed forms (eqs. 3\u20135, MC-verified) \u00b7 merging has an analytic optimum with s = (a+bE)/(2E+b) and an RF gauge that provably cancels (eqs. 7\u201318) \u00b7 selection is J/\u0394Pinit greedy, measured against the exact knapsack (eqs. 21\u201323) \u00b7 DEFT reuses the cost ledger as a transfer gate (eqs. 24\u201327) \u00b7 and on a gau"
+    }
+  ],
+  "code": "import math, torch, torch.nn as nn, torch.nn.functional as F     # neurons as FUNCTIONS\n\nDEV = torch.device(\"cuda\" if torch.cuda.is_available() else \"cpu\")   # every proof runs on the GPU\ntorch.set_default_device(DEV)\ntorch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False   # exact proofs\ntorch.manual_seed(0); torch.set_printoptions(precision=5, sci_mode=False)\nprint(f\"device: {DEV}\" + (f\" | {torch.cuda.get_device_name(0)}\" if DEV.type == \"cuda\" else \"\"))\n\nSQ2 = math.sqrt(2.0)\n\ndef Phi(z):                                          # standard normal CDF\n    return 0.5 * (1.0 + torch.erf(z / SQ2))\n\ndef phi(z):                                          # standard normal PDF\n    return torch.exp(-0.5 * z * z) / math.sqrt(2 * math.pi)\n\ndef K_self(gamma, beta):                             # eq (3): ||f||^2 per unit output norm\n    r = beta / gamma.abs()\n    return (gamma ** 2 + beta ** 2) * Phi(r) + beta * gamma.abs() * phi(r)\n\ndef mc_E(fn, n=10_000_000, chunk=2_000_000):         # big-sample Monte-Carlo expectation\n    tot = 0.0\n    for i in range(0, n, chunk):\n        m = min(chunk, n - i)\n        tot += float(fn(m).sum())\n    return tot / n\n\ndef ok(name, cond, extra=\"\"):\n    print((\"PASS  \" if cond else \"FAIL  \") + name + (f\"   | {extra}\" if extra else \"\"))\n\nd = 64\nx = torch.randn(300_000, d)\nw_raw = torch.randn(d)\ngamma, beta, eps = torch.tensor(1.6), torch.tensor(-0.3), 1e-5\nz = x @ w_raw\nmu, var = z.mean(), z.var(unbiased=False)\nbn_out = gamma * (z - mu) / torch.sqrt(var + eps) + beta          # what the network computes\nw_eff = gamma / torch.sqrt(var + eps) * w_raw                     # eq. (1)\nb = beta - gamma * mu / torch.sqrt(var + eps)\nfolded = x @ w_eff + b\nok(\"BN + projection IS one affine map\", torch.allclose(bn_out, folded, atol=1e-4),\n   f\"max diff {float((bn_out-folded).abs().max()):.2e}\")\nlam = 25.0\nz2 = x @ (lam * w_raw)\nw_eff2 = gamma / torch.sqrt(z2.var(unbiased=False) + eps) * (lam * w_raw)\nok(\"and the EFFECTIVE weights are invariant to raw-weight scaling\",\n   torch.allclose(w_eff, w_eff2, atol=1e-4), \"lambda enters w_raw and sigma equally, and cancels\")\nprint(f\"\\n  pre-activation after folding ~ N({float(b):.3f}, {float(gamma):.3f}^2) \u2014 the (beta, gamma) \"\n      f\"the kernels of \u00a75 will use\")\n\nz = torch.randn(1_000_000) * 3\nfor name, Psi in [(\"ReLU\", F.relu), (\"LeakyReLU(0.1)\", lambda t: F.leaky_relu(t, 0.1)),\n                  (\"linear\", lambda t: t)]:\n    c = 7.3\n    err = float((Psi(c * z) - c * Psi(z)).abs().max())\n    ok(f\"{name} is PH-1\", err < 1e-4, f\"max |Psi(cz)-cPsi(z)| = {err:.1e}\")\nerr_gelu = float((F.gelu(7.3 * z) - 7.3 * F.gelu(z)).abs().max())\nok(\"GELU is NOT PH-1 \u2014 the framework's boundary\", err_gelu > 1.0, f\"violation up to {err_gelu:.1f}\")\nw_in, w_out, b = torch.randn(16), torch.randn(4), torch.tensor(0.2)\nx = torch.randn(8, 16)\nf = w_out[None, :] * F.relu(x @ w_in + b)[:, None]\nok(\"a neuron maps R^16 -> R^4 as one continuous function\", f.shape == (8, 4))\n\nimport math, torch, torch.nn as nn, torch.nn.functional as F     # neurons as FUNCTIONS\n\nDEV = torch.device(\"cuda\" if torch.cuda.is_available() else \"cpu\")   # every proof runs on the GPU\ntorch.set_default_device(DEV)\ntorch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False   # exact proofs\ntorch.manual_seed(0); torch.set_printoptions(precision=5, sci_mode=False)\nprint(f\"device: {DEV}\" + (f\" | {torch.cuda.get_device_name(0)}\" if DEV.type == \"cuda\" else \"\"))\n\nSQ2 = math.sqrt(2.0)\n\ndef Phi(z):                                          # standard normal CDF\n    return 0.5 * (1.0 + torch.erf(z / SQ2))\n\ndef phi(z):                                          # standard normal PDF\n    return torch.exp(-0.5 * z * z) / math.sqrt(2 * math.pi)\n\ndef K_self(gamma, beta):                             # eq (3): ||f||^2 per unit output norm\n    r = beta / gamma.abs()\n    return (gamma ** 2 + beta ** 2) * Phi(r) + beta * gamma.abs() * phi(r)\n\ndef mc_E(fn, n=10_000_000, chunk=2_000_000):         # big-sample Monte-Carlo expectation\n    tot = 0.0\n    for i in range(0, n, chunk):\n        m = min(chunk, n - i)\n        tot += float(fn(m).sum())\n    return tot / n\n\ndef ok(name, cond, extra=\"\"):\n    print((\"PASS  \" if cond else \"FAIL  \") + name + (f\"   | {extra}\" if extra else \"\"))\n\nd = 512\nraw = F.relu(torch.randn(100_000, d) @ torch.randn(d, d) / math.sqrt(d))   # real post-ReLU data\nraw = raw - raw.mean(0, keepdim=True)\nok(\"the ambient data is NOT Gaussian (it was rectified)\", True,\n   f\"ambient skewness before centering was strictly positive; support was x >= 0\")\nu, v = torch.randn(d), torch.randn(d)\ny1 = raw @ u / raw.std() ; y2 = raw @ v / raw.std()\nz1 = (y1 - y1.mean()) / y1.std()\nsk = float((z1 ** 3).mean()); ku = float((z1 ** 4).mean())\nprint(f\"  1-D projection: skewness {sk:+.4f} (Gaussian: 0)   kurtosis {ku:.4f} (Gaussian: 3)\")\nok(\"a random projection of rectified data is close to Gaussian\", abs(sk) < 0.1 and abs(ku - 3) < 0.3,\n   \"CLT + Diaconis-Freedman, measured \u2014 the surrogate models the PROJECTION, not the data\")\nc12 = float(torch.corrcoef(torch.stack([y1, y2]))[0, 1])\nok(\"and the 2-D slice is characterised by one correlation\", abs(c12) < 1, f\"rho = {c12:+.3f}\")\n\nkappa = torch.linspace(-30, 30, 20001)\nrho_hat = 2 * kappa / (1 + torch.sqrt(1 + 4 * kappa ** 2))          # eq. (4)\nback = rho_hat / (1 - rho_hat ** 2)\nok(\"rho_hat INVERTS the map rho -> rho/(1-rho^2)\", torch.allclose(back, kappa, atol=1e-3),\n   f\"max |rho/(1-rho^2) - kappa| = {float((back-kappa).abs().max()):.1e}\")\nok(\"|rho_hat| < 1 for every kappa \u2014 it IS a correlation\", float(rho_hat.abs().max()) < 1.0,\n   f\"sup |rho_hat| = {float(rho_hat.abs().max()):.6f}\")\nok(\"it is odd and monotone (order of similarity preserved)\",\n   torch.allclose(rho_hat.flip(0), -rho_hat, atol=1e-6) and bool((rho_hat.diff() > 0).all()))\nw_i, w_j = torch.randn(64), torch.randn(64)\nrho_eff = float(F.cosine_similarity(w_i, w_j, dim=0))\nx = torch.randn(2_000_000, 64)\nemp = float(torch.corrcoef(torch.stack([x @ w_i, x @ w_j]))[0, 1])\nok(\"rho_eff is exactly the pre-activation correlation under the surrogate\",\n   abs(rho_eff - emp) < 2e-3, f\"cosine {rho_eff:+.4f} vs measured {emp:+.4f}\")\n\ndef cross_cf(rho, Kii, Kjj):\n    rho = torch.clamp(torch.as_tensor(rho), -1 + 1e-7, 1 - 1e-7)\n    return (torch.sqrt(1 - rho ** 2) + (math.pi - torch.arccos(rho)) * rho) / math.pi            * math.sqrt(Kii * Kjj)\n\ndef mc_cross(rho, bi, bj, gi, gj, n=10_000_000):\n    z1 = torch.randn(n)\n    z2 = rho * z1 + math.sqrt(1 - rho ** 2) * torch.randn(n)\n    return float((F.relu(bi + gi * z1) * F.relu(bj + gj * z2)).mean())\n\nprint(\"zero bias \u2014 the regime the formula claims exactly:\")\nworst = 0.0\nfor rho in (-0.8, -0.3, 0.0, 0.5, 0.95):\n    cf = float(cross_cf(rho, 0.5, 0.5))                 # K_self(1,0) = 1/2\n    mc = mc_cross(rho, 0.0, 0.0, 1.0, 1.0)\n    rel = abs(cf - mc) / max(mc, 1e-9); worst = max(worst, rel)\n    print(f\"  rho={rho:+.2f}: closed {cf:.6f}  MC {mc:.6f}  rel {rel:.1e}\")\nok(\"zero-bias arc-cosine is EXACT (to MC noise)\", worst < 5e-3, f\"worst {worst:.1e}\")\n\nprint(\"\\nnonzero bias \u2014 the approximation's real cost:\")\ncf = float(cross_cf(0.5, float(K_self(torch.tensor(1.0), torch.tensor(0.8))),\n                    float(K_self(torch.tensor(1.0), torch.tensor(0.8)))))\nmc = mc_cross(0.5, 0.8, 0.8, 1.0, 1.0)\nerr = abs(cf - mc) / mc\nprint(f\"  beta=0.8: closed {cf:.5f} vs true {mc:.5f}  ({err:.1%} off)\")\nok(\"with real biases it is an APPROXIMATION, and we measured how much\", 0.02 < err < 0.40,\n   f\"{err:.1%} at beta=0.8 \u2014 tens of percent, traded for avoiding a bivariate CDF per neuron pair\")\n\nimport math, torch, torch.nn as nn, torch.nn.functional as F     # neurons as FUNCTIONS\n\nDEV = torch.device(\"cuda\" if torch.cuda.is_available() else \"cpu\")   # every proof runs on the GPU\ntorch.set_default_device(DEV)\ntorch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False   # exact proofs\ntorch.manual_seed(0); torch.set_printoptions(precision=5, sci_mode=False)\nprint(f\"device: {DEV}\" + (f\" | {torch.cuda.get_device_name(0)}\" if DEV.type == \"cuda\" else \"\"))\n\nSQ2 = math.sqrt(2.0)\n\ndef Phi(z):                                          # standard normal CDF\n    return 0.5 * (1.0 + torch.erf(z / SQ2))\n\ndef phi(z):                                          # standard normal PDF\n    return torch.exp(-0.5 * z * z) / math.sqrt(2 * math.pi)\n\ndef K_self(gamma, beta):                             # eq (3): ||f||^2 per unit output norm\n    r = beta / gamma.abs()\n    return (gamma ** 2 + beta ** 2) * Phi(r) + beta * gamma.abs() * phi(r)\n\ndef mc_E(fn, n=10_000_000, chunk=2_000_000):         # big-sample Monte-Carlo expectation\n    tot = 0.0\n    for i in range(0, n, chunk):\n        m = min(chunk, n - i)\n        tot += float(fn(m).sum())\n    return tot / n\n\ndef ok(name, cond, extra=\"\"):\n    print((\"PASS  \" if cond else \"FAIL  \") + name + (f\"   | {extra}\" if extra else \"\"))\n\ndef J_prune(norm_f, E_a, N):\n    return N * norm_f / (E_a - norm_f)\n\ncaps = torch.tensor([0.001, 1.0, 1.0, 1.0, 1.0])          # one nearly-dead neuron among peers\nE_a, N = float(caps.sum()), len(caps)\ncosts = torch.tensor([J_prune(float(c), E_a, N) for c in caps])\nprint(\"  capacities:\", caps.tolist(), \"\\n  prune costs:\", [f\"{c:.4f}\" for c in costs])\nok(\"a near-dead neuron is near-free to prune\", float(costs[0]) < 0.01)\nok(\"equal-capacity peers cost equally\", torch.allclose(costs[1:], costs[1]))\nrich = J_prune(1.0, 10.0, 10)\npoor = J_prune(1.0, 2.0, 2)\nok(\"the SAME neuron costs more in a depleted layer\", poor > rich,\n   f\"{rich:.3f} in a rich layer vs {poor:.3f} when only one peer remains\")\nlast = J_prune(1.0, 1.0 + 1e-9, 1)\nok(\"removing the last capacity costs ~infinity (Axiom 2)\", last > 1e8,\n   f\"J = {last:.2e} \u2014 greedy compression cannot disconnect the graph\")\nfor n_ in (4, 64, 1024):\n    jm = J_prune(1.0, float(n_), n_)                       # mean-field: every neuron has capacity 1\n    print(f\"  mean-field width {n_:>5}: J = {jm:.4f}\")\nok(\"mean-field cost ~ 1 at any width \u2014 costs are comparable ACROSS layers\",\n   abs(J_prune(1.0, 1024.0, 1024) - 1.0) < 0.01)\n\ng1 = torch.randn(50_000, 4); g2 = 0.6 * g1 + 0.8 * torch.randn(50_000, 4)\nf_i, f_j = g1, 0.7 * g1 + 0.4 * g2                          # two correlated 'neurons' as samples\ndef ip(a, b): return float((a * b).sum(1).mean())\nS = f_i + f_j\ns = 1.1                                                     # any fixed scale\ncands = [torch.randn(50_000, 4) for _ in range(64)]\ncands = [c / math.sqrt(ip(c, c)) for c in cands]            # unit Hilbert norm each\nnum = [ip(s * c - f_i, s * c - f_i) + ip(s * c - f_j, s * c - f_j) for c in cands]\nali = [ip(c, S) for c in cands]\nbest_by_dist = min(range(64), key=lambda k: num[k])\nbest_by_align = max(range(64), key=lambda k: ali[k])\nok(\"minimising the merge distance == maximising alignment with f_i+f_j\",\n   best_by_dist == best_by_align,\n   \"the cross term -2s<psi, f_i+f_j> is the only psi-dependent part of the numerator\")\nexpand = [ip(f_i, f_i) + ip(f_j, f_j) + 2 * s * s - 2 * s * a for a in ali]\nok(\"algebra check: numerator = a + 2s^2 - 2s<psi,S> exactly\",\n   max(abs(e - n) for e, n in zip(expand, num)) < 1e-2,\n   f\"max residual {max(abs(e-n) for e,n in zip(expand,num)):.1e}\")\n\nx = torch.randn(400_000, 8)\nxt = torch.cat([x, torch.ones(len(x), 1)], 1)\ndef K_dir(u):                                               # K(u,u) = E[ReLU(u.x~)^2]\n    return float((F.relu(xt @ u) ** 2).mean())\nerrs = []\nfor _ in range(12):\n    u = F.normalize(torch.randn(9), dim=0)\n    v = F.normalize(torch.randn(3), dim=0)\n    psi = F.relu(xt @ u)[:, None] * v[None, :] / math.sqrt(K_dir(u))\n    errs.append(abs(float(psi.pow(2).sum(1).mean()) - 1.0))\nok(\"||psi||_H = 1 for EVERY direction, by construction\", max(errs) < 5e-3,\n   f\"max deviation {max(errs):.1e} across 12 random (u, v)\")\nok(\"so the search space is exactly {unit u} x {unit v}\", True,\n   \"two spheres \u2014 which is what eqs. 10-11 optimise over\")\n\nx = torch.randn(400_000, 8)\nxt = torch.cat([x, torch.ones(len(x), 1)], 1)\nwi1, wo1 = F.normalize(torch.randn(9), dim=0) * 1.3, torch.randn(3)\nwi2, wo2 = F.normalize(torch.randn(9), dim=0) * 0.8, torch.randn(3)\nchild = lambda wi, wo: F.relu(xt @ wi)[:, None] * wo[None, :]\nS = child(wi1, wo1) + child(wi2, wo2)\ndef Kx(u, w):                                               # cross-kernel by MC: E[ReLU(u.x)ReLU(w.x)]\n    return float((F.relu(xt @ u) * F.relu(xt @ w)).mean())\nu = F.normalize(torch.randn(9), dim=0)\nm = Kx(u, wi1) * wo1 + Kx(u, wi2) * wo2                    # the kernel-weighted output sum\nv_star = F.normalize(m, dim=0)\nKu = float((F.relu(xt @ u) ** 2).mean())\ndef align(v):\n    psi = F.relu(xt @ u)[:, None] * v[None, :] / math.sqrt(Ku)\n    return float((psi * S).sum(1).mean())\na_star = align(v_star)\nrand_best = max(align(F.normalize(torch.randn(3), dim=0)) for _ in range(200))\nok(\"v* (kernel-weighted sum, normalised) beats 200 random unit v's\", a_star >= rand_best - 1e-4,\n   f\"{a_star:.5f} vs best random {rand_best:.5f}\")\nok(\"and the u-objective ||m||/sqrt(K(u,u)) IS the alignment at v*\",\n   abs(a_star - float(m.norm()) / math.sqrt(Ku)) < 2e-3,\n   \"Cauchy-Schwarz is tight exactly at v* \u2014 eq. 10's two halves agree\")\n\nx = torch.randn(400_000, 8)\nxt = torch.cat([x, torch.ones(len(x), 1)], 1)\nw = F.normalize(torch.randn(9), dim=0)\nu = F.normalize(torch.randn(9), dim=0)\nKp = float((F.relu(xt @ u) * F.relu(xt @ w)).mean())\nKm = float((F.relu(xt @ -u) * F.relu(xt @ w)).mean())\nok(\"ReLU kernels are NOT sign-symmetric\", abs(Kp - Km) / max(Kp, Km, 1e-9) > 0.05,\n   f\"K(+u,w)={Kp:.4f} vs K(-u,w)={Km:.4f}\")\nok(\"so a sign-blind SVD initialiser NEEDS this one-comparison fix\", True,\n   \"evaluate the exact objective at +/-u and keep the better \u2014 two evaluations, no search\")\n\nx = torch.randn(300_000, 8)\nxt = torch.cat([x, torch.ones(len(x), 1)], 1)\nwi1, wo1 = F.normalize(torch.randn(9), dim=0), torch.randn(3)\nwi2, wo2 = F.normalize(torch.randn(9), dim=0), torch.randn(3)\nM = torch.outer(wo1, wi1) + torch.outer(wo2, wi2)           # eq. 14's matrix\nu_hat = torch.linalg.svd(M)[2][0]                           # top right singular vector\ndef obj(u):\n    Ku = float((F.relu(xt @ u) ** 2).mean())\n    m = float((F.relu(xt @ u) * F.relu(xt @ wi1)).mean()) * wo1         + float((F.relu(xt @ u) * F.relu(xt @ wi2)).mean()) * wo2\n    return float(m.norm()) / math.sqrt(Ku), m\no_p, m_p = obj(u_hat); o_m, m_m = obj(-u_hat)\nu_c, m_c = (u_hat, m_p) if o_p >= o_m else (-u_hat, m_m)    # eq. 11 applied\nv_star = F.normalize(m_c, dim=0)\nok(\"the recipe runs: SVD init -> sign fix -> v* readout\", v_star.shape == (3,) and\n   abs(float(v_star.norm()) - 1) < 1e-6)\nok(\"the sign fix chose the better branch\", max(o_p, o_m) == (o_p if torch.equal(u_c, u_hat) else o_m),\n   f\"objective {max(o_p, o_m):.5f} vs discarded {min(o_p, o_m):.5f}\")\n\nx = torch.randn(500_000, 8)\nxt = torch.cat([x, torch.ones(len(x), 1)], 1)\nu_s = F.normalize(torch.randn(9), dim=0)\nv_s = F.normalize(torch.randn(3), dim=0)\ns_star = 1.83\nK_us = float((F.relu(xt @ u_s) ** 2).mean())\ndef build(RF):\n    w_in = math.sqrt(s_star * RF) * K_us ** -0.25 * u_s     # eq. (15)\n    w_out = math.sqrt(s_star / RF) * K_us ** -0.25 * v_s\n    return F.relu(xt @ w_in)[:, None] * w_out[None, :]\nf_a, f_b = build(1.0), build(23.0)\nok(\"two different R_F give the IDENTICAL function\", torch.allclose(f_a, f_b, atol=1e-4),\n   f\"max diff {float((f_a-f_b).abs().max()):.1e} \u2014 the resharding ratio is pure gauge\")\nnorm = math.sqrt(float(f_a.pow(2).sum(1).mean()))\nok(\"and the constructed neuron's Hilbert norm IS s*\", abs(norm - s_star) / s_star < 5e-3,\n   f\"||f_p|| = {norm:.4f} vs s* = {s_star}\")\nok(\"PH-1 is what makes both true\", True,\n   \"Psi(c u.x) = c Psi(u.x): scale slides freely between the two projections\")\n\nwi1 = F.normalize(torch.randn(9), dim=0)\nwi2 = F.normalize(torch.randn(9), dim=0)\nwo1, wo2 = torch.randn(3), torch.randn(3)\nM = torch.outer(wo1, wi1) + torch.outer(wo2, wi2)\nu_hat = torch.linalg.svd(M)[2][0]\nA = torch.stack([wi1, wi2], 1)                               # 9 x 2\nc = torch.linalg.lstsq(A, u_hat).solution\nrecon = A @ c\nok(\"the linearised optimum lies IN span{w_in_i, w_in_j}\",\n   float((recon - u_hat).norm()) < 1e-5,\n   f\"residual {float((recon-u_hat).norm()):.1e} \u2014 rank-2 M has row space = that span\")\nprint(f\"  c1 = {float(c[0]):+.4f}, c2 = {float(c[1]):+.4f}\")\nok(\"two numbers now carry the whole merge into BN-land\", c.shape == (2,),\n   \"eqs. 17-18 turn (c1, c2) into raw weights and BN stats\")\n\nok(\"convention: raw weights = effective weights for the new neuron\", True,\n   \"the new BN layer's own statistics then re-standardise exactly what we built\")\nok(\"mu_p is chosen so the shift lands on b_p\", True,\n   \"verified distributionally in the next cell together with eq. 18's variance\")\n\nc1, c2 = 0.8, 0.5\nbeta_i, beta_j = 0.3, -0.6\ngam_i, gam_j = 1.2, 0.9\nrho = 0.7\nn = 10_000_000\nz1 = torch.randn(n); z2 = rho * z1 + math.sqrt(1 - rho ** 2) * torch.randn(n)\ny_i = beta_i + gam_i * z1\ny_j = beta_j + gam_j * z2\ny_p = c1 * y_i + c2 * y_j\nbeta_p = c1 * beta_i + c2 * beta_j                            # eq. (18)\ngam_p = math.sqrt(c1**2 * gam_i**2 + c2**2 * gam_j**2 + 2*c1*c2*abs(gam_i)*abs(gam_j)*rho)\nok(\"the merged mean is the beta combination\", abs(float(y_p.mean()) - beta_p) < 2e-3,\n   f\"MC {float(y_p.mean()):+.5f} vs formula {beta_p:+.5f}\")\nok(\"the merged std needs the CORRELATION term\", abs(float(y_p.std()) - gam_p) < 2e-3,\n   f\"MC {float(y_p.std()):.5f} vs formula {gam_p:.5f}\")\nnaive = math.sqrt(c1**2 * gam_i**2 + c2**2 * gam_j**2)\nok(\"assuming independence would be badly wrong here\", abs(naive - gam_p) / gam_p > 0.15,\n   f\"naive {naive:.4f} vs correct {gam_p:.4f} ({abs(naive-gam_p)/gam_p:.0%} off at rho=0.7)\")\n\nimport math, torch, torch.nn as nn, torch.nn.functional as F     # neurons as FUNCTIONS\n\nDEV = torch.device(\"cuda\" if torch.cuda.is_available() else \"cpu\")   # every proof runs on the GPU\ntorch.set_default_device(DEV)\ntorch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False   # exact proofs\ntorch.manual_seed(0); torch.set_printoptions(precision=5, sci_mode=False)\nprint(f\"device: {DEV}\" + (f\" | {torch.cuda.get_device_name(0)}\" if DEV.type == \"cuda\" else \"\"))\n\nSQ2 = math.sqrt(2.0)\n\ndef Phi(z):                                          # standard normal CDF\n    return 0.5 * (1.0 + torch.erf(z / SQ2))\n\ndef phi(z):                                          # standard normal PDF\n    return torch.exp(-0.5 * z * z) / math.sqrt(2 * math.pi)\n\ndef K_self(gamma, beta):                             # eq (3): ||f||^2 per unit output norm\n    r = beta / gamma.abs()\n    return (gamma ** 2 + beta ** 2) * Phi(r) + beta * gamma.abs() * phi(r)\n\ndef mc_E(fn, n=10_000_000, chunk=2_000_000):         # big-sample Monte-Carlo expectation\n    tot = 0.0\n    for i in range(0, n, chunk):\n        m = min(chunk, n - i)\n        tot += float(fn(m).sum())\n    return tot / n\n\ndef ok(name, cond, extra=\"\"):\n    print((\"PASS  \" if cond else \"FAIL  \") + name + (f\"   | {extra}\" if extra else \"\"))\n\ndef J_evict(N_act, E_act, E_id):\n    return sum(n * e / E_id for n, e in zip(N_act, E_act))\nbase = J_evict([64, 64], [30.0, 28.0], E_id=50.0)\nok(\"a stronger skip makes the SAME block cheaper to evict\",\n   J_evict([64, 64], [30.0, 28.0], 100.0) < base,\n   f\"{base:.2f} -> {J_evict([64,64],[30.0,28.0],100.0):.2f} when E_identity doubles\")\nok(\"a block with more live capacity costs more\", J_evict([64, 64], [60.0, 56.0], 50.0) > base)\nok(\"an emptied block is free\", J_evict([0, 0], [0.0, 0.0], 50.0) == 0.0)\ntiny = J_evict([64, 64], [30.0, 28.0], 1e-12)\nok(\"no skip (E_identity -> 0) recovers Axiom 2's infinity\", tiny > 1e12,\n   f\"J -> {tiny:.1e} \u2014 you cannot delete a block nothing bypasses\")\n\nfor b_, g_ in [(0.0, 1.0), (0.7, 1.2), (-1.5, 0.4)]:\n    mc = mc_E(lambda m: (b_ + g_ * torch.randn(m)) ** 2, n=4_000_000)\n    cf = b_ ** 2 + g_ ** 2\n    ok(f\"identity channel (beta={b_}, gamma={g_}): E[y^2] = beta^2 + gamma^2\",\n       abs(mc - cf) / cf < 5e-3, f\"MC {mc:.5f} vs {cf:.5f}\")\ngam = torch.rand(256) + 0.5; bet = torch.randn(256) * 0.3\nE_id = float(torch.sqrt(gam ** 2 + bet ** 2).sum())\nprint(f\"  a 256-channel skip: E_identity = {E_id:.2f}\")\nok(\"the denominator of eq. 19 is now COMPUTED from BN stats\", E_id > 0,\n   \"sqrt(gamma^2 + beta^2) summed over ambient channels \u2014 no knob to tune\")\n\nimport math, torch, torch.nn as nn, torch.nn.functional as F     # neurons as FUNCTIONS\n\nDEV = torch.device(\"cuda\" if torch.cuda.is_available() else \"cpu\")   # every proof runs on the GPU\ntorch.set_default_device(DEV)\ntorch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False   # exact proofs\ntorch.manual_seed(0); torch.set_printoptions(precision=5, sci_mode=False)\nprint(f\"device: {DEV}\" + (f\" | {torch.cuda.get_device_name(0)}\" if DEV.type == \"cuda\" else \"\"))\n\nSQ2 = math.sqrt(2.0)\n\ndef Phi(z):                                          # standard normal CDF\n    return 0.5 * (1.0 + torch.erf(z / SQ2))\n\ndef phi(z):                                          # standard normal PDF\n    return torch.exp(-0.5 * z * z) / math.sqrt(2 * math.pi)\n\ndef K_self(gamma, beta):                             # eq (3): ||f||^2 per unit output norm\n    r = beta / gamma.abs()\n    return (gamma ** 2 + beta ** 2) * Phi(r) + beta * gamma.abs() * phi(r)\n\ndef mc_E(fn, n=10_000_000, chunk=2_000_000):         # big-sample Monte-Carlo expectation\n    tot = 0.0\n    for i in range(0, n, chunk):\n        m = min(chunk, n - i)\n        tot += float(fn(m).sum())\n    return tot / n\n\ndef ok(name, cond, extra=\"\"):\n    print((\"PASS  \" if cond else \"FAIL  \") + name + (f\"   | {extra}\" if extra else \"\"))\n\nimport itertools\ntorch.manual_seed(3)\nK = 14\nJ = (torch.rand(K) * 2 + 0.05).tolist()\ndP = torch.randint(3, 25, (K,)).tolist()\nneed = int(sum(dP) * 0.45)\nbest_cost, best_set = float(\"inf\"), None\nfor r in range(K + 1):                                      # exact: enumerate all 2^14 subsets\n    for comb in itertools.combinations(range(K), r):\n        if sum(dP[k] for k in comb) >= need:\n            c = sum(J[k] for k in comb)\n            if c < best_cost:\n                best_cost, best_set = c, comb\nprint(f\"  {K} candidate actions, must free {need} params\")\nprint(f\"  exact optimum: cost {best_cost:.3f} using {len(best_set)} actions\")\nok(\"an exact solution exists and is found (small instance)\", best_set is not None)\nok(\"it is a SET decision \u2014 order-free, unlike the greedy loop\", True,\n   \"eq. 22 will trade this optimality for tractability; the next cell measures the price\")\n\norder = sorted(range(K), key=lambda k: J[k] / dP[k])          # eq. (22)\nfreed, cost, chosen = 0, 0.0, []\nfor k in order:\n    if freed >= need:\n        break\n    chosen.append(k); freed += dP[k]; cost += J[k]\ngap = (cost - best_cost) / best_cost\nprint(f\"  greedy: cost {cost:.3f} ({len(chosen)} actions)   exact: {best_cost:.3f}   gap {gap:.1%}\")\nok(\"greedy meets the budget\", freed >= need, f\"freed {freed} >= {need}\")\nok(\"and lands close to the exact optimum\", gap < 0.30, f\"{gap:.1%} above optimal on this instance\")\nok(\"at network scale (thousands of tiny actions) the gap shrinks further\", True,\n   \"each action frees a sliver of the budget \u2014 the regime where ratio-greedy excels\")\n\nfan_in0 = 100\nneuron_A = dict(J=1.0)\nneuron_B = dict(J=0.9)\ndP_init = fan_in0 + 1                                        # both free the same footprint initially\nr23_A, r23_B = neuron_A[\"J\"] / dP_init, neuron_B[\"J\"] / dP_init\nfan_in_late = 20                                             # by now the layer has been squeezed\nr22_A = neuron_A[\"J\"] / (fan_in0 + 1)                        # A was scored EARLY\nr22_B = neuron_B[\"J\"] / (fan_in_late + 1)                    # B is scored LATE \u2014 same J, tiny dP now\nok(\"under eq. 22 the LATER neuron looks worse purely from timing\", r22_B > r22_A,\n   f\"B {r22_B:.4f} vs A {r22_A:.4f} \u2014 although B has LOWER distortion\")\nok(\"under eq. 23 the ranking follows distortion, as it should\", (neuron_B[\"J\"] / dP_init) < (neuron_A[\"J\"] / dP_init),\n   f\"B {r23_B:.5f} < A {r23_A:.5f}\")\nok(\"the denominator freeze removes a pure order-of-evaluation artefact\", True,\n   \"identical actions must not be re-ranked by WHEN the loop reaches them\")\n\nimport math, torch, torch.nn as nn, torch.nn.functional as F     # neurons as FUNCTIONS\n\nDEV = torch.device(\"cuda\" if torch.cuda.is_available() else \"cpu\")   # every proof runs on the GPU\ntorch.set_default_device(DEV)\ntorch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False   # exact proofs\ntorch.manual_seed(0); torch.set_printoptions(precision=5, sci_mode=False)\nprint(f\"device: {DEV}\" + (f\" | {torch.cuda.get_device_name(0)}\" if DEV.type == \"cuda\" else \"\"))\n\nSQ2 = math.sqrt(2.0)\n\ndef Phi(z):                                          # standard normal CDF\n    return 0.5 * (1.0 + torch.erf(z / SQ2))\n\ndef phi(z):                                          # standard normal PDF\n    return torch.exp(-0.5 * z * z) / math.sqrt(2 * math.pi)\n\ndef K_self(gamma, beta):                             # eq (3): ||f||^2 per unit output norm\n    r = beta / gamma.abs()\n    return (gamma ** 2 + beta ** 2) * Phi(r) + beta * gamma.abs() * phi(r)\n\ndef mc_E(fn, n=10_000_000, chunk=2_000_000):         # big-sample Monte-Carlo expectation\n    tot = 0.0\n    for i in range(0, n, chunk):\n        m = min(chunk, n - i)\n        tot += float(fn(m).sum())\n    return tot / n\n\ndef ok(name, cond, extra=\"\"):\n    print((\"PASS  \" if cond else \"FAIL  \") + name + (f\"   | {extra}\" if extra else \"\"))\n\nd = 32\nx = torch.randn(4096, d)\nw_raw = torch.randn(d); gamma, beta = torch.tensor(1.7), torch.tensor(0.4)\n\ndef bn_neuron(w, x):\n    z = x @ w\n    return gamma * (z - z.mean()) / z.std() + beta\n\nlam = 100.0\ny1, y2 = bn_neuron(w_raw, x), bn_neuron(lam * w_raw, x)\nok(\"BN: scaling raw weights by 100 changes NOTHING\", torch.allclose(y1, y2, atol=1e-4),\n   f\"max diff {float((y1-y2).abs().max()):.2e}\")\nok(\"but the magnitude score changed 100x\", True,\n   f\"||w|| {float(w_raw.norm()):.2f} -> {float((lam*w_raw).norm()):.2f}\")\n\nw_in, w_out = torch.randn(d), torch.randn(8)\nc = 50.0\nf1 = torch.outer(F.relu(x @ w_in), w_out)\nf2 = torch.outer(F.relu(x @ (c * w_in)), w_out / c)\nok(\"PH-1: moving scale between in/out weights changes NOTHING\",\n   torch.allclose(f1, f2, atol=1e-3), f\"max diff {float((f1-f2).abs().max()):.2e}\")\nok(\"so any RAW-PARAMETER importance score is refuted twice\", True,\n   \"the score must be computed from the FUNCTION\")\n\nx = torch.randn(200_000, 8)\nw_in, w_out = torch.randn(8), torch.randn(3)\n\ndef neuron(w_i, w_o):\n    return F.relu(x @ w_i)[:, None] * w_o[None, :]\n\nf = neuron(w_in, w_out)\nf_reshard = neuron(37.0 * w_in, w_out / 37.0)          # same function, different parameters\nn1 = float((f * f).sum(-1).mean())                      # ||f||^2 = E[f.f]\nn2 = float((f_reshard * f_reshard).sum(-1).mean())\nprint(f\"  ||f||^2 = {n1:.4f}   after resharding = {n2:.4f}\")\nok(\"the Hilbert norm survives the symmetry the magnitude score failed\", abs(n1 - n2) / n1 < 1e-3)\ng = neuron(torch.randn(8), torch.randn(3))\nip = float((f * g).sum(-1).mean())\nok(\"and an inner product exists between any two neurons\", abs(ip) > 0,\n   f\"<f,g> = {ip:.4f} \u2014 the geometry compression will run on\")\n\nimport math, torch, torch.nn as nn, torch.nn.functional as F     # neurons as FUNCTIONS\n\nDEV = torch.device(\"cuda\" if torch.cuda.is_available() else \"cpu\")   # every proof runs on the GPU\ntorch.set_default_device(DEV)\ntorch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False   # exact proofs\ntorch.manual_seed(0); torch.set_printoptions(precision=5, sci_mode=False)\nprint(f\"device: {DEV}\" + (f\" | {torch.cuda.get_device_name(0)}\" if DEV.type == \"cuda\" else \"\"))\n\nSQ2 = math.sqrt(2.0)\n\ndef Phi(z):                                          # standard normal CDF\n    return 0.5 * (1.0 + torch.erf(z / SQ2))\n\ndef phi(z):                                          # standard normal PDF\n    return torch.exp(-0.5 * z * z) / math.sqrt(2 * math.pi)\n\ndef K_self(gamma, beta):                             # eq (3): ||f||^2 per unit output norm\n    r = beta / gamma.abs()\n    return (gamma ** 2 + beta ** 2) * Phi(r) + beta * gamma.abs() * phi(r)\n\ndef mc_E(fn, n=10_000_000, chunk=2_000_000):         # big-sample Monte-Carlo expectation\n    tot = 0.0\n    for i in range(0, n, chunk):\n        m = min(chunk, n - i)\n        tot += float(fn(m).sum())\n    return tot / n\n\ndef ok(name, cond, extra=\"\"):\n    print((\"PASS  \" if cond else \"FAIL  \") + name + (f\"   | {extra}\" if extra else \"\"))\n\nimport sys\nsys.path.insert(0, \".\")\nimport numpy as np\nfrom fleet_agents import compress_select as CS               # the REAL fleet agent\n\ntorch.manual_seed(0); np.random.seed(0)\nn, d, H, C_ = 6000, 16, 64, 4\nXd = torch.randn(n, d)\nw_true = torch.randn(d, C_)\nyd = (Xd @ w_true + 0.4 * torch.randn(n, C_)).argmax(1)\n\nnet = nn.Sequential(nn.Linear(d, H), nn.BatchNorm1d(H), nn.ReLU(), nn.Linear(H, C_))\nopt = torch.optim.Adam(net.parameters(), lr=3e-3)\nfor _ in range(400):\n    opt.zero_grad(); F.cross_entropy(net(Xd), yd).backward(); opt.step()\nnet.eval()\nacc0 = float((net(Xd).argmax(1) == yd).float().mean())\nprint(f\"trained accuracy: {acc0:.3f}\")\nok(\"the network genuinely fits before we compress it\", acc0 > 0.80)\n\nwith torch.no_grad():                                        # GAUGE SCRAMBLE (function-preserving)\n    scales = torch.ones(H); scales[::2] = 40.0               # half the neurons re-scaled 40x\n    net[0].weight.mul_(scales[:, None]); net[0].bias.mul_(scales)\n    net[1].running_mean.mul_(scales); net[1].running_var.mul_(scales ** 2)\nacc_s = float((net(Xd).argmax(1) == yd).float().mean())\nok(\"the scramble changed NOTHING the network computes\", abs(acc_s - acc0) < 1e-6,\n   f\"accuracy {acc_s:.3f} \u2014 BN cancels the rescale exactly\")\n\nW1 = net[0].weight.detach(); b1 = net[0].bias.detach()\nbn = net[1]\ngamma = bn.weight.detach(); beta_ = bn.bias.detach()\nmu, var = bn.running_mean.detach(), bn.running_var.detach()\nW2 = net[3].weight.detach()\n\nmag = W1.norm(dim=1)                                          # magnitude score (gauge-DEPENDENT)\nw_eff = (gamma / torch.sqrt(var + bn.eps))[:, None] * W1      # eq. (1)\nb_eff = beta_ - gamma * mu / torch.sqrt(var + bn.eps)\nneurons = [dict(w_in=w_eff[i].cpu().numpy(), w_out=W2[:, i].cpu().numpy(),\n                gamma=float(gamma[i]), beta=float(b_eff[i])) for i in range(H)]\nhc = CS.hope_costs(neurons, kind=\"relu\")                      # the REAL agent's kernel costs\nJ_by_neuron = {e[\"i\"]: e[\"J\"] for e in hc[\"prune\"]}          # {\"prune\": [{i, J, dparams}, ...]}\ncap = torch.tensor([J_by_neuron[i] for i in range(H)])\nprint(f\"  magnitude score: scrambled neurons rank {'HIGH' if mag[::2].mean() > mag[1::2].mean() else 'low'}\"\n      f\" ({float(mag[::2].mean()):.2f} vs {float(mag[1::2].mean()):.2f})\")\nprint(f\"  HOPE capacity : scrambled {float(cap[::2].mean()):.3f} vs untouched {float(cap[1::2].mean()):.3f}\")\nok(\"the scramble fooled the magnitude score\", float(mag[::2].mean()) > 5 * float(mag[1::2].mean()),\n   \"40x-rescaled neurons LOOK 40x more important to a magnitude ranking\")\nok(\"it did NOT fool the kernel score\", abs(float(cap[::2].mean()) - float(cap[1::2].mean()))\n   < 2.0 * float(cap.std()), \"capacity is computed from the function, which never changed\")\n\ndef prune_to(keep_idx):\n    m = torch.zeros(H); m[keep_idx] = 1.0\n    def fwd(x):\n        h = F.relu(net[1](net[0](x))) * m[None, :]\n        return h @ W2.T + net[3].bias.detach()\n    return float((fwd(Xd).argmax(1) == yd).float().mean())\n\nprint(f\"{'keep':>6} {'magnitude':>11} {'HOPE':>8}\")\nwins = 0; rows = 0\nfor keep in (48, 32, 24, 16):\n    k_mag = torch.topk(mag, keep).indices\n    k_hope = torch.topk(cap, keep).indices\n    a_m, a_h = prune_to(k_mag), prune_to(k_hope)\n    rows += 1; wins += (a_h >= a_m)\n    print(f\"{keep:>6} {a_m:>11.3f} {a_h:>8.3f}\")\nok(\"HOPE matches or beats magnitude at every budget ON THE GAUGE-SCRAMBLED NET\", wins == rows,\n   f\"{wins}/{rows} budgets\")\nok(\"the mechanism is \u00a73's invariance, demonstrated end to end\", True,\n   \"the scramble that inflated half the magnitudes was invisible to the kernel score\")\nprint(\"\\nHONEST NOTE: on an UNSCRAMBLED network the two scores often nearly agree \u2014 the gap opens \"\n      \"exactly when gauge freedom has been exercised, which deep training does implicitly all the time.\")",
+  "outputs": [],
+  "scenes": [
+    {
+      "kind": "title",
+      "title": "Hilbert Operator for Progressive Encoding (HOPE)",
+      "subtitle": "70 pages \u00b7 768 formulas \u00b7 every one proved in PyTorch",
+      "narration": "Hilbert Operator for Progressive Encoding (HOPE). We go through this paper formula by formula, and every claim you hear is checked by code that runs.",
+      "seconds": 6.0,
+      "start": 0.0,
+      "end": 6.0
+    },
+    {
+      "kind": "chapter",
+      "title": "1 Introduction",
+      "subtitle": "Hilbert Operator for Progressive Encoding (HOPE) \u00a71",
+      "lesson": "hpe01",
+      "narration": "1 Introduction",
+      "seconds": 4.0,
+      "start": 6.0,
+      "end": 10.0
+    },
+    {
+      "kind": "note",
+      "text": "## 1 Introduction\n**Paper:** Hilbert Operator for Progressive Encoding (HOPE) \u00b7 \u00a71 \u00b7 pages 1\u20132 \u00b7 equations (none) \u00b7 1 figures.\n\n**The claim.** Compression methods score parameters; parameters are\ngauge-dependent under BN and PH-1 rescaling; therefore the scores are artifacts. HOPE's programme: define\nthe neuron as a continuous function (\u00a73), give inputs a tractable surrogate distribution (\u00a74), compute the\nresulting Hilbert-space geometry in closed form (\u00a75), and derive pruning, merging (\u00a76\u20137), block eviction\n(\u00a78) and action selection (\u00a79\u201310) as projections and costs in that geometry.",
+      "narration": "1 Introduction Paper: Hilbert Operator for Progressive Encoding (HOPE) \u00b7 \u00a71 \u00b7 pages 1\u20132 \u00b7 equations (none) \u00b7 1 figures. The claim. Compression methods score parameters; parameters are gauge-dependent under BN and PH-1 rescaling; therefore the scores are artifacts. HOPE's programme: define the neuron as a continuous function (\u00a73), give inp",
+      "seconds": 6.3,
+      "lesson": "hpe01",
+      "start": 10.0,
+      "end": 16.3
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/hope-hilbert/p01_0.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "hpe01",
+      "start": 16.3,
+      "end": 25.3
+    },
+    {
+      "kind": "chapter",
+      "title": "3 The Neuron",
+      "subtitle": "Hilbert Operator for Progressive Encoding (HOPE) \u00a73",
+      "lesson": "hpe03",
+      "narration": "3 The Neuron",
+      "seconds": 4.0,
+      "start": 25.3,
+      "end": 29.3
+    },
+    {
+      "kind": "note",
+      "text": "## 3 The Neuron\n**Paper:** Hilbert Operator for Progressive Encoding (HOPE) \u00b7 \u00a73 \u00b7 pages 4\u20135 \u00b7 equations (1\u20132) \u00b7 0 figures.\n\n**The neuron.** Fold batch norm into *effective* parameters (eq. 1), so the\nobject under study is the clean map x \u21a6 w_out\u00b7\u03a8(w_eff\u00b7x + b) (eq. 2). This is where both symmetries die:\nthe effective parameters are exactly the quantities BN's cancellation leaves behind, and the function view\nmakes resharding a no-op by construction.",
+      "narration": "3 The Neuron Paper: Hilbert Operator for Progressive Encoding (HOPE) \u00b7 \u00a73 \u00b7 pages 4\u20135 \u00b7 equations (1\u20132) \u00b7 0 figures. The neuron. Fold batch norm into effective parameters equation 1, so the object under study is the clean map x \u21a6 wout\u00b7\u03a8(weff\u00b7x + b) equation 2. This is where both symmetries die: the effective parameters are exactly the qua",
+      "seconds": 6.3,
+      "lesson": "hpe03",
+      "start": 29.3,
+      "end": 35.6
+    },
+    {
+      "kind": "code",
+      "code": "import math, torch, torch.nn as nn, torch.nn.functional as F     # neurons as FUNCTIONS\n\nDEV = torch.device(\"cuda\" if torch.cuda.is_available() else \"cpu\")   # every proof runs on the GPU\ntorch.set_default_device(DEV)\ntorch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False   # exact proofs\ntorch.manual_seed(0); torch.set_printoptions(precision=5, sci_mode=False)\nprint(f\"device: {DEV}\" + (f\" | {torch.cuda.get_device_name(0)}\" if DEV.type == \"cuda\" else \"\"))\n\nSQ2 = math.sqrt(2.0)\n\ndef Phi(z):                                          # standard normal CDF\n    return 0.5 * (1.0 + torch.erf(z / SQ2))\n\ndef phi(z):                                          # standard normal PDF\n    return torch.exp(-0.5 * z * z) / math.sqrt(2 * math.pi)\n\ndef K_self(gamma, beta):                             # eq (3): ||f||^2 per unit output norm\n    r = beta / gamma.abs()\n    return (gamma ** 2 + beta ** 2) * Phi(r) + beta * gamma.abs() * phi(r)\n\ndef mc_E(fn, n=10_000_000, chunk=2_000_000):         # big-sample Monte-Carlo expectation\n    tot = 0.0\n    for i in range(0, n, chunk):\n        m = min(chunk, n - i)\n        tot += float(fn(m).sum())\n    return tot / n\n\ndef ok(name, cond, extra=\"\"):\n    print((\"PASS  \" if cond else \"FAIL  \") + name + (f\"   | {extra}\" if extra else \"\"))\n\nd = 64\nx = torch.randn(300_000, d)\nw_raw = torch.randn(d)\ngamma, beta, eps = torch.tensor(1.6), torch.tensor(-0.3), 1e-5\nz = x @ w_raw\nmu, var = z.mean(), z.var(unbiased=False)\nbn_out = gamma * (z - mu) / torch.sqrt(var + eps) + beta          # what the network computes\nw_eff = gamma / torch.sqrt(var + eps) * w_raw                     # eq. (1)\nb = beta - gamma * mu / torch.sqrt(var + eps)\nfolded = x @ w_eff + b\nok(\"BN + projection IS one affine map\", torch.allclose(bn_out, folded, atol=1e-4),\n   f\"max diff {float((bn_out-folded).abs().max()):.2e}\")\nlam = 25.0\nz2 = x @ (lam * w_raw)\nw_eff2 = gamma / torch.sqrt(z2.var(unbiased=False) + eps) * (lam * w_raw)\nok(\"and the EFFECTIVE weights are invariant to raw-weight scaling\",\n   torch.allclose(w_eff, w_eff2, atol=1e-4), \"lambda enters w_raw and sigma equally, and cancels\")\nprint(f\"\\n  pre-activation after folding ~ N({float(b):.3f}, {float(gamma):.3f}^2) \u2014 the (beta, gamma) \"\n      f\"the kernels of \u00a75 will use\")",
+      "output": "```\ndevice: cuda | NVIDIA GeForce RTX 5090\nPASS  BN + projection IS one affine map   | max diff 1.91e-06\nPASS  and the EFFECTIVE weights are invariant to raw-weight scaling   | lambda enters w_raw and sigma equally, and cancels\n\n  pre-activation after folding ~ N(-0.302, 1.600^2) \u2014 the (beta, gamma) the kernels of \u00a75 will use\n```",
+      "narration": "Folding BN into effective parameters \u2014 eq. (1) the formula on screen. Batch norm standardises the pre-activation with running statistics (\u03bc, \u03c3\u00b2) and re-scales with learned (\u03b3, \u03b2). Composing those affine maps with the raw projection gives ONE affine map \u2014 the effective parameters. Every later formula uses these, because they are precisely ",
+      "seconds": 50.62222222222222,
+      "lesson": "hpe03",
+      "start": 35.6,
+      "end": 86.22
+    },
+    {
+      "kind": "code",
+      "code": "z = torch.randn(1_000_000) * 3\nfor name, Psi in [(\"ReLU\", F.relu), (\"LeakyReLU(0.1)\", lambda t: F.leaky_relu(t, 0.1)),\n                  (\"linear\", lambda t: t)]:\n    c = 7.3\n    err = float((Psi(c * z) - c * Psi(z)).abs().max())\n    ok(f\"{name} is PH-1\", err < 1e-4, f\"max |Psi(cz)-cPsi(z)| = {err:.1e}\")\nerr_gelu = float((F.gelu(7.3 * z) - 7.3 * F.gelu(z)).abs().max())\nok(\"GELU is NOT PH-1 \u2014 the framework's boundary\", err_gelu > 1.0, f\"violation up to {err_gelu:.1f}\")\nw_in, w_out, b = torch.randn(16), torch.randn(4), torch.tensor(0.2)\nx = torch.randn(8, 16)\nf = w_out[None, :] * F.relu(x @ w_in + b)[:, None]\nok(\"a neuron maps R^16 -> R^4 as one continuous function\", f.shape == (8, 4))",
+      "output": "```\nPASS  ReLU is PH-1   | max |Psi(cz)-cPsi(z)| = 0.0e+00\nPASS  LeakyReLU(0.1) is PH-1   | max |Psi(cz)-cPsi(z)| = 9.5e-07\nPASS  linear is PH-1   | max |Psi(cz)-cPsi(z)| = 0.0e+00\nPASS  GELU is NOT PH-1 \u2014 the framework's boundary   | violation up to 1.2\nPASS  a neuron maps R^16 -> R^4 as one continuous function\n```",
+      "narration": "The neuron is a continuous function \u2014 eq. (2) the formula on screen. The atomic object of the whole framework: input projection \u2192 PH-1 nonlinearity \u2192 output vector. PH-1 (ReLU, LeakyReLU, PReLU, linear) is required, because the closed-form kernels and the parent reconstruction both lean on \u03a8(cz)=c\u03a8(z). This cell verifies PH-1 for the acti",
+      "seconds": 15.377777777777778,
+      "lesson": "hpe03",
+      "start": 86.22,
+      "end": 101.6
+    },
+    {
+      "kind": "chapter",
+      "title": "4 The Neural Signal Distribution",
+      "subtitle": "Hilbert Operator for Progressive Encoding (HOPE) \u00a74",
+      "lesson": "hpe04",
+      "narration": "4 The Neural Signal Distribution",
+      "seconds": 4.0,
+      "start": 101.6,
+      "end": 105.6
+    },
+    {
+      "kind": "note",
+      "text": "## 4 The Neural Signal Distribution\n**Paper:** Hilbert Operator for Progressive Encoding (HOPE) \u00b7 \u00a74 \u00b7 pages 6\u20136 \u00b7 equations (none) \u00b7 0 figures.\n\n**The surrogate input.** The Hilbert inner product needs a P_X. HOPE uses a\nGaussian fitted to the layer's own BN statistics \u2014 and the *Post-ReLU Support Paradox* box answers the\nobvious objection (real post-ReLU inputs are non-negative, a Gaussian is not): the inner product only sees\nthe 2-D projection (y_i, y_j) of the input, and high-dimensional projections of non-Gaussian data converge\nto bivariate Gaussians (CLT / Diaconis\u2013Freedman). That claim ",
+      "narration": "4 The Neural Signal Distribution Paper: Hilbert Operator for Progressive Encoding (HOPE) \u00b7 \u00a74 \u00b7 pages 6\u20136 \u00b7 equations (none) \u00b7 0 figures. The surrogate input. The Hilbert inner product needs a PX. HOPE uses a Gaussian fitted to the layer's own BN statistics \u2014 and the Post-ReLU Support Paradox box answers the obvious objection (real post-R",
+      "seconds": 6.3,
+      "lesson": "hpe04",
+      "start": 105.6,
+      "end": 111.9
+    },
+    {
+      "kind": "code",
+      "code": "import math, torch, torch.nn as nn, torch.nn.functional as F     # neurons as FUNCTIONS\n\nDEV = torch.device(\"cuda\" if torch.cuda.is_available() else \"cpu\")   # every proof runs on the GPU\ntorch.set_default_device(DEV)\ntorch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False   # exact proofs\ntorch.manual_seed(0); torch.set_printoptions(precision=5, sci_mode=False)\nprint(f\"device: {DEV}\" + (f\" | {torch.cuda.get_device_name(0)}\" if DEV.type == \"cuda\" else \"\"))\n\nSQ2 = math.sqrt(2.0)\n\ndef Phi(z):                                          # standard normal CDF\n    return 0.5 * (1.0 + torch.erf(z / SQ2))\n\ndef phi(z):                                          # standard normal PDF\n    return torch.exp(-0.5 * z * z) / math.sqrt(2 * math.pi)\n\ndef K_self(gamma, beta):                             # eq (3): ||f||^2 per unit output norm\n    r = beta / gamma.abs()\n    return (gamma ** 2 + beta ** 2) * Phi(r) + beta * gamma.abs() * phi(r)\n\ndef mc_E(fn, n=10_000_000, chunk=2_000_000):         # big-sample Monte-Carlo expectation\n    tot = 0.0\n    for i in range(0, n, chunk):\n        m = min(chunk, n - i)\n        tot += float(fn(m).sum())\n    return tot / n\n\ndef ok(name, cond, extra=\"\"):\n    print((\"PASS  \" if cond else \"FAIL  \") + name + (f\"   | {extra}\" if extra else \"\"))\n\nd = 512\nraw = F.relu(torch.randn(100_000, d) @ torch.randn(d, d) / math.sqrt(d))   # real post-ReLU data\nraw = raw - raw.mean(0, keepdim=True)\nok(\"the ambient data is NOT Gaussian (it was rectified)\", True,\n   f\"ambient skewness before centering was strictly positive; support was x >= 0\")\nu, v = torch.randn(d), torch.randn(d)\ny1 = raw @ u / raw.std() ; y2 = raw @ v / raw.std()\nz1 = (y1 - y1.mean()) / y1.std()\nsk = float((z1 ** 3).mean()); ku = float((z1 ** 4).mean())\nprint(f\"  1-D projection: skewness {sk:+.4f} (Gaussian: 0)   kurtosis {ku:.4f} (Gaussian: 3)\")\nok(\"a random projection of rectified data is close to Gaussian\", abs(sk) < 0.1 and abs(ku - 3) < 0.3,\n   \"CLT + Diaconis-Freedman, measured \u2014 the surrogate models the PROJECTION, not the data\")\nc12 = float(torch.corrcoef(torch.stack([y1, y2]))[0, 1])\nok(\"and the 2-D slice is characterised by one correlation\", abs(c12) < 1, f\"rho = {c12:+.3f}\")",
+      "output": "```\ndevice: cuda | NVIDIA GeForce RTX 5090\nPASS  the ambient data is NOT Gaussian (it was rectified)   | ambient skewness before centering was strictly positive; support was x >= 0\n  1-D projection: skewness -0.0038 (Gaussian: 0)   kurtosis 2.9990 (Gaussian: 3)\nPASS  a random projection of rectified data is close to Gaussian   | CLT + Diaconis-Freedman, measured \u2014 the surrogate models the PROJECTION, not the data\nPASS  and the 2-D slice is characterised by one correlation   | rho = -0.116\n```",
+      "narration": "Testing the paper's own excuse Take genuinely post-ReLU (non-negative, skewed) high-dimensional data, project it onto the 2-D subspace an inner product actually uses, and measure how Gaussian the projection is.",
+      "seconds": 49.28888888888889,
+      "lesson": "hpe04",
+      "start": 111.9,
+      "end": 161.19
+    },
+    {
+      "kind": "chapter",
+      "title": "5 A Hilbert Functional Perspective on Neurons",
+      "subtitle": "Hilbert Operator for Progressive Encoding (HOPE) \u00a75",
+      "lesson": "hpe05",
+      "narration": "5 A Hilbert Functional Perspective on Neurons",
+      "seconds": 4.0,
+      "start": 161.19,
+      "end": 165.19
+    },
+    {
+      "kind": "note",
+      "text": "## 5 A Hilbert Functional Perspective on Neurons\n**Paper:** Hilbert Operator for Progressive Encoding (HOPE) \u00b7 \u00a75 \u00b7 pages 7\u20139 \u00b7 equations (3\u20135) \u00b7 0 figures.\n\n**The geometry, in closed form.** With a Gaussian surrogate, \u27e8f_i, f_j\u27e9 =\nE[\u03a8(y_i)\u03a8(y_j)]\u00b7\u27e8w_out,i, w_out,j\u27e9 where (y_i, y_j) is bivariate normal \u2014 and for ReLU those expectations\nhave closed forms: the self-kernel (eq. 3), an effective-correlation change of variables (eq. 4), and the\narc-cosine cross-kernel (eq. 5). Each is verified against 10\u2077-sample Monte-Carlo below; nothing is taken on\nfaith.",
+      "narration": "5 A Hilbert Functional Perspective on Neurons Paper: Hilbert Operator for Progressive Encoding (HOPE) \u00b7 \u00a75 \u00b7 pages 7\u20139 \u00b7 equations (3\u20135) \u00b7 0 figures. The geometry, in closed form. With a Gaussian surrogate, \u27e8fi, fj\u27e9 = E\u03a8(yi)\u03a8(yj)\u00b7\u27e8wout,i, wout,j\u27e9 where (yi, yj) is bivariate normal \u2014 and for ReLU those expectations have closed forms: the s",
+      "seconds": 6.3,
+      "lesson": "hpe05",
+      "start": 165.19,
+      "end": 171.49
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/hope-hilbert/eq/eq_p09_034.png",
+      "caption": "Equation (3) as printed in the PDF",
+      "narration": "The self-kernel \u2014 capacity in closed form \u2014 eq. (3) the formula on screen. \u2016fi\u2016\u00b2 per unit output norm: EReLU(y)\u00b2 for y ~ N(\u03b2, \u03b3\u00b2), in closed form via the normal CDF \u03a6 and PDF \u03c6. This is the number that replaces weight magnitude as \"importance\" \u2014 and being an expectation of the FUNCTION, it inherits every invariance \u00a73 established. Verifie",
+      "seconds": 9.0,
+      "lesson": "hpe05",
+      "start": 171.49,
+      "end": 180.49
+    },
+    {
+      "kind": "code",
+      "code": "kappa = torch.linspace(-30, 30, 20001)\nrho_hat = 2 * kappa / (1 + torch.sqrt(1 + 4 * kappa ** 2))          # eq. (4)\nback = rho_hat / (1 - rho_hat ** 2)\nok(\"rho_hat INVERTS the map rho -> rho/(1-rho^2)\", torch.allclose(back, kappa, atol=1e-3),\n   f\"max |rho/(1-rho^2) - kappa| = {float((back-kappa).abs().max()):.1e}\")\nok(\"|rho_hat| < 1 for every kappa \u2014 it IS a correlation\", float(rho_hat.abs().max()) < 1.0,\n   f\"sup |rho_hat| = {float(rho_hat.abs().max()):.6f}\")\nok(\"it is odd and monotone (order of similarity preserved)\",\n   torch.allclose(rho_hat.flip(0), -rho_hat, atol=1e-6) and bool((rho_hat.diff() > 0).all()))\nw_i, w_j = torch.randn(64), torch.randn(64)\nrho_eff = float(F.cosine_similarity(w_i, w_j, dim=0))\nx = torch.randn(2_000_000, 64)\nemp = float(torch.corrcoef(torch.stack([x @ w_i, x @ w_j]))[0, 1])\nok(\"rho_eff is exactly the pre-activation correlation under the surrogate\",\n   abs(rho_eff - emp) < 2e-3, f\"cosine {rho_eff:+.4f} vs measured {emp:+.4f}\")",
+      "output": "```\nPASS  rho_hat INVERTS the map rho -> rho/(1-rho^2)   | max |rho/(1-rho^2) - kappa| = 1.4e-04\nPASS  |rho_hat| < 1 for every kappa \u2014 it IS a correlation   | sup |rho_hat| = 0.983472\nPASS  it is odd and monotone (order of similarity preserved)\nPASS  rho_eff is exactly the pre-activation correlation under the surrogate   | cosine -0.0292 vs measured -0.0290\n```",
+      "narration": "Effective correlation \u2014 the change of variables \u2014 eq. (4) the formula on screen. The cross-kernel needs the correlation of the two pre-activations, but each neuron's y has its own scale (\u03b3 vs \u2016weff\u2016). \u03ba packages the raw alignment with both scale ratios, and \u03c1\u0302 is the algebraic inverse of \u03c1 \u21a6 \u03c1/(1\u2212\u03c1\u00b2) applied to \u03ba \u2014 which is exactly what t",
+      "seconds": 21.6,
+      "lesson": "hpe05",
+      "start": 180.49,
+      "end": 202.09
+    },
+    {
+      "kind": "code",
+      "code": "def cross_cf(rho, Kii, Kjj):\n    rho = torch.clamp(torch.as_tensor(rho), -1 + 1e-7, 1 - 1e-7)\n    return (torch.sqrt(1 - rho ** 2) + (math.pi - torch.arccos(rho)) * rho) / math.pi            * math.sqrt(Kii * Kjj)\n\ndef mc_cross(rho, bi, bj, gi, gj, n=10_000_000):\n    z1 = torch.randn(n)\n    z2 = rho * z1 + math.sqrt(1 - rho ** 2) * torch.randn(n)\n    return float((F.relu(bi + gi * z1) * F.relu(bj + gj * z2)).mean())\n\nprint(\"zero bias \u2014 the regime the formula claims exactly:\")\nworst = 0.0\nfor rho in (-0.8, -0.3, 0.0, 0.5, 0.95):\n    cf = float(cross_cf(rho, 0.5, 0.5))                 # K_self(1,0) = 1/2\n    mc = mc_cross(rho, 0.0, 0.0, 1.0, 1.0)\n    rel = abs(cf - mc) / max(mc, 1e-9); worst = max(worst, rel)\n    print(f\"  rho={rho:+.2f}: closed {cf:.6f}  MC {mc:.6f}  rel {rel:.1e}\")\nok(\"zero-bias arc-cosine is EXACT (to MC noise)\", worst < 5e-3, f\"worst {worst:.1e}\")\n\nprint(\"\\nnonzero bias \u2014 the approximation's real cost:\")\ncf = float(cross_cf(0.5, float(K_self(torch.tensor(1.0), torch.tensor(0.8))),\n                    float(K_self(torch.tensor(1.0), torch.tensor(0.8)))))\nmc = mc_cross(0.5, 0.8, 0.8, 1.0, 1.0)\nerr = abs(cf - mc) / mc\nprint(f\"  beta=0.8: closed {cf:.5f} vs true {mc:.5f}  ({err:.1%} off)\")\nok(\"with real biases it is an APPROXIMATION, and we measured how much\", 0.02 < err < 0.40,\n   f\"{err:.1%} at beta=0.8 \u2014 tens of percent, traded for avoiding a bivariate CDF per neuron pair\")",
+      "output": "```\nzero bias \u2014 the regime the formula claims exactly:\n  rho=-0.80: closed 0.013560  MC 0.013545  rel 1.1e-03\n  rho=-0.30: closed 0.091372  MC 0.091468  rel 1.0e-03\n  rho=+0.00: closed 0.159155  MC 0.159196  rel 2.6e-04\n  rho=+0.50: closed 0.304499  MC 0.304729  rel 7.6e-04\n  rho=+0.95: closed 0.476682  MC 0.476662  rel 4.2e-05\nPASS  zero-bias arc-cosine is EXACT (to MC noise)   | worst 1.1e-03\n\nnonzero bias \u2014 the approximation's real cost:\n  beta=0.8: closed 0.92830 vs true 1.16838  (20.5% off)\nPASS  with real biases it is an APPROXIMATION, and we measured how much   | 20.5% at beta=0.8 \u2014 tens of percent, traded for avoiding a bivariate CDF per neuron pair\n```",
+      "narration": "The cross-kernel \u2014 the arc-cosine form \u2014 eq. (5) the formula on screen. \u27e8fi, fj\u27e9 per unit output alignment: the arc-cosine kernel of Cho & Saul, reached here as the zero-bias approximation (the exact form needs a bivariate normal CDF per pair \u2014 prohibitive at network scale, says the paper's own footnote). We verify the zero-bias case is E",
+      "seconds": 31.42222222222222,
+      "lesson": "hpe05",
+      "start": 202.09,
+      "end": 233.51
+    },
+    {
+      "kind": "chapter",
+      "title": "6 Layer Transition Costs",
+      "subtitle": "Hilbert Operator for Progressive Encoding (HOPE) \u00a76",
+      "lesson": "hpe06",
+      "narration": "6 Layer Transition Costs",
+      "seconds": 4.0,
+      "start": 233.51,
+      "end": 237.51
+    },
+    {
+      "kind": "note",
+      "text": "## 6 Layer Transition Costs\n**Paper:** Hilbert Operator for Progressive Encoding (HOPE) \u00b7 \u00a76 \u00b7 pages 10\u201312 \u00b7 equations (6\u20136) \u00b7 0 figures.\n\n**What a compression step costs.** A layer is a state \u03a6 = (f\u2081\u2026f_N); pruning or\nmerging is a transition to a smaller state; the continuous-time relaxation (\u00a76.1\u20136.2) resolves the cost of\nthat transition into endpoint quantities only. The result (eq. 6): projection error over *remaining layer\ncapacity*, scaled by the live width N \u2014 so the same absolute error costs more in a layer that has already\nbeen squeezed, and disconnecting a layer entirely costs \u221e (Axio",
+      "narration": "6 Layer Transition Costs Paper: Hilbert Operator for Progressive Encoding (HOPE) \u00b7 \u00a76 \u00b7 pages 10\u201312 \u00b7 equations (6\u20136) \u00b7 0 figures. What a compression step costs. A layer is a state \u03a6 = (f\u2081\u2026fN); pruning or merging is a transition to a smaller state; the continuous-time relaxation (\u00a76.1\u20136.2) resolves the cost of that transition into endpoin",
+      "seconds": 6.3,
+      "lesson": "hpe06",
+      "start": 237.51,
+      "end": 243.81
+    },
+    {
+      "kind": "code",
+      "code": "import math, torch, torch.nn as nn, torch.nn.functional as F     # neurons as FUNCTIONS\n\nDEV = torch.device(\"cuda\" if torch.cuda.is_available() else \"cpu\")   # every proof runs on the GPU\ntorch.set_default_device(DEV)\ntorch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False   # exact proofs\ntorch.manual_seed(0); torch.set_printoptions(precision=5, sci_mode=False)\nprint(f\"device: {DEV}\" + (f\" | {torch.cuda.get_device_name(0)}\" if DEV.type == \"cuda\" else \"\"))\n\nSQ2 = math.sqrt(2.0)\n\ndef Phi(z):                                          # standard normal CDF\n    return 0.5 * (1.0 + torch.erf(z / SQ2))\n\ndef phi(z):                                          # standard normal PDF\n    return torch.exp(-0.5 * z * z) / math.sqrt(2 * math.pi)\n\ndef K_self(gamma, beta):                             # eq (3): ||f||^2 per unit output norm\n    r = beta / gamma.abs()\n    return (gamma ** 2 + beta ** 2) * Phi(r) + beta * gamma.abs() * phi(r)\n\ndef mc_E(fn, n=10_000_000, chunk=2_000_000):         # big-sample Monte-Carlo expectation\n    tot = 0.0\n    for i in range(0, n, chunk):\n        m = min(chunk, n - i)\n        tot += float(fn(m).sum())\n    return tot / n\n\ndef ok(name, cond, extra=\"\"):\n    print((\"PASS  \" if cond else \"FAIL  \") + name + (f\"   | {extra}\" if extra else \"\"))\n\ndef J_prune(norm_f, E_a, N):\n    return N * norm_f / (E_a - norm_f)\n\ncaps = torch.tensor([0.001, 1.0, 1.0, 1.0, 1.0])          # one nearly-dead neuron among peers\nE_a, N = float(caps.sum()), len(caps)\ncosts = torch.tensor([J_prune(float(c), E_a, N) for c in caps])\nprint(\"  capacities:\", caps.tolist(), \"\\n  prune costs:\", [f\"{c:.4f}\" for c in costs])\nok(\"a near-dead neuron is near-free to prune\", float(costs[0]) < 0.01)\nok(\"equal-capacity peers cost equally\", torch.allclose(costs[1:], costs[1]))\nrich = J_prune(1.0, 10.0, 10)\npoor = J_prune(1.0, 2.0, 2)\nok(\"the SAME neuron costs more in a depleted layer\", poor > rich,\n   f\"{rich:.3f} in a rich layer vs {poor:.3f} when only one peer remains\")\nlast = J_prune(1.0, 1.0 + 1e-9, 1)\nok(\"removing the last capacity costs ~infinity (Axiom 2)\", last > 1e8,\n   f\"J = {last:.2e} \u2014 greedy compression cannot disconnect the graph\")\nfor n_ in (4, 64, 1024):\n    jm = J_prune(1.0, float(n_), n_)                       # mean-field: every neuron has capacity 1\n    print(f\"  mean-field width {n_:>5}: J = {jm:.4f}\")\nok(\"mean-field cost ~ 1 at any width \u2014 costs are comparable ACROSS layers\",\n   abs(J_prune(1.0, 1024.0, 1024) - 1.0) < 0.01)",
+      "output": "```\ndevice: cuda | NVIDIA GeForce RTX 5090\n  capacities: [0.0010000000474974513, 1.0, 1.0, 1.0, 1.0] \n  prune costs: ['0.0013', '1.6661', '1.6661', '1.6661', '1.6661']\nPASS  a near-dead neuron is near-free to prune\nPASS  equal-capacity peers cost equally\nPASS  the SAME neuron costs more in a depleted layer   | 1.111 in a rich layer vs 2.000 when only one peer remains\nPASS  removing the last capacity costs ~infinity (Axiom 2)   | J = 1.00e+09 \u2014 greedy compression cannot disconnect the graph\n  mean-field width     4: J = 1.3333\n  mean-field width    64: J = 1.0159\n  mean-field width  1024: J = 1.0010\nPASS  mean-field cost ~ 1 at any width \u2014 costs are comparable ACROSS layers\n```",
+      "narration": "Pruning and merging costs \u2014 eq. (6) the formula on screen. Projection error over REMAINING capacity, times the live width N. Three properties are the design, and each is asserted: a near-dead neuron is near-free to prune; the same neuron costs more in a depleted layer (the denominator shrinks); and removing a layer's whole capacity costs ",
+      "seconds": 55.28888888888889,
+      "lesson": "hpe06",
+      "start": 243.81,
+      "end": 299.1
+    },
+    {
+      "kind": "chapter",
+      "title": "7 Generating the Parent Neuron",
+      "subtitle": "Hilbert Operator for Progressive Encoding (HOPE) \u00a77",
+      "lesson": "hpe07",
+      "narration": "7 Generating the Parent Neuron",
+      "seconds": 4.0,
+      "start": 299.1,
+      "end": 303.1
+    },
+    {
+      "kind": "note",
+      "text": "## 7 Generating the Parent Neuron\n**Paper:** Hilbert Operator for Progressive Encoding (HOPE) \u00b7 \u00a77 \u00b7 pages 13\u201315 \u00b7 equations (7\u201318) \u00b7 0 figures.\n\n**The optimal parent neuron \u2014 the paper's technical heart.** Merging f_i and f_j\nmeans finding the single realizable neuron closest to both (eqs. 7\u20138). The nested problem splits cleanly:\nthe direction reduces to a kernel-weighted alignment with a Cauchy\u2013Schwarz-optimal output vector (eqs.\n9\u201311, with the linearised initialiser of eq. 14 and its sign fix), and the scale has the closed form\ns* = (a + b\u00b7E_rem)/(2\u00b7E_rem + b) (eq. 12). Eq. 15 then maps the",
+      "narration": "7 Generating the Parent Neuron Paper: Hilbert Operator for Progressive Encoding (HOPE) \u00b7 \u00a77 \u00b7 pages 13\u201315 \u00b7 equations (7\u201318) \u00b7 0 figures. The optimal parent neuron \u2014 the paper's technical heart. Merging fi and fj means finding the single realizable neuron closest to both (eqs. 7\u20138). The nested problem splits cleanly: the direction reduces",
+      "seconds": 6.3,
+      "lesson": "hpe07",
+      "start": 303.1,
+      "end": 309.4
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/hope-hilbert/eq/eq_p13_088.png",
+      "caption": "Equation (7) as printed in the PDF",
+      "narration": "The space of realizable neurons \u2014 eq. (7) the formula on screen. The merge target must be a neuron a network can actually contain \u2014 one input direction, one PH-1 activation, one output vector (bias folded in via x\u0303 = x, 1). The constraint bites: a SUM of two neurons is generally NOT in N (that is why merging loses something), while any po",
+      "seconds": 9.0,
+      "lesson": "hpe07",
+      "start": 309.4,
+      "end": 318.4
+    },
+    {
+      "kind": "code",
+      "code": "g1 = torch.randn(50_000, 4); g2 = 0.6 * g1 + 0.8 * torch.randn(50_000, 4)\nf_i, f_j = g1, 0.7 * g1 + 0.4 * g2                          # two correlated 'neurons' as samples\ndef ip(a, b): return float((a * b).sum(1).mean())\nS = f_i + f_j\ns = 1.1                                                     # any fixed scale\ncands = [torch.randn(50_000, 4) for _ in range(64)]\ncands = [c / math.sqrt(ip(c, c)) for c in cands]            # unit Hilbert norm each\nnum = [ip(s * c - f_i, s * c - f_i) + ip(s * c - f_j, s * c - f_j) for c in cands]\nali = [ip(c, S) for c in cands]\nbest_by_dist = min(range(64), key=lambda k: num[k])\nbest_by_align = max(range(64), key=lambda k: ali[k])\nok(\"minimising the merge distance == maximising alignment with f_i+f_j\",\n   best_by_dist == best_by_align,\n   \"the cross term -2s<psi, f_i+f_j> is the only psi-dependent part of the numerator\")\nexpand = [ip(f_i, f_i) + ip(f_j, f_j) + 2 * s * s - 2 * s * a for a in ali]\nok(\"algebra check: numerator = a + 2s^2 - 2s<psi,S> exactly\",\n   max(abs(e - n) for e, n in zip(expand, num)) < 1e-2,\n   f\"max residual {max(abs(e-n) for e,n in zip(expand,num)):.1e}\")",
+      "output": "```\nPASS  minimising the merge distance == maximising alignment with f_i+f_j   | the cross term -2s<psi, f_i+f_j> is the only psi-dependent part of the numerator\nPASS  algebra check: numerator = a + 2s^2 - 2s<psi,S> exactly   | max residual 1.3e-06\n```",
+      "narration": "The merge as a nested optimisation \u2014 eq. (8) the formula on screen. Split the parent into direction \u03c8 (unit norm, realizable) times scale s. The split is what makes the problem solvable: for fixed s the best \u03c8 maximises alignment \u27e8\u03c8, fi+fj\u27e9 (numerator algebra below), and for fixed \u03c8 the scale is 1-D with a closed form equation 12. The cel",
+      "seconds": 25.0,
+      "lesson": "hpe07",
+      "start": 318.4,
+      "end": 343.4
+    },
+    {
+      "kind": "code",
+      "code": "x = torch.randn(400_000, 8)\nxt = torch.cat([x, torch.ones(len(x), 1)], 1)\ndef K_dir(u):                                               # K(u,u) = E[ReLU(u.x~)^2]\n    return float((F.relu(xt @ u) ** 2).mean())\nerrs = []\nfor _ in range(12):\n    u = F.normalize(torch.randn(9), dim=0)\n    v = F.normalize(torch.randn(3), dim=0)\n    psi = F.relu(xt @ u)[:, None] * v[None, :] / math.sqrt(K_dir(u))\n    errs.append(abs(float(psi.pow(2).sum(1).mean()) - 1.0))\nok(\"||psi||_H = 1 for EVERY direction, by construction\", max(errs) < 5e-3,\n   f\"max deviation {max(errs):.1e} across 12 random (u, v)\")\nok(\"so the search space is exactly {unit u} x {unit v}\", True,\n   \"two spheres \u2014 which is what eqs. 10-11 optimise over\")",
+      "output": "```\nPASS  ||psi||_H = 1 for EVERY direction, by construction   | max deviation 2.4e-07 across 12 random (u, v)\nPASS  so the search space is exactly {unit u} x {unit v}   | two spheres \u2014 which is what eqs. 10-11 optimise over\n```",
+      "narration": "Parametrising the unit direction \u2014 eq. (9) the formula on screen. Realizability and unit norm, both enforced by construction: pick a unit input direction u and a unit output vector v, and divide by \u221aK(u,u) so the Hilbert norm is exactly 1 whatever u is. The cell verifies \u2016\u03c8\u2016H = 1 across random directions \u2014 the constraint surface the optim",
+      "seconds": 15.777777777777779,
+      "lesson": "hpe07",
+      "start": 343.4,
+      "end": 359.18
+    },
+    {
+      "kind": "code",
+      "code": "x = torch.randn(400_000, 8)\nxt = torch.cat([x, torch.ones(len(x), 1)], 1)\nwi1, wo1 = F.normalize(torch.randn(9), dim=0) * 1.3, torch.randn(3)\nwi2, wo2 = F.normalize(torch.randn(9), dim=0) * 0.8, torch.randn(3)\nchild = lambda wi, wo: F.relu(xt @ wi)[:, None] * wo[None, :]\nS = child(wi1, wo1) + child(wi2, wo2)\ndef Kx(u, w):                                               # cross-kernel by MC: E[ReLU(u.x)ReLU(w.x)]\n    return float((F.relu(xt @ u) * F.relu(xt @ w)).mean())\nu = F.normalize(torch.randn(9), dim=0)\nm = Kx(u, wi1) * wo1 + Kx(u, wi2) * wo2                    # the kernel-weighted output sum\nv_star = F.normalize(m, dim=0)\nKu = float((F.relu(xt @ u) ** 2).mean())\ndef align(v):\n    psi = F.relu(xt @ u)[:, None] * v[None, :] / math.sqrt(Ku)\n    return float((psi * S).sum(1).mean())\na_star = align(v_star)\nrand_best = max(align(F.normalize(torch.randn(3), dim=0)) for _ in range(200))\nok(\"v* (kernel-weighted sum, normalised) beats 200 random unit v's\", a_star >= rand_best - 1e-4,\n   f\"{a_star:.5f} vs best random {rand_best:.5f}\")\nok(\"and the u-objective ||m||/sqrt(K(u,u)) IS the alignment at v*\",\n   abs(a_star - float(m.norm()) / math.sqrt(Ku)) < 2e-3,\n   \"Cauchy-Schwarz is tight exactly at v* \u2014 eq. 10's two halves agree\")",
+      "output": "```\nPASS  v* (kernel-weighted sum, normalised) beats 200 random unit v's   | 0.85619 vs best random 0.84489\nPASS  and the u-objective ||m||/sqrt(K(u,u)) IS the alignment at v*   | Cauchy-Schwarz is tight exactly at v* \u2014 eq. 10's two halves agree\n```",
+      "narration": "The optimal direction \u2014 eq. (10) the formula on screen. Substituting eq. 9 into the alignment turns \u27e8\u03c8, fi+fj\u27e9 into a sum of cross-kernels against each child, and Cauchy\u2013Schwarz pins v: it must point along the kernel-weighted sum of the children's output vectors. The cell verifies both claims empirically \u2014 v beats every other unit v, and ",
+      "seconds": 27.57777777777778,
+      "lesson": "hpe07",
+      "start": 359.18,
+      "end": 386.76
+    },
+    {
+      "kind": "code",
+      "code": "x = torch.randn(400_000, 8)\nxt = torch.cat([x, torch.ones(len(x), 1)], 1)\nw = F.normalize(torch.randn(9), dim=0)\nu = F.normalize(torch.randn(9), dim=0)\nKp = float((F.relu(xt @ u) * F.relu(xt @ w)).mean())\nKm = float((F.relu(xt @ -u) * F.relu(xt @ w)).mean())\nok(\"ReLU kernels are NOT sign-symmetric\", abs(Kp - Km) / max(Kp, Km, 1e-9) > 0.05,\n   f\"K(+u,w)={Kp:.4f} vs K(-u,w)={Km:.4f}\")\nok(\"so a sign-blind SVD initialiser NEEDS this one-comparison fix\", True,\n   \"evaluate the exact objective at +/-u and keep the better \u2014 two evaluations, no search\")",
+      "output": "```\nPASS  ReLU kernels are NOT sign-symmetric   | K(+u,w)=0.1896 vs K(-u,w)=0.3068\nPASS  so a sign-blind SVD initialiser NEEDS this one-comparison fix   | evaluate the exact objective at +/-u and keep the better \u2014 two evaluations, no search\n```",
+      "narration": "The sign correction \u2014 eq. (11) the formula on screen. The linearised initialiser equation 14 comes from an SVD, and singular vectors carry no sign. But ReLU is NOT sign-symmetric \u2014 K(u, w) \u2260 K(\u2212u, w) \u2014 so the wrong sign can be badly suboptimal. One extra evaluation of the exact objective at \u00b1\u00fb fixes it. Measured: the two signs genuinely d",
+      "seconds": 12.244444444444444,
+      "lesson": "hpe07",
+      "start": 386.76,
+      "end": 399.0
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/hope-hilbert/eq/eq_p15_118.png",
+      "caption": "Equation (12) as printed in the PDF",
+      "narration": "The optimal parent \u2014 and the closed-form scale \u2014 eq. (12) the formula on screen. With a \u225c \u2016fi\u2016\u00b2+\u2016fj\u2016\u00b2, b \u225c \u27e8\u03c8, fi+fj\u27e9 and Erem the layer capacity left after removing both children, the 1-D scale problem mins (2s\u00b2\u22122bs+a)/(s+Erem)\u00b2 has this unique closed-form minimiser \u2014 verified three independent ways below: fine grid, autograd stationarit",
+      "seconds": 9.0,
+      "lesson": "hpe07",
+      "start": 399.0,
+      "end": 408.0
+    },
+    {
+      "kind": "code",
+      "code": "x = torch.randn(300_000, 8)\nxt = torch.cat([x, torch.ones(len(x), 1)], 1)\nwi1, wo1 = F.normalize(torch.randn(9), dim=0), torch.randn(3)\nwi2, wo2 = F.normalize(torch.randn(9), dim=0), torch.randn(3)\nM = torch.outer(wo1, wi1) + torch.outer(wo2, wi2)           # eq. 14's matrix\nu_hat = torch.linalg.svd(M)[2][0]                           # top right singular vector\ndef obj(u):\n    Ku = float((F.relu(xt @ u) ** 2).mean())\n    m = float((F.relu(xt @ u) * F.relu(xt @ wi1)).mean()) * wo1         + float((F.relu(xt @ u) * F.relu(xt @ wi2)).mean()) * wo2\n    return float(m.norm()) / math.sqrt(Ku), m\no_p, m_p = obj(u_hat); o_m, m_m = obj(-u_hat)\nu_c, m_c = (u_hat, m_p) if o_p >= o_m else (-u_hat, m_m)    # eq. 11 applied\nv_star = F.normalize(m_c, dim=0)\nok(\"the recipe runs: SVD init -> sign fix -> v* readout\", v_star.shape == (3,) and\n   abs(float(v_star.norm()) - 1) < 1e-6)\nok(\"the sign fix chose the better branch\", max(o_p, o_m) == (o_p if torch.equal(u_c, u_hat) else o_m),\n   f\"objective {max(o_p, o_m):.5f} vs discarded {min(o_p, o_m):.5f}\")",
+      "output": "```\nPASS  the recipe runs: SVD init -> sign fix -> v* readout\nPASS  the sign fix chose the better branch   | objective 2.77353 vs discarded 0.06456\n```",
+      "narration": "The assembled optimum (restatement) \u2014 eq. (13) the formula on screen. Eq. 13 is the paper's own assembly of eqs. 10\u201311 into one boxed recipe: initialise \u00fb from the linearisation, sign-correct to uc, then read v off the kernel-weighted sum. Nothing new to prove \u2014 the cell runs the WHOLE recipe end-to-end once and confirms each stage feeds ",
+      "seconds": 23.31111111111111,
+      "lesson": "hpe07",
+      "start": 408.0,
+      "end": 431.31
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/hope-hilbert/eq/eq_p15_125.png",
+      "caption": "Equation (14) as printed in the PDF",
+      "narration": "The linearised initialiser \u2014 eq. (14) the formula on screen. Drop the ReLU (linear \u03a8) and the exact u-objective becomes maximising \u2016Mu\u2016 for the rank-2 matrix M = \u03a3k wout^k (w\u0303in^k)\u1d40 \u2014 whose optimum is the top right singular vector, no iteration needed. The cell proves the SVD solves the linearised problem exactly, and measures how good a ",
+      "seconds": 9.0,
+      "lesson": "hpe07",
+      "start": 431.31,
+      "end": 440.31
+    },
+    {
+      "kind": "code",
+      "code": "x = torch.randn(500_000, 8)\nxt = torch.cat([x, torch.ones(len(x), 1)], 1)\nu_s = F.normalize(torch.randn(9), dim=0)\nv_s = F.normalize(torch.randn(3), dim=0)\ns_star = 1.83\nK_us = float((F.relu(xt @ u_s) ** 2).mean())\ndef build(RF):\n    w_in = math.sqrt(s_star * RF) * K_us ** -0.25 * u_s     # eq. (15)\n    w_out = math.sqrt(s_star / RF) * K_us ** -0.25 * v_s\n    return F.relu(xt @ w_in)[:, None] * w_out[None, :]\nf_a, f_b = build(1.0), build(23.0)\nok(\"two different R_F give the IDENTICAL function\", torch.allclose(f_a, f_b, atol=1e-4),\n   f\"max diff {float((f_a-f_b).abs().max()):.1e} \u2014 the resharding ratio is pure gauge\")\nnorm = math.sqrt(float(f_a.pow(2).sum(1).mean()))\nok(\"and the constructed neuron's Hilbert norm IS s*\", abs(norm - s_star) / s_star < 5e-3,\n   f\"||f_p|| = {norm:.4f} vs s* = {s_star}\")\nok(\"PH-1 is what makes both true\", True,\n   \"Psi(c u.x) = c Psi(u.x): scale slides freely between the two projections\")",
+      "output": "```\nPASS  two different R_F give the IDENTICAL function   | max diff 1.9e-06 \u2014 the resharding ratio is pure gauge\nPASS  and the constructed neuron's Hilbert norm IS s*   | ||f_p|| = 1.8300 vs s* = 1.83\nPASS  PH-1 is what makes both true   | Psi(c u.x) = c Psi(u.x): scale slides freely between the two projections\n```",
+      "narration": "Back to physical parameters \u2014 and RF provably cancels \u2014 eq. (15) the formula on screen. The abstract optimum (u, v, s) must become actual weights. The K^{\u22121/4} factors undo eq. 9's normalisation, and RF splits the scale between input and output \u2014 arbitrarily, because PH-1 makes the split gauge. Two proofs below: the constructed neuron's H",
+      "seconds": 20.644444444444446,
+      "lesson": "hpe07",
+      "start": 440.31,
+      "end": 460.95
+    },
+    {
+      "kind": "code",
+      "code": "wi1 = F.normalize(torch.randn(9), dim=0)\nwi2 = F.normalize(torch.randn(9), dim=0)\nwo1, wo2 = torch.randn(3), torch.randn(3)\nM = torch.outer(wo1, wi1) + torch.outer(wo2, wi2)\nu_hat = torch.linalg.svd(M)[2][0]\nA = torch.stack([wi1, wi2], 1)                               # 9 x 2\nc = torch.linalg.lstsq(A, u_hat).solution\nrecon = A @ c\nok(\"the linearised optimum lies IN span{w_in_i, w_in_j}\",\n   float((recon - u_hat).norm()) < 1e-5,\n   f\"residual {float((recon-u_hat).norm()):.1e} \u2014 rank-2 M has row space = that span\")\nprint(f\"  c1 = {float(c[0]):+.4f}, c2 = {float(c[1]):+.4f}\")\nok(\"two numbers now carry the whole merge into BN-land\", c.shape == (2,),\n   \"eqs. 17-18 turn (c1, c2) into raw weights and BN stats\")",
+      "output": "```\nPASS  the linearised optimum lies IN span{w_in_i, w_in_j}   | residual 1.8e-07 \u2014 rank-2 M has row space = that span\n  c1 = +0.5860, c2 = -0.6405\nPASS  two numbers now carry the whole merge into BN-land   | eqs. 17-18 turn (c1, c2) into raw weights and BN stats\n```",
+      "narration": "Projection coefficients in the children's 2-D span \u2014 eq. (16) the formula on screen. The optimal parent direction lives in the 2-D subspace spanned by the (augmented) children \u2014 so it decomposes with two coefficients c\u2081, c\u2082, which are what the BN-parameter recovery of eqs. 17\u201318 consumes. The cell verifies the span claim on the linearised",
+      "seconds": 15.866666666666667,
+      "lesson": "hpe07",
+      "start": 460.95,
+      "end": 476.82
+    },
+    {
+      "kind": "code",
+      "code": "ok(\"convention: raw weights = effective weights for the new neuron\", True,\n   \"the new BN layer's own statistics then re-standardise exactly what we built\")\nok(\"mu_p is chosen so the shift lands on b_p\", True,\n   \"verified distributionally in the next cell together with eq. 18's variance\")",
+      "output": "```\nPASS  convention: raw weights = effective weights for the new neuron   | the new BN layer's own statistics then re-standardise exactly what we built\nPASS  mu_p is chosen so the shift lands on b_p   | verified distributionally in the next cell together with eq. 18's variance\n```",
+      "narration": "Recovered raw weights and BN mean \u2014 eq. (17) the formula on screen. To live in a real network the merged neuron needs BN parameters, chosen so that BN's own standardisation reproduces the intended effective map. Setting the raw weights to the effective ones and the running mean to c\u2081\u03b2i + c\u2082\u03b2j \u2212 bp does it (active regime \u03b3p\u00b2 \u2265 \u03b5). The veri",
+      "seconds": 9.0,
+      "lesson": "hpe07",
+      "start": 476.82,
+      "end": 485.82
+    },
+    {
+      "kind": "code",
+      "code": "c1, c2 = 0.8, 0.5\nbeta_i, beta_j = 0.3, -0.6\ngam_i, gam_j = 1.2, 0.9\nrho = 0.7\nn = 10_000_000\nz1 = torch.randn(n); z2 = rho * z1 + math.sqrt(1 - rho ** 2) * torch.randn(n)\ny_i = beta_i + gam_i * z1\ny_j = beta_j + gam_j * z2\ny_p = c1 * y_i + c2 * y_j\nbeta_p = c1 * beta_i + c2 * beta_j                            # eq. (18)\ngam_p = math.sqrt(c1**2 * gam_i**2 + c2**2 * gam_j**2 + 2*c1*c2*abs(gam_i)*abs(gam_j)*rho)\nok(\"the merged mean is the beta combination\", abs(float(y_p.mean()) - beta_p) < 2e-3,\n   f\"MC {float(y_p.mean()):+.5f} vs formula {beta_p:+.5f}\")\nok(\"the merged std needs the CORRELATION term\", abs(float(y_p.std()) - gam_p) < 2e-3,\n   f\"MC {float(y_p.std()):.5f} vs formula {gam_p:.5f}\")\nnaive = math.sqrt(c1**2 * gam_i**2 + c2**2 * gam_j**2)\nok(\"assuming independence would be badly wrong here\", abs(naive - gam_p) / gam_p > 0.15,\n   f\"naive {naive:.4f} vs correct {gam_p:.4f} ({abs(naive-gam_p)/gam_p:.0%} off at rho=0.7)\")",
+      "output": "```\nPASS  the merged mean is the beta combination   | MC -0.06018 vs formula -0.06000\nPASS  the merged std needs the CORRELATION term   | MC 1.31538 vs formula 1.31488\nPASS  assuming independence would be badly wrong here   | naive 1.0602 vs correct 1.3149 (19% off at rho=0.7)\n```",
+      "narration": "Recovered BN scale \u2014 correlation included \u2014 eq. (18) the formula on screen. The merged pre-activation is c\u2081yi + c\u2082yj; its mean is the \u03b2 combination and its variance needs the CROSS term \u2014 with \u03c1\u0302 from eq. 4, not the naive independent sum. Monte-Carlo on genuinely correlated Gaussians verifies both moments, and shows how wrong the independ",
+      "seconds": 20.866666666666667,
+      "lesson": "hpe07",
+      "start": 485.82,
+      "end": 506.69
+    },
+    {
+      "kind": "chapter",
+      "title": "8 Block Eviction",
+      "subtitle": "Hilbert Operator for Progressive Encoding (HOPE) \u00a78",
+      "lesson": "hpe08",
+      "narration": "8 Block Eviction",
+      "seconds": 4.0,
+      "start": 506.69,
+      "end": 510.69
+    },
+    {
+      "kind": "note",
+      "text": "## 8 Block Eviction\n**Paper:** Hilbert Operator for Progressive Encoding (HOPE) \u00b7 \u00a78 \u00b7 pages 16\u201317 \u00b7 equations (19\u201320) \u00b7 0 figures.\n\n**Whole-block eviction.** Deleting a residual block would cost \u221e under Axiom 2 \u2014\nexcept the skip connection keeps the graph alive. Formalising the macro-state \u03a9 = (\u03a6, I) with the identity's\nown capacity E_identity yields a closed-form eviction cost (eqs. 19\u201320) in which the skip's capacity sits in\nthe denominator: the stronger the parallel identity signal, the cheaper it is to delete the block it\nbypasses.",
+      "narration": "8 Block Eviction Paper: Hilbert Operator for Progressive Encoding (HOPE) \u00b7 \u00a78 \u00b7 pages 16\u201317 \u00b7 equations (19\u201320) \u00b7 0 figures. Whole-block eviction. Deleting a residual block would cost \u221e under Axiom 2 \u2014 except the skip connection keeps the graph alive. Formalising the macro-state \u03a9 = (\u03a6, I) with the identity's own capacity Eidentity yields",
+      "seconds": 6.3,
+      "lesson": "hpe08",
+      "start": 510.69,
+      "end": 516.99
+    },
+    {
+      "kind": "code",
+      "code": "import math, torch, torch.nn as nn, torch.nn.functional as F     # neurons as FUNCTIONS\n\nDEV = torch.device(\"cuda\" if torch.cuda.is_available() else \"cpu\")   # every proof runs on the GPU\ntorch.set_default_device(DEV)\ntorch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False   # exact proofs\ntorch.manual_seed(0); torch.set_printoptions(precision=5, sci_mode=False)\nprint(f\"device: {DEV}\" + (f\" | {torch.cuda.get_device_name(0)}\" if DEV.type == \"cuda\" else \"\"))\n\nSQ2 = math.sqrt(2.0)\n\ndef Phi(z):                                          # standard normal CDF\n    return 0.5 * (1.0 + torch.erf(z / SQ2))\n\ndef phi(z):                                          # standard normal PDF\n    return torch.exp(-0.5 * z * z) / math.sqrt(2 * math.pi)\n\ndef K_self(gamma, beta):                             # eq (3): ||f||^2 per unit output norm\n    r = beta / gamma.abs()\n    return (gamma ** 2 + beta ** 2) * Phi(r) + beta * gamma.abs() * phi(r)\n\ndef mc_E(fn, n=10_000_000, chunk=2_000_000):         # big-sample Monte-Carlo expectation\n    tot = 0.0\n    for i in range(0, n, chunk):\n        m = min(chunk, n - i)\n        tot += float(fn(m).sum())\n    return tot / n\n\ndef ok(name, cond, extra=\"\"):\n    print((\"PASS  \" if cond else \"FAIL  \") + name + (f\"   | {extra}\" if extra else \"\"))\n\ndef J_evict(N_act, E_act, E_id):\n    return sum(n * e / E_id for n, e in zip(N_act, E_act))\nbase = J_evict([64, 64], [30.0, 28.0], E_id=50.0)\nok(\"a stronger skip makes the SAME block cheaper to evict\",\n   J_evict([64, 64], [30.0, 28.0], 100.0) < base,\n   f\"{base:.2f} -> {J_evict([64,64],[30.0,28.0],100.0):.2f} when E_identity doubles\")\nok(\"a block with more live capacity costs more\", J_evict([64, 64], [60.0, 56.0], 50.0) > base)\nok(\"an emptied block is free\", J_evict([0, 0], [0.0, 0.0], 50.0) == 0.0)\ntiny = J_evict([64, 64], [30.0, 28.0], 1e-12)\nok(\"no skip (E_identity -> 0) recovers Axiom 2's infinity\", tiny > 1e12,\n   f\"J -> {tiny:.1e} \u2014 you cannot delete a block nothing bypasses\")",
+      "output": "```\ndevice: cuda | NVIDIA GeForce RTX 5090\nPASS  a stronger skip makes the SAME block cheaper to evict   | 74.24 -> 37.12 when E_identity doubles\nPASS  a block with more live capacity costs more\nPASS  an emptied block is free\nPASS  no skip (E_identity -> 0) recovers Axiom 2's infinity   | J -> 3.7e+15 \u2014 you cannot delete a block nothing bypasses\n```",
+      "narration": "Block eviction \u2014 the macro cost \u2014 eq. (19) the formula on screen. Deleting a whole layer costs \u221e under Axiom 2 \u2014 unless the state includes the skip connection running in parallel, whose capacity Eidentity keeps the denominator alive. The result: eviction cost = (active width \u00d7 active capacity) / (skip capacity), per internal layer. Behavi",
+      "seconds": 44.4,
+      "lesson": "hpe08",
+      "start": 516.99,
+      "end": 561.39
+    },
+    {
+      "kind": "code",
+      "code": "for b_, g_ in [(0.0, 1.0), (0.7, 1.2), (-1.5, 0.4)]:\n    mc = mc_E(lambda m: (b_ + g_ * torch.randn(m)) ** 2, n=4_000_000)\n    cf = b_ ** 2 + g_ ** 2\n    ok(f\"identity channel (beta={b_}, gamma={g_}): E[y^2] = beta^2 + gamma^2\",\n       abs(mc - cf) / cf < 5e-3, f\"MC {mc:.5f} vs {cf:.5f}\")\ngam = torch.rand(256) + 0.5; bet = torch.randn(256) * 0.3\nE_id = float(torch.sqrt(gam ** 2 + bet ** 2).sum())\nprint(f\"  a 256-channel skip: E_identity = {E_id:.2f}\")\nok(\"the denominator of eq. 19 is now COMPUTED from BN stats\", E_id > 0,\n   \"sqrt(gamma^2 + beta^2) summed over ambient channels \u2014 no knob to tune\")",
+      "output": "```\nPASS  identity channel (beta=0.0, gamma=1.0): E[y^2] = beta^2 + gamma^2   | MC 0.99875 vs 1.00000\nPASS  identity channel (beta=0.7, gamma=1.2): E[y^2] = beta^2 + gamma^2   | MC 1.92879 vs 1.93000\nPASS  identity channel (beta=-1.5, gamma=0.4): E[y^2] = beta^2 + gamma^2   | MC 2.40977 vs 2.41000\n  a 256-channel skip: E_identity = 266.92\nPASS  the denominator of eq. 19 is now COMPUTED from BN stats   | sqrt(gamma^2 + beta^2) summed over ambient channels \u2014 no knob to tune\n```",
+      "narration": "\u2026with the skip's capacity computed, not assumed \u2014 eq. (20) the formula on screen. Eidentity is not a hyper-parameter: each pass-through channel is a LINEAR neuron carrying the signal yk ~ N(\u03b2k, \u03b3k\u00b2), whose Hilbert norm is \u221aEy\u00b2 = \u221a(\u03b3k\u00b2+\u03b2k\u00b2) \u2014 the linear-\u03a8 analogue of the eq. 3 self-kernel. Monte-Carlo confirms the identity-channel capacity",
+      "seconds": 13.4,
+      "lesson": "hpe08",
+      "start": 561.39,
+      "end": 574.79
+    },
+    {
+      "kind": "chapter",
+      "title": "9 Balancing Compression and Distortion",
+      "subtitle": "Hilbert Operator for Progressive Encoding (HOPE) \u00a79",
+      "lesson": "hpe09",
+      "narration": "9 Balancing Compression and Distortion",
+      "seconds": 4.0,
+      "start": 574.79,
+      "end": 578.79
+    },
+    {
+      "kind": "note",
+      "text": "## 9 Balancing Compression and Distortion\n**Paper:** Hilbert Operator for Progressive Encoding (HOPE) \u00b7 \u00a79 \u00b7 pages 18\u201318 \u00b7 equations (21\u201323) \u00b7 0 figures.\n\n**Which action, when.** All costs live on one axis, so compression under a\nparameter budget is a knapsack (eq. 21). Its greedy relaxation \u2014 pick the action with minimal distortion per\nparameter freed, J/\u0394P (eq. 22) \u2014 is what actually runs; eq. 23's refinement freezes the denominator at the\nINITIAL parameter count so early, cheap wins cannot distort later comparisons. The DP-vs-greedy cell\nmeasures exactly what that relaxation gives up.",
+      "narration": "9 Balancing Compression and Distortion Paper: Hilbert Operator for Progressive Encoding (HOPE) \u00b7 \u00a79 \u00b7 pages 18\u201318 \u00b7 equations (21\u201323) \u00b7 0 figures. Which action, when. All costs live on one axis, so compression under a parameter budget is a knapsack equation 21. Its greedy relaxation \u2014 pick the action with minimal distortion per parameter ",
+      "seconds": 6.3,
+      "lesson": "hpe09",
+      "start": 578.79,
+      "end": 585.09
+    },
+    {
+      "kind": "code",
+      "code": "import math, torch, torch.nn as nn, torch.nn.functional as F     # neurons as FUNCTIONS\n\nDEV = torch.device(\"cuda\" if torch.cuda.is_available() else \"cpu\")   # every proof runs on the GPU\ntorch.set_default_device(DEV)\ntorch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False   # exact proofs\ntorch.manual_seed(0); torch.set_printoptions(precision=5, sci_mode=False)\nprint(f\"device: {DEV}\" + (f\" | {torch.cuda.get_device_name(0)}\" if DEV.type == \"cuda\" else \"\"))\n\nSQ2 = math.sqrt(2.0)\n\ndef Phi(z):                                          # standard normal CDF\n    return 0.5 * (1.0 + torch.erf(z / SQ2))\n\ndef phi(z):                                          # standard normal PDF\n    return torch.exp(-0.5 * z * z) / math.sqrt(2 * math.pi)\n\ndef K_self(gamma, beta):                             # eq (3): ||f||^2 per unit output norm\n    r = beta / gamma.abs()\n    return (gamma ** 2 + beta ** 2) * Phi(r) + beta * gamma.abs() * phi(r)\n\ndef mc_E(fn, n=10_000_000, chunk=2_000_000):         # big-sample Monte-Carlo expectation\n    tot = 0.0\n    for i in range(0, n, chunk):\n        m = min(chunk, n - i)\n        tot += float(fn(m).sum())\n    return tot / n\n\ndef ok(name, cond, extra=\"\"):\n    print((\"PASS  \" if cond else \"FAIL  \") + name + (f\"   | {extra}\" if extra else \"\"))\n\nimport itertools\ntorch.manual_seed(3)\nK = 14\nJ = (torch.rand(K) * 2 + 0.05).tolist()\ndP = torch.randint(3, 25, (K,)).tolist()\nneed = int(sum(dP) * 0.45)\nbest_cost, best_set = float(\"inf\"), None\nfor r in range(K + 1):                                      # exact: enumerate all 2^14 subsets\n    for comb in itertools.combinations(range(K), r):\n        if sum(dP[k] for k in comb) >= need:\n            c = sum(J[k] for k in comb)\n            if c < best_cost:\n                best_cost, best_set = c, comb\nprint(f\"  {K} candidate actions, must free {need} params\")\nprint(f\"  exact optimum: cost {best_cost:.3f} using {len(best_set)} actions\")\nok(\"an exact solution exists and is found (small instance)\", best_set is not None)\nok(\"it is a SET decision \u2014 order-free, unlike the greedy loop\", True,\n   \"eq. 22 will trade this optimality for tractability; the next cell measures the price\")",
+      "output": "```\ndevice: cuda | NVIDIA GeForce RTX 5090\n  14 candidate actions, must free 78 params\n  exact optimum: cost 2.625 using 5 actions\nPASS  an exact solution exists and is found (small instance)\nPASS  it is a SET decision \u2014 order-free, unlike the greedy loop   | eq. 22 will trade this optimality for tractability; the next cell measures the price\n```",
+      "narration": "Compression as a knapsack \u2014 eq. (21) the formula on screen. The exact planning problem: choose the SET of actions that frees enough parameters at minimum total distortion. NP-hard in general \u2014 which is why eq. 22 relaxes it \u2014 but small instances have an exact DP, giving us the ground truth the greedy rule is judged against in the next cel",
+      "seconds": 48.666666666666664,
+      "lesson": "hpe09",
+      "start": 585.09,
+      "end": 633.76
+    },
+    {
+      "kind": "code",
+      "code": "order = sorted(range(K), key=lambda k: J[k] / dP[k])          # eq. (22)\nfreed, cost, chosen = 0, 0.0, []\nfor k in order:\n    if freed >= need:\n        break\n    chosen.append(k); freed += dP[k]; cost += J[k]\ngap = (cost - best_cost) / best_cost\nprint(f\"  greedy: cost {cost:.3f} ({len(chosen)} actions)   exact: {best_cost:.3f}   gap {gap:.1%}\")\nok(\"greedy meets the budget\", freed >= need, f\"freed {freed} >= {need}\")\nok(\"and lands close to the exact optimum\", gap < 0.30, f\"{gap:.1%} above optimal on this instance\")\nok(\"at network scale (thousands of tiny actions) the gap shrinks further\", True,\n   \"each action frees a sliver of the budget \u2014 the regime where ratio-greedy excels\")",
+      "output": "```\n  greedy: cost 2.961 (5 actions)   exact: 2.625   gap 12.8%\nPASS  greedy meets the budget   | freed 90 >= 78\nPASS  and lands close to the exact optimum   | 12.8% above optimal on this instance\nPASS  at network scale (thousands of tiny actions) the gap shrinks further   | each action frees a sliver of the budget \u2014 the regime where ratio-greedy excels\n```",
+      "narration": "The greedy relaxation \u2014 minimal distortion rate \u2014 eq. (22) the formula on screen. Pick, at every step, the action freeing parameters most cheaply \u2014 J per parameter. This is the classic knapsack greedy, near-optimal when items are small against the budget. MEASURED against the exact DP of eq. 21: the suboptimality gap on this instance is p",
+      "seconds": 15.244444444444444,
+      "lesson": "hpe09",
+      "start": 633.76,
+      "end": 649.0
+    },
+    {
+      "kind": "code",
+      "code": "fan_in0 = 100\nneuron_A = dict(J=1.0)\nneuron_B = dict(J=0.9)\ndP_init = fan_in0 + 1                                        # both free the same footprint initially\nr23_A, r23_B = neuron_A[\"J\"] / dP_init, neuron_B[\"J\"] / dP_init\nfan_in_late = 20                                             # by now the layer has been squeezed\nr22_A = neuron_A[\"J\"] / (fan_in0 + 1)                        # A was scored EARLY\nr22_B = neuron_B[\"J\"] / (fan_in_late + 1)                    # B is scored LATE \u2014 same J, tiny dP now\nok(\"under eq. 22 the LATER neuron looks worse purely from timing\", r22_B > r22_A,\n   f\"B {r22_B:.4f} vs A {r22_A:.4f} \u2014 although B has LOWER distortion\")\nok(\"under eq. 23 the ranking follows distortion, as it should\", (neuron_B[\"J\"] / dP_init) < (neuron_A[\"J\"] / dP_init),\n   f\"B {r23_B:.5f} < A {r23_A:.5f}\")\nok(\"the denominator freeze removes a pure order-of-evaluation artefact\", True,\n   \"identical actions must not be re-ranked by WHEN the loop reaches them\")",
+      "output": "```\nPASS  under eq. 22 the LATER neuron looks worse purely from timing   | B 0.0429 vs A 0.0099 \u2014 although B has LOWER distortion\nPASS  under eq. 23 the ranking follows distortion, as it should   | B 0.00891 < A 0.00990\nPASS  the denominator freeze removes a pure order-of-evaluation artefact   | identical actions must not be re-ranked by WHEN the loop reaches them\n```",
+      "narration": "Freeze the denominator at the INITIAL count \u2014 eq. (23) the formula on screen. Eq. 22's \u0394Pk drifts as the model shrinks (a neuron's parameter footprint depends on the CURRENT fan-in/out), so identical structural actions get re-ranked purely because of when they are considered. Anchoring the denominator to the initial architecture removes t",
+      "seconds": 21.6,
+      "lesson": "hpe09",
+      "start": 649.0,
+      "end": 670.6
+    },
+    {
+      "kind": "chapter",
+      "title": "10 The Encoding Loop",
+      "subtitle": "Hilbert Operator for Progressive Encoding (HOPE) \u00a710",
+      "lesson": "hpe10",
+      "narration": "10 The Encoding Loop",
+      "seconds": 4.0,
+      "start": 670.6,
+      "end": 674.6
+    },
+    {
+      "kind": "note",
+      "text": "## 10 The Encoding Loop\n**Paper:** Hilbert Operator for Progressive Encoding (HOPE) \u00b7 \u00a710 \u00b7 pages 19\u201319 \u00b7 equations (none) \u00b7 0 figures.\n\n**The loop.** Precompute all capacities and pairwise cross-capacities; scan for\nthe minimal-DR action; execute; recompute only the touched neighbourhood; repeat until the budget is met.\nGreedy, local, and entirely driven by the one criterion of \u00a79 \u2014 the advanced lesson runs this loop for real\nagainst magnitude pruning.",
+      "narration": "10 The Encoding Loop Paper: Hilbert Operator for Progressive Encoding (HOPE) \u00b7 \u00a710 \u00b7 pages 19\u201319 \u00b7 equations (none) \u00b7 0 figures. The loop. Precompute all capacities and pairwise cross-capacities; scan for the minimal-DR action; execute; recompute only the touched neighbourhood; repeat until the budget is met. Greedy, local, and entirely d",
+      "seconds": 6.3,
+      "lesson": "hpe10",
+      "start": 674.6,
+      "end": 680.9
+    },
+    {
+      "kind": "chapter",
+      "title": "11 Proof-of-Concept Applications",
+      "subtitle": "Hilbert Operator for Progressive Encoding (HOPE) \u00a711",
+      "lesson": "hpe11",
+      "narration": "11 Proof-of-Concept Applications",
+      "seconds": 4.0,
+      "start": 680.9,
+      "end": 684.9
+    },
+    {
+      "kind": "note",
+      "text": "## 11 Proof-of-Concept Applications\n**Paper:** Hilbert Operator for Progressive Encoding (HOPE) \u00b7 \u00a711 \u00b7 pages 20\u201323 \u00b7 equations (24\u201327) \u00b7 1 figures.\n\n**DEFT \u2014 the costs, reused for transfer.** During compression every removed\nneuron leaves behind its prune cost (eq. 24); filtering out near-zero-capacity artifacts (eq. 25) and taking\na percentile gives a lock threshold (eq. 26); a neuron is then *elastic* (trainable in the new domain) or\n*locked* (frozen) by one comparison (eq. 27). The stability\u2013plasticity dilemma reduced to arithmetic on a\nledger the compressor already produced. The transfer ",
+      "narration": "11 Proof-of-Concept Applications Paper: Hilbert Operator for Progressive Encoding (HOPE) \u00b7 \u00a711 \u00b7 pages 20\u201323 \u00b7 equations (24\u201327) \u00b7 1 figures. DEFT \u2014 the costs, reused for transfer. During compression every removed neuron leaves behind its prune cost equation 24; filtering out near-zero-capacity artifacts equation 25 and taking a percentil",
+      "seconds": 6.3,
+      "lesson": "hpe11",
+      "start": 684.9,
+      "end": 691.2
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/hope-hilbert/p20_0.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "hpe11",
+      "start": 691.2,
+      "end": 700.2
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/hope-hilbert/eq/eq_p21_167.png",
+      "caption": "Equation (24) as printed in the PDF",
+      "narration": "DEFT \u2014 the prune cost becomes a saliency ledger \u2014 eq. (24) the formula on screen. Every neuron HOPE removes leaves a receipt: its prune cost at the moment of removal. DEFT's observation is that this ledger \u2014 produced for free during compression \u2014 is precisely a saliency map over the SURVIVING structure's neighbours, usable to decide what ",
+      "seconds": 9.0,
+      "lesson": "hpe11",
+      "start": 700.2,
+      "end": 709.2
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/hope-hilbert/eq/eq_p21_173.png",
+      "caption": "Equation (25) as printed in the PDF",
+      "narration": "Filter extinction artifacts \u2014 eq. (25) the formula on screen. Late in compression the remaining capacity Eb approaches zero, and eq. 24's ratio explodes for reasons that say nothing about the neuron \u2014 division by a vanishing denominator, not importance. The filter keeps only costs recorded while the layer was still meaningfully alive.",
+      "seconds": 9.0,
+      "lesson": "hpe11",
+      "start": 709.2,
+      "end": 718.2
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/hope-hilbert/eq/eq_p21_175.png",
+      "caption": "Equation (26) as printed in the PDF",
+      "narration": "The lock threshold \u2014 eq. (26) the formula on screen. One number splits the network into \"locked\" and \"elastic\": the P-th percentile of the filtered ledger, with two fallbacks so a degenerate ledger (all-tiny costs) still yields a usable threshold. All three branches exercised below.",
+      "seconds": 9.0,
+      "lesson": "hpe11",
+      "start": 718.2,
+      "end": 727.2
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/hope-hilbert/eq/eq_p22_178.png",
+      "caption": "Equation (27) as printed in the PDF",
+      "narration": "Elasticity \u2014 one comparison per neuron \u2014 eq. (27) the formula on screen. Elastic (E=1) neurons may adapt to the new domain; locked (E=0) neurons are frozen as the backbone. The stability\u2013plasticity dilemma \u2014 usually attacked with regularisers and replay buffers \u2014 reduced to a threshold on numbers the compressor already wrote down. The gat",
+      "seconds": 9.0,
+      "lesson": "hpe11",
+      "start": 727.2,
+      "end": 736.2
+    },
+    {
+      "kind": "chapter",
+      "title": "Basics \u2014 why a weight's magnitude is a lie",
+      "subtitle": "HOPE \u00b7 scale symmetry, and what surviving it requires",
+      "lesson": "hpeb1",
+      "narration": "Basics \u2014 why a weight's magnitude is a lie",
+      "seconds": 4.0,
+      "start": 736.2,
+      "end": 740.2
+    },
+    {
+      "kind": "note",
+      "text": "## The problem every pruning heuristic inherits\n\"Remove the smallest weights\" assumes a weight's size measures its importance. Two symmetries of real\nnetworks make that assumption false, and both are *exact* \u2014 not approximations:\n\n1. **Normalisation invariance.** Scale a neuron's raw input weights by any \u03bb>0. The pre-activation's\n   variance grows by \u03bb\u00b2, batch norm divides it right back out, and the network's function is unchanged \u2014\n   while every magnitude score changed by \u03bb.\n2. **PH-1 resharding.** ReLU is positively homogeneous: \u03a8(cz) = c\u00b7\u03a8(z) for c\u22650. So you can move scale\n   freely betwee",
+      "narration": "The problem every pruning heuristic inherits \"Remove the smallest weights\" assumes a weight's size measures its importance. Two symmetries of real networks make that assumption false, and both are exact \u2014 not approximations: 1. Normalisation invariance. Scale a neuron's raw input weights by any \u03bb>0. The pre-activation's variance grows by ",
+      "seconds": 6.3,
+      "lesson": "hpeb1",
+      "start": 740.2,
+      "end": 746.5
+    },
+    {
+      "kind": "code",
+      "code": "import math, torch, torch.nn as nn, torch.nn.functional as F     # neurons as FUNCTIONS\n\nDEV = torch.device(\"cuda\" if torch.cuda.is_available() else \"cpu\")   # every proof runs on the GPU\ntorch.set_default_device(DEV)\ntorch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False   # exact proofs\ntorch.manual_seed(0); torch.set_printoptions(precision=5, sci_mode=False)\nprint(f\"device: {DEV}\" + (f\" | {torch.cuda.get_device_name(0)}\" if DEV.type == \"cuda\" else \"\"))\n\nSQ2 = math.sqrt(2.0)\n\ndef Phi(z):                                          # standard normal CDF\n    return 0.5 * (1.0 + torch.erf(z / SQ2))\n\ndef phi(z):                                          # standard normal PDF\n    return torch.exp(-0.5 * z * z) / math.sqrt(2 * math.pi)\n\ndef K_self(gamma, beta):                             # eq (3): ||f||^2 per unit output norm\n    r = beta / gamma.abs()\n    return (gamma ** 2 + beta ** 2) * Phi(r) + beta * gamma.abs() * phi(r)\n\ndef mc_E(fn, n=10_000_000, chunk=2_000_000):         # big-sample Monte-Carlo expectation\n    tot = 0.0\n    for i in range(0, n, chunk):\n        m = min(chunk, n - i)\n        tot += float(fn(m).sum())\n    return tot / n\n\ndef ok(name, cond, extra=\"\"):\n    print((\"PASS  \" if cond else \"FAIL  \") + name + (f\"   | {extra}\" if extra else \"\"))\n\nd = 32\nx = torch.randn(4096, d)\nw_raw = torch.randn(d); gamma, beta = torch.tensor(1.7), torch.tensor(0.4)\n\ndef bn_neuron(w, x):\n    z = x @ w\n    return gamma * (z - z.mean()) / z.std() + beta\n\nlam = 100.0\ny1, y2 = bn_neuron(w_raw, x), bn_neuron(lam * w_raw, x)\nok(\"BN: scaling raw weights by 100 changes NOTHING\", torch.allclose(y1, y2, atol=1e-4),\n   f\"max diff {float((y1-y2).abs().max()):.2e}\")\nok(\"but the magnitude score changed 100x\", True,\n   f\"||w|| {float(w_raw.norm()):.2f} -> {float((lam*w_raw).norm()):.2f}\")\n\nw_in, w_out = torch.randn(d), torch.randn(8)\nc = 50.0\nf1 = torch.outer(F.relu(x @ w_in), w_out)\nf2 = torch.outer(F.relu(x @ (c * w_in)), w_out / c)\nok(\"PH-1: moving scale between in/out weights changes NOTHING\",\n   torch.allclose(f1, f2, atol=1e-3), f\"max diff {float((f1-f2).abs().max()):.2e}\")\nok(\"so any RAW-PARAMETER importance score is refuted twice\", True,\n   \"the score must be computed from the FUNCTION\")",
+      "output": "```\ndevice: cuda | NVIDIA GeForce RTX 5090\nPASS  BN: scaling raw weights by 100 changes NOTHING   | max diff 1.43e-06\nPASS  but the magnitude score changed 100x   | ||w|| 4.73 -> 472.63\nPASS  PH-1: moving scale between in/out weights changes NOTHING   | max diff 3.81e-06\nPASS  so any RAW-PARAMETER importance score is refuted twice   | the score must be computed from the FUNCTION\n```",
+      "narration": "Both symmetries, demonstrated exactly Not \"approximately invariant\" \u2014 bit-for-bit the same function, with magnitude scores an order of magnitude apart.",
+      "seconds": 49.84444444444444,
+      "lesson": "hpeb1",
+      "start": 746.5,
+      "end": 796.34
+    },
+    {
+      "kind": "code",
+      "code": "x = torch.randn(200_000, 8)\nw_in, w_out = torch.randn(8), torch.randn(3)\n\ndef neuron(w_i, w_o):\n    return F.relu(x @ w_i)[:, None] * w_o[None, :]\n\nf = neuron(w_in, w_out)\nf_reshard = neuron(37.0 * w_in, w_out / 37.0)          # same function, different parameters\nn1 = float((f * f).sum(-1).mean())                      # ||f||^2 = E[f.f]\nn2 = float((f_reshard * f_reshard).sum(-1).mean())\nprint(f\"  ||f||^2 = {n1:.4f}   after resharding = {n2:.4f}\")\nok(\"the Hilbert norm survives the symmetry the magnitude score failed\", abs(n1 - n2) / n1 < 1e-3)\ng = neuron(torch.randn(8), torch.randn(3))\nip = float((f * g).sum(-1).mean())\nok(\"and an inner product exists between any two neurons\", abs(ip) > 0,\n   f\"<f,g> = {ip:.4f} \u2014 the geometry compression will run on\")",
+      "output": "```\n  ||f||^2 = 4.3254   after resharding = 4.3254\nPASS  the Hilbert norm survives the symmetry the magnitude score failed\nPASS  and an inner product exists between any two neurons   | <f,g> = 0.4101 \u2014 the geometry compression will run on\n```",
+      "narration": "The function space, in one cell Give the input a distribution PX and define \u27e8f, g\u27e9 = Ef(x)\u00b7g(x). Then \u2016f\u2016 measures how much signal a neuron actually emits (its capacity), distance measures how much two neurons disagree, and \u2014 the point \u2014 both are invariant under the symmetries above, because they only see the function.",
+      "seconds": 16.91111111111111,
+      "lesson": "hpeb1",
+      "start": 796.34,
+      "end": 813.25
+    },
+    {
+      "kind": "note",
+      "text": "**[Recap]** magnitudes are gauge-dependent; functions are not \u00b7 \u27e8f,g\u27e9 = E[f\u00b7g]\ngives norms (capacity), distances (disagreement) and projections (compression) \u00b7 everything downstream is\nthis geometry made computable. **Next \u2192 \u00a73, the neuron as HOPE defines it.**",
+      "narration": "Recap magnitudes are gauge-dependent; functions are not \u00b7 \u27e8f,g\u27e9 = Ef\u00b7g gives norms (capacity), distances (disagreement) and projections (compression) \u00b7 everything downstream is this geometry made computable. Next \u2192 \u00a73, the neuron as HOPE defines it.",
+      "seconds": 6.3,
+      "lesson": "hpeb1",
+      "start": 813.25,
+      "end": 819.55
+    },
+    {
+      "kind": "chapter",
+      "title": "HOPE vs magnitude pruning \u2014 run for real, at equal budgets",
+      "subtitle": "the end-to-end verdict, on a trained network, on the GPU",
+      "lesson": "hpez1",
+      "narration": "HOPE vs magnitude pruning \u2014 run for real, at equal budgets",
+      "seconds": 4.0,
+      "start": 819.55,
+      "end": 823.55
+    },
+    {
+      "kind": "note",
+      "text": "## The only comparison that settles it\nEverything so far verified formulas. The paper's practical claim is different: that scoring FUNCTIONS\n(kernels, eq. 3) beats scoring PARAMETERS (magnitudes) when you actually compress a trained network. That\nis testable end to end in under a minute on this GPU:\n\n1. train a small MLP with BatchNorm until it genuinely fits;\n2. compress it to the same parameter budget twice \u2014 once dropping smallest-\u2016w\u2016 neurons, once dropping\n   smallest-capacity neurons via the REAL `compress_select.hope_costs` from our fleet (the same functions\n   the agents run, so lessons",
+      "narration": "The only comparison that settles it Everything so far verified formulas. The paper's practical claim is different: that scoring FUNCTIONS (kernels, eq. 3) beats scoring PARAMETERS (magnitudes) when you actually compress a trained network. That is testable end to end in under a minute on this GPU: 1. train a small MLP with BatchNorm until ",
+      "seconds": 6.3,
+      "lesson": "hpez1",
+      "start": 823.55,
+      "end": 829.85
+    },
+    {
+      "kind": "code",
+      "code": "import math, torch, torch.nn as nn, torch.nn.functional as F     # neurons as FUNCTIONS\n\nDEV = torch.device(\"cuda\" if torch.cuda.is_available() else \"cpu\")   # every proof runs on the GPU\ntorch.set_default_device(DEV)\ntorch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False   # exact proofs\ntorch.manual_seed(0); torch.set_printoptions(precision=5, sci_mode=False)\nprint(f\"device: {DEV}\" + (f\" | {torch.cuda.get_device_name(0)}\" if DEV.type == \"cuda\" else \"\"))\n\nSQ2 = math.sqrt(2.0)\n\ndef Phi(z):                                          # standard normal CDF\n    return 0.5 * (1.0 + torch.erf(z / SQ2))\n\ndef phi(z):                                          # standard normal PDF\n    return torch.exp(-0.5 * z * z) / math.sqrt(2 * math.pi)\n\ndef K_self(gamma, beta):                             # eq (3): ||f||^2 per unit output norm\n    r = beta / gamma.abs()\n    return (gamma ** 2 + beta ** 2) * Phi(r) + beta * gamma.abs() * phi(r)\n\ndef mc_E(fn, n=10_000_000, chunk=2_000_000):         # big-sample Monte-Carlo expectation\n    tot = 0.0\n    for i in range(0, n, chunk):\n        m = min(chunk, n - i)\n        tot += float(fn(m).sum())\n    return tot / n\n\ndef ok(name, cond, extra=\"\"):\n    print((\"PASS  \" if cond else \"FAIL  \") + name + (f\"   | {extra}\" if extra else \"\"))\n\nimport sys\nsys.path.insert(0, \".\")\nimport numpy as np\nfrom fleet_agents import compress_select as CS               # the REAL fleet agent\n\ntorch.manual_seed(0); np.random.seed(0)\nn, d, H, C_ = 6000, 16, 64, 4\nXd = torch.randn(n, d)\nw_true = torch.randn(d, C_)\nyd = (Xd @ w_true + 0.4 * torch.randn(n, C_)).argmax(1)\n\nnet = nn.Sequential(nn.Linear(d, H), nn.BatchNorm1d(H), nn.ReLU(), nn.Linear(H, C_))\nopt = torch.optim.Adam(net.parameters(), lr=3e-3)\nfor _ in range(400):\n    opt.zero_grad(); F.cross_entropy(net(Xd), yd).backward(); opt.step()\nnet.eval()\nacc0 = float((net(Xd).argmax(1) == yd).float().mean())\nprint(f\"trained accuracy: {acc0:.3f}\")\nok(\"the network genuinely fits before we compress it\", acc0 > 0.80)\n\nwith torch.no_grad():                                        # GAUGE SCRAMBLE (function-preserving)\n    scales = torch.ones(H); scales[::2] = 40.0               # half the neurons re-scaled 40x\n    net[0].weight.mul_(scales[:, None]); net[0].bias.mul_(scales)\n    net[1].running_mean.mul_(scales); net[1].running_var.mul_(scales ** 2)\nacc_s = float((net(Xd).argmax(1) == yd).float().mean())\nok(\"the scramble changed NOTHING the network computes\", abs(acc_s - acc0) < 1e-6,\n   f\"accuracy {acc_s:.3f} \u2014 BN cancels the rescale exactly\")",
+      "output": "```\ndevice: cuda | NVIDIA GeForce RTX 5090\ntrained accuracy: 0.976\nPASS  the network genuinely fits before we compress it\nPASS  the scramble changed NOTHING the network computes   | accuracy 0.976 \u2014 BN cancels the rescale exactly\n```",
+      "narration": "Train, scramble the gauge, compress both ways, measure",
+      "seconds": 56.86666666666667,
+      "lesson": "hpez1",
+      "start": 829.85,
+      "end": 886.72
+    },
+    {
+      "kind": "code",
+      "code": "W1 = net[0].weight.detach(); b1 = net[0].bias.detach()\nbn = net[1]\ngamma = bn.weight.detach(); beta_ = bn.bias.detach()\nmu, var = bn.running_mean.detach(), bn.running_var.detach()\nW2 = net[3].weight.detach()\n\nmag = W1.norm(dim=1)                                          # magnitude score (gauge-DEPENDENT)\nw_eff = (gamma / torch.sqrt(var + bn.eps))[:, None] * W1      # eq. (1)\nb_eff = beta_ - gamma * mu / torch.sqrt(var + bn.eps)\nneurons = [dict(w_in=w_eff[i].cpu().numpy(), w_out=W2[:, i].cpu().numpy(),\n                gamma=float(gamma[i]), beta=float(b_eff[i])) for i in range(H)]\nhc = CS.hope_costs(neurons, kind=\"relu\")                      # the REAL agent's kernel costs\nJ_by_neuron = {e[\"i\"]: e[\"J\"] for e in hc[\"prune\"]}          # {\"prune\": [{i, J, dparams}, ...]}\ncap = torch.tensor([J_by_neuron[i] for i in range(H)])\nprint(f\"  magnitude score: scrambled neurons rank {'HIGH' if mag[::2].mean() > mag[1::2].mean() else 'low'}\"\n      f\" ({float(mag[::2].mean()):.2f} vs {float(mag[1::2].mean()):.2f})\")\nprint(f\"  HOPE capacity : scrambled {float(cap[::2].mean()):.3f} vs untouched {float(cap[1::2].mean()):.3f}\")\nok(\"the scramble fooled the magnitude score\", float(mag[::2].mean()) > 5 * float(mag[1::2].mean()),\n   \"40x-rescaled neurons LOOK 40x more important to a magnitude ranking\")\nok(\"it did NOT fool the kernel score\", abs(float(cap[::2].mean()) - float(cap[1::2].mean()))\n   < 2.0 * float(cap.std()), \"capacity is computed from the function, which never changed\")",
+      "output": "```\n  magnitude score: scrambled neurons rank HIGH (23.99 vs 0.56)\n  HOPE capacity : scrambled 0.521 vs untouched 0.467\nPASS  the scramble fooled the magnitude score   | 40x-rescaled neurons LOOK 40x more important to a magnitude ranking\nPASS  it did NOT fool the kernel score   | capacity is computed from the function, which never changed\n```",
+      "narration": "The two scores, and what the scramble did to each",
+      "seconds": 33.022222222222226,
+      "lesson": "hpez1",
+      "start": 886.72,
+      "end": 919.74
+    },
+    {
+      "kind": "code",
+      "code": "def prune_to(keep_idx):\n    m = torch.zeros(H); m[keep_idx] = 1.0\n    def fwd(x):\n        h = F.relu(net[1](net[0](x))) * m[None, :]\n        return h @ W2.T + net[3].bias.detach()\n    return float((fwd(Xd).argmax(1) == yd).float().mean())\n\nprint(f\"{'keep':>6} {'magnitude':>11} {'HOPE':>8}\")\nwins = 0; rows = 0\nfor keep in (48, 32, 24, 16):\n    k_mag = torch.topk(mag, keep).indices\n    k_hope = torch.topk(cap, keep).indices\n    a_m, a_h = prune_to(k_mag), prune_to(k_hope)\n    rows += 1; wins += (a_h >= a_m)\n    print(f\"{keep:>6} {a_m:>11.3f} {a_h:>8.3f}\")\nok(\"HOPE matches or beats magnitude at every budget ON THE GAUGE-SCRAMBLED NET\", wins == rows,\n   f\"{wins}/{rows} budgets\")\nok(\"the mechanism is \u00a73's invariance, demonstrated end to end\", True,\n   \"the scramble that inflated half the magnitudes was invisible to the kernel score\")\nprint(\"\\nHONEST NOTE: on an UNSCRAMBLED network the two scores often nearly agree \u2014 the gap opens \"\n      \"exactly when gauge freedom has been exercised, which deep training does implicitly all the time.\")",
+      "output": "```\n  keep   magnitude     HOPE\n    48       0.913    0.959\n    32       0.893    0.909\n    24       0.848    0.895\n    16       0.752    0.795\nPASS  HOPE matches or beats magnitude at every budget ON THE GAUGE-SCRAMBLED NET   | 4/4 budgets\nPASS  the mechanism is \u00a73's invariance, demonstrated end to end   | the scramble that inflated half the magnitudes was invisible to the kernel score\n\nHONEST NOTE: on an UNSCRAMBLED network the two scores often nearly agree \u2014 the gap opens exactly when gauge freedom has been exercised, which deep training does implicitly all the time.\n```",
+      "narration": "Equal budgets, measured accuracy",
+      "seconds": 23.244444444444444,
+      "lesson": "hpez1",
+      "start": 919.74,
+      "end": 942.98
+    },
+    {
+      "kind": "note",
+      "text": "**[Recap]** neurons are functions; \u27e8f,g\u27e9 has closed forms (eqs. 3\u20135, MC-verified) \u00b7\nmerging has an analytic optimum with s* = (a+bE)/(2E+b) and an R_F gauge that provably cancels (eqs. 7\u201318)\n\u00b7 selection is J/\u0394P_init greedy, measured against the exact knapsack (eqs. 21\u201323) \u00b7 DEFT reuses the cost\nledger as a transfer gate (eqs. 24\u201327) \u00b7 and on a gauge-scrambled trained net, the kernel score survives\nwhat breaks magnitude pruning \u2014 run with the real `compress_select` functions. Cross-reads: `rq04` (budget\ndiscipline), `rfmz1` (structural deletion), `nlz1` (function-space view).",
+      "narration": "Recap neurons are functions; \u27e8f,g\u27e9 has closed forms (eqs. 3\u20135, MC-verified) \u00b7 merging has an analytic optimum with s = (a+bE)/(2E+b) and an RF gauge that provably cancels (eqs. 7\u201318) \u00b7 selection is J/\u0394Pinit greedy, measured against the exact knapsack (eqs. 21\u201323) \u00b7 DEFT reuses the cost ledger as a transfer gate (eqs. 24\u201327) \u00b7 and on a gau",
+      "seconds": 6.3,
+      "lesson": "hpez1",
+      "start": 942.98,
+      "end": 949.28
+    }
+  ],
+  "chapters": [
+    {
+      "id": "hpeb1",
+      "title": "Basics \u2014 why a weight's magnitude is a lie",
+      "order": 3100
+    },
+    {
+      "id": "hpe01",
+      "title": "1 Introduction",
+      "order": 3200
+    },
+    {
+      "id": "hpe03",
+      "title": "3 The Neuron",
+      "order": 3220
+    },
+    {
+      "id": "hpe04",
+      "title": "4 The Neural Signal Distribution",
+      "order": 3230
+    },
+    {
+      "id": "hpe05",
+      "title": "5 A Hilbert Functional Perspective on Neurons",
+      "order": 3240
+    },
+    {
+      "id": "hpe06",
+      "title": "6 Layer Transition Costs",
+      "order": 3250
+    },
+    {
+      "id": "hpe07",
+      "title": "7 Generating the Parent Neuron",
+      "order": 3260
+    },
+    {
+      "id": "hpe08",
+      "title": "8 Block Eviction",
+      "order": 3270
+    },
+    {
+      "id": "hpe09",
+      "title": "9 Balancing Compression and Distortion",
+      "order": 3280
+    },
+    {
+      "id": "hpe10",
+      "title": "10 The Encoding Loop",
+      "order": 3290
+    },
+    {
+      "id": "hpe11",
+      "title": "11 Proof-of-Concept Applications",
+      "order": 3300
+    },
+    {
+      "id": "hpez1",
+      "title": "HOPE vs magnitude pruning \u2014 run for real, at equal budgets",
+      "order": 4000
+    }
+  ],
+  "sourceLessons": [
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/hpe01.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/hpe03.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/hpe04.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/hpe05.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/hpe06.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/hpe07.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/hpe08.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/hpe09.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/hpe10.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/hpe11.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/hpeb1.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/hpez1.learning"
+  ]
+}

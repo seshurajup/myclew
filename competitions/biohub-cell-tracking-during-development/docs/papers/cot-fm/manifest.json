@@ -1,0 +1,808 @@
+{
+  "slug": "cot-fm",
+  "source": "/tmp/claude-1001/-home-seshu-kaggle-2026/5abb95f8-1364-4775-8ff5-e5c2788bac9d/scratchpad/arx_2603.13395.pdf",
+  "pdf": "/tmp/claude-1001/-home-seshu-kaggle-2026/5abb95f8-1364-4775-8ff5-e5c2788bac9d/scratchpad/arx_2603.13395.pdf",
+  "title": "COT-FM: Cluster-wise Optimal Transport Flow Matching",
+  "backend": "docling",
+  "pages": 18,
+  "figures": [
+    {
+      "page": 1,
+      "path": "assets/fig/p01_0.png",
+      "y0": 357.119873046875,
+      "y1": 465.81396484375,
+      "caption": "Figure 1. COT-FM Yields Straight, Structure-Preserving Transport Flows. Blue points show the source distribution (Gaussian), and gray points show the target distributions (a 5-component Gaussian mixture and Two Moons). Orange points are generated samples, and purple lines denote the learned transport trajectories. Red crosses mark cluster means under our Cluster-wise Optimal Transport Flow Matching (COT-FM). The method yields straight trajectories while still capturing the structure of each target distribution.",
+      "label": "Figure 1",
+      "w": 450,
+      "h": 450
+    },
+    {
+      "page": 1,
+      "path": "assets/fig/p01_1.png",
+      "y0": 246.2353515625,
+      "y1": 370.53546142578125,
+      "caption": "",
+      "label": "",
+      "w": 900,
+      "h": 900
+    },
+    {
+      "page": 1,
+      "path": "assets/fig/p01_2.png",
+      "y0": 357.119873046875,
+      "y1": 465.81396484375,
+      "caption": "",
+      "label": "",
+      "w": 450,
+      "h": 450
+    },
+    {
+      "page": 1,
+      "path": "assets/fig/p01_3.png",
+      "y0": 246.2353515625,
+      "y1": 370.53546142578125,
+      "caption": "",
+      "label": "",
+      "w": 900,
+      "h": 900
+    },
+    {
+      "page": 1,
+      "path": "assets/fig/p01_4.png",
+      "y0": 357.119873046875,
+      "y1": 465.81396484375,
+      "caption": "",
+      "label": "",
+      "w": 450,
+      "h": 450
+    },
+    {
+      "page": 1,
+      "path": "assets/fig/p01_5.png",
+      "y0": 246.2353515625,
+      "y1": 370.53546142578125,
+      "caption": "",
+      "label": "",
+      "w": 900,
+      "h": 900
+    },
+    {
+      "page": 1,
+      "path": "assets/fig/p01_6.png",
+      "y0": 246.2353515625,
+      "y1": 370.53546142578125,
+      "caption": "",
+      "label": "",
+      "w": 900,
+      "h": 900
+    },
+    {
+      "page": 1,
+      "path": "assets/fig/p01_7.png",
+      "y0": 357.119873046875,
+      "y1": 465.81396484375,
+      "caption": "",
+      "label": "",
+      "w": 450,
+      "h": 450
+    },
+    {
+      "page": 3,
+      "path": "assets/fig/p03_0.png",
+      "y0": 187.73660278320312,
+      "y1": 262.3708801269531,
+      "caption": "",
+      "label": "",
+      "w": 1060,
+      "h": 1064
+    },
+    {
+      "page": 3,
+      "path": "assets/fig/p03_1.png",
+      "y0": 89.38064575195312,
+      "y1": 164.06649780273438,
+      "caption": "",
+      "label": "",
+      "w": 1172,
+      "h": 1188
+    },
+    {
+      "page": 3,
+      "path": "assets/fig/p03_2.png",
+      "y0": -27.226593017578125,
+      "y1": 303.8277587890625,
+      "caption": "",
+      "label": "",
+      "w": 1800,
+      "h": 1800
+    },
+    {
+      "page": 3,
+      "path": "assets/fig/p03_3.png",
+      "y0": 187.71078491210938,
+      "y1": 262.3966369628906,
+      "caption": "Figure 2. Vector field results from different coupling strate- gies. Random coupling forces the model to regress inconsistent (gray) velocity targets, creating ambiguous intersections and push- ing the model toward an averaged (purple) direction, which pro- duces curved velocity fields. In contrast, optimal transport provides consistent couplings with fewer intersections, enabling the model to learn much straighter velocity fields.",
+      "label": "Figure 2",
+      "w": 670,
+      "h": 618
+    },
+    {
+      "page": 4,
+      "path": "assets/fig/p04_0.png",
+      "y0": 228.1961669921875,
+      "y1": 247.1136016845703,
+      "caption": "",
+      "label": "",
+      "w": 86,
+      "h": 89
+    },
+    {
+      "page": 4,
+      "path": "assets/fig/p04_1.png",
+      "y0": 252.38526916503906,
+      "y1": 273.2359619140625,
+      "caption": "",
+      "label": "",
+      "w": 87,
+      "h": 90
+    },
+    {
+      "page": 4,
+      "path": "assets/fig/p04_2.png",
+      "y0": 252.36257934570312,
+      "y1": 273.2586364746094,
+      "caption": "Figure 3. Overview of our proposed method. In Stage 1, we cluster the dataset, and for each image within a cluster Ck, we reverse the ODE back to the noise space using a pretrained flow model to compute the new mean \u03bc0,k and covariance \u03a30,k for that cluster. In Stage 2, we apply optimal transport to finetune the pretrained flow model across all clusters, encouraging it to align with the distributional structure captured in Stage 1. During inference, we first sample a cluster index k, then draw a noise x from N(\u03bc0,k, \u03a30,k), and use this noise to generate an image through the finetuned flow model.",
+      "label": "Figure 3",
+      "w": 88,
+      "h": 88
+    },
+    {
+      "page": 4,
+      "path": "assets/fig/p04_3.png",
+      "y0": 114.00828552246094,
+      "y1": 135.1162872314453,
+      "caption": "",
+      "label": "",
+      "w": 127,
+      "h": 129
+    },
+    {
+      "page": 4,
+      "path": "assets/fig/p04_4.png",
+      "y0": 130.31642150878906,
+      "y1": 151.55235290527344,
+      "caption": "",
+      "label": "",
+      "w": 132,
+      "h": 128
+    },
+    {
+      "page": 4,
+      "path": "assets/fig/p04_5.png",
+      "y0": 147.42169189453125,
+      "y1": 168.52969360351562,
+      "caption": "",
+      "label": "",
+      "w": 127,
+      "h": 129
+    },
+    {
+      "page": 4,
+      "path": "assets/fig/p04_6.png",
+      "y0": 190.08584594726562,
+      "y1": 211.19384765625,
+      "caption": "",
+      "label": "",
+      "w": 118,
+      "h": 117
+    },
+    {
+      "page": 4,
+      "path": "assets/fig/p04_7.png",
+      "y0": 203.36993408203125,
+      "y1": 224.47793579101562,
+      "caption": "",
+      "label": "",
+      "w": 118,
+      "h": 117
+    },
+    {
+      "page": 4,
+      "path": "assets/fig/p04_8.png",
+      "y0": 223.30941772460938,
+      "y1": 244.41741943359375,
+      "caption": "",
+      "label": "",
+      "w": 115,
+      "h": 116
+    },
+    {
+      "page": 4,
+      "path": "assets/fig/p04_9.png",
+      "y0": 114.65986633300781,
+      "y1": 135.7678680419922,
+      "caption": "",
+      "label": "",
+      "w": 127,
+      "h": 129
+    },
+    {
+      "page": 4,
+      "path": "assets/fig/p04_10.png",
+      "y0": 130.31642150878906,
+      "y1": 151.55235290527344,
+      "caption": "",
+      "label": "",
+      "w": 132,
+      "h": 128
+    },
+    {
+      "page": 4,
+      "path": "assets/fig/p04_11.png",
+      "y0": 147.42169189453125,
+      "y1": 168.52969360351562,
+      "caption": "",
+      "label": "",
+      "w": 127,
+      "h": 129
+    },
+    {
+      "page": 4,
+      "path": "assets/fig/p04_12.png",
+      "y0": 190.08584594726562,
+      "y1": 211.19384765625,
+      "caption": "",
+      "label": "",
+      "w": 118,
+      "h": 117
+    },
+    {
+      "page": 4,
+      "path": "assets/fig/p04_13.png",
+      "y0": 203.36993408203125,
+      "y1": 224.47793579101562,
+      "caption": "",
+      "label": "",
+      "w": 118,
+      "h": 117
+    },
+    {
+      "page": 4,
+      "path": "assets/fig/p04_14.png",
+      "y0": 223.30941772460938,
+      "y1": 244.41741943359375,
+      "caption": "",
+      "label": "",
+      "w": 115,
+      "h": 116
+    },
+    {
+      "page": 6,
+      "path": "assets/fig/p06_0.png",
+      "y0": 216.5888671875,
+      "y1": 273.08349609375,
+      "caption": "Table 1. 2D synthetic data distributions. COT-FM outperforms all baselines in both Wasserstein distance and curvature.",
+      "label": "Table 1",
+      "w": 450,
+      "h": 450
+    },
+    {
+      "page": 6,
+      "path": "assets/fig/p06_1.png",
+      "y0": 216.5888671875,
+      "y1": 273.08349609375,
+      "caption": "Table 2. Unconditional image generation on CIFAR-10 [27]. COT-FM improves generation quality across different flow match- ing baselines and sampling steps. Measured in FID (lower is better).",
+      "label": "Table 2",
+      "w": 450,
+      "h": 450
+    },
+    {
+      "page": 6,
+      "path": "assets/fig/p06_2.png",
+      "y0": 216.5888671875,
+      "y1": 273.08349609375,
+      "caption": "",
+      "label": "",
+      "w": 450,
+      "h": 450
+    },
+    {
+      "page": 6,
+      "path": "assets/fig/p06_3.png",
+      "y0": 208.44699096679688,
+      "y1": 278.73297119140625,
+      "caption": "Figure 4. Visualization of 2D checkerboard data under different methods. Blue points denote the source distribution, gray points the target distribution, and orange points the generated samples.",
+      "label": "Figure 4",
+      "w": 450,
+      "h": 450
+    },
+    {
+      "page": 7,
+      "path": "assets/fig/p07_0.png",
+      "y0": 273.83489990234375,
+      "y1": 313.1448974609375,
+      "caption": "",
+      "label": "",
+      "w": 334,
+      "h": 333
+    },
+    {
+      "page": 7,
+      "path": "assets/fig/p07_1.png",
+      "y0": 273.83489990234375,
+      "y1": 313.1448974609375,
+      "caption": "",
+      "label": "",
+      "w": 336,
+      "h": 336
+    },
+    {
+      "page": 7,
+      "path": "assets/fig/p07_2.png",
+      "y0": 273.83489990234375,
+      "y1": 313.1448974609375,
+      "caption": "",
+      "label": "",
+      "w": 333,
+      "h": 335
+    },
+    {
+      "page": 7,
+      "path": "assets/fig/p07_3.png",
+      "y0": 273.8348693847656,
+      "y1": 313.3414306640625,
+      "caption": "Figure 5. Comparison of two trajectories under the same initial setting in LIBERO Long. Our method successfully places the mug into the microwave and closes the door, while FLOWER fails to insert the mug smoothly and gets stuck inside the microwave.",
+      "label": "Figure 5",
+      "w": 335,
+      "h": 334
+    },
+    {
+      "page": 7,
+      "path": "assets/fig/p07_4.png",
+      "y0": 273.8348693847656,
+      "y1": 313.3414306640625,
+      "caption": "",
+      "label": "",
+      "w": 336,
+      "h": 337
+    },
+    {
+      "page": 7,
+      "path": "assets/fig/p07_5.png",
+      "y0": 232.75595092773438,
+      "y1": 272.0659484863281,
+      "caption": "Table 3. Conditional Image Generation on ImageNet 256\u00d7256. FID (\u2193) at different NFE steps.",
+      "label": "Table 3",
+      "w": 334,
+      "h": 336
+    },
+    {
+      "page": 7,
+      "path": "assets/fig/p07_6.png",
+      "y0": 232.75595092773438,
+      "y1": 272.0659484863281,
+      "caption": "Table 4. Robotic manipulation on LIBERO benchmarks [31]. COT-FM achieves single-step performance comparable to FLOWER\u2019s 4-step generation while outperforming other single- step baselines. Measured in success rate (higher is better).",
+      "label": "Table 4",
+      "w": 335,
+      "h": 335
+    },
+    {
+      "page": 7,
+      "path": "assets/fig/p07_7.png",
+      "y0": 232.75595092773438,
+      "y1": 272.0659484863281,
+      "caption": "",
+      "label": "",
+      "w": 334,
+      "h": 335
+    },
+    {
+      "page": 7,
+      "path": "assets/fig/p07_8.png",
+      "y0": 232.75595092773438,
+      "y1": 272.0659484863281,
+      "caption": "",
+      "label": "",
+      "w": 336,
+      "h": 335
+    },
+    {
+      "page": 7,
+      "path": "assets/fig/p07_9.png",
+      "y0": 232.75595092773438,
+      "y1": 272.0659484863281,
+      "caption": "",
+      "label": "",
+      "w": 335,
+      "h": 336
+    },
+    {
+      "page": 8,
+      "path": "assets/fig/p08_3.png",
+      "y0": 317.1578063964844,
+      "y1": 349.0731506347656,
+      "caption": "Table 5. Ablation studies on CIFAR-10 at 50-step generation. (a) Additional alternating iterations progressively reduce FID. (b) COT- FM maintains consistent performance on held-out test data. (c) Size-proportional cluster sampling outperforms uniform sampling.",
+      "label": "Table 5",
+      "w": 1820,
+      "h": 303
+    },
+    {
+      "page": 8,
+      "path": "assets/fig/p08_4.png",
+      "y0": 284.67926025390625,
+      "y1": 316.5946044921875,
+      "caption": "Figure 6. CIFAR-10 visualization for different flow-based methods under 50-step generation settings.",
+      "label": "Figure 6",
+      "w": 1872,
+      "h": 311
+    },
+    {
+      "page": 8,
+      "path": "assets/fig/p08_5.png",
+      "y0": 349.6363525390625,
+      "y1": 380.4252624511719,
+      "caption": "Figure 7. Visualization of a CIFAR-10 cluster. The first row shows representative images from the cluster. Using these images, we apply reverse ODE to estimate the \u03bc0,k and \u03a30,k (Fig. 3, Stage 1). The second row shows images generated by sampling noise from this estimated distribution. The last row presents the results after finetuning the pretrained flow model.",
+      "label": "Figure 7",
+      "w": 885,
+      "h": 143
+    },
+    {
+      "page": 17,
+      "path": "assets/fig/p17_0.png",
+      "y0": 103.70761108398438,
+      "y1": 290.1488952636719,
+      "caption": "",
+      "label": "",
+      "w": 320,
+      "h": 320
+    },
+    {
+      "page": 17,
+      "path": "assets/fig/p17_1.png",
+      "y0": 103.70761108398438,
+      "y1": 290.1488952636719,
+      "caption": "",
+      "label": "",
+      "w": 320,
+      "h": 320
+    },
+    {
+      "page": 17,
+      "path": "assets/fig/p17_2.png",
+      "y0": 300.63616943359375,
+      "y1": 487.07745361328125,
+      "caption": "",
+      "label": "",
+      "w": 320,
+      "h": 320
+    },
+    {
+      "page": 17,
+      "path": "assets/fig/p17_3.png",
+      "y0": 300.63616943359375,
+      "y1": 487.07745361328125,
+      "caption": "",
+      "label": "",
+      "w": 320,
+      "h": 320
+    },
+    {
+      "page": 17,
+      "path": "assets/fig/p17_4.png",
+      "y0": 497.564697265625,
+      "y1": 684.0059814453125,
+      "caption": "Figure 9. Visualization of CIFAR-10 for different flow-based methods under 10-step and 50-step generation settings.",
+      "label": "Figure 9",
+      "w": 320,
+      "h": 320
+    },
+    {
+      "page": 17,
+      "path": "assets/fig/p17_5.png",
+      "y0": 497.564697265625,
+      "y1": 684.0059814453125,
+      "caption": "",
+      "label": "",
+      "w": 320,
+      "h": 320
+    },
+    {
+      "page": 18,
+      "path": "assets/fig/p18_0.png",
+      "y0": 115.93511962890625,
+      "y1": 387.8359375,
+      "caption": "",
+      "label": "",
+      "w": 320,
+      "h": 320
+    },
+    {
+      "page": 18,
+      "path": "assets/fig/p18_1.png",
+      "y0": 404.8297119140625,
+      "y1": 676.7305297851562,
+      "caption": "Figure 10. Visualization of CIFAR-10 for MeanFlow under 1-step generation settings.",
+      "label": "Figure 10",
+      "w": 320,
+      "h": 320
+    }
+  ],
+  "tables": [
+    {
+      "page": 6,
+      "rows": 3,
+      "cols": 2,
+      "image": "assets/tab/p06_1.png"
+    },
+    {
+      "page": 7,
+      "rows": 3,
+      "cols": 3,
+      "image": "assets/tab/p07_0.png"
+    },
+    {
+      "page": 8,
+      "rows": 3,
+      "cols": 2,
+      "image": "assets/tab/p08_0.png"
+    },
+    {
+      "page": 13,
+      "rows": 3,
+      "cols": 2,
+      "image": "assets/tab/p13_0.png"
+    }
+  ],
+  "sections": [
+    {
+      "level": 1,
+      "page": 1,
+      "num": "",
+      "title": "Abstract",
+      "heading": "Abstract"
+    },
+    {
+      "level": 1,
+      "page": 1,
+      "num": "1",
+      "title": "Introduction",
+      "heading": "1. Introduction"
+    },
+    {
+      "level": 1,
+      "page": 3,
+      "num": "2",
+      "title": "Preliminary of Flow Matching",
+      "heading": "2. Preliminary of Flow Matching"
+    },
+    {
+      "level": 1,
+      "page": 4,
+      "num": "3",
+      "title": "Method",
+      "heading": "3. Method"
+    },
+    {
+      "level": 2,
+      "page": 4,
+      "num": "3.1",
+      "title": "Constructing Cluster-wise Target Vector Field",
+      "heading": "3.1. Constructing Cluster-wise Target Vector Field"
+    },
+    {
+      "level": 2,
+      "page": 5,
+      "num": "3.3",
+      "title": "Alternating Optimization and Sampling",
+      "heading": "3.3. Alternating Optimization and Sampling"
+    },
+    {
+      "level": 2,
+      "page": 5,
+      "num": "3.2",
+      "title": "Optimizing FM Models",
+      "heading": "3.2. Optimizing FM Models"
+    },
+    {
+      "level": 1,
+      "page": 5,
+      "num": "4",
+      "title": "Experiments",
+      "heading": "4. Experiments"
+    },
+    {
+      "level": 2,
+      "page": 6,
+      "num": "4.1",
+      "title": "Unconditional 2D Point Cloud Generation",
+      "heading": "4.1. Unconditional 2D Point Cloud Generation"
+    },
+    {
+      "level": 2,
+      "page": 6,
+      "num": "4.2",
+      "title": "Unconditional Image Generation",
+      "heading": "4.2. Unconditional Image Generation"
+    },
+    {
+      "level": 2,
+      "page": 7,
+      "num": "4.3",
+      "title": "Conditional Image Generation",
+      "heading": "4.3. Conditional Image Generation"
+    },
+    {
+      "level": 2,
+      "page": 7,
+      "num": "4.4",
+      "title": "Text-conditional Robotic Action Generation",
+      "heading": "4.4. Text-conditional Robotic Action Generation"
+    },
+    {
+      "level": 2,
+      "page": 8,
+      "num": "4.5",
+      "title": "Ablation Analysis",
+      "heading": "4.5. Ablation Analysis"
+    },
+    {
+      "level": 1,
+      "page": 8,
+      "num": "5",
+      "title": "Conclusions",
+      "heading": "5. Conclusions"
+    },
+    {
+      "level": 1,
+      "page": 9,
+      "num": "",
+      "title": "Acknowledgment",
+      "heading": "Acknowledgment"
+    },
+    {
+      "level": 1,
+      "page": 9,
+      "num": "",
+      "title": "References",
+      "heading": "References"
+    },
+    {
+      "level": 1,
+      "page": 12,
+      "num": "",
+      "title": "Supplementary Material",
+      "heading": "Supplementary Material"
+    },
+    {
+      "level": 1,
+      "page": 12,
+      "num": "A",
+      "title": "Extension to Conditional Generation",
+      "heading": "A. Extension to Conditional Generation"
+    },
+    {
+      "level": 1,
+      "page": 12,
+      "num": "B",
+      "title": "Computational Cost Analysis",
+      "heading": "B. Computational Cost Analysis"
+    },
+    {
+      "level": 1,
+      "page": 13,
+      "num": "C",
+      "title": "Comparison with 2-Rectified Flow",
+      "heading": "C. Comparison with 2-Rectified Flow"
+    },
+    {
+      "level": 1,
+      "page": 13,
+      "num": "D",
+      "title": "Additional Metrics and Ablation on",
+      "heading": "D. Additional Metrics and Ablation on"
+    },
+    {
+      "level": 1,
+      "page": 14,
+      "num": "G",
+      "title": "Related work",
+      "heading": "G. Related work"
+    },
+    {
+      "level": 1,
+      "page": 14,
+      "num": "E",
+      "title": "Discussion on Clustering Quality",
+      "heading": "E. Discussion on Clustering Quality"
+    },
+    {
+      "level": 1,
+      "page": 14,
+      "num": "F",
+      "title": "Convergence of Alternating Optimization",
+      "heading": "F. Convergence of Alternating Optimization"
+    },
+    {
+      "level": 2,
+      "page": 15,
+      "num": "",
+      "title": "H.3. CIFAR-10",
+      "heading": "H.3. CIFAR-10"
+    },
+    {
+      "level": 1,
+      "page": 15,
+      "num": "H",
+      "title": "Experimental Configuration",
+      "heading": "H. Experimental Configuration"
+    },
+    {
+      "level": 2,
+      "page": 15,
+      "num": "",
+      "title": "H.1. Compute Environment",
+      "heading": "H.1. Compute Environment"
+    },
+    {
+      "level": 2,
+      "page": 15,
+      "num": "",
+      "title": "H.4. ImageNet",
+      "heading": "H.4. ImageNet"
+    },
+    {
+      "level": 2,
+      "page": 15,
+      "num": "",
+      "title": "H.2. 2D Point Cloud",
+      "heading": "H.2. 2D Point Cloud"
+    },
+    {
+      "level": 2,
+      "page": 16,
+      "num": "",
+      "title": "H.5. LIBERO",
+      "heading": "H.5. LIBERO"
+    },
+    {
+      "level": 1,
+      "page": 16,
+      "num": "I",
+      "title": "Additional Generated Results",
+      "heading": "I. Additional Generated Results"
+    },
+    {
+      "level": 1,
+      "page": 17,
+      "num": "",
+      "title": "10-step 50-step",
+      "heading": "10-step 50-step"
+    },
+    {
+      "level": 1,
+      "page": 18,
+      "num": "",
+      "title": "1-step",
+      "heading": "1-step"
+    }
+  ],
+  "equations": 52,
+  "numbered": 10,
+  "md": "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/docs/papers/cot-fm/cot-fm.md",
+  "equations_json": "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/docs/papers/cot-fm/equations.json",
+  "available": {
+    "pymupdf": true,
+    "marker": true,
+    "docling": true
+  },
+  "score": {
+    "chars": 76317,
+    "headings": 39,
+    "equations": 15,
+    "eq_tags": 0,
+    "images": 0,
+    "tables": 103,
+    "latex_cmds": 96,
+    "mojibake": 0
+  }
+}

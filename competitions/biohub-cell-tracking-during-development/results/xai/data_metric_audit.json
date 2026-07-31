@@ -1,0 +1,36 @@
+{
+  "per_embryo": {
+    "44b6": {
+      "datasets": 71,
+      "nodes": 20197,
+      "edges": 19826,
+      "divisions": 26,
+      "gt_nodes_per_frame": 3.03
+    },
+    "6bba": {
+      "datasets": 128,
+      "nodes": 113121,
+      "edges": 109057,
+      "divisions": 125,
+      "gt_nodes_per_frame": 8.87
+    }
+  },
+  "total_divisions": 151,
+  "golden_divisions": 1,
+  "metric": {
+    "score": "adj_edge_jaccard + 0.1\u00b7division_jaccard",
+    "adj": "J\u00b7(1\u22120.1\u00b7(T_pred\u2212T_true)/T_true) node-count penalty",
+    "gate": "7\u00b5m bipartite match",
+    "division": "parent\u21922 sisters, \u00b11 frame, both-lineage coverage, connected component, bipartite"
+  },
+  "gotcha_flags": [
+    "SPARSE-GT: competition GT is ~5.9 tracked nodes/frame (\u22481% of real cells) \u2014 external DENSE GT (100+/frame) does NOT transfer; verify any lever on the SPARSE competition metric, not dense external.",
+    "SMALL-DIVISION-SAMPLE: only 151 GT divisions total across 199 datasets ({'44b6': 26, '6bba': 125} per embryo); golden-12 has ~1 \u2192 HIGH VARIANCE, confirm any division result on the FULL per-embryo set, never golden.",
+    "EMBRYO\u2194STAGE CONFOUND: {'6bba': {'S0': np.int64(44), 'S1': np.int64(32), 'S3': np.int64(24), 'S2': np.int64(19), 'S4': np.int64(9)}, '44b6': {'S4': np.int64(26), 'S3': np.int64(25), 'S2': np.int64(15), 'S1': np.int64(3), 'S0': np.int64(2)}} \u2014 44b6=late/dense, 6bba=early/sparse-leaning; NEVER pool stages across embryos (a 'stage' effect can be an embryo effect). Test WITHIN embryo.",
+    "MOTION-SCALE: median inter-frame displacement 1.82\u00b5m \u2248 1 downsampled voxel \u2248 \u00bc of the 7\u00b5m match gate \u2014 express \u00b5m priors as multiples of the movie's OWN median motion (embryo-invariant).",
+    "PROXY-METRIC: src/metric.py DIVISION scoring is a stricter out-degree PROXY \u2014 always score divisions with official-score (host division_metrics.py: \u00b11-frame tolerance, daughter-lineage coverage, bipartite). Edge side matches.",
+    "STALE-BASELINE: always compare a config against a FRESH SAME-PIPELINE baseline, never a pre-existing/older-pipeline geff set (a stale base faked a +0.078 edge gain that was really 0.",
+    "CV\u2194LB DECOUPLING: local CV (~0.87-0.94 by embryo) is near-ceiling and decoupled from LB; a dense-data gain can be invisible to sparse CV. Kaggle is final judge; human-gated submit for LB-only levers.",
+    "PIPELINE-PLUMBING: tracker-predict subprocess runs cwd=repo (use ABSOLUTE data paths), method name drives weights path (pass explicit --weights), --debug-video OVERWRITES the method dir (use unique method per crop), geffs are DIRECTORIES (ls -d)."
+  ]
+}

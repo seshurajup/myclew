@@ -1,0 +1,60 @@
+@ id: rs04
+@ order: 33
+@ title: Fine-tuning for divisions — the one-line smoking gun
+@ subtitle: why the model never learned divisions, and how we fix it
+@ source: research/pilkwang_support_pack/repo/scripts/train_unet_transformer.py
+
+--- note
+## Reading the loss to find the bug
+`rs03` proved divisions need training. So we opened pilkwang's own `compute_loss` — and found the
+reason `division_J = 0` in one line. Divisions are **rare** (~8 in thousands of edges), and the
+loss weights them **the same as everything else** (weight 1.0). The rare class is drowned out; the
+model is never pushed to learn it.
+
+--- note
+**Illustrative — the key code (not a runnable cell):**
+```python
+div_rows = target.sum(dim=1) > 1     # rows where a source has >1 target = a DIVISION
+weight = torch.ones_like(loss)       # every row weighted 1.0 ...
+weight[div_rows] = 1.0               # ... including divisions -> NO up-weighting (the bug)
+loss = (loss * weight)[mask].mean()  # rare divisions contribute almost nothing
+```
+
+--- note
+### The fix — up-weight the rare class
+**[PyTorch]** Raise `weight[div_rows]` so each division example counts for many normal ones. We
+fine-tune only the small edge head (warm-started from his weights), on **his** split, so it's
+leak-free and cheap.
+
+--- note
+**Illustrative — the key code (not a runnable cell):**
+```python
+DIV_W = 10.0                         # sweep 5-20: how much each division example is worth
+weight[div_rows] = DIV_W             # push the model to actually learn divisions
+```
+
+--- note
+### Two more fixes it needed
+**[Craft — from the runs]** Up-weighting alone made the model predict *more* divisions (1 → 9) but
+still 0 correct — it needed **(1)** checkpointing on `division_jaccard` (not accuracy, which ignores
+divisions), and **(2)** a **division-oversampled loader** so each batch actually contains division
+examples to learn from.
+
+--- note
+**Illustrative — the key code (not a runnable cell):**
+```python
+# checkpoint on the metric we care about, not proxy accuracy:
+if division_jaccard(model, val) > best_div:   # select the best-DIVISION model
+    best_div, best_state = ..., model.state_dict()
+# oversample frame-pairs that contain a GT division:
+sampler = WeightedRandomSampler(has_division * 20 + 1, len(ds))
+```
+
+--- note
+### Status
+This is our **live** approach to actually claim the +0.049. It targets the exact gap `rs03` proved
+is real, using training (the only thing that works) rather than another hand-rule.
+
+--- note
+**Next → rs05: meanwhile, a no-training +0.003 someone else found.**
+

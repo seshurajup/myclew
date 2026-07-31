@@ -1,0 +1,42 @@
+[
+  {
+    "text": "Type hints become truly powerful when a tool like mypy checks them for you.",
+    "until_line": 4
+  },
+  {
+    "text": "mypy reads your type annotations and finds mismatches without ever running your code.",
+    "until_line": 4
+  },
+  {
+    "text": "greet promises to take a string and return a string, and total expects a list of integers.",
+    "until_line": 7
+  },
+  {
+    "text": "[chuckle] If you called greet with the number forty-two, mypy would flag it as an error before you ran anything.",
+    "until_line": 11
+  },
+  {
+    "text": "[sniff] It catches a whole class of bugs — passing the wrong type — at your desk, not in production.",
+    "until_line": 11
+  },
+  {
+    "text": "Correct usage type-checks silently, giving you confidence the pieces fit together.",
+    "until_line": 15
+  },
+  {
+    "text": "[sigh] Optional makes the possibility of None explicit, forcing you to handle the empty case.",
+    "until_line": 20
+  },
+  {
+    "text": "So find, which might return a string or None, documents that honestly for both readers and the checker.",
+    "until_line": 20
+  },
+  {
+    "text": "[groan] On large codebases, static type checking catches countless mistakes early — it's like a spellchecker for your logic.",
+    "until_line": 20
+  },
+  {
+    "text": "Next video: profiling and timeit. Tell me in the comments if this clicked.",
+    "until_line": 20
+  }
+]

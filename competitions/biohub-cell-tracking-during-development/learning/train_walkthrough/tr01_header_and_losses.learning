@@ -1,0 +1,160 @@
+@ id: tr01
+@ order: 161
+@ title: train_unet_transformer.py — header & the loss functions
+@ subtitle: lines 1–118: imports, the GT transition matrix, and the focal-BCE link loss
+@ source: research/pilkwang_support_pack/repo/scripts/train_unet_transformer.py
+
+--- note
+## What this file is
+`train_unet_transformer.py` (1279 lines) is pilkwang's **end-to-end trainer**: a temporal 3D-UNet
+detector whose feature maps feed a small transformer that predicts, for every pair of consecutive
+frames, a **node→node link matrix**. This walkthrough covers it top-to-bottom; every code cell below
+runs on our **real** competition `.geff` data (outputs are captured, never typed).
+
+The module docstring states the core trick — gradients flow **through integer node indexing** back
+into the UNet:
+```
+The UNet (TemporalUNet3D) runs on each batch of consecutive frame pairs during training.
+Its output feature maps are indexed at integer node coordinates (round + clamp), concatenated
+with sinusoidal positional embeddings, and fed to SimpleNodeTransformer. Gradients flow back
+through the integer indexing into the UNet weights.
+```
+
+--- note
+### The imports (lines 15–35)
+```python
+import argparse                     # CLI flags (--split, --epochs, ...)  → covered in tr06
+import json                         # read/write splits + config.json
+import time                         # epoch timing
+from dataclasses import dataclass   # frozen metadata containers (FrameWindowData, VideoMeta)
+from pathlib import Path            # filesystem paths
+import numpy as np                  # cpu arrays (coords, ids, targets)
+import polars as pl                 # fast columnar filter over the .geff node/edge tables
+import torch                        # tensors + autograd
+import torch.nn as nn               # layers
+import torch.nn.functional as F     # bce, softmax, interpolate
+import zarr                         # the image volumes live in zarr v3
+from torch.utils.data import Dataset, DataLoader  # the input pipeline (tr02)
+from tqdm import tqdm               # progress bars
+import tracksdata as td             # the graph library the .geff loads into
+from biohub_tracking.io import invert_time_graph, open_dataset   # dataset IO (io01 lesson)
+from biohub_tracking.models import SimpleNodeTransformer, TemporalUNet3D  # the two nets (tr03)
+from itertools import cycle as _cycle   # endless iterator for --max-iters capping
+```
+**[Craft]** note the clean split: `numpy/polars` for CPU graph work, `torch` for the differentiable
+part, and the two model classes imported from the installable `biohub_tracking` package (not inlined).
+
+--- note
+### `compute_gt_transition_matrix` (lines 38–52) — the label the linker learns
+For a pair of frames, the ground-truth link matrix `M` has `M[i, j] = 1` iff GT node `i` in frame `t`
+is joined by a GT edge to node `j` in frame `t+1`. It is built by mapping each frame's node-ids to
+row/col indices, then writing a `1` per GT edge:
+```python
+def compute_gt_transition_matrix(gt_ids_t, gt_ids_t1, edge_attrs):
+    t_to_row  = {nid: i for i, nid in enumerate(gt_ids_t)}      # node_id → row index (frame t)
+    t1_to_col = {nid: i for i, nid in enumerate(gt_ids_t1)}     # node_id → col index (frame t+1)
+    matrix = torch.zeros(len(gt_ids_t), len(gt_ids_t1), dtype=torch.float32)  # (N_t, N_t1) all-zero
+    for source_id, target_id in zip(edge_attrs["source_id"], edge_attrs["target_id"]):  # every GT edge
+        if source_id in t_to_row and target_id in t1_to_col:   # both endpoints in this window?
+            matrix[t_to_row[source_id], t1_to_col[target_id]] = 1.0  # mark the link
+    return matrix                                              # the dense target the transformer fits
+```
+Below we build this **exact matrix on a real embryo** for frames 0→1.
+
+--- code
+import numpy as np, zarr                                        # arrays + zarr IO
+ROOT = "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development"  # project root
+TRAIN = f"{ROOT}/input/biohub-cell-tracking-during-development/train"     # the labelled embryos
+G = f"{TRAIN}/6bba_062c8d37.geff"                               # one real embryo's tracking graph
+nid = np.asarray(zarr.open(f"{G}/nodes/ids")[:])               # every node's global id
+nt  = np.asarray(zarr.open(f"{G}/nodes/props/t/values")[:])   # every node's frame index
+src = np.asarray(zarr.open(f"{G}/edges/ids")[:][:, 0])         # edge source node-ids
+tgt = np.asarray(zarr.open(f"{G}/edges/ids")[:][:, 1])         # edge target node-ids
+ids_t  = nid[nt == 0]                                          # node-ids in frame 0  (rows)
+ids_t1 = nid[nt == 1]                                          # node-ids in frame 1  (cols)
+t_to_row  = {n: i for i, n in enumerate(ids_t)}               # row index map
+t1_to_col = {n: i for i, n in enumerate(ids_t1)}              # col index map
+M = np.zeros((len(ids_t), len(ids_t1)), np.float32)          # empty transition matrix
+for s, d in zip(src, tgt):                                     # scan every GT edge
+    if s in t_to_row and d in t1_to_col:                      # both ends inside frames 0/1?
+        M[t_to_row[s], t1_to_col[d]] = 1.0                    # write the link
+{"rows_frame0": M.shape[0], "cols_frame1": M.shape[1], "gt_links": int(M.sum())}  # real counts
+
+--- output
+```
+{'rows_frame0': 5, 'cols_frame1': 5, 'gt_links': 5}
+```
+
+--- note
+### `compute_loss` (lines 55–72) — softmax over **columns**, focal-weighted BCE
+The subtle, important design choice: `softmax(logits, dim=0)`. Column-softmax means each frame-`t+1`
+node picks its **one** parent — so a cell can have two children (division) but two cells can **not**
+merge into one. Loss is focal-weighted BCE, and only rows/cols that carry an annotation contribute
+(labels are sparse):
+```python
+def compute_loss(logits, target):
+    active_rows = target.sum(dim=1) > 0                        # frame-t nodes that have any GT link
+    active_cols = target.sum(dim=0) > 0                        # frame-t+1 nodes that have any GT link
+    mask = active_rows.unsqueeze(1) | active_cols.unsqueeze(0) # supervise only annotated rows/cols
+    if not mask.any():                                         # nothing annotated → zero (keeps grad)
+        return torch.tensor(0.0, requires_grad=True, device=logits.device)
+    probs = torch.softmax(logits, dim=0)  # dim=0 intentional: divisions allowed, merges aren't
+    bce = F.binary_cross_entropy(probs, target, reduction="none")  # per-entry BCE
+    p_t = probs * target + (1 - probs) * (1 - target)         # prob of the CORRECT class per entry
+    loss = ((1 - p_t) ** 2) * bce                             # focal term (1-p_t)^2 down-weights easy
+    div_rows = target.sum(dim=1) > 1                          # rows that divide (≥2 children)
+    weight = torch.ones_like(loss); weight[div_rows] = 1.0    # (hook to up-weight divisions)
+    return (loss * weight)[mask].mean()                       # mean over supervised entries
+```
+Below we run this **real focal-BCE** on the real matrix `M` from the previous cell, comparing a random
+init vs. the perfect prediction — the loss must be far lower when logits point at the true links.
+
+--- code
+import torch, torch.nn.functional as F                        # torch loss ops
+Mt = torch.from_numpy(M)                                       # real GT matrix (N_t, N_t1)
+def compute_loss(logits, target):                             # the file's exact function
+    active_rows = target.sum(dim=1) > 0                        # annotated rows
+    active_cols = target.sum(dim=0) > 0                        # annotated cols
+    mask = active_rows.unsqueeze(1) | active_cols.unsqueeze(0) # supervised region
+    if not mask.any():                                        # nothing to supervise
+        return torch.tensor(0.0, requires_grad=True)          # zero, grad-safe
+    probs = torch.softmax(logits, dim=0)                      # column-softmax (parents compete)
+    bce = F.binary_cross_entropy(probs, target, reduction="none")  # per-entry BCE
+    p_t = probs * target + (1 - probs) * (1 - target)         # prob of correct class
+    loss = ((1 - p_t) ** 2) * bce                             # focal weighting
+    return loss[mask].mean()                                  # mean over supervised entries
+torch.manual_seed(0)                                          # reproducible
+rand_logits = torch.randn_like(Mt)                            # untrained linker output
+perfect_logits = (Mt * 10) - 5                               # logits that point at the true links
+{"loss_random": round(float(compute_loss(rand_logits, Mt)), 4),   # high
+ "loss_perfect": round(float(compute_loss(perfect_logits, Mt)), 4)} # low → loss is well-formed
+
+--- output
+```
+{'loss_random': 0.2427, 'loss_perfect': 0.0}
+```
+
+--- note
+### `compute_batch_loss` (75–88) & `_evaluate_pair` (91–109)
+`compute_batch_loss` just slices each padded item back to its real `(n_t, n_t1)` size and averages
+`compute_loss` over the batch. `_evaluate_pair` reuses `compute_loss` and adds an accuracy count
+(`probs > 0.5` vs target) over the supervised mask — used only for reporting, never for backprop.
+```python
+def compute_batch_loss(logits, target, mask_t, mask_t1):
+    B = logits.shape[0]; losses = []                          # one loss per batch item
+    for b in range(B):
+        nt  = mask_t[b].sum().item()                          # real node count, frame t
+        nt1 = mask_t1[b].sum().item()                         # real node count, frame t+1
+        losses.append(compute_loss(logits[b, :nt, :nt1], target[b, :nt, :nt1]))  # unpad + loss
+    return torch.stack(losses).mean()                         # batch-mean link loss
+```
+**[Craft] Constants (111–117):** `DEFAULT_AUGMENTATIONS = [brightness_augment, flip_augment]` (aug
+lessons), `DEFAULT_METHOD = "unet_transformer"`, and `_POS_EMBED_DIM = 8` per axis → **32-dim**
+positional code (4 axes × 8), used everywhere in tr02. **Next → tr02: the data pipeline.**
+
+--- shape
+compute_gt_transition_matrix → (N_t, N_t1)<br>
+compute_loss: softmax dim=0 (cols)<br>
+focal term (1-p_t)²·BCE<br>
+_POS_EMBED_DIM = 8 /axis → 32 total
+

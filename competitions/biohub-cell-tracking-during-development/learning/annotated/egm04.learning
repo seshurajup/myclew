@@ -1,0 +1,16 @@
+@ id: egm04
+@ order: 3030
+@ title: 4 Evaluation
+@ subtitle: EmbeddingGemma: Powerful and Lightweight Text Representations §4
+@ source: docs/papers/embeddinggemma/embeddinggemma.md
+
+--- note
+## 4 Evaluation
+**Paper:** EmbeddingGemma: Powerful and Lightweight Text Representations · §4 · pages 7–10 · equations (none) · 0 figures.
+
+**Evaluation — whose numbers are whose.** MTEB multilingual/English/code:
+the authors', not reproduced, and the pack never claims them. What is OURS, measured live: the shipped
+model's paraphrase geometry (basics), the task-prompt effect (eq. 1: 0/8 → 5/8 top-1 on real agent
+routing), and truncation retention (advanced). Small, honest, and run on the exact artifact the paper
+shipped.
+

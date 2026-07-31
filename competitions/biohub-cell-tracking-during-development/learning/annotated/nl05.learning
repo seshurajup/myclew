@@ -1,0 +1,290 @@
+@ id: nl05
+@ order: 1340
+@ title: 5 Existing Architectures as Neural Learning Modules
+@ subtitle: Nested Learning: The Illusion of Deep Learning Architecture §5
+@ source: docs/papers/nested-learning/nested-learning.md
+
+--- note
+## 5 Existing Architectures as Neural Learning Modules
+**Paper:** Nested Learning: The Illusion of Deep Learning Architecture · §5 · pages 21–23 · equations (61–68) · 0 figures.
+
+**Every sequence model in the literature, as one table.** Fix the memory class
+(matrix or MLP), pick an internal objective, pick an optimizer for it, and you have named an
+architecture:
+
+| objective `L̃(M; k, v)` | optimizer | recurrence | model |
+|---|---|---|---|
+| weighted `Σ s(kᵢ,q)‖vᵢ−M‖²` | **closed form** (Nadaraya–Watson) | none — re-solved per query | softmax attention (62), SWA (63) |
+| `−2⟨Mk, v⟩` | GD + weight decay | `M = αM + ηvφ(k)ᵀ` | linear attention, RetNet, RWKV, lightning (64) |
+| `‖Mk − v‖²` | SGD, `Ret = ‖M−M_{t-1}‖²` | `M = (I−ηkkᵀ)M + ηvkᵀ` | DeltaNet, Longhorn, RWKV-7 (65) |
+| `−2⟨Mk,v⟩ + ‖Mᵀv‖²` | GD | Oja's rule | OjaNet (66–67) |
+| any `L̃`, windowed over `c` past inputs | GD | `M = αM − Σᵢγ∇L̃` | Omega rule / Atlas (68) |
+| `‖Mk−v‖_p^p` | GD | — | Miras / `L_p` memories |
+
+So the "heterogeneity" of modern architectures is an illusion: they are all feedforward memories, and
+what differs is **objective, learning rule, and level**. §5.1's box states it outright — the illusion
+comes from only ever seeing the *solution* of the optimization problem, never the problem.
+
+--- note
+### Keys, values, queries (given, from the lower-frequency level) — eq. (61)
+
+$$
+\boldsymbol{k}_t = \boldsymbol{x}_tW_{\boldsymbol{k}},\qquad \boldsymbol{v}_t = \boldsymbol{x}_tW_{\boldsymbol{v}},\qquad \boldsymbol{q}_t = \boldsymbol{x}_tW_{\boldsymbol{q}}
+$$
+
+From here on the paper analyses only the *high-frequency* level and takes `(k, v, q)`
+as given, because the projections are optimised at a lower frequency. Every architecture below differs
+only in what it does with these three.
+
+--- code
+import torch, torch.nn as nn, torch.nn.functional as F      # the whole paper is linear algebra + autograd
+
+import sys; sys.path.insert(0, "learning")
+import vizkit as vz                                            # the shared visual + explainability layer
+
+DEV = torch.device("cuda" if torch.cuda.is_available() else "cpu")   # every proof runs on the GPU
+torch.set_default_device(DEV)                                  # so EVERY tensor/module below is on DEV
+# These cells PROVE matrix identities, so they need full fp32: TF32 truncates the mantissa to 10 bits
+# and an identity that holds to 1e-6 in fp32 only holds to ~1e-3 in TF32. Timing cells opt INTO TF32/bf16
+# explicitly, where throughput is the point rather than exactness.
+torch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False
+torch.manual_seed(0); torch.set_printoptions(precision=4, sci_mode=False)
+print(f"device: {DEV}" + (f" | {torch.cuda.get_device_name(0)}" if DEV.type == "cuda" else ""))
+
+def ok(name, cond, extra=""):                                  # a lesson's PROOF prints PASS/FAIL, never prose
+    print(("PASS  " if cond else "FAIL  ") + name + (f"   | {extra}" if extra else ""))
+
+def close(a, b, tol=1e-5):                                     # float-safe equality for matrix identities
+    return torch.allclose(a, b, atol=tol, rtol=tol)
+
+def newton_schulz(G, steps=5, eps=1e-7):                       # the orthogonalisation used by Muon/M3
+    a, b, c = 3.4445, -4.7750, 2.0315                          # the standard quintic coefficients
+    X = G / (G.norm() + eps)
+    tall = X.shape[0] > X.shape[1]
+    if tall: X = X.T
+    for _ in range(steps):
+        A = X @ X.T; X = a * X + (b * A + c * A @ A) @ X
+    return X.T if tall else X
+
+T, d = 6, 4
+X = torch.randn(T, d)
+Wk, Wv, Wq = (torch.randn(d, d) / d ** 0.5 for _ in range(3))
+K, V, Q = X @ Wk, X @ Wv, X @ Wq
+ok("one shared interface for every model in this section", (K.shape, V.shape, Q.shape) == ((T, d),) * 3,
+   f"K,V,Q each {tuple(K.shape)}")
+
+--- output
+```
+device: cuda | NVIDIA GeForce RTX 5090
+PASS  one shared interface for every model in this section   | K,V,Q each (6, 4)
+```
+
+--- image
+learning/assets/nested-learning/eq/eq_p22_226.png
+Equation (61) as printed in the PDF
+
+--- note
+### Softmax attention = Nadaraya–Watson solution of a weighted L2 regression — eq. (62)
+
+$$
+\mathcal{M}^{*} = \arg\min_{\mathcal{M}}\sum_{i=1}^{L}s(\boldsymbol{k}_i,\boldsymbol{q})\big\lVert \boldsymbol{v}_i-\mathcal{M}\big\rVert_2^2 \;=\; \sum_{i=1}^{L}\frac{s(\boldsymbol{k}_i,\boldsymbol{q})}{\sum_{j=1}^{L}s(\boldsymbol{k}_j,\boldsymbol{q})}\,\boldsymbol{v}_i
+$$
+
+Attention is the **non-parametric** member of the family: the argmin has a closed form,
+so there is nothing to fit and nothing to carry — update frequency ∞, perfect recall, and a cache that
+grows with the context. That is why the paper says parametric memories of the *same* search space should
+not be expected to beat attention at scale; to beat it you must change the *levels*, not the objective.
+
+--- code
+s = torch.exp(K @ Q[3] / d ** 0.5)
+ok("closed form == softmax attention", close((s[:, None] * V).sum(0) / s.sum(),
+                                            F.softmax(K @ Q[3] / d ** 0.5, dim=0) @ V))
+print("cache grows with L (perfect memory); state of a recurrent memory does not")
+
+--- output
+```
+PASS  closed form == softmax attention
+cache grows with L (perfect memory); state of a recurrent memory does not
+```
+
+--- image
+learning/assets/nested-learning/eq/eq_p22_233.png
+Equation (62) as printed in the PDF
+
+--- note
+### Sliding-window attention = the same argmin on the last c tokens — eq. (63)
+
+$$
+\mathcal{M}^{*} = \arg\min_{\mathcal{M}}\sum_{i=t-c+1}^{t}s(\boldsymbol{k}_i,\boldsymbol{q}_i)\big\lVert \boldsymbol{v}_i-\mathcal{M}\big\rVert_2^2 \;=\; \sum_{i=t-c+1}^{t}\frac{s(\boldsymbol{k}_i,\boldsymbol{q})}{\sum_{j=t-c+1}^{t}s(\boldsymbol{k}_j,\boldsymbol{q})}\,\boldsymbol{v}_i
+$$
+
+Only the *range of the sum* changed: SWA is a **context** choice, not a mechanism
+choice. Same lens covers global attention, local attention, and everything between.
+
+--- code
+c, t = 3, 5
+idx = slice(t - c + 1, t + 1)
+sw = torch.exp(K[idx] @ Q[t] / d ** 0.5)
+ok("windowed closed form == windowed attention",
+   close((sw[:, None] * V[idx]).sum(0) / sw.sum(), F.softmax(K[idx] @ Q[t] / d ** 0.5, dim=0) @ V[idx]))
+
+--- output
+```
+PASS  windowed closed form == windowed attention
+```
+
+--- image
+learning/assets/nested-learning/eq/eq_p22_243.png
+Equation (63) as printed in the PDF
+
+--- note
+### Hebbian-rule RNNs (linear attention, RetNet, RWKV, lightning attention) — eq. (64)
+
+$$
+\mathcal{M}_t = \alpha_t\mathcal{M}_{t-1} - \eta\nabla_{\mathcal{M}_{t-1}}\tilde{\mathcal{L}}\big(\mathcal{M}_{t-1};\phi(\boldsymbol{k}_t),\boldsymbol{v}_t\big) \;=\; \alpha_t\mathcal{M}_{t-1} + \eta_t\,\boldsymbol{v}_t\phi(\boldsymbol{k}_t)^{\top},\qquad \tilde{\mathcal{L}}(\mathcal{M};\boldsymbol{k},\boldsymbol{v}) := -2\langle \mathcal{M}\boldsymbol{k},\boldsymbol{v}\rangle
+$$
+
+The **first generation** of modern RNNs, all recovered at once: choose `α_t` (1,
+learnable, channel-wise, input-dependent) and the kernel `φ` (identity, polynomial, …) and you get linear
+attention / RetNet / RWKV / lightning attention. The mechanism is one gradient step on a *dot-product*
+objective — Hebbian writing, with all its capacity limits.
+
+--- code
+M = torch.zeros(d, d); alpha, eta = 0.95, 1.0
+phi = lambda z: F.elu(z) + 1                                     # a positive feature map, as in linear attn
+for t in range(T):
+    M = alpha * M + eta * torch.outer(V[t], phi(K[t]))           # eq. 64
+Mg = torch.zeros(d, d, requires_grad=True)
+(-2 * (Mg @ phi(K[0])) @ V[0]).backward()
+ok("the update is one GD step on -2<Mk, v>", close(-0.5 * Mg.grad, torch.outer(V[0], phi(K[0]))),
+   "grad = -2 v phi(k)^T")
+ok("state stays (d, d) for any T", M.shape == (d, d), f"T={T}")
+
+--- output
+```
+PASS  the update is one GD step on -2<Mk, v>   | grad = -2 v phi(k)^T
+PASS  state stays (d, d) for any T   | T=6
+```
+
+--- image
+learning/assets/nested-learning/eq/eq_p22_248.png
+Equation (64) as printed in the PDF
+
+--- note
+### Delta-rule RNNs (DeltaNet, Longhorn, RWKV-7) — eq. (65)
+
+$$
+\mathcal{M}_t = \mathcal{M}_{t-1} - \eta_t\nabla_{\mathcal{M}_{t-1}}\tilde{\mathcal{L}}\big(\mathcal{M}_{t-1};\phi(\boldsymbol{k}_t),\boldsymbol{v}_t\big) \;=\; \big(\boldsymbol{I}-\eta_t\boldsymbol{k}_t\boldsymbol{k}_t^{\top}\big)\mathcal{M}_{t-1} + \eta_t\,\boldsymbol{v}_t\boldsymbol{k}_t^{\top},\qquad \tilde{\mathcal{L}}_t=\lVert \mathcal{M}_t\boldsymbol{k}_t-\boldsymbol{v}_t\rVert_2^2,\;\; \mathrm{Ret}_t=\lVert \mathcal{M}_t-\mathcal{M}_{t-1}\rVert_F^2
+$$
+
+Swap the objective for **L2 regression** and the write becomes "erase what is stored at
+this key, then write" — better capacity and real forgetting. Varying `Ret` (e.g. `‖M − α_tM_{t-1}‖²`),
+adding weight decay `‖M‖_q^q`, taking several GD steps, or making `η_t, α_t` learnable generates the whole
+zoo of delta-rule variants.
+
+--- code
+Md, Mh = torch.zeros(d, d), torch.zeros(d, d); eta = 1.0
+Kn = F.normalize(K, dim=-1)
+for t in range(T):
+    Md = (torch.eye(d) - eta * torch.outer(Kn[t], Kn[t])) @ Md + eta * torch.outer(V[t], Kn[t])
+    Mh = Mh + torch.outer(V[t], Kn[t])                            # Hebbian, for comparison
+err_d = sum(float((Md @ Kn[t] - V[t]).norm()) for t in range(T)) / T
+err_h = sum(float((Mh @ Kn[t] - V[t]).norm()) for t in range(T)) / T
+ok("delta rule recalls its own writes better than Hebbian", err_d < err_h,
+   f"mean recall error: delta {err_d:.4f} vs Hebbian {err_h:.4f}")
+Mg = torch.zeros(d, d, requires_grad=True)
+((Mg @ Kn[0] - V[0]).pow(2).sum()).backward()
+ok("gradient of the L2 objective == 2(Mk - v)k^T", close(Mg.grad, 2 * torch.outer(-V[0], Kn[0])))
+
+--- output
+```
+PASS  delta rule recalls its own writes better than Hebbian   | mean recall error: delta 4.3255 vs Hebbian 5.5143
+PASS  gradient of the L2 objective == 2(Mk - v)k^T
+```
+
+--- image
+learning/assets/nested-learning/eq/eq_p22_259.png
+Equation (65) as printed in the PDF
+
+--- note
+### Oja's rule (OjaNet) — eq. (66)
+
+$$
+\mathcal{M}_t = \alpha_t\mathcal{M}_{t-1} + \eta_t\,\boldsymbol{v}_t\big(\phi(\boldsymbol{k}_t)^{\top}-\mathcal{M}_{t-1}^{\top}\boldsymbol{v}_t\big)
+$$
+
+Hebbian writing plus a **unit-norm constraint** on the single neuron (Oja 1982), which
+stabilises the runaway growth of pure Hebbian updates. Reported to underperform delta-rule models
+empirically, but it completes the picture of "which objective am I choosing".
+
+--- code
+Mo = torch.randn(d, d) * 0.1; Mh2 = Mo.clone(); alpha, eta = 1.0, 0.1
+for t in range(T):
+    Mo = alpha * Mo + eta * torch.outer(V[t], phi(K[t]) - Mo.T @ V[t])   # eq. 66
+    Mh2 = alpha * Mh2 + eta * torch.outer(V[t], phi(K[t]))
+ok("Oja's normalisation keeps the state bounded", float(Mo.norm()) < float(Mh2.norm()),
+   f"||M||: Oja {float(Mo.norm()):.3f} vs Hebbian {float(Mh2.norm()):.3f}")
+
+--- output
+```
+PASS  Oja's normalisation keeps the state bounded   | ||M||: Oja 1.170 vs Hebbian 1.826
+```
+
+--- image
+learning/assets/nested-learning/eq/eq_p23_265.png
+Equation (66) as printed in the PDF
+
+--- note
+### …and the objective it descends — eq. (67)
+
+$$
+\mathcal{M}_t = \mathcal{M}_{t-1} - \eta_t\nabla_{\mathcal{M}_{t-1}}\tilde{\mathcal{L}}\big(\mathcal{M}_{t-1};\phi(\boldsymbol{k}_t),\boldsymbol{v}_t\big),\qquad \tilde{\mathcal{L}}(\mathcal{M};\boldsymbol{k}_t,\boldsymbol{v}_t) = -2\langle \mathcal{M}\boldsymbol{k}_t,\boldsymbol{v}_t\rangle + \lVert \mathcal{M}^{\top}\boldsymbol{v}_t\rVert_2^2
+$$
+
+The dot-product objective **plus** an `‖Mᵀv‖²` penalty — that second term is exactly
+where the normalisation comes from. Same recipe as always: read the rule, recover the objective.
+
+--- code
+Mg = torch.randn(d, d, requires_grad=True)
+k0, v0 = phi(K[0]), V[0]
+(-2 * (Mg @ k0) @ v0 + (Mg.T @ v0).pow(2).sum()).backward()
+analytic = -2 * torch.outer(v0, k0) + 2 * torch.outer(v0, Mg.detach().T @ v0)
+ok("autograd gradient == Oja's analytic update direction", close(Mg.grad, analytic, 1e-4))
+
+--- output
+```
+PASS  autograd gradient == Oja's analytic update direction
+```
+
+--- note
+### Omega rule (Atlas) — a window of past inputs, not just the current one — eq. (68)
+
+$$
+\mathcal{M}_t = \alpha_t\mathcal{M}_{t-1} - \sum_{i=t-c+1}^{t}\gamma_{t,i}\,\nabla\tilde{\mathcal{L}}\big(\mathcal{M}_t;\phi(\boldsymbol{k}_i),\boldsymbol{v}_i\big)
+$$
+
+Every rule so far is **online** (state + current input). Omega caches the last `c`
+inputs and takes a *weighted* gradient over all of them, which lets the memory revise a whole
+neighbourhood at once. With `γ = 1` and `c` = the full context the optimum collapses back to the online
+case.
+
+--- code
+c = 3; Momega = torch.zeros(d, d); alpha = 0.98
+for t in range(T):
+    lo = max(0, t - c + 1)
+    gsum = sum(0.5 ** (t - i) * (Momega @ Kn[i] - V[i]).unsqueeze(1) @ Kn[i].unsqueeze(0)
+               for i in range(lo, t + 1))                         # eq. 68 with gamma = 0.5^(t-i)
+    Momega = alpha * Momega - 0.3 * gsum
+res_window = sum(float((Momega @ Kn[i] - V[i]).norm()) for i in range(T - c, T)) / c
+ok("a windowed update fits the recent neighbourhood", res_window < err_h,
+   f"recent-window error {res_window:.4f} vs Hebbian {err_h:.4f}")
+
+--- output
+```
+PASS  a windowed update fits the recent neighbourhood   | recent-window error 0.7269 vs Hebbian 5.5143
+```
+
+--- image
+learning/assets/nested-learning/eq/eq_p23_275.png
+Equation (68) as printed in the PDF
+

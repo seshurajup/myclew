@@ -1,0 +1,48 @@
+import torch, torch.nn as nn, torch.nn.functional as F      # Schur coordinates + structured ablation
+import sys; sys.path.insert(0, "learning")
+import vizkit as vz
+
+DEV = torch.device("cuda" if torch.cuda.is_available() else "cpu")   # every proof runs on the GPU
+torch.set_default_device(DEV)
+torch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False   # exact proofs
+torch.manual_seed(0); torch.set_printoptions(precision=4, sci_mode=False)
+print(f"device: {DEV}" + (f" | {torch.cuda.get_device_name(0)}" if DEV.type == "cuda" else ""))
+
+def ok(name, cond, extra=""):
+    print(("PASS  " if cond else "FAIL  ") + name + (f"   | {extra}" if extra else ""))
+
+def close(a, b, tol=1e-5):
+    return torch.allclose(a, b, atol=tol, rtol=tol)
+
+def schur(W):
+    """Real Schur form via scipy on the CPU (LAPACK has no CUDA path), returned on DEV."""
+    import numpy as np
+    from scipy.linalg import schur as _schur
+    T, Q = _schur(W.detach().double().cpu().numpy(), output="real")
+    return (torch.tensor(Q, dtype=torch.float32, device=DEV),
+            torch.tensor(T, dtype=torch.float32, device=DEV))
+
+H, T_len, d_in, d_out = 24, 40, 4, 2
+Wx = torch.randn(H, d_in) / 2
+Wy = torch.randn(d_out, H) / (H ** 0.5)
+W = torch.randn(H, H) / (H ** 0.5)
+W = 0.95 * W / torch.linalg.matrix_norm(W, 2)
+X = torch.randn(T_len, d_in)
+
+def states(Wr):
+    h = torch.zeros(H); hs = []
+    for t in range(T_len):
+        h = torch.tanh(Wx @ X[t] + Wr @ h)                       # eq. 1
+        hs.append(h)
+    return torch.stack(hs)
+
+hs = states(W)
+ok("the state stays bounded (tanh saturates)", float(hs.abs().max()) <= 1.0,
+   f"max |h| = {float(hs.abs().max()):.4f}")
+ok("h_0 = 0 makes the rollout a deterministic function of the input", close(states(W), hs))
+
+rollout = lambda Wr: states(Wr) @ Wy.T                            # eq. 2
+base = rollout(W)
+ok("the rollout has one prediction per timestep", base.shape == (T_len, d_out), f"{tuple(base.shape)}")
+ok("and it is what we will hold fixed while editing W_hh", True,
+   "W_xh and W_hy never change in any experiment below")

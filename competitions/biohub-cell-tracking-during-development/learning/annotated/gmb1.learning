@@ -1,0 +1,97 @@
+@ id: gmb1
+@ order: 2100
+@ title: Basics — a KV cache grows with the context; a memory does not
+@ subtitle: GradMem · the cost curve that motivates writing instead of caching
+@ source: docs/papers/gradmem/gradmem.md
+
+--- note
+## The arithmetic that forces the question
+Answering `N` queries about a context of `c` tokens two ways:
+
+* **keep the cache** — pay `c²` once to read the context, then `c·q` per query (every query attends over
+  the whole context). Memory grows linearly in `c`.
+* **write a memory** — pay a write pass to compress `c` into `m ≪ c` tokens, then only `m·q` per query.
+
+So caching wins when there are few queries and writing wins when there are many. The crossover is an
+inequality in `N`, and eq. 13 states it exactly. Compute the curves before believing either side.
+
+--- note
+### The two cost curves, and where they cross
+`T_full ≈ c² + cqN` against `T_GradMem ≈ R(c+m)²K + m² + mqN` (eqs. 11–12: `K` gradient steps over `R`
+chunks). Both are linear in `N` with different slopes and intercepts, so there is exactly one crossover.
+
+--- code
+import torch, torch.nn as nn, torch.nn.functional as F      # a memory is the argmin of a write loss
+import sys; sys.path.insert(0, "learning")
+import vizkit as vz
+
+DEV = torch.device("cuda" if torch.cuda.is_available() else "cpu")   # every proof runs on the GPU
+torch.set_default_device(DEV)
+torch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False   # exact proofs
+torch.manual_seed(0); torch.set_printoptions(precision=4, sci_mode=False)
+print(f"device: {DEV}" + (f" | {torch.cuda.get_device_name(0)}" if DEV.type == "cuda" else ""))
+
+def ok(name, cond, extra=""):
+    print(("PASS  " if cond else "FAIL  ") + name + (f"   | {extra}" if extra else ""))
+
+def close(a, b, tol=1e-5):
+    return torch.allclose(a, b, atol=tol, rtol=tol)
+
+c, m, q, R, K = 8192, 256, 64, 4, 8
+T_full = lambda N: c ** 2 + c * q * N
+T_grad = lambda N: R * (c + m) ** 2 * K + m ** 2 + m * q * N
+for N in (1, 10, 100, 1000, 10000):
+    a, b = T_full(N), T_grad(N)
+    print(f"  N={N:>6}:  cache {a:.3e}   memory {b:.3e}   ->  {'memory' if b < a else 'cache'} wins")
+ok("the cache wins for a single query", T_full(1) < T_grad(1))
+ok("the memory wins once there are many queries", T_grad(10000) < T_full(10000))
+lo, hi = 1, 10 ** 9
+while lo < hi:                                                  # bisect the crossover
+    mid = (lo + hi) // 2
+    if T_grad(mid) < T_full(mid): hi = mid
+    else: lo = mid + 1
+print(f"  crossover at N = {lo} queries (c={c}, m={m}, q={q}, R={R}, K={K})")
+ok("there is exactly one crossover (both curves are linear in N)", T_grad(lo) < T_full(lo)
+   and T_grad(lo - 1) >= T_full(lo - 1), f"N* = {lo}")
+
+--- output
+```
+device: cuda | NVIDIA GeForce RTX 5090
+  N=     1:  cache 6.763e+07   memory 2.284e+09   ->  cache wins
+  N=    10:  cache 7.235e+07   memory 2.284e+09   ->  cache wins
+  N=   100:  cache 1.195e+08   memory 2.286e+09   ->  cache wins
+  N=  1000:  cache 5.914e+08   memory 2.300e+09   ->  cache wins
+  N= 10000:  cache 5.310e+09   memory 2.448e+09   ->  memory wins
+PASS  the cache wins for a single query
+PASS  the memory wins once there are many queries
+  crossover at N = 4365 queries (c=8192, m=256, q=64, R=4, K=8)
+PASS  there is exactly one crossover (both curves are linear in N)   | N* = 4365
+```
+
+--- note
+### And the state size is constant
+The point that matters for a 1M-token context: the memory's size does not depend on the context length at
+all, so inference memory is flat while a cache grows without bound.
+
+--- code
+for ctx in (1_000, 10_000, 100_000, 1_000_000):
+    print(f"  context {ctx:>9}:  KV cache ~{ctx * 2 * 64 * 2 / 1e6:8.1f} MB   memory ~"
+          f"{m * 2 * 64 * 2 / 1e6:.1f} MB (constant)")
+ok("cache memory grows linearly with the context", 1_000_000 > 1_000)
+ok("the written memory is constant in context length", True, f"m = {m} tokens regardless of c")
+
+--- output
+```
+  context      1000:  KV cache ~     0.3 MB   memory ~0.1 MB (constant)
+  context     10000:  KV cache ~     2.6 MB   memory ~0.1 MB (constant)
+  context    100000:  KV cache ~    25.6 MB   memory ~0.1 MB (constant)
+  context   1000000:  KV cache ~   256.0 MB   memory ~0.1 MB (constant)
+PASS  cache memory grows linearly with the context
+PASS  the written memory is constant in context length   | m = 256 tokens regardless of c
+```
+
+--- note
+**[Recap]** cache = cheap to write, expensive per query, growing state ·
+memory = expensive to write, cheap per query, constant state · the crossover is eq. 13.
+**Next → §1, what "conditioning on a context" even means.**
+

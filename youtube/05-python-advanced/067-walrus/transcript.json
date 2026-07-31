@@ -1,0 +1,42 @@
+[
+  {
+    "text": "The walrus operator, a colon followed by equals, assigns a value and uses it in the same expression.",
+    "until_line": 3
+  },
+  {
+    "text": "Here we compute the length, store it in n, and compare it to three, all in one line.",
+    "until_line": 4
+  },
+  {
+    "text": "[chuckle] Then we reuse n inside the block, without ever computing the length twice.",
+    "until_line": 4
+  },
+  {
+    "text": "That's the whole point — capture a value right where you test it, avoiding a separate line before the if.",
+    "until_line": 4
+  },
+  {
+    "text": "[sniff] It's especially handy when a computation is expensive and you'd rather not repeat it.",
+    "until_line": 9
+  },
+  {
+    "text": "We calculate the integer square root once, name it root, and use it both in the test and the message.",
+    "until_line": 9
+  },
+  {
+    "text": "[sigh] The walrus also cleans up while loops that read until a sentinel value.",
+    "until_line": 15
+  },
+  {
+    "text": "Each pass reads the next value, assigns it to v, and checks it against zero, all in the loop condition.",
+    "until_line": 15
+  },
+  {
+    "text": "[groan] Use the walrus sparingly — in the right spot it's elegant, but overused it makes lines hard to read.",
+    "until_line": 16
+  },
+  {
+    "text": "Up next, advanced unpacking. Comment the topic you want after that.",
+    "until_line": 16
+  }
+]

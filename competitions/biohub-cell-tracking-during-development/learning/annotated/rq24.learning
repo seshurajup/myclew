@@ -1,0 +1,12 @@
+@ id: rq24
+@ order: 2330
+@ title: O Scope and Extensions
+@ subtitle: RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory §O
+@ source: docs/papers/ratequant/ratequant.md
+
+--- note
+## O Scope and Extensions
+**Paper:** RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory · §O · pages 20–20 · equations (none) · 0 figures.
+
+> TODO(author): the *why* of §O in 3–5 lines.
+

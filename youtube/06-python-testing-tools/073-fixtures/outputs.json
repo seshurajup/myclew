@@ -1,0 +1,16 @@
+[
+  {
+    "after_line": 12,
+    "text": ">>> 2 passed",
+    "caption": "fixtures inject shared data"
+  },
+  {
+    "after_line": 20,
+    "text": "",
+    "caption": "yield splits setup from cleanup"
+  },
+  {
+    "after_line": 20,
+    "image": "artifacts/terminal.png"
+  }
+]

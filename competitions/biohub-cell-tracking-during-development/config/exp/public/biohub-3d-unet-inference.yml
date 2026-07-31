@@ -1,0 +1,10 @@
+# PUBLIC notebook config — drkongvis/biohub-3d-unet-inference
+name: pub_biohub-3d-unet-inference
+source: drkongvis/biohub-3d-unet-inference
+family: other
+base: unknown
+lb: None
+golden_cv: None
+mined_params: "augs=['Flip']"
+run: manual
+score: golden-12 (adj_edge_J + 0.1*div_J), by_embryo

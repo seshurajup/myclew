@@ -1,0 +1,49 @@
+@ id: g404
+@ order: 404
+@ title: Compute efficiency — the MTP drafter
+@ subtitle: a small multi-token-prediction head for speculative decoding
+@ source: arxiv 2607.02770
+
+--- note
+## The problem: decoding is serial and slow
+Autoregressive decoding produces **one token per forward pass** of the full model. That is latency-
+bound: the big model runs once per output token. **Speculative decoding** (Leviathan et al., 2023)
+breaks the serialisation — a cheap **drafter** proposes several future tokens, and the big model then
+**verifies** them all in a single parallel pass, accepting the longest correct prefix. Net effect:
+several tokens can be emitted per expensive verification pass.
+
+--- note
+## Gemma 4's drafter: an autoregressive MTP head
+Gemma 4 ships a small **multi-token-prediction (MTP) drafter head** (Li et al., 2024 / EAGLE-style),
+trained alongside the main model. How it works:
+
+- The main model's **last-layer activations from the previous step** plus **token embeddings** are fed
+  into the MTP head.
+- The head generates future tokens **sequentially** using its **own embedder** and a **4-layer
+  Transformer block** that **cross-attends to the KV cache of the main model**.
+- Cross-attending to the main model's KVs means the drafter needs **no MTP prefill** and supports
+  **any draft length** — it reuses the context the big model already computed.
+
+--- image
+learning/assets/gemma4/fig1_mtp.png
+Figure 1 — the autoregressive MTP drafter (blue blocks, right) is fed activations and KV cache from the main model (gray blocks, left). Each drafted token (t3, t4, ...) runs Concat + down-proj → 4 MTP layers → Unembed + softmax, cross-attending (red "attention" arrows) into the main model's last prefilled local/global layers.
+
+--- note
+## Sizing
+The drafter Transformer block has **model dimension 256** for E2B and E4B, and **1024** for 26B-A4B
+and 31B; **three local + one global** attention layers. Drafter parameter counts (Table 1): **76M**
+(E2B), **77M** (E4B), **400M** (12B), **430M** (26B-A4B), **500M** (31B) — tiny next to the base model.
+
+--- note
+## Efficient MTP decoding — the top-k-clusters trick
+A subtle cost: the drafter's final projection to the **full 262k vocabulary** is itself expensive on a
+small head. For the **E2B and E4B** drafters, Gemma 4 replaces that full-vocab projection with a
+**top-k operation over clusters of tokens**, shrinking the final matmul from **d × 262,000** to
+**d × 4096** — while "preserving a similar acceptance rate." So the drafter stays cheap enough that the
+speculative-decoding speedup isn't eaten by the drafter's own softmax.
+
+--- note
+## Why we care (Part B)
+This is a concrete, reproducible **speculative-decoding** recipe: a small draft head + verify + accept.
+Part B builds an **mtp-speculative-decode** fleet agent that measures the decode speedup from a draft
+head given a draft length and an acceptance rate — the exact lever Figure 1 describes.

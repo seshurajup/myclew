@@ -1,0 +1,42 @@
+[
+  {
+    "text": "JSON is the universal language for exchanging data between programs, websites, and APIs.",
+    "until_line": 1
+  },
+  {
+    "text": "The json module converts between Python objects and JSON text in both directions.",
+    "until_line": 1
+  },
+  {
+    "text": "dumps turns a Python dictionary into a JSON string, and indent makes it neatly readable.",
+    "until_line": 5
+  },
+  {
+    "text": "[chuckle] Notice how the structure maps cleanly — dictionaries become objects, lists stay lists.",
+    "until_line": 6
+  },
+  {
+    "text": "[sniff] loads does the reverse, parsing a JSON string back into real Python objects you can use.",
+    "until_line": 10
+  },
+  {
+    "text": "So the parsed result behaves like a normal dictionary, and you index into it as usual.",
+    "until_line": 11
+  },
+  {
+    "text": "[sigh] A full round-trip — dump then load — preserves your data exactly, proving the conversion is faithful.",
+    "until_line": 14
+  },
+  {
+    "text": "There are also dump and load, which write to and read from files directly.",
+    "until_line": 14
+  },
+  {
+    "text": "[groan] Any time your program talks to the web or saves settings, JSON is almost certainly how the data travels.",
+    "until_line": 14
+  },
+  {
+    "text": "Next video: file input and output. Comment the topic you want after that.",
+    "until_line": 14
+  }
+]

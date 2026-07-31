@@ -1,0 +1,26 @@
+[
+  {
+    "after_line": 5,
+    "text": ">>> Alice is 30\\n>>> Bob is 25\\n>>> Carol is 35",
+    "caption": "loop two lists in parallel"
+  },
+  {
+    "after_line": 11,
+    "text": ">>> [(1, 'x'), (2, 'y')]",
+    "caption": "zip stops at the shortest"
+  },
+  {
+    "after_line": 15,
+    "text": ">>> {'Alice': 30, 'Bob': 25, 'Carol': 35}",
+    "caption": "zip → dict"
+  },
+  {
+    "after_line": 19,
+    "text": ">>> (1, 2, 3) ('a', 'b', 'c')",
+    "caption": "zip(*pairs) unzips"
+  },
+  {
+    "after_line": 19,
+    "image": "artifacts/terminal.png"
+  }
+]

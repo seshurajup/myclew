@@ -1,0 +1,56 @@
+@ id: lbq03
+@ order: 603
+@ title: Why QAT, not PTQ — the weights must LEARN to be ternary
+@ subtitle: post-training quantization collapses at 1.58 bits; training-in-the-loop does not
+@ source: arxiv 2310.11453
+
+--- note
+## Two ways to get a low-bit model
+There are two fundamentally different routes to a low-precision LLM, and the distinction is the whole
+reason BitNet exists:
+
+- **Post-training quantization (PTQ).** Take a **finished, full-precision** model and **round** its
+  weights (and maybe activations) down to low precision *after* training. Simple, cheap, no retraining
+  — GPTQ, SmoothQuant, AWQ, QuIP, Absmax all live here. The problem: the model "is **not optimized for
+  the quantized representation** during training," so quality degrades, and the loss gets **worse the
+  lower you go**.
+- **Quantization-aware training (QAT).** **Simulate** the low-precision rounding **during training**
+  (via the STE, lbq02), so the weights **learn to be robust to it**. More expensive, but "typically
+  results in better accuracy, as the model is trained to account for the reduced precision from the
+  beginning." BitNet is QAT taken to the extreme case — **1-bit / 1.58-bit**.
+
+--- note
+## The evidence: PTQ collapses as bits → 1, QAT does not
+The original BitNet paper (2310.11453) puts the two approaches on the same axes. As you push PTQ methods
+toward very low bit-widths their accuracy **falls off a cliff toward random**, and perplexity **explodes**
+— e.g. Absmax PTQ at 1-bit reaches a perplexity of **3.5×10²³** (i.e. a broken model). BitNet, which is
+**trained** at 1-bit from scratch (the red star), stays up near the full-precision line where every PTQ
+curve has already collapsed. This is the picture that motivates the entire line of work.
+
+--- image
+learning/assets/bitnet/bitnet_fig1_fourpanel.png
+Figure 1 (2310.11453), four panels. TOP-LEFT: BitNet is "Training from Scratch" (trained W-bits = inference W-bits, on the diagonal) whereas PTQ methods (FP8, SmoothQuant, GPTQ, QuIP) train at 16-bit and only *quantize* for inference (bottom row). TOP-RIGHT: **Accuracy vs Weight Bits** — the SoTA PTQ curve degrades steeply from 8→1 bit and heads toward "Random", while BitNet (★, trained from scratch) holds high accuracy at 1 bit. BOTTOM-LEFT: energy-cost reduction grows with model size (8.8×→38.8×). BOTTOM-RIGHT: BitNet's loss curve runs **parallel** to the FP16 Transformer's, with a small, roughly constant gap **ΔL = 0.09** that shrinks as models scale.
+
+--- note
+## Why PTQ *cannot* reach 1.58 bits and QAT can
+Rounding a trained weight to the nearest ternary value introduces an error. In a full-precision model the
+weights were placed assuming they'd be used at full precision — so **rounding to {-1,0,+1} is a large,
+uncorrected perturbation**, and there is no gradient step left to compensate. Under QAT the opposite is
+true: because the forward pass **already used the ternary weights** at every step, the loss the optimizer
+minimized **already includes the rounding error**, and the STE let it adjust the latent weights so the
+ternary pattern is a *good* one. The network effectively **learns a weight distribution that quantizes
+well** — clustering values near -1, 0, +1 — rather than being forced onto a grid it was never trained
+for. That is why b1.58 can **match FP16** at 3B+ while PTQ to the same precision collapses.
+
+--- note
+## This is exactly the Bonsai-debunk distinction (our own finding)
+Our `docs/bonsai_ternary_lowbit_findings.md` audited a "ternary Bonsai" project claimed to be low-bit
+*training*. The verdict: Bonsai is **PTQ of off-the-shelf Qwen3 checkpoints** into a group-wise ternary
+*format* + custom kernels — a **deployment/inference demo**, with **no QAT, no STE, no from-scratch
+low-bit training**. The paper we are reading here is precisely what Bonsai is *not*: it never discloses a
+rounding rule that keeps ~95% quality at 1.58 bits, because "pure round-to-nearest PTQ to 1.58 bits
+normally collapses quality; real BitNet b1.58 needed **QAT from scratch**." The genuinely reusable,
+reproducible primitive — ternary {-1,0,+1} + absmean scaling + STE training — comes from **BitNet b1.58**,
+and that is what we built into the `lowbit-qat` agent. (Contrast with **g405**, Gemma 4's *post-hoc* QAT
+of already-trained checkpoints: a milder, format-oriented QAT that still starts from a full model — see
+lbq05.)

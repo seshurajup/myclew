@@ -1,0 +1,48 @@
+@ id: rs03
+@ order: 32
+@ title: The division lever — the +0.049 headroom
+@ subtitle: a huge, proven gain that no hand-rule can reach
+@ source: learning/ensemble_work/div_oracle.py
+
+--- note
+## Where the points actually are
+The metric is `edge_J + 0.1·division_J`. For pilkwang, **division_J = 0** — it recovers **0 of 8**
+GT divisions on the golden-12. That 0.1 term is completely untapped. How much is it worth? We built
+an **oracle** (uses the GT to add the correct divisions) to measure the ceiling.
+
+--- image
+learning/assets/division_event.png
+A division: one parent at t splits into two daughters at t+1 that both continue to t+2. The metric only counts it as a true positive if the parent matches within 7 µm AND both children continue — a strict topology.
+
+--- note
+### The oracle — recover just 4 divisions, gain +0.049
+**[Data — measured]** Of the 8 GT divisions, **4 are recoverable** (both daughters are present as
+detections). Adding exactly those 4 lifts the score from **0.870 → 0.919**:
+--- output
+| variant | golden-12 | division_J |
+|---|---|---|
+| base (pilkwang) | 0.870 | 0.000 (0/8) |
+| **oracle: +4 real divisions** | **0.919** | 0.50 (4/8) |
+
+--- note
+### But no hand-rule can find them — we proved it three ways
+**[Domain — the hard truth]** The real 2nd daughter is **8–14 µm** from the parent and is usually
+**not** the nearest cell — at ~250 cells/frame it's buried among ~10 decoys. Every no-training
+method got **0 true divisions**:
+--- output
+| method to pick the 2nd daughter | true divisions found |
+|---|---|
+| geometric (nearest, tight gates) | 0 |
+| pilkwang's own edge-model probabilities | 0 |
+| mitotic image signature (brightness+symmetry) | 0 |
+
+--- note
+### The conclusion
+**[Domain]** The daughters are geometrically indistinguishable from random neighbours — the signal
+that separates them is **learned**, not geometric. So the +0.049 is real but reachable only by
+**training** the model to find divisions (`rs04`).
+--- shape
+ceiling: **+0.049**<br>hand-rules: **0 TP**<br>→ must be trained
+
+--- note
+**Next → rs04: training for divisions — and the one-line bug that explains everything.**

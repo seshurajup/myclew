@@ -1,0 +1,42 @@
+[
+  {
+    "text": "Python lets a class inherit from more than one parent at once — that's multiple inheritance.",
+    "until_line": 7
+  },
+  {
+    "text": "Swimmer knows how to move, and Flyer knows how to fly, each a separate ability.",
+    "until_line": 7
+  },
+  {
+    "text": "Duck inherits from both, mixing their abilities together and adding its own sound.",
+    "until_line": 11
+  },
+  {
+    "text": "[chuckle] So a single duck can swim, fly, and quack, drawing methods from both parents at once.",
+    "until_line": 16
+  },
+  {
+    "text": "[sniff] But what if two parents define the same method? Python needs a rule to decide which wins.",
+    "until_line": 19
+  },
+  {
+    "text": "That rule is the Method Resolution Order, or MRO — the exact sequence Python searches for a method.",
+    "until_line": 19
+  },
+  {
+    "text": "Duck's MRO lists itself first, then its parents left to right, then object at the very end.",
+    "until_line": 19
+  },
+  {
+    "text": "[sigh] Python follows that order and stops at the first match, giving predictable, consistent behavior.",
+    "until_line": 19
+  },
+  {
+    "text": "[groan] Multiple inheritance is powerful but can get tangled — many people prefer small, focused mixins to keep it clean.",
+    "until_line": 19
+  },
+  {
+    "text": "Next video: enums. Save this one for when you need it.",
+    "until_line": 19
+  }
+]

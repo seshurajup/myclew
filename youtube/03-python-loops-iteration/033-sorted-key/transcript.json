@@ -1,0 +1,42 @@
+[
+  {
+    "text": "The sorted function returns a new, ordered version of any sequence you give it.",
+    "until_line": 2
+  },
+  {
+    "text": "By default it sorts ascending, smallest to largest, and reverse equals true flips that.",
+    "until_line": 3
+  },
+  {
+    "text": "[chuckle] But the real power is the key argument — a function that decides what to sort by.",
+    "until_line": 7
+  },
+  {
+    "text": "Pass key equals len, and the words sort by their length instead of alphabetically.",
+    "until_line": 7
+  },
+  {
+    "text": "[sniff] For structured data, a lambda key lets you sort by any field you like.",
+    "until_line": 11
+  },
+  {
+    "text": "Here we sort people by the second element, their age, youngest first.",
+    "until_line": 11
+  },
+  {
+    "text": "[sigh] One important distinction: sorted always returns a brand new list, leaving the original untouched.",
+    "until_line": 15
+  },
+  {
+    "text": "The list's own sort method, by contrast, rearranges the list in place and returns nothing.",
+    "until_line": 15
+  },
+  {
+    "text": "[groan] Choose sorted when you want a copy, and dot-sort when you're happy to change the original.",
+    "until_line": 15
+  },
+  {
+    "text": "In the next one we take on reversing sequences. Save this one for when you need it.",
+    "until_line": 15
+  }
+]

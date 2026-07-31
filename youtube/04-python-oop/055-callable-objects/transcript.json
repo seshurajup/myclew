@@ -1,0 +1,42 @@
+[
+  {
+    "text": "In Python, even objects can be called like functions — the secret is the dunder-call method.",
+    "until_line": 6
+  },
+  {
+    "text": "Define dunder-call, and instances of your class become callable, just by adding parentheses.",
+    "until_line": 6
+  },
+  {
+    "text": "Multiplier stores a factor, and calling the object multiplies its argument by that factor.",
+    "until_line": 6
+  },
+  {
+    "text": "[chuckle] So double behaves like a function, but it's really an object remembering its factor of two.",
+    "until_line": 11
+  },
+  {
+    "text": "triple works the same way with three — each is a configured, callable object.",
+    "until_line": 12
+  },
+  {
+    "text": "[sniff] The advantage over a plain function is state — a callable object can remember things between calls.",
+    "until_line": 21
+  },
+  {
+    "text": "This Counter bumps its internal count every time it's called, and returns the new total.",
+    "until_line": 21
+  },
+  {
+    "text": "[sigh] So three calls give one, two, three, with the object quietly tracking progress inside.",
+    "until_line": 23
+  },
+  {
+    "text": "[groan] Callable objects blur the line between functions and objects, giving you functions that carry memory.",
+    "until_line": 23
+  },
+  {
+    "text": "Video 56 tackles contextlib. Comment the topic you want after that.",
+    "until_line": 23
+  }
+]

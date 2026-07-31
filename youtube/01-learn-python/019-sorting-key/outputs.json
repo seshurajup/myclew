@@ -1,0 +1,5 @@
+[
+  {"after_line": 4, "text": ">>> ['fig', 'kiwi', 'apple', 'banana']", "caption": "key=len sorts by length"},
+  {"after_line": 7, "text": ">>> [('cat', 40), ('amy', 30), ('ben', 25)]", "caption": "key picks the field to sort on"},
+  {"after_line": 9, "text": ">>> ('cat', 40)", "caption": "max takes a key too"}
+]

@@ -1,0 +1,12 @@
+@ id: eda05
+@ order: 1940
+@ title: 4 Experiments
+@ subtitle: Erase-then-Delta Attention: Decoupling Erase and Write Addresses in Delta-Rule Linear Attention §4
+@ source: docs/papers/eda-delta-attention/eda-delta-attention.md
+
+--- note
+## 4 Experiments
+**Paper:** Erase-then-Delta Attention: Decoupling Erase and Write Addresses in Delta-Rule Linear Attention · §4 · pages 7–9 · equations (none) · 0 figures.
+
+> TODO(author): the *why* of §4 in 3–5 lines.
+

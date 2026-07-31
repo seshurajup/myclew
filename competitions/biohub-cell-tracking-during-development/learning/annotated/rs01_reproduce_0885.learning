@@ -1,0 +1,49 @@
+@ id: rs01
+@ order: 30
+@ title: Reproducing the leader (pilkwang 0.885) locally
+@ subtitle: the full pipeline end-to-end — and the leak-free CV that makes it trustworthy
+@ source: research/pilkwang_support_pack/repo/scripts/predict_unet_transformer.py
+
+--- note
+## Step one is always: reproduce the target
+Before improving anything, we rebuilt pilkwang's LB-0.885 pipeline on our own machine — detector →
+edge model → ILP → post-processing (pt01–pt08, pp01) — and scored it with the **official metric**
+(me01). This is the honest baseline every idea must beat.
+
+--- note
+### The golden-12 = pilkwang's own held-out fold (leak-free)
+**[Data — a lucky, important find]** pilkwang shipped his predictions for **12 datasets** (6 `44b6`
++ 6 `6bba`). Those are exactly his `split_0` **test fold** — the datasets his weights were *not*
+trained on. So scoring on those 12 is **leak-free**: our local number reflects true generalisation,
+not memorised training data.
+--- code
+GOLDEN12 = {"44b6_0113de3b", "44b6_0b24845f", ...,   # pilkwang's split_0 TEST fold
+            "6bba_05b6850b", ...}                     # 6 x 44b6 + 6 x 6bba, leak-free for his weights
+--- shape
+12 datasets<br>= his split_0 test<br>trained on the other 187
+
+--- note
+### The result — we reproduce it
+**[Data]** Running his exact pipeline on the golden-12 with the official metric:
+
+> local golden-12 = **0.870**  ↔  public LB = **0.885**
+
+The ~0.015 gap is the usual subset-vs-full-test wobble; the pipeline is faithfully reproduced. Now
+we have a trustworthy local yardstick to test every idea against **before** spending a Kaggle
+submission.
+--- output
+| pipeline | golden-12 (official) | public LB |
+|---|---|---|
+| pilkwang full | **0.870** | **0.885** |
+| — raw det + ILP (no post-proc) | 0.853 | — |
+
+--- note
+### The mindset (bestfitting-style)
+**[Craft]** You cannot improve what you cannot measure faithfully. Reproduce the leader, verify
+your metric matches, fix a leak-free CV — *then* iterate. Everything after this (`rs02`–`rs07`)
+stands on this baseline.
+--- shape
+baseline: **0.870** local<br>the bar to beat
+
+--- note
+**Next → rs02: why even this trustworthy-looking CV can still mislead.**

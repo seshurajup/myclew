@@ -1,0 +1,46 @@
+@ id: g408
+@ order: 408
+@ title: Pre-training recipe
+@ subtitle: data, tokenizer, filtering — what the report states (and what it doesn't)
+@ source: arxiv 2607.02770
+
+--- note
+## Overall
+Gemma 4 "follows a similar pre-training as Gemma 3." The report is deliberately high-level about data —
+it does **not** give exact dataset sizes or token counts, so we report only what it states and invent
+no numbers.
+
+--- note
+## Training data
+The pre-training dataset is described as "a large-scale, diverse collection of data from a wide range of
+domains and modalities, including **web documents, code, images, and audio** (audio for **E2B, E4B and
+12B**), with a **cutoff date of January 2025**." That is the full description the report gives — no
+mixture weights, no volumes.
+
+--- note
+## Tokenizer
+Gemma 4 uses **the same tokenizer as Gemini** (Gemini Team, 2025): a **SentencePiece** tokenizer
+(Kudo & Richardson, 2018) with **split digits**, **preserved whitespace**, and **byte-level
+encodings**. The **vocabulary has 262k entries**. (Split digits help arithmetic; byte-level guarantees
+no out-of-vocabulary text; preserved whitespace matters for code.)
+
+--- note
+## Filtering
+Data is filtered to:
+
+- **decontaminate benchmarks** (remove test-set leakage),
+- reduce the risk of **unwanted or unsafe utterances**, and
+- reduce the risk of **recitation** (verbatim memorised regurgitation).
+
+Safety-oriented data pre-processing (e.g. removing certain personal information) is covered in g413.
+
+--- image
+learning/assets/gemma4/t02_pretrain_infra.png
+Table 2 — pre-training infrastructure and sharding (chips, data / sequence / replica shards) per model. The compute-infra details — TPU generations, ZeRO-3, Pathways, GSPMD, Slice-Granularity Elasticity — are in g412.
+
+--- note
+## What is NOT specified
+The report does not disclose: dataset token counts, per-modality mixture ratios, number of training
+steps, learning-rate schedule, or context length used during pre-training. Treat pre-training here as
+"Gemma-3-like, multimodal, Jan-2025 cutoff, 262k SentencePiece vocab" and look to g412 for the compute
+side.

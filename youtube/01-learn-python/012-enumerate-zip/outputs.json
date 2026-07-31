@@ -1,0 +1,5 @@
+[
+  {"after_line": 5, "text": ">>> 1 amy\n>>> 2 ben\n>>> 3 cat", "caption": "enumerate gives index + item"},
+  {"after_line": 8, "text": ">>> amy is 31\n>>> ben is 25\n>>> cat is 40", "caption": "zip walks lists in lockstep"},
+  {"after_line": 11, "text": ">>> {'amy': 31, 'ben': 25, 'cat': 40}", "caption": "zip straight into a dict"}
+]

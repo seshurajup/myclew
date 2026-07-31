@@ -1,0 +1,30 @@
+import sys, math, itertools, torch
+sys.path.insert(0, "learning/paper_packs")
+import tsc_engine as E                                      # exact-float64 UHAT/LTL/B-RASP/DFA engine
+from tsc_engine import (AFF, aff, UHA, ReLUL, UHAT, BRASP, MNONE, MFUT, MPAST, g,
+                        TOP, BOT, Q, NOT, AND, OR, IMP, SINCE, UNTIL, P_, F_, Y_, H_,
+                        ltl_eval, ltl_size, ltl_accepts, words,
+                        dfa_accepts, dfa_shortest, dfa_minimize, dfa_singleton,
+                        ltl_to_uhat, uhat_to_ltl, counter_word, counter_brasp, counter_dfa)
+
+DEV = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+print(f"device: {DEV}" + (f" | {torch.cuda.get_device_name(0)}" if DEV.type == "cuda" else ""))
+
+def ok(name, cond, extra=""):
+    print(("PASS  " if cond else "FAIL  ") + name + (f"   | {extra}" if extra else ""))
+
+phi = AND(Q("b"), P_(Q("a")))
+T1 = ltl_to_uhat(phi, "ab")
+T2 = ltl_to_uhat(NOT(NOT(phi)), "ab")                         # different syntax, same language
+ok("two syntactically different UHATs verified equivalent to length 8",
+   all(T1.accepts(w) == T2.accepts(w) for w in words("ab", 1, 8)),
+   f"|T1| = {T1.size()} vs |T2| = {T2.size()} — sizes differ, language does not")
+pA = counter_brasp(3, wrap_or=True)                            # accepts exactly the N=3 witness
+pB = counter_brasp(3, wrap_or=False)                           # the printed variant: accepts NOTHING
+agree_to = 12
+same_short = all(pA.accepts(w, out="Y") == pB.accepts(w, out="Y") for w in words("01#", 1, agree_to))
+w3 = counter_word(3)
+ok(f"the trap: two programs agreeing on EVERY word to length {agree_to}", same_short)
+ok("that differ — at the exponential horizon", pA.accepts(w3, out="Y") != pB.accepts(w3, out="Y"),
+   f"first disagreement at length {len(w3)} — testing cannot certify equivalence of succinct machines")
+print("\nNOT VERIFIED: EXPSPACE-completeness (asymptotic). Verified: the phenomenon that makes it true.")

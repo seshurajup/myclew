@@ -1,0 +1,82 @@
+{
+  "playground-series-s5e11": {
+    "modality": "tabular",
+    "n": 5
+  },
+  "playground-series-s5e7": {
+    "modality": "tabular",
+    "n": 1
+  },
+  "playground-series-s5e4": {
+    "modality": "tabular",
+    "n": 5
+  },
+  "equity-post-HCT-survival-predictions": {
+    "modality": "tabular",
+    "n": 5
+  },
+  "jane-street-real-time-market-data-forecasting": {
+    "modality": "timeseries",
+    "n": 3
+  },
+  "rohlik-sales-forecasting-challenge-v2": {
+    "modality": "timeseries",
+    "n": 3
+  },
+  "child-mind-institute-problematic-internet-use": {
+    "modality": "tabular",
+    "n": 5
+  },
+  "stanford-rna-3d-folding": {
+    "modality": "3d-bio",
+    "n": 5
+  },
+  "czii-cryo-et-object-identification": {
+    "modality": "3d-vol",
+    "n": 5
+  },
+  "isic-2024-challenge": {
+    "modality": "image",
+    "n": 5
+  },
+  "rsna-2024-lumbar-spine-degenerative-classification": {
+    "modality": "image",
+    "n": 5
+  },
+  "byu-locating-bacterial-flagellar-motors-2025": {
+    "modality": "3d-vol",
+    "n": 5
+  },
+  "birdclef-2025": {
+    "modality": "audio",
+    "n": 5
+  },
+  "wsdm-cup-multilingual-chatbot-arena": {
+    "modality": "llm",
+    "n": 5
+  },
+  "eedi-mining-misconceptions-in-mathematics": {
+    "modality": "llm",
+    "n": 5
+  },
+  "drawing-with-llms": {
+    "modality": "llm",
+    "n": 5
+  },
+  "map-charting-student-math-misunderstandings": {
+    "modality": "llm",
+    "n": 5
+  },
+  "llm-classification-finetuning": {
+    "modality": "llm",
+    "n": 0
+  },
+  "arc-prize-2024": {
+    "modality": "reasoning",
+    "n": 5
+  },
+  "lux-ai-season-3": {
+    "modality": "agentic",
+    "n": 5
+  }
+}

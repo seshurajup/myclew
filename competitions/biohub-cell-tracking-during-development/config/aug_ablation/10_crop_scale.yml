@@ -1,0 +1,42 @@
+# aug_journey — CLEAN ISOLATED SINGLE. DENSITY/stage-bridge (run FIRST after no-aug): isometric in-plane zoom spanning s in [0.55,1.8] = +/-~3.3x density, brackets the 3.37x 6bba<->44b6 gap BOTH ways (44b6 327 vs 6bba 97 cells/frame; e57/03_true_density_stage.csv; augfinder crop_scale=PASS). CITE Cellpose scale-norm (Stringer, Nat Methods 2021) + StarDist3D anisotropy (Weigert, WACV 2020).
+# ONE-CHANGE ABLATION: every field is IDENTICAL across the journey (split, bs8, epochs, seed) — the ONLY
+# difference between configs is the `augment:` block. Trains on the human's stage-matched SCREEN substrate
+# (splits_screen_matched, both embryos 12/12); JUDGE BY EMBRYO on the 6/6 test (adjJ_44b6 = money, adjJ_6bba =
+# guardrail, never the blend); use splits_screen_matched_k6 (6-fold) for close-call keep/reject. NO Kaggle.
+name: 10_crop_scale
+paths:
+  python:  research/cellmot_venv/bin/python
+  trainer: research/official_repo/scripts/train_unet_transformer.py
+  pythonpath:
+    - research/official_repo/src
+    - research/official_repo/scripts
+    - .
+  data_dir: input/biohub-cell-tracking-during-development/train
+  splits:   learning/ensemble_work/finetune/splits_screen_matched.json
+  cache_dir: research/cache/ds1x4x4
+mlflow:
+  tracking_uri: http://localhost:5000
+  experiment:   kaggle-biohub-stagebridge
+  run_name:     10_crop_scale
+  log_artifacts: false
+gpu:
+  power_limit_w: 400
+train:
+  method:          10_crop_scale
+  split:           0
+  downsample:      "1,4,4"
+  epochs:          10
+  lr:              1e-4
+  batch_size:      8
+  num_workers:     6
+  det_loss_weight: 10.0
+  det_neg_weight:  0.01
+  window_size:     2
+  pool_kernel_um:  5.0
+  max_iters:       150
+  seed:            1234
+augment:
+  - name: crop_scale
+    p: 0.5
+    smin: 0.55
+    smax: 1.8

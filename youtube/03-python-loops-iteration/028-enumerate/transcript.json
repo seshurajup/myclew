@@ -1,0 +1,38 @@
+[
+  {
+    "text": "When you loop over a list, you often need the position as well as the value — and enumerate gives you both.",
+    "until_line": 3
+  },
+  {
+    "text": "It hands back a pair each time: the index first, then the item.",
+    "until_line": 4
+  },
+  {
+    "text": "So instead of tracking a counter yourself, enumerate does it automatically as you loop.",
+    "until_line": 4
+  },
+  {
+    "text": "[chuckle] By default it counts from zero, but you can pass start equals one to number things naturally.",
+    "until_line": 7
+  },
+  {
+    "text": "That's perfect for ranked lists, turning your loop into a clean, numbered display.",
+    "until_line": 8
+  },
+  {
+    "text": "[sniff] Compare it to the old way — a separate index variable you increment by hand, easy to forget.",
+    "until_line": 13
+  },
+  {
+    "text": "Here enumerate lets us flag exactly which item needs review, by its position.",
+    "until_line": 14
+  },
+  {
+    "text": "[groan] Any time you catch yourself writing i equals zero and i plus equals one around a loop, reach for enumerate instead.",
+    "until_line": 14
+  },
+  {
+    "text": "In the next one we take on zip. Tell me in the comments if this clicked.",
+    "until_line": 14
+  }
+]

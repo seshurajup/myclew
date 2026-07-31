@@ -1,0 +1,42 @@
+[
+  {
+    "text": "A decorator that takes its own arguments needs one extra layer — a function that returns a decorator.",
+    "until_line": 5
+  },
+  {
+    "text": "repeat takes the number of times, then returns the actual decorator inside it.",
+    "until_line": 5
+  },
+  {
+    "text": "That inner decorator wraps your function, and the wrapper runs it repeatedly.",
+    "until_line": 5
+  },
+  {
+    "text": "[chuckle] So it's three nested functions: one for the argument, one for the function, one for the call.",
+    "until_line": 5
+  },
+  {
+    "text": "[sniff] The at-repeat with times equals three means greet now runs three times on every call.",
+    "until_line": 5
+  },
+  {
+    "text": "So a single greet call prints the greeting three times, controlled by the decorator's argument.",
+    "until_line": 5
+  },
+  {
+    "text": "[sigh] Notice the wraps decorator from functools — it copies the original function's name and docs onto the wrapper.",
+    "until_line": 5
+  },
+  {
+    "text": "Without it, greet's name would wrongly show as wrapper, confusing debuggers and documentation tools.",
+    "until_line": 19
+  },
+  {
+    "text": "[groan] Parameterized decorators power real frameworks — think route paths, retry counts, and cache sizes.",
+    "until_line": 19
+  },
+  {
+    "text": "Next video: the walrus operator. Which one do you already use? Comment below.",
+    "until_line": 19
+  }
+]

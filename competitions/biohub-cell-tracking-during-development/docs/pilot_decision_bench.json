@@ -1,0 +1,81 @@
+{
+ "fine-tuned": {
+  "n": 200,
+  "top1": 0.945,
+  "top3": 0.96,
+  "dispatchable": 0.995,
+  "sec_per_case": 1.85,
+  "wrong": [
+   {
+    "gold": "arch-search",
+    "got": null,
+    "shortlist": []
+   },
+   {
+    "gold": "linking",
+    "got": "sed-attention-pool",
+    "shortlist": [
+     "sed-attention-pool",
+     "division",
+     "attention-residual"
+    ]
+   },
+   {
+    "gold": "nb-preflight",
+    "got": "post-proc",
+    "shortlist": [
+     "post-proc",
+     "combo-search",
+     "post-optimize"
+    ]
+   },
+   {
+    "gold": "linking",
+    "got": "division",
+    "shortlist": [
+     "division",
+     "division-rescue",
+     "density-regression-head"
+    ]
+   },
+   {
+    "gold": "linking",
+    "got": "pseudo-label",
+    "shortlist": [
+     "pseudo-label",
+     "sed-attention-pool",
+     "video-frame-sampler"
+    ]
+   },
+   {
+    "gold": "paper-verify",
+    "got": "division",
+    "shortlist": [
+     "division",
+     "division-rescue",
+     "density-regression-head"
+    ]
+   },
+   {
+    "gold": "arch-search",
+    "got": "learn",
+    "shortlist": [
+     "learn",
+     "llm-backend",
+     "notebook-sync"
+    ]
+   },
+   {
+    "gold": "box-sample",
+    "got": "density-regression-head",
+    "shortlist": [
+     "density-regression-head",
+     "division",
+     "head-consistency"
+    ]
+   }
+  ],
+  "model": "local-hf//home/seshu/.cache/huggingface/hub/models--unsloth--gemma-4-E2B-it/snapshots/d36bdd3855c82a6a1a23f7c459b749f5724ae75d",
+  "adapter": "models/tool_lora_v8"
+ }
+}

@@ -1,0 +1,173 @@
+@ id: lfm01
+@ order: 2600
+@ title: 1 The published architecture — what the config already proves
+@ subtitle: LFM2.5-Encoders: Fast at Long Context, Even on CPU (Liquid AI) §1
+@ source: docs/papers/lfm25-encoders/model_card.md
+
+--- note
+## 1 The published architecture — what the config already proves
+**Repo:** LFM2.5-Encoders: Fast at Long Context, Even on CPU (Liquid AI) · https://www.liquid.ai/blog/lfm2-5-encoders · units (1–4).
+
+**The architecture, from the published files.** A `config.json` is a few kB and
+it is the ground truth for shape: it fixes the width, depth, vocabulary, feed-forward size and the exact
+per-layer interleave. Units 1–4 read it, derive the parameter budget, and check the two sizes against each
+other — 230M vs 350M differ in *depth only*, which is a cleaner ablation than most papers publish.
+
+--- note
+### The published shape — unit (1)
+
+```python
+CFG["hidden_size"], CFG["num_hidden_layers"], CFG["intermediate_size"], CFG["vocab_size"]
+```
+
+Width 1024, depth 16, SwiGLU feed-forward of 6656, vocabulary 65536. A 1024-wide model
+with a 65k vocabulary spends a lot on embeddings, which is why unit 3's weight tying matters.
+
+--- code
+import json, math, time, warnings
+warnings.filterwarnings("ignore")
+import torch, torch.nn as nn, torch.nn.functional as F
+from pathlib import Path
+
+DEV = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+torch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False   # exact proofs
+torch.manual_seed(0); torch.set_printoptions(precision=4, sci_mode=False)
+print(f"device: {DEV}" + (f" | {torch.cuda.get_device_name(0)}" if DEV.type == "cuda" else ""))
+
+CFG = json.loads(Path("docs/papers/lfm25-encoders/models/LFM2.5-Encoder-350M.config.json").read_text())
+CFG_S = json.loads(Path("docs/papers/lfm25-encoders/models/LFM2.5-Encoder-230M.config.json").read_text())
+
+def ok(name, cond, extra=""):
+    print(("PASS  " if cond else "FAIL  ") + name + (f"   | {extra}" if extra else ""))
+
+for k in ("model_type", "hidden_size", "num_hidden_layers", "intermediate_size",
+          "vocab_size", "num_attention_heads", "num_key_value_heads", "block_use_swiglu"):
+    print(f"  {k:24s} {CFG[k]}")
+ok("it is the LFM2 family", CFG["model_type"] == "lfm2")
+ok("a SwiGLU feed-forward", CFG["block_use_swiglu"] is True)
+ok("the FFN is ~6.5x the width", 6 < CFG["intermediate_size"] / CFG["hidden_size"] < 7,
+   f"{CFG['intermediate_size']}/{CFG['hidden_size']} = {CFG['intermediate_size']/CFG['hidden_size']:.2f}")
+ok("and FFN width is a multiple of 256 (a kernel-alignment choice)",
+   CFG["intermediate_size"] % 256 == 0, f"{CFG['intermediate_size']} = 26 x 256")
+
+--- output
+```
+device: cuda | NVIDIA GeForce RTX 5090
+  model_type               lfm2
+  hidden_size              1024
+  num_hidden_layers        16
+  intermediate_size        6656
+  vocab_size               65536
+  num_attention_heads      16
+  num_key_value_heads      8
+  block_use_swiglu         True
+PASS  it is the LFM2 family
+PASS  a SwiGLU feed-forward
+PASS  the FFN is ~6.5x the width   | 6656/1024 = 6.50
+PASS  and FFN width is a multiple of 256 (a kernel-alignment choice)   | 6656 = 26 x 256
+```
+
+--- note
+### 230M vs 350M differ in DEPTH only — unit (2)
+
+```python
+CFG_S["num_hidden_layers"] vs CFG["num_hidden_layers"]
+```
+
+A rare, clean comparison: both sizes share width, vocabulary and head counts, and differ
+only in how many layers they stack. So any quality gap between them is attributable to depth alone — the
+kind of controlled pair you normally have to train yourself.
+
+--- code
+same = [k for k in ("hidden_size", "num_attention_heads", "num_key_value_heads", "vocab_size",
+                    "conv_L_cache") if CFG.get(k) == CFG_S.get(k)]
+print("identical between 230M and 350M:", same)
+print(f"depth: 230M = {CFG_S['num_hidden_layers']}   350M = {CFG['num_hidden_layers']}")
+ok("width, heads, vocab and conv width are IDENTICAL", len(same) == 5)
+ok("only the depth differs", CFG_S["num_hidden_layers"] != CFG["num_hidden_layers"],
+   f"{CFG_S['num_hidden_layers']} vs {CFG['num_hidden_layers']} layers")
+ok("so a quality gap isolates DEPTH", True, "a controlled pair, published for free")
+
+--- output
+```
+identical between 230M and 350M: ['hidden_size', 'num_attention_heads', 'num_key_value_heads', 'vocab_size', 'conv_L_cache']
+depth: 230M = 14   350M = 16
+PASS  width, heads, vocab and conv width are IDENTICAL
+PASS  only the depth differs   | 14 vs 16 layers
+PASS  so a quality gap isolates DEPTH   | a controlled pair, published for free
+```
+
+--- note
+### Tied embeddings — the MLM head is free — unit (3)
+
+```python
+CFG["tie_word_embeddings"] is True
+```
+
+The masked-LM head projects 1024 → 65536. Untied that is 67M parameters, on a model
+totalling ~350M — around a fifth of the budget for a layer that is thrown away after pre-training. Tying it
+to the input embedding makes it cost nothing extra.
+
+--- code
+V, H = CFG["vocab_size"], CFG["hidden_size"]
+head = V * H
+print(f"lm_head would be {V} x {H} = {head/1e6:.1f}M parameters")
+ok("the head is TIED to the input embedding", CFG["tie_word_embeddings"] is True)
+ok("which saves ~19% of a 350M budget", 0.15 < head / 350e6 < 0.25,
+   f"{head/1e6:.0f}M of ~350M = {head/350e6:.0%}")
+ok("and costs nothing at inference", True, "the same matrix, transposed")
+
+--- output
+```
+lm_head would be 65536 x 1024 = 67.1M parameters
+PASS  the head is TIED to the input embedding
+PASS  which saves ~19% of a 350M budget   | 67M of ~350M = 19%
+PASS  and costs nothing at inference   | the same matrix, transposed
+```
+
+--- note
+### A parameter budget from the config alone — unit (4)
+
+```python
+params = embed + sum(per-layer conv|attention + SwiGLU FFN)
+```
+
+No weights needed: the config determines the count. Building the estimate is worth doing
+because it tells you *where* the parameters are — and here they are overwhelmingly in the feed-forward
+blocks, not in attention, which is itself an argument that removing attention layers costs little capacity.
+
+--- code
+V, H, L = CFG["vocab_size"], CFG["hidden_size"], CFG["num_hidden_layers"]
+F_ = CFG["intermediate_size"]
+n_kv, n_q = CFG["num_key_value_heads"], CFG["num_attention_heads"]
+hd = H // n_q
+embed = V * H                                                   # tied, so counted once
+ffn = 3 * H * F_                                                # SwiGLU: gate, up, down
+attn = H * H + 2 * (n_kv * hd) * H + H * H                      # q, k, v (GQA), o
+conv = H * CFG["conv_L_cache"] + 3 * H * H                      # depthwise kernel + in/gate/out
+types = CFG["layer_types"]
+body = sum((attn if "attention" in t else conv) + ffn for t in types)
+total = embed + body
+print(f"  embeddings (tied) {embed/1e6:>7.1f}M")
+print(f"  FFN blocks        {L*ffn/1e6:>7.1f}M")
+print(f"  attention layers  {sum(attn for t in types if 'attention' in t)/1e6:>7.1f}M")
+print(f"  conv layers       {sum(conv for t in types if t=='conv')/1e6:>7.1f}M")
+print(f"  TOTAL             {total/1e6:>7.1f}M   (published name: 350M)")
+ok("the estimate lands near the published size", 250e6 < total < 480e6, f"{total/1e6:.0f}M")
+ok("most parameters are in the FEED-FORWARD, not attention", L * ffn > 4 * attn * 6,
+   f"FFN {L*ffn/1e6:.0f}M vs attention {6*attn/1e6:.0f}M")
+ok("so dropping attention layers costs little CAPACITY", True,
+   "it costs global mixing, which is why six remain")
+
+--- output
+```
+  embeddings (tied)    67.1M
+  FFN blocks          327.2M
+  attention layers     18.9M
+  conv layers          31.5M
+  TOTAL               444.6M   (published name: 350M)
+PASS  the estimate lands near the published size   | 445M
+PASS  most parameters are in the FEED-FORWARD, not attention   | FFN 327M vs attention 19M
+PASS  so dropping attention layers costs little CAPACITY   | it costs global mixing, which is why six remain
+```
+

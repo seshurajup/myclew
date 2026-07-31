@@ -1,0 +1,10 @@
+# PUBLIC notebook config — amanatar/biohub-0-855-ema-intensity-cost-tracking
+name: pub_biohub-0-855-ema-intensi
+source: amanatar/biohub-0-855-ema-intensity-cost-tracking
+family: learned-graph
+base: pilkwang_learned_graph
+lb: 0.855
+golden_cv: 0.8708
+mined_params: "det_threshold=['0.020', '0.025', '0.030']; division=['SAFE_DIV']"
+run: inference
+score: golden-12 (adj_edge_J + 0.1*div_J), by_embryo

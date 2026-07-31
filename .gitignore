@@ -1,0 +1,10 @@
+
+# ===== NEVER commit credentials (GitHub push protection caught youtube_token.json once) =====
+**/config/_auto/
+*token*.json
+*secret*
+*credential*
+kaggle.json
+.env
+*.pem
+*.key

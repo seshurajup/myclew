@@ -1,0 +1,16 @@
+[
+  {
+    "after_line": 11,
+    "text": ">>> INFO: the app started\\n>>> WARNING: low disk space\\n>>> ERROR: something failed",
+    "caption": "levels filter by importance"
+  },
+  {
+    "after_line": 18,
+    "text": ">>> INFO: processing data\\n>>> DATA",
+    "caption": "logging tells the program's story"
+  },
+  {
+    "after_line": 18,
+    "image": "artifacts/terminal.png"
+  }
+]

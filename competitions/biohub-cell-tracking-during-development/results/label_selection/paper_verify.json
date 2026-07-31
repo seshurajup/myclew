@@ -1,0 +1,71 @@
+{
+  "measurements": {
+    "cells_per_frame_by_stage": {
+      "S0": 5583.0,
+      "S1": 9229.0,
+      "S2": 17397.0,
+      "S3": 30374.0,
+      "S4": 59013.0
+    },
+    "cells_per_frame_min": 3783.0,
+    "cells_per_frame_max": 78644.0,
+    "total_div": 151,
+    "movies_with_div": 87,
+    "n_movies": 199,
+    "div_per_track": 0.06569029413718744,
+    "label_pct": 2.6414324905464523,
+    "gap_frac": 0.0,
+    "median_span": 38.19346733668342,
+    "local_density_cohens_d": -0.576075485200528
+  },
+  "verdicts": [
+    {
+      "id": "C1",
+      "claim": "Cell number rises monotonically with developmental time",
+      "source": "Zebrahub \u2014 Lange et al., Cell 2024 (doi 10.1016/j.cell.2024.09.047)",
+      "paper_says": "continuous time-course, embryo grows",
+      "our_data": "cells/frame S0\u2192S4 = 5583\u21929229\u219217397\u219230374\u219259013 (10.6\u00d7)",
+      "verdict": "MATCH"
+    },
+    {
+      "id": "C2",
+      "claim": "Developmental window 10 hpf\u201310 dpf",
+      "source": "Zebrahub \u2014 Lange et al., Cell 2024 (doi 10.1016/j.cell.2024.09.047)",
+      "paper_says": "whole atlas 10 hpf\u219210 dpf",
+      "our_data": "our movies cells/frame 3783\u201378644 \u2192 early somitogenesis sub-window",
+      "verdict": "PARTIAL"
+    },
+    {
+      "id": "C3",
+      "claim": "Frequent cell divisions across the tissue",
+      "source": "Zebrahub \u2014 Lange et al., Cell 2024 (doi 10.1016/j.cell.2024.09.047)",
+      "paper_says": "many mitoses, esp. earlier stages",
+      "our_data": "151 divisions in GT, 87/199 movies \u22651, but only 0.066/track \u2014 sparse GT UNDER-samples divisions",
+      "verdict": "PARTIAL"
+    },
+    {
+      "id": "C4",
+      "claim": "GT = sparse dual-channel 'platinum' lineages (auto-track + curate)",
+      "source": "Ultrack \u2014 Royer et al., Nat. Methods 2025 (PMC12615266, OA)",
+      "paper_says": "20\u201330% mCherry mosaic \u2192 curated long lineages",
+      "our_data": "~2.6% of cells labeled, gap_frac=0.00 (continuous), complete tracks",
+      "verdict": "MATCH"
+    },
+    {
+      "id": "C5",
+      "claim": "Sparse-labeled cells sit in LESS-crowded regions (easier to track)",
+      "source": "Ultrack \u2014 Royer et al., Nat. Methods 2025 (PMC12615266, OA)",
+      "paper_says": "'sparse channel consistently easier to track'",
+      "our_data": "local-density Cohen's d = -0.58 (labeled < unlabeled)",
+      "verdict": "MATCH"
+    },
+    {
+      "id": "C6",
+      "claim": "Curation kept long high-quality lineages",
+      "source": "Ultrack \u2014 Royer et al., Nat. Methods 2025 (PMC12615266, OA)",
+      "paper_says": "'selecting long... high-quality lineages'",
+      "our_data": "median track span 38 frames, div/track 0.066",
+      "verdict": "MATCH"
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+# PUBLIC notebook config — kaggle kernels pull abhijithneilabraham/solution
+name: pub_public_abhijith_deepcenter_090
+source: kaggle kernels pull abhijithneilabraham/solution
+family: other
+base: unknown
+lb: 0.9
+golden_cv: 0.9257
+mined_params: ""
+run: manual
+score: golden-12 (adj_edge_J + 0.1*div_J), by_embryo

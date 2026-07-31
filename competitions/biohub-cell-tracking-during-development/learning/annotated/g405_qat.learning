@@ -1,0 +1,46 @@
+@ id: g405
+@ order: 405
+@ title: Memory efficiency — quantization-aware training (QAT)
+@ subtitle: quantized checkpoints with minimal quality loss, plus quantized encoders
+@ source: arxiv 2607.02770
+
+--- note
+## Why QAT, not just post-hoc quantization
+Post-training quantization (PTQ) rounds a finished model's weights to low precision and *hopes* quality
+survives. **Quantization-aware training (QAT)** (Jacob et al., 2018) instead simulates the low-precision
+rounding **during training**, so the weights learn to be robust to it. Gemma 4 **releases QAT'd
+checkpoints alongside the raw ones**, cutting parameter memory and latency "with minimal impact on
+quality."
+
+--- note
+## Two weight formats (chosen for real inference engines)
+Grounded in the most popular open-source engines (e.g. **llama.cpp**) and hardware support, Gemma 4
+targets two representations:
+
+- **Mobile quantization** — per-channel **low-bitwidth weights (a mix of int2 and int4)** with **int8
+  activations**.
+- **Q4_0 quantization** — **blockwise** 4-bit quantization (the format commonly called `Q4_0`).
+
+To keep **fp16 inference stable**, they add a **scalar scale at each block** that bounds the activation
+ranges so they fit in fp16 — a small but important numerical guard.
+
+--- image
+learning/assets/gemma4/t03_memory.png
+Table 3 — text-only memory footprint (GB) at 32k context. bf16 → quantized: E2B 4.6→0.8 (†mobile), E4B 9.0→2.3, 12B 24.0→7.65 (‡Q4_0), 26B-A4B 52.0/7.6→16.2/2.8, 31B 64.0→19.2. The "+KV" column is the int8 KV cache add-on (small, thanks to g403). QAT is what makes the 31B fit ~19 GB instead of 64 GB.
+
+--- note
+## QAT on the encoders too
+Quantization isn't only for the text weights — the **image and audio encoders** are quantized as well:
+
+- **150M image encoder**: quantizing weights and activations to **8-bit (W8A8)** gives a **2× cut in
+  forward-pass memory** (400 MB → 200 MB, including on-device compile overhead) and a **44% latency
+  reduction** vs Gemma 3n on newer hardware.
+- **Audio encoder**: activations to **8 bits**, weights to **{2, 4, 8} bits varying by layer cluster**
+  → a **78% on-disk reduction**, from **390 MB (Gemma 3n) to 87 MB**.
+
+--- note
+## Relation to our fleet
+We already have a `lowbit-qat` agent (BitNet-b1.58 ternary + int4/int8 fake-quant + straight-through
+estimator). Gemma 4's contribution here is the **recipe/format choice** (mobile int2/int4+int8, Q4_0,
+per-block fp16 scale, W8A8 encoders) rather than a new training algorithm — so Part B extends the
+existing QAT agent with a Gemma-4-style format profiler instead of adding a duplicate agent.

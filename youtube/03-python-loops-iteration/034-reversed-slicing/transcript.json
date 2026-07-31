@@ -1,0 +1,42 @@
+[
+  {
+    "text": "Python gives you several clean ways to walk a sequence backwards.",
+    "until_line": 1
+  },
+  {
+    "text": "The reversed function returns a lazy iterator that yields items from last to first.",
+    "until_line": 5
+  },
+  {
+    "text": "It doesn't build a new list, it just steps through the original in reverse order.",
+    "until_line": 6
+  },
+  {
+    "text": "[chuckle] Slicing with a step of negative one is the other classic way — and it does make a new list.",
+    "until_line": 10
+  },
+  {
+    "text": "That same slice trick reverses a string too, since strings are sequences of characters.",
+    "until_line": 13
+  },
+  {
+    "text": "[sniff] So python spelled backwards falls out in a single, tidy expression.",
+    "until_line": 13
+  },
+  {
+    "text": "You can combine reversed with enumerate to number items as you count down through them.",
+    "until_line": 16
+  },
+  {
+    "text": "[sigh] Reach for reversed when you want to loop efficiently, and the slice when you want an actual reversed copy.",
+    "until_line": 16
+  },
+  {
+    "text": "[groan] Both read cleanly, so pick whichever makes your intent most obvious to the next reader.",
+    "until_line": 16
+  },
+  {
+    "text": "any and all is next, video number 35. Tell me in the comments if this clicked.",
+    "until_line": 16
+  }
+]

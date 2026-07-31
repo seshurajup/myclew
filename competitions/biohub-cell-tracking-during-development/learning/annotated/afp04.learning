@@ -1,0 +1,16 @@
+@ id: afp04
+@ order: 2930
+@ title: 4 Deployment in Mathematics Research
+@ subtitle: Advancing Mathematics Research with AI-Driven Formal Proof Search §4
+@ source: docs/papers/ai-formal-proof/ai-formal-proof.md
+
+--- note
+## 4 Deployment in Mathematics Research
+**Repo:** Advancing Mathematics Research with AI-Driven Formal Proof Search · /tmp/claude-1001/-home-seshu-kaggle-2026/5abb95f8-1364-4775-8ff5-e5c2788bac9d/scratchpad/arx_2605.22763v1.pdf · units (none).
+
+**The deployment — stated, not re-proved.** §4 and appendix B contain the actual
+mathematics the system produced or assisted: optimisation theory, graph reconstruction results, algebraic
+geometry, additive combinatorics, quantum optics. The numbered equations of the PDF live in these proofs.
+Re-deriving the authors' theorems is neither honest nor useful here; what this pack verifies is the
+MACHINE that produced them. This section is the reminder of what the machine was for.
+

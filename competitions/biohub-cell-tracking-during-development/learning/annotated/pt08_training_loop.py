@@ -1,0 +1,58 @@
+"""Working code for pt08 — the training loop, on REAL data. Builds a real target heat-map from
+real cell coordinates and runs one real optimiser step; writes pt08_training_loop.learning.
+    research/cellmot_venv/bin/python learning/annotated/pt08_training_loop.py
+"""
+from pathlib import Path
+import sys
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from lessonkit import build_lesson
+
+ROOT = Path("/home/seshu/kaggle/2026/biohub-cell-tracking-during-development")
+TRAIN = ROOT / "input/biohub-cell-tracking-during-development/train"
+
+META = dict(id="pt08", order=17, title="The training loop",
+            subtitle="zero_grad → backward → clip → step — one real step, loss actually drops",
+            source="research/pilkwang_support_pack/repo/scripts/train_unet_transformer.py")
+
+CELLS = [
+    dict(note="""## The five lines that train everything
+Every PyTorch model learns with the same loop: forward → loss → `backward()` → clip → `step()`.
+We run **one real step** of a tiny detector on a real frame, with a **real target** (1 at the real
+cell locations from the `.geff`), and watch the loss drop. Numbers below are captured on our data."""),
+
+    dict(note="""### Real frame + real target heat-map
+Load a real frame and place a `1` at each real cell centre (from the `.geff`) → the target the
+detector must reproduce.""",
+         code="""import torch, torch.nn as nn, torch.nn.functional as F, numpy as np, zarr  # layers + IO
+vol = np.asarray(zarr.open(f"{TRAIN}/6bba_062c8d37.zarr/0")[0]).astype(np.float32)[:, ::4, ::4]  # real frame
+x = torch.from_numpy(vol)[None, None]                              # (B,C,Z,Y,X)
+G = f"{TRAIN}/6bba_062c8d37.geff/nodes/props"                       # the graph nodes
+nt = np.asarray(zarr.open(f"{G}/t/values")[:])                    # each cell's frame
+z = np.asarray(zarr.open(f"{G}/z/values")[:]).astype(int); y = np.asarray(zarr.open(f"{G}/y/values")[:]).astype(int); xx = np.asarray(zarr.open(f"{G}/x/values")[:]).astype(int)
+target = torch.zeros_like(x)                                       # empty heat-map
+m = nt == 0                                                        # real cells in frame 0
+target[0, 0, np.clip(z[m], 0, vol.shape[0]-1), np.clip(y[m]//4, 0, vol.shape[1]-1), np.clip(xx[m]//4, 0, vol.shape[2]-1)] = 1.0  # mark real cell centres
+int(target.sum())                                                 # number of real cells to detect"""),
+
+    dict(note="""### One real optimiser step
+**[PyTorch]** `AdamW` updates weights; the loop is `zero_grad` → `backward` (compute gradients) →
+`clip_grad_norm_(1.0)` (stabilise) → `step` (apply). **[Craft]** grad-clipping and a seed are how a
+grandmaster keeps runs reproducible. The loss **drops** after one step — learning works.""",
+         code="""net = nn.Sequential(nn.Conv3d(1, 8, 3, padding=1), nn.ReLU(), nn.Conv3d(8, 1, 1))  # a tiny detector
+opt = torch.optim.AdamW(net.parameters(), lr=1e-2)                # the optimiser
+before = F.binary_cross_entropy_with_logits(net(x), target)      # loss before training
+opt.zero_grad()                                                  # clear old gradients
+loss = F.binary_cross_entropy_with_logits(net(x), target)        # forward + loss
+loss.backward()                                                  # backprop: compute gradients
+torch.nn.utils.clip_grad_norm_(net.parameters(), 1.0)            # clip gradients (stability)
+opt.step()                                                       # apply the update
+after = F.binary_cross_entropy_with_logits(net(x), target)       # loss after one step
+{"loss_before": round(float(before), 4), "loss_after": round(float(after), 4)}  # it drops"""),
+
+    dict(note="""**[Domain]** the real trainer runs this millions of times over all embryos, and —
+our key change — **checkpoints on `division_jaccard`** (not accuracy) so it actually selects for
+divisions. **Next → me01: the metric this all optimises.**"""),
+]
+
+if __name__ == "__main__":
+    build_lesson(META, CELLS, Path(__file__).with_suffix(".learning"), {"TRAIN": TRAIN})

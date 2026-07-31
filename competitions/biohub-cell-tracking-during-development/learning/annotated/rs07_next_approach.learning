@@ -1,0 +1,48 @@
+@ id: rs07
+@ order: 36
+@ title: Our next approach — the plan to pass 0.885
+@ subtitle: what all the research points to
+@ source: learning/CURRICULUM.md
+
+--- note
+## Putting the whole journey together
+Every finding narrows the path. Ensembling is redundant (`rs06`). No hand-rule reaches divisions
+(`rs03`). Local CV can mislead on density (`rs02`). The real, stackable levers are **divisions**
+(a trained head) and **recall** (finer detection). Here's the plan.
+
+--- note
+### Lever 1 — a division-aware trained edge head (rs04)
+**[Domain]** The +0.049 division headroom is only reachable by training. Fine-tune the small edge
+head with up-weighted division loss + division-jaccard checkpointing + a division-oversampled
+loader. Validate on golden-12's `division_jaccard` — the one thing local CV scores honestly.
+
+--- note
+### Lever 2 — a higher-resolution (1,2,2) detector
+**[Data — the untapped lever]** Every public detector runs at downsample **(1,4,4)**. The metric
+matches within **7 µm**; finer XY localisation → tighter matches → more matched edges → higher
+edge-Jaccard. No public notebook does this. Retrain the detector at **(1,2,2)** (isotropy argument
+from `aug01`) and feed it through the same proven post-processing.
+
+--- note
+**Illustrative — the key code (not a runnable cell):**
+```python
+downsample = (1, 2, 2)   # was (1,4,4); finer XY -> better 7 µm localisation -> higher edge-J
+# same TemporalUNet3D (pt01-04), same post-proc (pp01) -> a better detector, drop-in
+```
+
+--- note
+### Lever 3 — free recall from gap2 (rs05)
+**[Craft]** Turn on 2-frame gap recovery — a validated +0.003 with no training, orthogonal to the
+above. Stack it on the improved detector + division head.
+
+--- note
+### The discipline
+**[Craft — bestfitting]** One change at a time. Measure each on golden-12 (divisions + relative
+gains are honest there). Confirm the absolute on **one** Kaggle submission. Package as a fork of
+pilkwang's notebook: same detector code, our fine-tuned edge weights (as a Kaggle Model), gap2 ON,
+strip comments. That's how we cross **0.885** — grounded in every lesson before this one.
+
+--- note
+You've now read the whole system, end to end — the data, the architecture, the training, the
+metric, and every research decision. That's the foundation for building the next model.
+

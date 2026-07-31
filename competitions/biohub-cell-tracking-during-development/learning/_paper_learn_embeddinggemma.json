@@ -1,0 +1,37 @@
+{
+  "slug": "embeddinggemma",
+  "lessons": 6,
+  "ids": [
+    "egmb1",
+    "egm01",
+    "egm02",
+    "egm03",
+    "egm04",
+    "egmz1"
+  ],
+  "coverage": {
+    "total": 5,
+    "placed": 5,
+    "missing": [],
+    "taught": 5,
+    "untaught": [],
+    "proven": 5,
+    "unproven": [],
+    "cropped": 3,
+    "figures": 4,
+    "figures_placed": 3,
+    "lessons": 4
+  },
+  "curriculum": {
+    "appended": true,
+    "section": "EmbeddingGemma (2025) \u2014 a 300M embedder, its losses run and its claims measured live",
+    "lessons": 6
+  },
+  "pruned": [],
+  "code_cells": 9,
+  "cells_with_output": 9,
+  "silent_lessons": [],
+  "out_dir": "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated",
+  "assets": "learning/assets/embeddinggemma",
+  "python": "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/research/cellmot_venv/bin/python"
+}

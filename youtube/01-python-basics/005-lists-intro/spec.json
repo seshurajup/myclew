@@ -1,0 +1,13 @@
+{
+  "language": "python",
+  "title": "lists.py",
+  "hook": "The one container you'll use every day",
+  "playlist": "Learn Python",
+  "target_seconds": 95,
+  "tts_engine": "chatterbox",
+  "music_prompt": "organized, flowing, moderate lo-fi",
+  "code_path": "code.py",
+  "transcript_path": "transcript.json",
+  "outputs_path": "outputs.json",
+  "accent": "ocean"
+}

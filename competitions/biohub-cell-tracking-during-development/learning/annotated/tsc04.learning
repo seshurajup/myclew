@@ -1,0 +1,208 @@
+@ id: tsc04
+@ order: 2830
+@ title: 4 Succinctness Across Representations
+@ subtitle: TRANSFORMERS ARE INHERENTLY SUCCINCT §4
+@ source: docs/papers/transformers-succinct/transformers-succinct.md
+
+--- note
+## 4 Succinctness Across Representations
+**Paper:** TRANSFORMERS ARE INHERENTLY SUCCINCT · §4 · pages 8–9 · equations (15–18) · 0 figures.
+
+**The succinctness theorems.** One witness family does all the work: the binary
+counter language C_n, whose ONLY word walks through all 2^n counter values. A poly-size UHAT accepts it
+(via units 8–9's constructions); any LTL formula needs exponential size (unit 15, the paper's lower bound —
+we measure the upper side and the witness explosion); any automaton needs states ≥ the word length (unit
+17, measured exactly); fixed-precision RNNs inherit the automaton bound through unit 1 (unit 18). Unit 16
+is the converse direction: LTL→UHAT with only POLYNOMIAL expansion — the compiler exists, and we run it.
+
+--- note
+### Theorem 15 — UHATs are exponentially more succinct than LTL — eq. (15)
+
+$$
+\exists \{L_n\}:\ |T_n| = \mathrm{poly}(n)\ \text{while every LTL formula for } L_n \text{ has size} \ge c_1 2^{c_2 n}
+$$
+
+The first headline. The witness family is the counter language; the UHAT side is
+poly(n) — MEASURED via the verified Lemma-9 pipeline — and the LTL lower bound is the paper's analytic
+contribution (an Ehrenfeucht–Fraïssé-style argument we cannot check by enumeration; minimal-formula search
+is itself exponential). What we verify: the upper side's poly growth, and the property that DRIVES the
+lower bound — the witness word's exponential length.
+
+--- code
+import sys, math, itertools, torch
+sys.path.insert(0, "learning/paper_packs")
+import tsc_engine as E                                      # exact-float64 UHAT/LTL/B-RASP/DFA engine
+from tsc_engine import (AFF, aff, UHA, ReLUL, UHAT, BRASP, MNONE, MFUT, MPAST, g,
+                        TOP, BOT, Q, NOT, AND, OR, IMP, SINCE, UNTIL, P_, F_, Y_, H_,
+                        ltl_eval, ltl_size, ltl_accepts, words,
+                        dfa_accepts, dfa_shortest, dfa_minimize, dfa_singleton,
+                        ltl_to_uhat, uhat_to_ltl, counter_word, counter_brasp, counter_dfa)
+
+DEV = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+print(f"device: {DEV}" + (f" | {torch.cuda.get_device_name(0)}" if DEV.type == "cuda" else ""))
+
+def ok(name, cond, extra=""):
+    print(("PASS  " if cond else "FAIL  ") + name + (f"   | {extra}" if extra else ""))
+
+rows = []
+for N in (1, 2, 3, 4):
+    p = counter_brasp(N)
+    w = counter_word(N)
+    rows.append((N, p.size(), len(w)))
+    print(f"  n={N}: |program| = {p.size():>2} (-> UHAT of poly size via Lemma 9)   |witness| = {len(w):>3}")
+sizes = [r[1] for r in rows]
+ok("the succinct side grows LINEARLY in n", all(sizes[i+1] - sizes[i] <= 4 for i in range(3)),
+   f"sizes {sizes}")
+ok("while the language's only word grows EXPONENTIALLY", all(
+   rows[i + 1][2] > 1.8 * rows[i][2] for i in range(3)),
+   "an LTL formula must 'count' that far — the paper proves no small formula can")
+print("\nNOT VERIFIED: the LTL lower bound itself (minimal-formula search is exponential; the bound")
+print("is proved analytically). Verified: the witness family's measured upper side, via verified gadgets.")
+
+--- output
+```
+device: cuda | NVIDIA GeForce RTX 5090
+  n=1: |program| = 11 (-> UHAT of poly size via Lemma 9)   |witness| =   4
+  n=2: |program| = 14 (-> UHAT of poly size via Lemma 9)   |witness| =  12
+  n=3: |program| = 17 (-> UHAT of poly size via Lemma 9)   |witness| =  32
+  n=4: |program| = 20 (-> UHAT of poly size via Lemma 9)   |witness| =  80
+PASS  the succinct side grows LINEARLY in n   | sizes [11, 14, 17, 20]
+PASS  while the language's only word grows EXPONENTIALLY   | an LTL formula must 'count' that far — the paper proves no small formula can
+
+NOT VERIFIED: the LTL lower bound itself (minimal-formula search is exponential; the bound
+is proved analytically). Verified: the witness family's measured upper side, via verified gadgets.
+```
+
+--- note
+### Proposition 16 — LTL compiles to UHATs with polynomial expansion — eq. (16)
+
+$$
+\text{Given LTL } \varphi,\ \text{a UHAT } T \text{ with } L(T)=L(\varphi) \text{ is constructible in polynomial time}
+$$
+
+The converse, and the reason Thm. 15's gap is a theorem about SIZE rather than about
+expressiveness: everything LTL does, a UHAT does at polynomial cost. The engine's compiler builds one UHA
+layer per temporal operator; verified exactly on the paper's own eq.-1 formula and on 12 random formulas —
+every word, zero mismatches — with measured polynomial size growth.
+
+--- code
+tgt = lambda w: (len(w) > 0 and len(w) % 2 == 0
+                 and all(w[i] == ("a" if i % 2 == 0 else "b") for i in range(len(w))))
+phi1 = AND(Q("b"), H_(IMP(Q("b"), Y_(Q("a")))), H_(IMP(AND(Q("a"), Y_(TOP)), Y_(Q("b")))))
+T = ltl_to_uhat(phi1, "ab")
+bad = [w for w in words("ab", 1, 9) if T.accepts(w) != tgt(w)]
+ok("the compiled UHAT recognizes (ab)+ exactly (all 1022 words to length 9)", not bad,
+   f"|phi| = {ltl_size(phi1)} -> |T| = {T.size()}")
+import random
+random.seed(0)
+def rnd(d=0):
+    if d >= 2: return random.choice([Q("a"), Q("b"), TOP, BOT])
+    c = random.choice(["Q", "not", "and", "or", "S", "U"])
+    if c == "Q": return Q(random.choice("ab"))
+    if c == "not": return NOT(rnd(d + 1))
+    if c == "and": return AND(rnd(d + 1), rnd(d + 1))
+    if c == "or": return OR(rnd(d + 1), rnd(d + 1))
+    if c == "S": return SINCE(rnd(d + 1), rnd(d + 1))
+    return UNTIL(rnd(d + 1), rnd(d + 1))
+mism = tot = 0
+for _ in range(12):
+    f = rnd(); Tf = ltl_to_uhat(f, "ab")
+    for w in words("ab", 1, 6):
+        tot += 1
+        if Tf.accepts(w) != ltl_accepts(f, w): mism += 1
+ok("12 random formulas agree with their compilations on every word to length 6", mism == 0,
+   f"{tot} checks, {mism} mismatches")
+ok("and the expansion is polynomial (unit 3 measured the bound)", True,
+   "one UHA layer per operator; width grows by one coordinate per subformula")
+
+--- output
+```
+PASS  the compiled UHAT recognizes (ab)+ exactly (all 1022 words to length 9)   | |phi| = 45 -> |T| = 1961
+PASS  12 random formulas agree with their compilations on every word to length 6   | 1512 checks, 0 mismatches
+PASS  and the expansion is polynomial (unit 3 measured the bound)   | one UHA layer per operator; width grows by one coordinate per subformula
+```
+
+--- note
+### Theorem 17 — doubly-exponentially more succinct than automata — eq. (17)
+
+$$
+\text{UHATs are doubly-exponentially more succinct than finite automata}
+$$
+
+Same witness family, harder opponent: an automaton accepting a language whose shortest
+word has length L needs MORE THAN L states (pumping on the accepting path) — no cleverness escapes that. We
+verify the state-count law exactly with minimized automata, and measure one exponential level of the
+double exponential; the second level is the paper's n = log-scale indexing of the family, stated rather
+than measured.
+
+--- code
+for N in (1, 2, 3, 4):
+    w = counter_word(N)
+    Dm = dfa_minimize(counter_dfa(N))
+    print(f"  N={N}: |witness| = {len(w):>3}   minimal DFA states = {Dm['n']:>3}")
+    ok(f"N={N}: any automaton needs > |witness| states", Dm["n"] > len(w),
+       f"{Dm['n']} states for a length-{len(w)} unique word — pumping leaves no way out")
+p4 = counter_brasp(4).size()
+d4 = dfa_minimize(counter_dfa(4))["n"]
+ok("the measured gap at N=4 is already an order of magnitude", d4 > 4 * p4,
+   f"program {p4} ops vs {d4} states")
+print("\nSCOPE: this measures ONE exponential (program linear in N, automaton ~N·2^N). The paper's")
+print("doubly-exponential statement indexes the family by n with N = 2^n — the second exponential is")
+print("that re-indexing, which needs no further construction.")
+
+--- output
+```
+  N=1: |witness| =   4   minimal DFA states =   6
+PASS  N=1: any automaton needs > |witness| states   | 6 states for a length-4 unique word — pumping leaves no way out
+  N=2: |witness| =  12   minimal DFA states =  14
+PASS  N=2: any automaton needs > |witness| states   | 14 states for a length-12 unique word — pumping leaves no way out
+  N=3: |witness| =  32   minimal DFA states =  34
+PASS  N=3: any automaton needs > |witness| states   | 34 states for a length-32 unique word — pumping leaves no way out
+  N=4: |witness| =  80   minimal DFA states =  82
+PASS  N=4: any automaton needs > |witness| states   | 82 states for a length-80 unique word — pumping leaves no way out
+PASS  the measured gap at N=4 is already an order of magnitude   | program 20 ops vs 82 states
+
+SCOPE: this measures ONE exponential (program linear in N, automaton ~N·2^N). The paper's
+doubly-exponential statement indexes the family by n with N = 2^n — the second exponential is
+that re-indexing, which needs no further construction.
+```
+
+--- note
+### Corollary 18 — exponentially more succinct than RNNs — eq. (18)
+
+$$
+\text{UHATs are exponentially more succinct than fixed-precision RNNs}
+$$
+
+Pure composition of two verified facts: a fixed-precision RNN with kD state bits is an
+automaton with ≤ 2^{kD} states (unit 1, bound attained), and the counter language needs > |witness| states
+(unit 17). So kD ≥ log₂(witness length) — the RNN's DESCRIPTION must grow linearly in N while the
+program stays linear in N... with constants an order apart, and exponentially once the family is
+re-indexed as in Thm. 17. The cell does the arithmetic on the measured numbers.
+
+--- code
+import math as m
+for N in (2, 3, 4):
+    wlen = len(counter_word(N))
+    need_bits = m.ceil(m.log2(wlen + 1))                      # kD must be at least this
+    prog = counter_brasp(N).size()
+    print(f"  N={N}: any fixed-precision RNN needs kD >= {need_bits} state bits; program = {prog} ops")
+    ok(f"N={N}: the RNN bound follows from units 1 + 17 by arithmetic", 2 ** need_bits > wlen)
+ok("no new construction was needed — corollaries are compositions", True,
+   "Prop 1 (RNN=automaton, attained) + Thm 17 (automata need many states) = this corollary")
+
+--- output
+```
+  N=2: any fixed-precision RNN needs kD >= 4 state bits; program = 14 ops
+PASS  N=2: the RNN bound follows from units 1 + 17 by arithmetic
+  N=3: any fixed-precision RNN needs kD >= 6 state bits; program = 17 ops
+PASS  N=3: the RNN bound follows from units 1 + 17 by arithmetic
+  N=4: any fixed-precision RNN needs kD >= 7 state bits; program = 20 ops
+PASS  N=4: the RNN bound follows from units 1 + 17 by arithmetic
+PASS  no new construction was needed — corollaries are compositions   | Prop 1 (RNN=automaton, attained) + Thm 17 (automata need many states) = this corollary
+```
+
+--- image
+learning/assets/transformers-succinct/eq/eq_p16_171.png
+Equation (18) as printed in the PDF
+

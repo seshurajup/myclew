@@ -1,0 +1,176 @@
+{
+  "mode": "mini",
+  "sec": 5.6,
+  "datasets": {
+    "44b6": [
+      "44b6_d29c9ab2"
+    ],
+    "6bba": [
+      "6bba_bb9f20c3"
+    ]
+  },
+  "n_close_pairs": 14,
+  "psf": {
+    "sigma_z_vox": 3.0,
+    "sigma_xy_vox": 1.0,
+    "rl_iters": 5,
+    "_why_sigma_z": "light-sheet z-elongation anchored to z/xy voxel anisotropy 1.625/0.40625~4x, capped to <=3px (kept LIGHT per SiMView no-deconv note)"
+  },
+  "roi": {
+    "HZ": 6,
+    "HXY": 19,
+    "min_dist_vox": [
+      2,
+      7,
+      7
+    ],
+    "_why": "ROI half = ceil(7\u00b5m gate / voxel)+1; min peak-dist ~2\u00b5m (half nearest-neighbour)"
+  },
+  "device": "cuda",
+  "hw": {
+    "gpu": "NVIDIA GeForce RTX 5090",
+    "amp_dtype": "bf16",
+    "allow_tf32": true
+  },
+  "gateA_diagnostic": {
+    "overall": {
+      "n": 14,
+      "resolved": 1,
+      "resolved_frac": 0.071,
+      "raw_2peak_frac": 0.643,
+      "deconv_2peak_frac": 0.643,
+      "mean_raw_peaks": 1.64,
+      "mean_deconv_peaks": 1.64
+    },
+    "by_embryo": {
+      "44b6": {
+        "n": 5,
+        "resolved": 0,
+        "resolved_frac": 0.0,
+        "raw_2peak_frac": 0.8,
+        "deconv_2peak_frac": 0.6,
+        "mean_raw_peaks": 1.8,
+        "mean_deconv_peaks": 1.6,
+        "z_separated": {
+          "n": 3,
+          "resolved": 0,
+          "resolved_frac": 0.0,
+          "raw_2peak_frac": 1.0,
+          "deconv_2peak_frac": 0.667,
+          "mean_raw_peaks": 2.0,
+          "mean_deconv_peaks": 1.67
+        },
+        "paired_sig": {
+          "n": 1,
+          "note": "too few datasets for paired test (need >=3)"
+        }
+      },
+      "6bba": {
+        "n": 9,
+        "resolved": 1,
+        "resolved_frac": 0.111,
+        "raw_2peak_frac": 0.556,
+        "deconv_2peak_frac": 0.667,
+        "mean_raw_peaks": 1.56,
+        "mean_deconv_peaks": 1.67,
+        "z_separated": {
+          "n": 0,
+          "resolved": 0,
+          "resolved_frac": null,
+          "raw_2peak_frac": null,
+          "deconv_2peak_frac": null
+        },
+        "paired_sig": {
+          "n": 1,
+          "note": "too few datasets for paired test (need >=3)"
+        }
+      }
+    }
+  },
+  "gateB_runtime": {
+    "sec_per_frame_local": 0.1027,
+    "t4_slowdown_assumed": 5.0,
+    "n_gpu": 2,
+    "frames_hidden_test": 19900,
+    "eta_hours_2xT4": 1.42,
+    "fits_12h": true,
+    "_why": "deconv-only ETA (add detector+linker separately); T4 factor conservative for conv/FFT-bound work"
+  },
+  "gateC_detector": {
+    "note": "UNLEARNED DoG detector -> mismatch-free; pilkwang (learned-on-RAW) would need a RETRAIN to deploy on deconv",
+    "44b6": {
+      "raw": {
+        "prec": 0.0506,
+        "rec": 0.8542,
+        "f1": 0.0955,
+        "tp": 41,
+        "fp": 770,
+        "fn": 7
+      },
+      "deconv": {
+        "prec": 0.0516,
+        "rec": 0.875,
+        "f1": 0.0974,
+        "tp": 42,
+        "fp": 772,
+        "fn": 6
+      },
+      "precision_paired_sig": {
+        "n": 3,
+        "mean_delta": 0.0010999999999999992,
+        "cliffs_delta": 0.2222,
+        "wilcoxon_p": 1.0,
+        "sign_p": 1.0,
+        "boot_ci": [
+          -0.0003,
+          0.0036
+        ],
+        "underpowered": true,
+        "min_detectable": 0.00287,
+        "significant": false
+      },
+      "d_precision": 0.001
+    },
+    "6bba": {
+      "raw": {
+        "prec": 0.1161,
+        "rec": 0.7867,
+        "f1": 0.2024,
+        "tp": 59,
+        "fp": 449,
+        "fn": 16
+      },
+      "deconv": {
+        "prec": 0.1151,
+        "rec": 0.8133,
+        "f1": 0.2017,
+        "tp": 61,
+        "fp": 469,
+        "fn": 14
+      },
+      "precision_paired_sig": {
+        "n": 3,
+        "mean_delta": -0.0010333333333333306,
+        "cliffs_delta": -0.1111,
+        "wilcoxon_p": 0.75,
+        "sign_p": 1.0,
+        "boot_ci": [
+          -0.0039,
+          0.0017
+        ],
+        "underpowered": true,
+        "min_detectable": 0.0037,
+        "significant": false
+      },
+      "d_precision": -0.001
+    }
+  },
+  "verdict": {
+    "decision": "WEAK-GO",
+    "reason": "positive on one embryo / borderline \u2014 scale (mode=full) before committing; a learned-detector retrain is the real cost gate",
+    "gateA": false,
+    "gateB": true,
+    "gateC": true,
+    "gateC_note": "DoG \u0394precision per-embryo=[0.001, -0.001]"
+  }
+}

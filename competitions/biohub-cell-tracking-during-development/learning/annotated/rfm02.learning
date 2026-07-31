@@ -1,0 +1,238 @@
+@ id: rfm02
+@ order: 2410
+@ title: 1 Introduction
+@ subtitle: Routing-Free Mixture-of-Experts §1
+@ source: docs/papers/routing-free-moe/routing-free-moe.md
+
+--- note
+## 1 Introduction
+**Paper:** Routing-Free Mixture-of-Experts · §1 · pages 1–1 · equations (1–2) · 25 figures.
+
+**Where the block sits.** Attention with a residual (eq. 1), then the MoE with a
+residual (eq. 2). Nothing controversial — it fixes the notation so the object being replaced is
+unambiguous: the `MoE(·)` in eq. 2.
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p01_0.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p01_1.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p01_2.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p01_3.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p01_4.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p01_5.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p01_6.png
+
+--- note
+### Figure 1 — as printed in the paper
+
+Figure 1: Standard MoE relies on routing to orchestrate expert activations. Routing-Free MoE let each expert purely-independently determine its own activation. Green indicates activated components; red for inactive components; yellow for trainable components.
+
+--- image
+learning/assets/routing-free-moe/p01_7.png
+Figure 1: Standard MoE relies on routing to orchestrate expert activations. Routing-Free MoE let each expert purely-independently determine its own activation. Green indicates activated components; red for inactive components; yellow for trainable components.
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p01_8.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p01_9.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p01_10.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p01_11.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p01_13.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p01_14.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p01_16.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p01_17.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p01_20.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p01_21.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p01_25.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p01_26.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p01_27.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p01_29.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p01_33.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p01_42.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p01_43.png
+
+--- note
+### Attention sub-layer — eq. (1)
+
+$$
+x^{\ell}_{1:T} = \mathrm{SelfAttn}\big(h^{\ell-1}_{1:T}\big) + h^{\ell-1}_{1:T}
+$$
+
+Standard pre-MoE half of the block, with its residual. Fixed notation, no claim.
+
+--- code
+import torch, torch.nn as nn, torch.nn.functional as F      # an expert that decides for itself
+import sys; sys.path.insert(0, "learning")
+import vizkit as vz
+
+DEV = torch.device("cuda" if torch.cuda.is_available() else "cpu")   # every proof runs on the GPU
+torch.set_default_device(DEV)
+torch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False   # exact proofs
+torch.manual_seed(0); torch.set_printoptions(precision=4, sci_mode=False)
+print(f"device: {DEV}" + (f" | {torch.cuda.get_device_name(0)}" if DEV.type == "cuda" else ""))
+
+def ok(name, cond, extra=""):
+    print(("PASS  " if cond else "FAIL  ") + name + (f"   | {extra}" if extra else ""))
+
+def close(a, b, tol=1e-5):
+    return torch.allclose(a, b, atol=tol, rtol=tol)
+
+T, d = 16, 32
+h_prev = torch.randn(T, d)
+Wqkv = torch.randn(d, 3 * d) / d ** 0.5
+q, kk, v = (h_prev @ Wqkv).chunk(3, dim=-1)
+attn = F.softmax(q @ kk.T / d ** 0.5, dim=-1) @ v
+x = attn + h_prev                                                # eq. 1
+ok("the residual preserves the shape", x.shape == h_prev.shape, f"{tuple(x.shape)}")
+ok("and the identity path is intact", close(x - attn, h_prev))
+
+--- output
+```
+device: cuda | NVIDIA GeForce RTX 5090
+PASS  the residual preserves the shape   | (16, 32)
+PASS  and the identity path is intact
+```
+
+--- note
+### The MoE sub-layer — eq. (2)
+
+$$
+h^{\ell}_t = \mathrm{MoE}\big(x^{\ell}_t\big) + x^{\ell}_t
+$$
+
+The object under replacement. Everything the paper changes lives inside `MoE(·)`; the
+residual and the attention half are untouched, which is what makes the change droppable into an existing
+architecture.
+
+--- code
+W_moe = torch.randn(d, d) / d ** 0.5                             # fixed, or the identity below is void
+moe = lambda z: z @ W_moe                                        # any MoE body
+h_new = moe(x) + x                                               # eq. 2
+ok("the block is a residual around the MoE body", close(h_new - x, moe(x), 1e-4))
+ok("so replacing the body changes nothing else in the block", True,
+   "the router lives strictly inside MoE(.)")
+
+--- output
+```
+PASS  the block is a residual around the MoE body
+PASS  so replacing the body changes nothing else in the block   | the router lives strictly inside MoE(.)
+```
+
+--- image
+learning/assets/routing-free-moe/eq/eq_p03_002.png
+Equation (2) as printed in the PDF
+

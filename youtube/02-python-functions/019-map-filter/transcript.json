@@ -1,0 +1,42 @@
+[
+  {
+    "text": "Map and filter are two classic tools for transforming lists without writing a single loop.",
+    "until_line": 1
+  },
+  {
+    "text": "Map applies a function to every item in a sequence — here we double each number in one clean line.",
+    "until_line": 4
+  },
+  {
+    "text": "Notice map returns a special map object, so we wrap it in list to actually see the results.",
+    "until_line": 4
+  },
+  {
+    "text": "[chuckle] Filter is its partner — it keeps only the items where the function returns true.",
+    "until_line": 7
+  },
+  {
+    "text": "So filtering for the even numbers leaves us with two, four, and six.",
+    "until_line": 7
+  },
+  {
+    "text": "[sigh] Map isn't limited to lambdas — you can hand it any named function, like this Celsius to Fahrenheit converter.",
+    "until_line": 14
+  },
+  {
+    "text": "Each temperature flows through the function and comes out converted.",
+    "until_line": 14
+  },
+  {
+    "text": "And the real elegance is chaining them — first filter to keep the evens, then map to square each one.",
+    "until_line": 18
+  },
+  {
+    "text": "[groan] Two tiny functions, no loops, and the whole transformation reads almost like a sentence.",
+    "until_line": 18
+  },
+  {
+    "text": "list comprehensions is next, video number 20. Comment the topic you want after that.",
+    "until_line": 18
+  }
+]

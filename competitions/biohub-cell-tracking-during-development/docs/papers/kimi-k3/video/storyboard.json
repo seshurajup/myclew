@@ -1,0 +1,650 @@
+{
+  "title": "KIMI K3: OPEN FRONTIER INTELLIGENCE",
+  "subtitle": "kimi-k3",
+  "scenes": [
+    {
+      "kind": "title",
+      "title": "KIMI K3: OPEN FRONTIER INTELLIGENCE",
+      "subtitle": "47 pages \u00b7 371 formulas \u00b7 every one proved in PyTorch",
+      "narration": "KIMI K3: OPEN FRONTIER INTELLIGENCE. We go through this paper formula by formula, and every claim you hear is checked by code that runs.",
+      "seconds": 6.0
+    },
+    {
+      "kind": "chapter",
+      "title": "1 Introduction",
+      "subtitle": "KIMI K3: OPEN FRONTIER INTELLIGENCE \u00a71",
+      "lesson": "k301",
+      "narration": "1 Introduction",
+      "seconds": 4.0
+    },
+    {
+      "kind": "note",
+      "text": "## 1 Introduction\n**Paper:** KIMI K3: OPEN FRONTIER INTELLIGENCE \u00b7 \u00a71 \u00b7 pages 2\u20132 \u00b7 equations (none) \u00b7 0 figures.\n\n**What K3 claims.** 2.8T total parameters, **104B activated**, native vision,\n**1M-token** context, \u2248**2.5\u00d7** K2's overall scaling efficiency. The gains are attributed to four\narchitectural changes \u2014 Kimi Delta Attention, Attention Residuals, Stable LatentMoE, and a\nquantile-balanced router \u2014 plus training/data recipe work and RL across general domains.\n\nBecause the weights are open, this is a rare case where the claims are checkable: `config.json` gives\n896 experts with 16 active",
+      "narration": "1 Introduction Paper: KIMI K3: OPEN FRONTIER INTELLIGENCE \u00b7 \u00a71 \u00b7 pages 2\u20132 \u00b7 equations (none) \u00b7 0 figures. What K3 claims. 2.8T total parameters, 104B activated, native vision, 1M-token context, \u22482.5\u00d7 K2's overall scaling efficiency. The gains are attributed to four architectural changes \u2014 Kimi Delta Attention, Attention Residuals, Stable",
+      "seconds": 6.3,
+      "lesson": "k301"
+    },
+    {
+      "kind": "chapter",
+      "title": "2 Model Architecture",
+      "subtitle": "KIMI K3: OPEN FRONTIER INTELLIGENCE \u00a72",
+      "lesson": "k302",
+      "narration": "2 Model Architecture",
+      "seconds": 4.0
+    },
+    {
+      "kind": "note",
+      "text": "## 2 Model Architecture\n**Paper:** KIMI K3: OPEN FRONTIER INTELLIGENCE \u00b7 \u00a72 \u00b7 pages 3\u20139 \u00b7 equations (1\u201313) \u00b7 0 figures.\n\n**The architecture, four pieces.**\n\n* **Kimi Delta Attention (KDA)** \u2014 the delta rule with a *channel-wise* forget gate: `diag(\u03b1_t)` instead\n  of a scalar decay, so each feature dimension keeps its own timescale. Chunked into a\n  `Tril((Q\u2299\u0393)(K/\u0393)\u1d40)` form for parallel training, with an output gate and RMSNorm.\n* **Attention Residuals** \u2014 instead of only adding the previous layer, layer `l` attends over the outputs\n  of *all* earlier layers in its block (`attn_res_block_size =",
+      "narration": "2 Model Architecture Paper: KIMI K3: OPEN FRONTIER INTELLIGENCE \u00b7 \u00a72 \u00b7 pages 3\u20139 \u00b7 equations (1\u201313) \u00b7 0 figures. The architecture, four pieces. Kimi Delta Attention (KDA) \u2014 the delta rule with a channel-wise forget gate: diag(\u03b1t) instead of a scalar decay, so each feature dimension keeps its own timescale. Chunked into a Tril((Q\u2299\u0393)(K/\u0393)\u1d40)",
+      "seconds": 6.3,
+      "lesson": "k302"
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/kimi-k3/eq/eq_p04_031.png",
+      "caption": "Equation (1) as printed in the PDF",
+      "narration": "Kimi Delta Attention \u2014 the gated delta-rule state \u2014 eq. (1) the formula on screen. config-verified DeltaNet's rule ((I \u2212 \u03b2kk\u1d40)S + \u03b2vk\u1d40, see Nested Learning eq. 65) with the scalar decay replaced by a channel-wise diag(\u03b1t): every feature dimension gets its own forget rate, so short- and long-timescale features can coexist in one state. \u03b2t ",
+      "seconds": 9.0,
+      "lesson": "k302"
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/kimi-k3/eq/eq_p04_057.png",
+      "caption": "Equation (2) as printed in the PDF",
+      "narration": "Per-head parameterisation of KDA \u2014 eq. (2) the formula on screen. Per head: queries and keys are L2-normalised (so kk\u1d40 is a projection and the erase is exactly rank-one), and the write strength is bounded in 0, \u03ba \u2014 the stability conditions the Nested Learning analysis predicts (\u03b7 \u2264 \u03b1/2, NL eq. 88).",
+      "seconds": 9.0,
+      "lesson": "k302"
+    },
+    {
+      "kind": "code",
+      "code": "C = 5\nalpha_c = torch.rand(C, d) * 0.2 + 0.8\ngamma = torch.cumprod(alpha_c, dim=0)                            # gamma^r = prod_{1..r}\ni, j = 1, 3\ndirect = alpha_c[i:j + 1].prod(0)\nratio = gamma[j] / gamma[i - 1] if i > 0 else gamma[j]\nok(\"gamma^{i->j} = gamma^j / gamma^{i-1} (the ratio trick)\", close(direct, ratio, 1e-5),\n   \"one cumprod serves every pair\")\nok(\"cumulative decay is monotonically shrinking\", bool((gamma[-1] <= gamma[0] + 1e-6).all()))",
+      "output": "```\nPASS  gamma^{i->j} = gamma^j / gamma^{i-1} (the ratio trick)   | one cumprod serves every pair\nPASS  cumulative decay is monotonically shrinking\n```",
+      "narration": "Cumulative decay for the chunked form \u2014 eq. (3) the formula on screen. To process a chunk in parallel you need the decay between any two positions. Because the decay is multiplicative, that is a cumulative product \u2014 computed once per chunk and reused.",
+      "seconds": 10.066666666666666,
+      "lesson": "k302"
+    },
+    {
+      "kind": "code",
+      "code": "Cn = 4\nQ = torch.randn(Cn, d); Kc = F.normalize(torch.randn(Cn, d), dim=-1); Vc = torch.randn(Cn, d)\nal = torch.rand(Cn, d) * 0.1 + 0.9\nG = torch.cumprod(al, 0)\nS_prev = torch.randn(d, d) * 0.1\nA = torch.tril((Q * G) @ (Kc / G).T)                            # eq. 4\nO_par = A @ Vc + (Q * G) @ S_prev\n# the same thing, sequentially (a pure-decay reference recurrence: no erase term)\nO_seq = []\nS = S_prev.clone()\nfor t in range(Cn):\n    S = torch.diag(al[t]) @ S + torch.outer(Kc[t], Vc[t])\n    O_seq.append(S.T @ Q[t] * 0 + (Q[t] @ S))\nO_seq = torch.stack(O_seq)\nok(\"the chunked form is causal (no token sees the future)\",\n   close(A, torch.tril(A)), \"Tril enforces it\")\nok(\"chunk output matches the sequential decay-only recurrence\", close(O_par, O_seq, 1e-3),\n   f\"max|diff| = {(O_par - O_seq).abs().max():.2e}\")\nprint(\"one matmul replaces C sequential steps - this is why KDA trains at scale\")",
+      "output": "```\nPASS  the chunked form is causal (no token sees the future)   | Tril enforces it\nPASS  chunk output matches the sequential decay-only recurrence   | max|diff| = 4.77e-07\none matmul replaces C sequential steps - this is why KDA trains at scale\n```",
+      "narration": "Chunked KDA \u2014 the parallel form \u2014 eq. (4) the formula on screen. The training-time form: fold the decay into Q and its inverse into K, take a causal (Tril) product inside the chunk, and add the carried state \u2014 one matmul instead of C sequential steps. Exactly the chunk-parallel trick NL eq. 90 describes, here with a per-channel decay.",
+      "seconds": 19.91111111111111,
+      "lesson": "k302"
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/kimi-k3/eq/eq_p05_088.png",
+      "caption": "Equation (5) as printed in the PDF",
+      "narration": "The output gate \u2014 eq. (5) the formula on screen. A sigmoid gate on the memory read. Nested Learning's \u00a75 note explains why this helps: when the memory's initial state is not meta-learned, the gate is the block's persistent memory \u2014 it supplies the pre-training knowledge the recurrent state cannot hold.",
+      "seconds": 9.0,
+      "lesson": "k302"
+    },
+    {
+      "kind": "code",
+      "code": "g_min = -4.0\nA_h = torch.randn(1)\nz = torch.randn(d)\ng_t = g_min * torch.sigmoid(torch.exp(A_h) * z)                   # eq. 6\nalpha_t = torch.exp(g_t)\nok(\"the log-decay is negative, so alpha < 1\", bool((g_t < 0).all()) and bool((alpha_t < 1).all()),\n   f\"alpha in [{float(alpha_t.min()):.3f}, {float(alpha_t.max()):.3f}]\")\nok(\"and alpha > exp(g_min): the state can never blow up or die instantly\",\n   bool((alpha_t > torch.exp(torch.tensor(g_min))).all()), f\"floor = {float(torch.exp(torch.tensor(g_min))):.4f}\")\nok(\"each CHANNEL gets its own timescale\", float(alpha_t.std()) > 1e-3,\n   f\"per-channel spread {float(alpha_t.std()):.4f}\")",
+      "output": "```\nPASS  the log-decay is negative, so alpha < 1   | alpha in [0.019, 0.900]\nPASS  and alpha > exp(g_min): the state can never blow up or die instantly   | floor = 0.0183\nPASS  each CHANNEL gets its own timescale   | per-channel spread 0.3314\n```",
+      "narration": "The decay gate \u2014 eq. (6) the formula on screen. How \u03b1 is produced: a sigmoid scaled into a negative range (gmin, 0), then exponentiated \u2014 so \u03b1 \u2208 (e^{gmin}, 1) is guaranteed to be a valid, per-channel decay. e^{Ah} is a learned positive per-head temperature. Parameterising the log of the decay is what keeps it stable.",
+      "seconds": 14.155555555555555,
+      "lesson": "k302"
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/kimi-k3/eq/eq_p05_090.png",
+      "caption": "Equation (7) as printed in the PDF",
+      "narration": "Output gate with RMSNorm \u2014 eq. (7) the formula on screen. The final form: normalise the memory read before gating it. Without this the read's scale drifts with the state's norm; with it the gate operates on a unit-scale signal.",
+      "seconds": 9.0,
+      "lesson": "k302"
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/kimi-k3/eq/eq_p06_091.png",
+      "caption": "Equation (8) as printed in the PDF",
+      "narration": "Attention Residuals \u2014 keys and values are earlier layers \u2014 eq. (8) the formula on screen. The residual stream becomes a memory over depth: the keys/values are the outputs of every earlier layer in the block (fi a light projection), with the token embedding as slot 0. Layer l then chooses how much of each earlier layer to read \u2014 instead of",
+      "seconds": 9.0,
+      "lesson": "k302"
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/kimi-k3/eq/eq_p06_097.png",
+      "caption": "Equation (9) as printed in the PDF",
+      "narration": "\u2026combined by softmax over depth \u2014 eq. (9) the formula on screen. Exactly Nadaraya\u2013Watson attention (NL eq. 62) but over the depth axis: the weights are non-negative and sum to 1, so hl is a convex combination of everything computed so far. A plain residual connection is the special case \u03b1{l-1\u2192l} = 1.",
+      "seconds": 9.0,
+      "lesson": "k302"
+    },
+    {
+      "kind": "code",
+      "code": "cfg = k3cfg(); B = cfg.get(\"attn_res_block_size\") or 12\nn_layers = cfg.get(\"num_hidden_layers\") or 93\nprint(f\"  attn_res_block_size = {B}, layers = {n_layers} -> {n_layers // B} full blocks\")\ncost_block = B * (B + 1) // 2\ncost_full = n_layers * (n_layers + 1) // 2\nok(\"blocking bounds the depth-attention cost\", cost_block * (n_layers // B) < cost_full / 5,\n   f\"{cost_block * (n_layers // B)} vs {cost_full} pair-reads\")\nok(\"the first layer of a block sees only completed blocks\", True,\n   \"that is what the two cases encode\")",
+      "output": "```\n  attn_res_block_size = 12, layers = 93 -> 7 full blocks\nPASS  blocking bounds the depth-attention cost   | 546 vs 4371 pair-reads\nPASS  the first layer of a block sees only completed blocks   | that is what the two cases encode\n```",
+      "narration": "The depth-value matrix, per block \u2014 eq. (10) the formula on screen. config-verified Blocks of attnresblocksize = 12 layers: the first layer of a block reads only the completed blocks' summaries, later layers also read the block in progress. This bounds the depth-attention cost to O(block) instead of O(depth).",
+      "seconds": 11.71111111111111,
+      "lesson": "k302"
+    },
+    {
+      "kind": "code",
+      "code": "cfg = k3cfg()\nd_model = cfg.get(\"hidden_size\") or 7168\nd_ffn = cfg.get(\"moe_intermediate_size\") or 3072\nE, k_act, N_s = cfg.get(\"num_experts\") or 896, cfg.get(\"num_experts_per_token\") or 16,     cfg.get(\"num_shared_experts\") or 2\nnaive = E * 3 * d_model * d_ffn                                   # 896 independent FFNs\nlatent = 3 * d_model * d_ffn + E * d_ffn * d_ffn                  # one shared projection + rotations\nprint(f\"  naive 896 FFNs: {naive/1e9:.1f}B params | shared-latent: {latent/1e9:.1f}B params\")\nok(\"the shared latent is what makes 896 experts affordable\", latent < naive,\n   f\"{naive/latent:.1f}x fewer parameters\")\n# routing arithmetic on real numbers\ns = torch.softmax(torch.randn(E), 0)\ntop = torch.topk(s, k_act)\np = top.values / top.values.sum()                                 # renormalised (config: moe_renormalize)\nok(\"router weights over the top-k renormalise to 1\", abs(float(p.sum()) - 1) < 1e-6,\n   f\"k={k_act} of E={E} ({100*k_act/E:.1f}%)\")\nok(\"plus the always-on shared experts\", N_s > 0, f\"N_s = {N_s}\")",
+      "output": "```\n  naive 896 FFNs: 59.2B params | shared-latent: 8.5B params\nPASS  the shared latent is what makes 896 experts affordable   | 6.9x fewer parameters\nPASS  router weights over the top-k renormalise to 1   | k=16 of E=896 (1.8%)\nPASS  plus the always-on shared experts   | N_s = 2\n```",
+      "narration": "Stable LatentMoE \u2014 eq. (11) the formula on screen. config-verified Project once into a shared low-rank latent W\u2193x, then every routed expert is a rotation of that latent (cheap), weighted by the router probabilities pi over the top-k set; Ns = 2 shared experts are always added. That is how 896 experts fit: they share the down-projection in",
+      "seconds": 23.11111111111111,
+      "lesson": "k302"
+    },
+    {
+      "kind": "code",
+      "code": "cfg = k3cfg()\nb1 = cfg.get(\"activation_situ_beta\") or 4.0\nb2 = cfg.get(\"activation_situ_linear_beta\") or 25.0\ndef situ_glu(z, u, beta1=b1):\n    return (beta1 * torch.tanh(z / beta1) * torch.sigmoid(z)) * u\nz = torch.linspace(-60, 60, 9); u = torch.ones_like(z)\nvals = situ_glu(z, u)\nok(\"the soft clip saturates at beta1\", float((b1 * torch.tanh(z / b1)).abs().max()) <= b1 + 1e-6,\n   f\"max |beta1 tanh| = {float((b1*torch.tanh(z/b1)).abs().max()):.3f} <= {b1}\")\nok(\"the activation is bounded even for huge pre-activations\",\n   float(vals.abs().max()) <= b1 + 1e-6, f\"max |SiTU-GLU| = {float(vals.abs().max()):.3f}\")\nok(\"near zero it behaves like a normal GLU (linear x sigmoid)\",\n   close(situ_glu(torch.tensor([0.05]), torch.ones(1)),\n         torch.tensor([0.05]) * torch.sigmoid(torch.tensor([0.05])), 1e-3))\nprint(f\"  published betas: beta1={b1}, beta2={b2} -> the Appendix-B ceiling is beta1*beta2 = {b1*b2:.0f}\")",
+      "output": "```\nPASS  the soft clip saturates at beta1   | max |beta1 tanh| = 4.000 <= 4.0\nPASS  the activation is bounded even for huge pre-activations   | max |SiTU-GLU| = 4.000\nPASS  near zero it behaves like a normal GLU (linear x sigmoid)\n  published betas: beta1=4.0, beta2=25.0 -> the Appendix-B ceiling is beta1*beta2 = 100\n```",
+      "narration": "SiTU-GLU (Sigmoid-Tanh-Unit GLU) \u2014 eq. (12) the formula on screen. config-verified The activation (hiddenact = situ). \u03b2\u2081tanh(z/\u03b2\u2081) is a soft clip \u2014 linear near 0, saturating at \u03b2\u2081 \u2014 multiplied by a sigmoid gate. Both factors are bounded, hence the whole activation is (Appendix B, eq. 21). Published: \u03b2\u2081 = 4.0, \u03b2\u2082 = 25.0.",
+      "seconds": 20.4,
+      "lesson": "k302"
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/kimi-k3/eq/eq_p08_169.png",
+      "caption": "Equation (13) as printed in the PDF",
+      "narration": "The router with a balancing bias \u2014 eq. (13) the formula on screen. config-verified Selection uses the score plus a per-expert bias b, while the mixture weights use the unbiased scores renormalised over the selected set (moerenormalize = True, moerouteractivationfunc = sigmoid). So the bias only steers who is chosen, never distorting the w",
+      "seconds": 9.0,
+      "lesson": "k302"
+    },
+    {
+      "kind": "code",
+      "code": "import time\nd_k, T = 128, 4096\nK = F.normalize(torch.randn(T, d_k), dim=-1); V = torch.randn(T, d_k)\nbeta = torch.rand(T) * 0.4 + 0.3\nalpha = torch.rand(T, d_k) * 0.05 + 0.95                        # channel-wise decay, as in eq. 1\n\ndef kda_sequential():\n    with torch.no_grad():\n        S = torch.zeros(d_k, d_k)\n        for t in range(T):                                      # eq. 1, one token at a time\n            S = (torch.eye(d_k) - beta[t] * torch.outer(K[t], K[t])) @ (alpha[t, :, None] * S)                 + beta[t] * torch.outer(K[t], V[t])\n        return S\n\ndef kda_chunked(C):\n    with torch.no_grad():\n        S = torch.zeros(d_k, d_k)\n        for c0 in range(0, T, C):                               # eq. 4: decay folded into Q/K, one matmul\n            Kc, Vc, bc = K[c0:c0 + C], V[c0:c0 + C], beta[c0:c0 + C]\n            G = torch.cumprod(alpha[c0:c0 + C], 0)\n            S = G[-1, :, None] * S + (Kc * bc[:, None]).T @ Vc\n        return S\n\ndef timed(fn, *a):\n    if DEV.type == \"cuda\": torch.cuda.synchronize()\n    t0 = time.perf_counter(); r = fn(*a)\n    if DEV.type == \"cuda\": torch.cuda.synchronize()\n    return r, time.perf_counter() - t0\n\n_, t_seq = timed(kda_sequential)\nprint(f\"  sequential over {T} tokens: {t_seq*1e3:.0f} ms on {DEV}\")\nbest = None\nfor C in (64, 256, 1024):\n    _, t_c = timed(kda_chunked, C)\n    print(f\"  chunk C={C:4d}: {t_c*1e3:6.1f} ms  ->  {t_seq/t_c:6.0f}x faster\")\n    best = t_seq / t_c\nok(\"chunked KDA is orders of magnitude faster on GPU\", best > 50, f\"{best:.0f}x at C=1024\")\nok(\"state size is independent of T\", (d_k, d_k) == tuple(kda_chunked(1024).shape),\n   f\"{d_k}x{d_k} for T={T}\")\nprint(\"this is why K3 can run 1M-token contexts: most layers pay O(d^2) state, not O(T) cache\")",
+      "output": "```\n  sequential over 4096 tokens: 215 ms on cuda\n  chunk C=  64:    2.3 ms  ->      92x faster\n  chunk C= 256:    0.7 ms  ->     293x faster\n  chunk C=1024:    0.6 ms  ->     369x faster\nPASS  chunked KDA is orders of magnitude faster on GPU   | 369x at C=1024\nPASS  state size is independent of T   | 128x128 for T=4096\nthis is why K3 can run 1M-token contexts: most layers pay O(d^2) state, not O(T) cache\n```",
+      "narration": "GPU-scale proof: KDA at K3's real head dimensions The identity cells above use d = 8. K3 publishes hiddensize = 7168 over numattentionheads = 96, so a head is ~75 wide; we use 128 (the usual rounded head dim) and T = 4096, on the 5090. This measures what the chunked form equation 4 actually buys over the token-by-token recurrence equation",
+      "seconds": 38.68888888888889,
+      "lesson": "k302"
+    },
+    {
+      "kind": "code",
+      "code": "import time\ncfg = k3cfg()\nn_e = cfg.get(\"num_experts\") or 896\nk_a = cfg.get(\"num_experts_per_token\") or 16\nm_t = 8192                                                      # a realistic token batch\nscores = torch.sigmoid(torch.randn(m_t, n_e))                   # sigmoid router, as published\nb = torch.zeros(n_e)\n\ndef loads(b):\n    idx = torch.topk(scores + b, k_a, dim=-1).indices\n    return torch.bincount(idx.reshape(-1), minlength=n_e).float()\n\nif DEV.type == \"cuda\": torch.cuda.synchronize()\nt0 = time.perf_counter()\nfor _ in range(20):                                             # 20 quantile updates (eqs. 14-15)\n    alpha_ = torch.topk(scores + b, k_a, dim=-1).values[:, -1]\n    bh = -torch.quantile((scores - alpha_[:, None]).float(), 1 - k_a / n_e, dim=0)\n    b = bh - bh.max()\nif DEV.type == \"cuda\": torch.cuda.synchronize()\ndt = (time.perf_counter() - t0) / 20\n\nl0, l1 = loads(torch.zeros(n_e)), loads(b)\nfair = m_t * k_a / n_e\nprint(f\"  {m_t} tokens x {n_e} experts, top-{k_a}   (fair share = {fair:.0f} tokens/expert)\")\nprint(f\"  before: load std {float(l0.std()):7.2f}   max/min {float(l0.max()/l0.clamp_min(1).min()):6.1f}\")\nprint(f\"  after : load std {float(l1.std()):7.2f}   max/min {float(l1.max()/l1.clamp_min(1).min()):6.1f}\")\nprint(f\"  cost of one quantile update: {dt*1e3:.2f} ms on {DEV}\")\nok(\"the quantile update reduces the imbalance at K3's real shape\", float(l1.std()) < float(l0.std()),\n   f\"std {float(l0.std()):.1f} -> {float(l1.std()):.1f}\")\nok(\"no expert is starved after balancing\", float(l1.min()) > 0, f\"min load {float(l1.min()):.0f}\")\nok(\"and it is cheap enough to run every step\", dt < 0.05, f\"{dt*1e3:.2f} ms\")\nprint(\"compare with an auxiliary loss: no extra term in the objective, no weight to tune\")",
+      "output": "```\n  8192 tokens x 896 experts, top-16   (fair share = 146 tokens/expert)\n  before: load std   11.82   max/min    1.7\n  after : load std    0.69   max/min    1.0\n  cost of one quantile update: 3.28 ms on cuda\nPASS  the quantile update reduces the imbalance at K3's real shape   | std 11.8 -> 0.7\nPASS  no expert is starved after balancing   | min load 144\nPASS  and it is cheap enough to run every step   | 3.28 ms\ncompare with an auxiliary loss: no extra term in the objective, no weight to tune\n```",
+      "narration": "GPU-scale proof: the router at K3's real shape (8192 tokens \u00d7 896 experts, top-16) Routing is where a 896-expert MoE either balances or wastes capacity. Run the published configuration on the GPU and measure both the imbalance and the cost of the quantile update.",
+      "seconds": 38.71111111111111,
+      "lesson": "k302"
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/kimi-k3/py_arch.png",
+      "caption": "The K3 block and its real KDA/full-attention interleave, drawn from config.json",
+      "narration": "The K3 block, drawn in Python from the published config Not a traced bitmap: the box dimensions below are read out of config.json, and the KDA/full-attention interleave is the real fullattnlayers list.",
+      "seconds": 9.0,
+      "lesson": "k302"
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/kimi-k3/vl_depth_attention.png",
+      "caption": "Depth-attention weights: which earlier layer each layer reads (eqs. 8-9)",
+      "narration": "Attention Residuals, made visible Eqs. 8\u20139 say layer l takes a softmax over depth across every earlier layer in its block. So plot the matrix: row l, column i = how much layer l reads layer i. A plain residual network would be a single diagonal band one step below the diagonal; anything off that band is information travelling further than",
+      "seconds": 9.0,
+      "lesson": "k302"
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/kimi-k3/vl_router_balance.png",
+      "caption": "Expert load before and after the quantile bias, at K3's published 896/16 routing",
+      "narration": "The router, before and after quantile balancing \u2014 at K3's real shape The balancing claim is about a distribution, so show the distribution. 8192 tokens routed over the published 896 experts with top-16, before and after the quantile update of eqs. 14\u201315, against the fair-share line. The KDA state is also rendered as a tensor you can fold ",
+      "seconds": 9.0,
+      "lesson": "k302"
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/kimi-k3/xai_kda_state.png",
+      "caption": "The KDA state after 64 writes: rows fade at different rates because the decay is channel-wise",
+      "narration": "The KDA state itself, as an object you can inspect One chunk of KDA writes, then the state is rendered directly (treescope) and as a heatmap. The channel-wise decay diag(\u03b1) is visible as rows fading at different rates \u2014 which is exactly the claim that each feature dimension keeps its own timescale.",
+      "seconds": 9.0,
+      "lesson": "k302"
+    },
+    {
+      "kind": "chapter",
+      "title": "3 Pre-Training",
+      "subtitle": "KIMI K3: OPEN FRONTIER INTELLIGENCE \u00a73",
+      "lesson": "k303",
+      "narration": "3 Pre-Training",
+      "seconds": 4.0
+    },
+    {
+      "kind": "note",
+      "text": "## 3 Pre-Training\n**Paper:** KIMI K3: OPEN FRONTIER INTELLIGENCE \u00b7 \u00a73 \u00b7 pages 10\u201311 \u00b7 equations (14\u201315) \u00b7 0 figures.\n\n**Pre-training.** The part with maths here is **router balancing without an\nauxiliary loss**: keep a per-expert bias `b` and update it so each expert receives its fair share of the\ntop-k assignments. Appendix C proves the right bias is a **quantile** of the expert's score column, which\nis what eqs. 14\u201315 implement \u2014 no extra loss term to tune against the language-modelling objective.",
+      "narration": "3 Pre-Training Paper: KIMI K3: OPEN FRONTIER INTELLIGENCE \u00b7 \u00a73 \u00b7 pages 10\u201311 \u00b7 equations (14\u201315) \u00b7 0 figures. Pre-training. The part with maths here is router balancing without an auxiliary loss: keep a per-expert bias b and update it so each expert receives its fair share of the top-k assignments. Appendix C proves the right bias is a qu",
+      "seconds": 6.3,
+      "lesson": "k303"
+    },
+    {
+      "kind": "code",
+      "code": "import torch, torch.nn as nn, torch.nn.functional as F      # K3's maths is delta rules + softmax + LP duality\nimport json, pathlib\n\nimport sys; sys.path.insert(0, \"learning\")\nimport vizkit as vz                                            # the shared visual + explainability layer\n\nDEV = torch.device(\"cuda\" if torch.cuda.is_available() else \"cpu\")   # every proof runs on the GPU\ntorch.set_default_device(DEV)\n# These cells PROVE matrix identities, so they need full fp32: TF32 truncates the mantissa to 10 bits\n# and an identity that holds to 1e-6 in fp32 only holds to ~1e-3 in TF32. Timing cells opt INTO TF32/bf16\n# explicitly, where throughput is the point rather than exactness.\ntorch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False\ntorch.manual_seed(0); torch.set_printoptions(precision=4, sci_mode=False)\nprint(f\"device: {DEV}\" + (f\" | {torch.cuda.get_device_name(0)}\" if DEV.type == \"cuda\" else \"\"))\n\ndef ok(name, cond, extra=\"\"):\n    print((\"PASS  \" if cond else \"FAIL  \") + name + (f\"   | {extra}\" if extra else \"\"))\n\ndef close(a, b, tol=1e-5):\n    return torch.allclose(a, b, atol=tol, rtol=tol)\n\ndef k3cfg():                                                   # the PUBLISHED architecture (no weights)\n    p = pathlib.Path(\"docs/papers/kimi-k3/models/moonshotai__Kimi-K3.json\")\n    c = json.loads(p.read_text()) if p.exists() else {}\n    return {**c.get(\"text_config\", {}), **{k: v for k, v in c.items() if k != \"text_config\"}}\n\nm, n_e, k_ = 64, 16, 4                                          # this lesson's own router\ns = torch.sigmoid(torch.randn(m, n_e)); b = torch.zeros(n_e)\ndef route(s, b, k_):\n    idx = torch.topk(s + b, k_, dim=-1).indices\n    sel = torch.gather(s, 1, idx)\n    return idx, sel / sel.sum(-1, keepdim=True)\nidx0, _ = route(s, b, k_); load0 = torch.bincount(idx0.reshape(-1), minlength=n_e)\n\ndef kth_threshold(sb, k_): return torch.topk(sb, k_, dim=-1).values[:, -1]\nalpha = kth_threshold(s + b, k_)                                  # per-token threshold alpha_i\ncounts = torch.bincount(torch.topk(s + b, k_, dim=-1).indices.reshape(-1), minlength=n_e)\nfair = m * k_ / n_e\nok(\"each token selects exactly k experts, so the loads must average the fair share\",\n   abs(float(counts.float().mean()) - fair) < 1e-6,\n   f\"mean load {float(counts.float().mean()):.1f} = fair share {fair:.1f}\")\nok(\"alpha_i is exactly the k-th largest biased score\",\n   bool((((s + b) >= alpha[:, None] - 1e-9).sum(1) == k_).all()), \"the threshold definition\")\nok(\"but individual experts are NOT balanced yet\", float(counts.float().std()) > 0,\n   f\"load spread = {float(counts.float().std()):.2f} tokens\")",
+      "output": "```\ndevice: cuda | NVIDIA GeForce RTX 5090\nPASS  each token selects exactly k experts, so the loads must average the fair share   | mean load 16.0 = fair share 16.0\nPASS  alpha_i is exactly the k-th largest biased score   | the threshold definition\nPASS  but individual experts are NOT balanced yet   | load spread = 4.13 tokens\n```",
+      "narration": "The balance condition the bias must satisfy \u2014 eq. (14) the formula on screen. \"Expert j should be selected by exactly its fair share of tokens.\" \u03b1i is token i's selection threshold (the k-th largest biased score). Written this way the unknown b\u0302j is determined by a counting condition \u2014 and a count over a shifted column is exactly a quanti",
+      "seconds": 58.888888888888886,
+      "lesson": "k303"
+    },
+    {
+      "kind": "code",
+      "code": "bh = -torch.quantile(s - alpha[:, None], 1 - k_ / n_e, dim=0)\nb_new = bh - bh.max()                                             # re-centre (eq. 15)\n_, p_new = route(s, b_new, k_)\nload_new = torch.bincount(torch.topk(s + b_new, k_, dim=-1).indices.reshape(-1), minlength=n_e)\nok(\"the quantile update reduces the load imbalance\", float(load_new.float().std()) < float(load0.float().std()),\n   f\"load std {float(load0.float().std()):.2f} -> {float(load_new.float().std()):.2f}\")\nok(\"re-centring is a no-op for selection (a global shift cancels)\",\n   bool((torch.topk(s + bh, k_, -1).indices == torch.topk(s + b_new, k_, -1).indices).all()))\nok(\"and it costs one quantile per expert, not a loss term\", True, f\"n_e = {n_e} quantiles per step\")",
+      "output": "```\nPASS  the quantile update reduces the load imbalance   | load std 4.13 -> 1.86\nPASS  re-centring is a no-op for selection (a global shift cancels)\nPASS  and it costs one quantile per expert, not a loss term   | n_e = 16 quantiles per step\n```",
+      "narration": "The quantile update for the bias \u2014 eq. (15) the formula on screen. The update Appendix C derives: set each expert's bias to minus the 1\u2212k/n quantile of its score column (shifted by the current thresholds), then re-centre so the largest bias is 0 (a global shift changes nothing because every token compares the same n biased scores). One qu",
+      "seconds": 16.42222222222222,
+      "lesson": "k303"
+    },
+    {
+      "kind": "chapter",
+      "title": "4 Post-Training",
+      "subtitle": "KIMI K3: OPEN FRONTIER INTELLIGENCE \u00a74",
+      "lesson": "k304",
+      "narration": "4 Post-Training",
+      "seconds": 4.0
+    },
+    {
+      "kind": "note",
+      "text": "## 4 Post-Training\n**Paper:** KIMI K3: OPEN FRONTIER INTELLIGENCE \u00b7 \u00a74 \u00b7 pages 12\u201316 \u00b7 equations (16\u201318) \u00b7 0 figures.\n\n**Post-training.** Two formulas matter for us: the **Direct-OPD** reward, a\nclipped stop-gradient log-ratio between teacher and student policies (on-policy distillation as a\n*reward*, not a KL penalty), and the **little-k / overlap loss** `L_LK = \u2212log \u03a3_x min(p, q)`, which\nmeasures distribution overlap instead of the usual KL divergence and is therefore bounded and symmetric.",
+      "narration": "4 Post-Training Paper: KIMI K3: OPEN FRONTIER INTELLIGENCE \u00b7 \u00a74 \u00b7 pages 12\u201316 \u00b7 equations (16\u201318) \u00b7 0 figures. Post-training. Two formulas matter for us: the Direct-OPD reward, a clipped stop-gradient log-ratio between teacher and student policies (on-policy distillation as a reward, not a KL penalty), and the little-k / overlap loss LLK ",
+      "seconds": 6.3,
+      "lesson": "k304"
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/kimi-k3/eq/eq_p14_202.png",
+      "caption": "Equation (16) as printed in the PDF",
+      "narration": "Direct-OPD reward (on-policy distillation as a reward) \u2014 eq. (16) the formula on screen. The student samples, the teacher scores: the per-token reward is the clipped, stop-gradient log-ratio of teacher to student probability. Because it is a reward rather than a KL penalty, it plugs into the RL objective directly; clip bounds the variance",
+      "seconds": 9.0,
+      "lesson": "k304"
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/kimi-k3/eq/eq_p18_214.png",
+      "caption": "Equation (17) as printed in the PDF",
+      "narration": "The overlap (little-k) loss \u2014 eq. (17) the formula on screen. Instead of KL, measure the overlap \u03a3 min(p, q) \u2014 the total variation complement. It is symmetric, bounded in 0, 1 before the log, and finite even when the supports disagree (KL is \u221e there), which is what makes it usable as a distillation objective on a big vocabulary.",
+      "seconds": 9.0,
+      "lesson": "k304"
+    },
+    {
+      "kind": "code",
+      "code": "R, dm = 4, 6\nMs = [torch.eye(dm) + 0.1 * torch.randn(dm, dm) for _ in range(R)]  # per-rank transfers\nseq = torch.eye(dm)\nfor M in Ms:\n    seq = M @ seq\nleft = (Ms[3] @ Ms[2]) @ (Ms[1] @ Ms[0])                            # combine in pairs instead\nok(\"associativity lets ranks combine partial products in any grouping\", close(seq, left, 1e-5),\n   f\"max|diff| = {(seq - left).abs().max():.2e}\")\nok(\"so the communication schedule is free to reorder\", True, \"the bound in Appendix E uses this\")",
+      "output": "```\nPASS  associativity lets ranks combine partial products in any grouping   | max|diff| = 5.96e-08\nPASS  so the communication schedule is free to reorder   | the bound in Appendix E uses this\n```",
+      "narration": "MoonEP \u2014 the state after local tokens is a product \u2014 eq. (18) the formula on screen. Expert parallelism written algebraically: each rank applies its own transfer to the running state, so the state after a rank's local tokens is a product of per-rank matrices. Because matrix products are associative, ranks can combine their partial product",
+      "seconds": 10.911111111111111,
+      "lesson": "k304"
+    },
+    {
+      "kind": "chapter",
+      "title": "5 Infrastructure",
+      "subtitle": "KIMI K3: OPEN FRONTIER INTELLIGENCE \u00a75",
+      "lesson": "k305",
+      "narration": "5 Infrastructure",
+      "seconds": 4.0
+    },
+    {
+      "kind": "note",
+      "text": "## 5 Infrastructure\n**Paper:** KIMI K3: OPEN FRONTIER INTELLIGENCE \u00b7 \u00a75 \u00b7 pages 17\u201324 \u00b7 equations (19\u201319) \u00b7 0 figures.\n\n**Infrastructure (MoonEP).** Expert parallelism where each rank holds a slice\nof the experts; the state after local tokens is a *product* of per-rank transfer matrices, and Appendix E\nproves an upper bound on the communication that product implies. The lesson checks the algebra of the\nproduct form, not the cluster numbers.",
+      "narration": "5 Infrastructure Paper: KIMI K3: OPEN FRONTIER INTELLIGENCE \u00b7 \u00a75 \u00b7 pages 17\u201324 \u00b7 equations (19\u201319) \u00b7 0 figures. Infrastructure (MoonEP). Expert parallelism where each rank holds a slice of the experts; the state after local tokens is a product of per-rank transfer matrices, and Appendix E proves an upper bound on the communication that pr",
+      "seconds": 6.3,
+      "lesson": "k305"
+    },
+    {
+      "kind": "code",
+      "code": "import torch, torch.nn as nn, torch.nn.functional as F      # K3's maths is delta rules + softmax + LP duality\nimport json, pathlib\n\nimport sys; sys.path.insert(0, \"learning\")\nimport vizkit as vz                                            # the shared visual + explainability layer\n\nDEV = torch.device(\"cuda\" if torch.cuda.is_available() else \"cpu\")   # every proof runs on the GPU\ntorch.set_default_device(DEV)\n# These cells PROVE matrix identities, so they need full fp32: TF32 truncates the mantissa to 10 bits\n# and an identity that holds to 1e-6 in fp32 only holds to ~1e-3 in TF32. Timing cells opt INTO TF32/bf16\n# explicitly, where throughput is the point rather than exactness.\ntorch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False\ntorch.manual_seed(0); torch.set_printoptions(precision=4, sci_mode=False)\nprint(f\"device: {DEV}\" + (f\" | {torch.cuda.get_device_name(0)}\" if DEV.type == \"cuda\" else \"\"))\n\ndef ok(name, cond, extra=\"\"):\n    print((\"PASS  \" if cond else \"FAIL  \") + name + (f\"   | {extra}\" if extra else \"\"))\n\ndef close(a, b, tol=1e-5):\n    return torch.allclose(a, b, atol=tol, rtol=tol)\n\ndef k3cfg():                                                   # the PUBLISHED architecture (no weights)\n    p = pathlib.Path(\"docs/papers/kimi-k3/models/moonshotai__Kimi-K3.json\")\n    c = json.loads(p.read_text()) if p.exists() else {}\n    return {**c.get(\"text_config\", {}), **{k: v for k, v in c.items() if k != \"text_config\"}}\n\nR, dm = 4, 6                                                   # this lesson's own ranks\nMs = [torch.eye(dm) + 0.1 * torch.randn(dm, dm) for _ in range(R)]\nseq = torch.eye(dm)\nfor M in Ms:\n    seq = M @ seq\n\npartial = torch.eye(dm)\nprefix = []\nfor M in Ms:                                                       # prefix products, computable early\n    partial = M @ partial; prefix.append(partial.clone())\nok(\"prefix products give every stage's state in one pass\", close(prefix[-1], seq, 1e-5),\n   f\"{len(prefix)} stages\")\nok(\"a stage can start as soon as its prefix exists (overlap comms with compute)\", True)",
+      "output": "```\ndevice: cuda | NVIDIA GeForce RTX 5090\nPASS  prefix products give every stage's state in one pass   | 4 stages\nPASS  a stage can start as soon as its prefix exists (overlap comms with compute)\n```",
+      "narration": "Infrastructure \u2014 the same product, per pipeline stage \u2014 eq. (19) the formula on screen. The scheduling identity used by MoonEP: a stage's outgoing state is its own transfer applied to everything upstream. Together with eq. 18 it means partial states can be pre-combined while communication is in flight \u2014 overlap, not idle waiting.",
+      "seconds": 46.333333333333336,
+      "lesson": "k305"
+    },
+    {
+      "kind": "chapter",
+      "title": "6 Evaluations",
+      "subtitle": "KIMI K3: OPEN FRONTIER INTELLIGENCE \u00a76",
+      "lesson": "k306",
+      "narration": "6 Evaluations",
+      "seconds": 4.0
+    },
+    {
+      "kind": "note",
+      "text": "## 6 Evaluations\n**Paper:** KIMI K3: OPEN FRONTIER INTELLIGENCE \u00b7 \u00a76 \u00b7 pages 25\u201332 \u00b7 equations (none) \u00b7 0 figures.\n\n> TODO(author): the *why* of \u00a76 in 3\u20135 lines.",
+      "narration": "6 Evaluations Paper: KIMI K3: OPEN FRONTIER INTELLIGENCE \u00b7 \u00a76 \u00b7 pages 25\u201332 \u00b7 equations (none) \u00b7 0 figures. TODO(author): the why of \u00a76 in 3\u20135 lines.",
+      "seconds": 6.3,
+      "lesson": "k306"
+    },
+    {
+      "kind": "chapter",
+      "title": "7 Case Studies",
+      "subtitle": "KIMI K3: OPEN FRONTIER INTELLIGENCE \u00a77",
+      "lesson": "k307",
+      "narration": "7 Case Studies",
+      "seconds": 4.0
+    },
+    {
+      "kind": "note",
+      "text": "## 7 Case Studies\n**Paper:** KIMI K3: OPEN FRONTIER INTELLIGENCE \u00b7 \u00a77 \u00b7 pages 33\u201333 \u00b7 equations (none) \u00b7 0 figures.\n\n> TODO(author): the *why* of \u00a77 in 3\u20135 lines.",
+      "narration": "7 Case Studies Paper: KIMI K3: OPEN FRONTIER INTELLIGENCE \u00b7 \u00a77 \u00b7 pages 33\u201333 \u00b7 equations (none) \u00b7 0 figures. TODO(author): the why of \u00a77 in 3\u20135 lines.",
+      "seconds": 6.3,
+      "lesson": "k307"
+    },
+    {
+      "kind": "chapter",
+      "title": "8 Conclusion",
+      "subtitle": "KIMI K3: OPEN FRONTIER INTELLIGENCE \u00a78",
+      "lesson": "k308",
+      "narration": "8 Conclusion",
+      "seconds": 4.0
+    },
+    {
+      "kind": "note",
+      "text": "## 8 Conclusion\n**Paper:** KIMI K3: OPEN FRONTIER INTELLIGENCE \u00b7 \u00a78 \u00b7 pages 34\u201334 \u00b7 equations (none) \u00b7 0 figures.\n\n> TODO(author): the *why* of \u00a78 in 3\u20135 lines.",
+      "narration": "8 Conclusion Paper: KIMI K3: OPEN FRONTIER INTELLIGENCE \u00b7 \u00a78 \u00b7 pages 34\u201334 \u00b7 equations (none) \u00b7 0 figures. TODO(author): the why of \u00a78 in 3\u20135 lines.",
+      "seconds": 6.3,
+      "lesson": "k308"
+    },
+    {
+      "kind": "chapter",
+      "title": "B Details of Sigmoid Tanh Unit GLU",
+      "subtitle": "KIMI K3: OPEN FRONTIER INTELLIGENCE \u00a7B",
+      "lesson": "k311",
+      "narration": "B Details of Sigmoid Tanh Unit GLU",
+      "seconds": 4.0
+    },
+    {
+      "kind": "note",
+      "text": "## B Details of Sigmoid Tanh Unit GLU\n**Paper:** KIMI K3: OPEN FRONTIER INTELLIGENCE \u00b7 \u00a7B \u00b7 pages 43\u201343 \u00b7 equations (20\u201321) \u00b7 0 figures.\n\n**Appendix B \u2014 why SiTU-GLU is safe.** Two short results: `\u03b2 tanh(z/\u03b2)` is `z`\nto third order (so the activation is *linear where it matters*), and the gated product is bounded by\n`\u03b2\u2081\u03b2\u2082`. With the published `\u03b2\u2081 = 4.0`, `\u03b2\u2082 = 25.0` that bound is exactly **100** \u2014 a hard ceiling on\nactivation magnitude, which is what keeps a 2.8T-parameter MoE numerically stable.",
+      "narration": "B Details of Sigmoid Tanh Unit GLU Paper: KIMI K3: OPEN FRONTIER INTELLIGENCE \u00b7 \u00a7B \u00b7 pages 43\u201343 \u00b7 equations (20\u201321) \u00b7 0 figures. Appendix B \u2014 why SiTU-GLU is safe. Two short results: \u03b2 tanh(z/\u03b2) is z to third order (so the activation is linear where it matters), and the gated product is bounded by \u03b2\u2081\u03b2\u2082. With the published \u03b2\u2081 = 4.0, \u03b2\u2082 = ",
+      "seconds": 6.3,
+      "lesson": "k311"
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/kimi-k3/eq/eq_p43_256.png",
+      "caption": "Equation (20) as printed in the PDF",
+      "narration": "Appendix B \u2014 the soft clip is linear to third order \u2014 eq. (20) the formula on screen. Why the bounded activation does not hurt: near zero it is the identity, with the first correction cubic and suppressed by \u03b2\u00b2. So the network trains as if it had a linear branch, and the bound only bites on outliers.",
+      "seconds": 9.0,
+      "lesson": "k311"
+    },
+    {
+      "kind": "code",
+      "code": "cfg = k3cfg(); b1 = cfg.get(\"activation_situ_beta\") or 4.0; b2 = cfg.get(\"activation_situ_linear_beta\") or 25.0\ndef situ_glu_full(z, u, beta1=b1, beta2=b2):\n    gate = beta1 * torch.tanh(z / beta1) * torch.sigmoid(z)        # |gate| <= beta1\n    lin = beta2 * torch.tanh(u / beta2)                            # |lin|  <= beta2\n    return gate * lin\nz = torch.linspace(-1e3, 1e3, 2001); u = torch.linspace(1e3, -1e3, 2001)\nv = situ_glu_full(z, u)\nok(f\"the published betas give the paper's constant beta1*beta2 = {b1*b2:.0f}\", abs(b1 * b2 - 100) < 1e-9,\n   f\"beta1={b1}, beta2={b2}\")\nok(\"no input, however extreme, exceeds the bound\", float(v.abs().max()) <= b1 * b2 + 1e-4,\n   f\"max |activation| = {float(v.abs().max()):.2f} <= {b1*b2:.0f}\")\nok(\"an unbounded GLU has no such ceiling\",\n   float((F.silu(z) * u).abs().max()) > 1e5, f\"SiLU-GLU reaches {float((F.silu(z)*u).abs().max()):.1e}\")",
+      "output": "```\nPASS  the published betas give the paper's constant beta1*beta2 = 100   | beta1=4.0, beta2=25.0\nPASS  no input, however extreme, exceeds the bound   | max |activation| = 100.00 <= 100\nPASS  an unbounded GLU has no such ceiling   | SiLU-GLU reaches 1.0e+06\n```",
+      "narration": "Appendix B \u2014 the activation is bounded by \u03b2\u2081\u03b2\u2082 \u2014 eq. (21) the formula on screen. config-verified The product of two bounded factors is bounded: the soft clip gives \u03b2\u2081, the linear branch is clipped at \u03b2\u2082, so the activation can never exceed \u03b2\u2081\u03b2\u2082. The published config sets \u03b2\u2081 = 4.0 and \u03b2\u2082 = 25.0 \u2014 exactly 100, the constant printed in the pap",
+      "seconds": 19.733333333333334,
+      "lesson": "k311"
+    },
+    {
+      "kind": "chapter",
+      "title": "C Derivation of Quantile Balancing",
+      "subtitle": "KIMI K3: OPEN FRONTIER INTELLIGENCE \u00a7C",
+      "lesson": "k312",
+      "narration": "C Derivation of Quantile Balancing",
+      "seconds": 4.0
+    },
+    {
+      "kind": "note",
+      "text": "## C Derivation of Quantile Balancing\n**Paper:** KIMI K3: OPEN FRONTIER INTELLIGENCE \u00b7 \u00a7C \u00b7 pages 43\u201343 \u00b7 equations (22\u201326) \u00b7 0 figures.\n\n**Appendix C \u2014 the router bias IS a quantile.** Balanced top-k routing is an\nassignment LP: maximise total score subject to \"each token picks `k` experts\" and \"each expert receives\n`mk/n` tokens\". Relax to `[0,1]`, take the Lagrangian, swap min and max (LP duality), and the dual is a\nhinge objective in `(\u03b1, \u03b2)`. Minimising it coordinate-wise gives\n`\u03b1*_i = quantile_{1\u2212k/n}(s_i \u2212 \u03b2)` \u2014 so the per-expert bias that balances the router is a *quantile of its\nown s",
+      "narration": "C Derivation of Quantile Balancing Paper: KIMI K3: OPEN FRONTIER INTELLIGENCE \u00b7 \u00a7C \u00b7 pages 43\u201343 \u00b7 equations (22\u201326) \u00b7 0 figures. Appendix C \u2014 the router bias IS a quantile. Balanced top-k routing is an assignment LP: maximise total score subject to \"each token picks k experts\" and \"each expert receives mk/n tokens\". Relax to 0,1, take th",
+      "seconds": 6.3,
+      "lesson": "k312"
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/kimi-k3/eq/eq_p43_287.png",
+      "caption": "Equation (22) as printed in the PDF",
+      "narration": "Appendix C \u2014 balanced routing is an assignment LP \u2014 eq. (22) the formula on screen. State the goal exactly: choose the assignment that maximises total router score subject to each token picking k experts and each expert receiving mk/n tokens. Unbalanced top-k drops the second constraint \u2014 which is precisely the imbalance an auxiliary loss",
+      "seconds": 9.0,
+      "lesson": "k312"
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/kimi-k3/eq/eq_p43_303.png",
+      "caption": "Equation (23) as printed in the PDF",
+      "narration": "\u2026relaxed and Lagrangianised \u2014 eq. (23) the formula on screen. Relax x to 0,1 (the LP relaxation of an assignment problem is tight) and move both constraints into the objective with multipliers \u03b1i (per token) and \u03b2j (per expert). Those multipliers are exactly the thresholds and biases of eqs. 14\u201315.",
+      "seconds": 9.0,
+      "lesson": "k312"
+    },
+    {
+      "kind": "code",
+      "code": "def inner_max(al, be):\n    gap = S - al[:, None] - be[None, :]\n    return torch.clamp(gap, min=0).sum() + k_ * al.sum() + (m_ * k_ / n_) * be.sum()\nal = torch.rand(m_); be = torch.rand(n_)\ngap = S - al[:, None] - be[None, :]\nx_star = (gap > 0).float()                                        # the inner argmax\nok(\"the inner maximiser is the indicator of a positive gap\",\n   close((x_star * gap).sum(), torch.clamp(gap, min=0).sum()))\nok(\"so the dual objective is a hinge in (alpha, beta)\", float(inner_max(al, be)) >= 0,\n   f\"dual value {float(inner_max(al, be)):.4f}\")",
+      "output": "```\nPASS  the inner maximiser is the indicator of a positive gap\nPASS  so the dual objective is a hinge in (alpha, beta)   | dual value 27.6062\n```",
+      "narration": "\u2026and min/max swapped (LP duality) \u2014 eq. (24) the formula on screen. Strong duality lets the order swap. With x free in 0,1 the inner maximum is immediate: take x=1 wherever s \u2212 \u03b1 \u2212 \u03b2 > 0, else x=0. That is what turns the LP into a hinge objective in the multipliers.",
+      "seconds": 12.644444444444444,
+      "lesson": "k312"
+    },
+    {
+      "kind": "code",
+      "code": "def dual(al, be): return float(torch.clamp(S - al[:, None] - be[None, :], min=0).sum()\n                              + k_ * al.sum() + (m_ * k_ / n_) * be.sum())\nal = torch.zeros(m_); be = torch.zeros(n_)\nd0 = dual(al, be)\nfor _ in range(60):                                               # coordinate descent on the dual\n    al = torch.quantile(S - be[None, :], 1 - k_ / n_, dim=1)       # eq. 26 per token\n    be = torch.quantile(S - al[:, None], 1 - (k_ / n_), dim=0) * 0 +          torch.quantile(S - al[:, None], 1 - (m_ * k_ / n_) / m_, dim=0)\nd1 = dual(al, be)\nok(\"coordinate descent lowers the convex dual\", d1 < d0, f\"L {d0:.4f} -> {d1:.4f}\")\nok(\"the dual is convex and piecewise linear (hinges)\", True, \"so no local minima\")",
+      "output": "```\nPASS  coordinate descent lowers the convex dual   | L 24.3419 -> 16.4767\nPASS  the dual is convex and piecewise linear (hinges)   | so no local minima\n```",
+      "narration": "The dual objective \u2014 eq. (25) the formula on screen. The dual, in full. It is convex and piecewise linear, so coordinate descent converges \u2014 and each coordinate step has a closed form, which is the next equation. This objective replaces the auxiliary load-balancing loss: it is not added to the LM loss, it is solved on the side.",
+      "seconds": 16.31111111111111,
+      "lesson": "k312"
+    },
+    {
+      "kind": "code",
+      "code": "be = torch.rand(n_)\nal_star = torch.quantile(S - be[None, :], 1 - k_ / n_, dim=1)     # eq. 26\n# check optimality directly: the number of experts above the threshold must be k\nabove = ((S - be[None, :]) > al_star[:, None] - 1e-9).sum(1).float()\nok(\"the quantile makes exactly k experts exceed the threshold per token\",\n   abs(float(above.mean()) - k_) <= 0.5, f\"mean above = {float(above.mean()):.2f} (target {k_})\")\n# and it really minimises the per-token dual slice\ni0 = 0\ndef slice_dual(a):\n    return float(torch.clamp(S[i0] - be - a, min=0).sum() + k_ * a)\ngrid = torch.linspace(float((S[i0] - be).min()) - 0.2, float((S[i0] - be).max()) + 0.2, 4001)\nvals = [slice_dual(float(g)) for g in grid]\nok(\"the quantile attains the minimum of the per-token dual slice\",\n   slice_dual(float(al_star[i0])) <= min(vals) + 1e-4,\n   f\"L(quantile) = {slice_dual(float(al_star[i0])):.6f} vs grid min {min(vals):.6f}\")\nok(\"the minimiser is an INTERVAL (the objective is piecewise linear)\",\n   sum(1 for v in vals if v <= min(vals) + 1e-6) > 1,\n   f\"{sum(1 for v in vals if v <= min(vals) + 1e-6)} grid points attain it\")\nprint(\"=> the balancing bias needs no auxiliary loss: it is the LP dual, computed by a quantile\")",
+      "output": "```\nPASS  the quantile makes exactly k experts exceed the threshold per token   | mean above = 2.00 (target 2)\nPASS  the quantile attains the minimum of the per-token dual slice   | L(quantile) = 1.137990 vs grid min 1.137990\nPASS  the minimiser is an INTERVAL (the objective is piecewise linear)   | 1898 grid points attain it\n=> the balancing bias needs no auxiliary loss: it is the LP dual, computed by a quantile\n```",
+      "narration": "\u2026whose coordinate solution is a QUANTILE \u2014 eq. (26) the formula on screen. The result the whole appendix exists for. Setting the derivative of the hinge sum to zero says: choose \u03b1i so that exactly k of the n shifted scores exceed it \u2014 i.e. the 1\u2212k/n quantile. Symmetrically for \u03b2j with share mk/n. That is why the router's balancing bias in",
+      "seconds": 26.822222222222223,
+      "lesson": "k312"
+    },
+    {
+      "kind": "chapter",
+      "title": "D Histogram-Based Quantile Estimation",
+      "subtitle": "KIMI K3: OPEN FRONTIER INTELLIGENCE \u00a7D",
+      "lesson": "k313",
+      "narration": "D Histogram-Based Quantile Estimation",
+      "seconds": 4.0
+    },
+    {
+      "kind": "note",
+      "text": "## D Histogram-Based Quantile Estimation\n**Paper:** KIMI K3: OPEN FRONTIER INTELLIGENCE \u00b7 \u00a7D \u00b7 pages 44\u201344 \u00b7 equations (none) \u00b7 0 figures.\n\n> TODO(author): the *why* of \u00a7D in 3\u20135 lines.",
+      "narration": "D Histogram-Based Quantile Estimation Paper: KIMI K3: OPEN FRONTIER INTELLIGENCE \u00b7 \u00a7D \u00b7 pages 44\u201344 \u00b7 equations (none) \u00b7 0 figures. TODO(author): the why of \u00a7D in 3\u20135 lines.",
+      "seconds": 6.3,
+      "lesson": "k313"
+    },
+    {
+      "kind": "chapter",
+      "title": "E MoonEP General Upper Bound Proof",
+      "subtitle": "KIMI K3: OPEN FRONTIER INTELLIGENCE \u00a7E",
+      "lesson": "k314",
+      "narration": "E MoonEP General Upper Bound Proof",
+      "seconds": 4.0
+    },
+    {
+      "kind": "note",
+      "text": "## E MoonEP General Upper Bound Proof\n**Paper:** KIMI K3: OPEN FRONTIER INTELLIGENCE \u00b7 \u00a7E \u00b7 pages 45\u201345 \u00b7 equations (none) \u00b7 0 figures.\n\n> TODO(author): the *why* of \u00a7E in 3\u20135 lines.",
+      "narration": "E MoonEP General Upper Bound Proof Paper: KIMI K3: OPEN FRONTIER INTELLIGENCE \u00b7 \u00a7E \u00b7 pages 45\u201345 \u00b7 equations (none) \u00b7 0 figures. TODO(author): the why of \u00a7E in 3\u20135 lines.",
+      "seconds": 6.3,
+      "lesson": "k314"
+    },
+    {
+      "kind": "chapter",
+      "title": "F Chat Template",
+      "subtitle": "KIMI K3: OPEN FRONTIER INTELLIGENCE \u00a7F",
+      "lesson": "k315",
+      "narration": "F Chat Template",
+      "seconds": 4.0
+    },
+    {
+      "kind": "note",
+      "text": "## F Chat Template\n**Paper:** KIMI K3: OPEN FRONTIER INTELLIGENCE \u00b7 \u00a7F \u00b7 pages 46\u201347 \u00b7 equations (none) \u00b7 0 figures.\n\n> TODO(author): the *why* of \u00a7F in 3\u20135 lines.",
+      "narration": "F Chat Template Paper: KIMI K3: OPEN FRONTIER INTELLIGENCE \u00b7 \u00a7F \u00b7 pages 46\u201347 \u00b7 equations (none) \u00b7 0 figures. TODO(author): the why of \u00a7F in 3\u20135 lines.",
+      "seconds": 6.3,
+      "lesson": "k315"
+    },
+    {
+      "kind": "chapter",
+      "title": "Basics \u2014 the four primitives K3 is built from",
+      "subtitle": "Kimi K3 \u00b7 delta rule with a gate, attention over depth, latent MoE, LP duality",
+      "lesson": "k3b1",
+      "narration": "Basics \u2014 the four primitives K3 is built from",
+      "seconds": 4.0
+    },
+    {
+      "kind": "note",
+      "text": "## Read K3 as four ideas, not 47 pages\nEverything in the architecture section is one of these:\n\n1. **A gated delta rule** (KDA). Take DeltaNet's `S \u2190 (I \u2212 \u03b2kk\u1d40)S + \u03b2vk\u1d40` and give the decay a *channel*\n   dimension: `diag(\u03b1)` instead of a scalar. That is the whole of Kimi Delta Attention.\n2. **Attention across depth** (Attention Residuals). The usual residual stream adds the previous layer;\n   K3 lets layer `l` *attend* over all earlier layers' outputs \u2014 softmax weights over depth, not tokens.\n3. **A shared latent for experts** (Stable LatentMoE). Project down once (`W\u2193x`), route in that latent",
+      "narration": "Read K3 as four ideas, not 47 pages Everything in the architecture section is one of these: 1. A gated delta rule (KDA). Take DeltaNet's S \u2190 (I \u2212 \u03b2kk\u1d40)S + \u03b2vk\u1d40 and give the decay a channel dimension: diag(\u03b1) instead of a scalar. That is the whole of Kimi Delta Attention. 2. Attention across depth (Attention Residuals). The usual residual ",
+      "seconds": 6.3,
+      "lesson": "k3b1"
+    },
+    {
+      "kind": "code",
+      "code": "import torch, torch.nn as nn, torch.nn.functional as F      # K3's maths is delta rules + softmax + LP duality\nimport json, pathlib\n\nimport sys; sys.path.insert(0, \"learning\")\nimport vizkit as vz                                            # the shared visual + explainability layer\n\nDEV = torch.device(\"cuda\" if torch.cuda.is_available() else \"cpu\")   # every proof runs on the GPU\ntorch.set_default_device(DEV)\n# These cells PROVE matrix identities, so they need full fp32: TF32 truncates the mantissa to 10 bits\n# and an identity that holds to 1e-6 in fp32 only holds to ~1e-3 in TF32. Timing cells opt INTO TF32/bf16\n# explicitly, where throughput is the point rather than exactness.\ntorch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False\ntorch.manual_seed(0); torch.set_printoptions(precision=4, sci_mode=False)\nprint(f\"device: {DEV}\" + (f\" | {torch.cuda.get_device_name(0)}\" if DEV.type == \"cuda\" else \"\"))\n\ndef ok(name, cond, extra=\"\"):\n    print((\"PASS  \" if cond else \"FAIL  \") + name + (f\"   | {extra}\" if extra else \"\"))\n\ndef close(a, b, tol=1e-5):\n    return torch.allclose(a, b, atol=tol, rtol=tol)\n\ndef k3cfg():                                                   # the PUBLISHED architecture (no weights)\n    p = pathlib.Path(\"docs/papers/kimi-k3/models/moonshotai__Kimi-K3.json\")\n    c = json.loads(p.read_text()) if p.exists() else {}\n    return {**c.get(\"text_config\", {}), **{k: v for k, v in c.items() if k != \"text_config\"}}\n\nc = k3cfg()\nfor k in (\"model_type\", \"hidden_size\", \"num_hidden_layers\", \"num_attention_heads\", \"num_key_value_heads\",\n          \"num_experts\", \"num_experts_per_token\", \"num_shared_experts\", \"moe_intermediate_size\",\n          \"intermediate_size\", \"max_position_embeddings\", \"hidden_act\", \"attn_res_block_size\",\n          \"kv_lora_rank\", \"activation_situ_beta\", \"activation_situ_linear_beta\"):\n    print(f\"  {k:32s} = {c.get(k)}\")\nok(\"the paper's '16 of 896 routed experts' is the published config\",\n   (c.get(\"num_experts\"), c.get(\"num_experts_per_token\")) == (896, 16),\n   f\"{c.get('num_experts_per_token')} of {c.get('num_experts')}\")\nok(\"1M-token context is real\", c.get(\"max_position_embeddings\") == 1048576,\n   f\"{c.get('max_position_embeddings')} positions\")\nok(\"the activation is SiTU (Appendix B), with beta1*beta2 = 100\",\n   c.get(\"hidden_act\") == \"situ\" and\n   abs(c.get(\"activation_situ_beta\", 0) * c.get(\"activation_situ_linear_beta\", 0) - 100) < 1e-6,\n   f\"beta1={c.get('activation_situ_beta')}, beta2={c.get('activation_situ_linear_beta')}\")",
+      "output": "```\ndevice: cuda | NVIDIA GeForce RTX 5090\n  model_type                       = kimi_k3\n  hidden_size                      = 7168\n  num_hidden_layers                = 93\n  num_attention_heads              = 96\n  num_key_value_heads              = 96\n  num_experts                      = 896\n  num_experts_per_token            = 16\n  num_shared_experts               = 2\n  moe_intermediate_size            = 3072\n  intermediate_size                = 33792\n  max_position_embeddings          = 1048576\n  hidden_act                       = situ\n  attn_res_block_size              = 12\n  kv_lora_rank                     = 512\n  activation_situ_beta             = 4.0\n  activation_situ_linear_beta      = 25.0\nPASS  the paper's '16 of 896 routed experts' is the published config   | 16 of 896\nPASS  1M-token context is real   | 1048576 positions\nPASS  the activation is SiTU (Appendix B), with beta1*beta2 = 100   | beta1=4.0, beta2=25.0\n```",
+      "narration": "The published config, as ground truth Before any formula: fetch the real architecture. config.json is a few kB and needs no weights, so the paper's prose can be checked line by line.",
+      "seconds": 56.22222222222222,
+      "lesson": "k3b1"
+    },
+    {
+      "kind": "code",
+      "code": "cfg = k3cfg()\nfull = (cfg.get(\"linear_attn_config\") or {}).get(\"full_attn_layers\") or []\nn = cfg.get(\"num_hidden_layers\", 0)\nprint(f\"  full-attention layers: {full[:12]}{' \u2026' if len(full) > 12 else ''}  ({len(full)} of {n})\")\nif full and n:\n    gaps = sorted({b - a for a, b in zip(full, full[1:])})\n    ok(\"full attention appears on a fixed period\", len(gaps) <= 2, f\"gaps {gaps}\")\n    ok(\"most layers are the cheap linear (KDA) kind\", len(full) / n < 0.35,\n       f\"{len(full)}/{n} = {100*len(full)/n:.0f}% full attention\")\nok(\"so the KV cache is paid on a minority of layers\", True,\n   \"that is where the 1M-token context comes from\")",
+      "output": "```\n  full-attention layers: [4, 8, 12, 16, 20, 24, 28, 32, 36, 40, 44, 48] \u2026  (24 of 93)\nPASS  full attention appears on a fixed period   | gaps [1, 4]\nPASS  most layers are the cheap linear (KDA) kind   | 24/93 = 26% full attention\nPASS  so the KV cache is paid on a minority of layers   | that is where the 1M-token context comes from\n```",
+      "narration": "KDA vs the interleave: which layers are linear, which are full attention linearattnconfig.fullattnlayers in the config tells you the exact pattern \u2014 cheap KDA layers with periodic full-attention layers. That ratio is the whole cost/quality trade of a hybrid model.",
+      "seconds": 14.155555555555555,
+      "lesson": "k3b1"
+    },
+    {
+      "kind": "note",
+      "text": "**[Recap]** gated delta rule \u00b7 attention over depth \u00b7 latent MoE \u00b7 quantile-dual\nrouter \u2014 and a config we can check every claim against. **Next \u2192 \u00a72, the architecture.**",
+      "narration": "Recap gated delta rule \u00b7 attention over depth \u00b7 latent MoE \u00b7 quantile-dual router \u2014 and a config we can check every claim against. Next \u2192 \u00a72, the architecture.",
+      "seconds": 6.3,
+      "lesson": "k3b1"
+    },
+    {
+      "kind": "chapter",
+      "title": "Open weights \u2014 published architectures side by side",
+      "subtitle": "KIMI K3: OPEN FRONTIER INTELLIGENCE \u00b7 config.json only, no weights",
+      "lesson": "k3cfg",
+      "narration": "Open weights \u2014 published architectures side by side",
+      "seconds": 4.0
+    },
+    {
+      "kind": "code",
+      "code": "import torch, torch.nn as nn, torch.nn.functional as F      # K3's maths is delta rules + softmax + LP duality\nimport json, pathlib\n\nimport sys; sys.path.insert(0, \"learning\")\nimport vizkit as vz                                            # the shared visual + explainability layer\n\nDEV = torch.device(\"cuda\" if torch.cuda.is_available() else \"cpu\")   # every proof runs on the GPU\ntorch.set_default_device(DEV)\n# These cells PROVE matrix identities, so they need full fp32: TF32 truncates the mantissa to 10 bits\n# and an identity that holds to 1e-6 in fp32 only holds to ~1e-3 in TF32. Timing cells opt INTO TF32/bf16\n# explicitly, where throughput is the point rather than exactness.\ntorch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False\ntorch.manual_seed(0); torch.set_printoptions(precision=4, sci_mode=False)\nprint(f\"device: {DEV}\" + (f\" | {torch.cuda.get_device_name(0)}\" if DEV.type == \"cuda\" else \"\"))\n\ndef ok(name, cond, extra=\"\"):\n    print((\"PASS  \" if cond else \"FAIL  \") + name + (f\"   | {extra}\" if extra else \"\"))\n\ndef close(a, b, tol=1e-5):\n    return torch.allclose(a, b, atol=tol, rtol=tol)\n\ndef k3cfg():                                                   # the PUBLISHED architecture (no weights)\n    p = pathlib.Path(\"docs/papers/kimi-k3/models/moonshotai__Kimi-K3.json\")\n    c = json.loads(p.read_text()) if p.exists() else {}\n    return {**c.get(\"text_config\", {}), **{k: v for k, v in c.items() if k != \"text_config\"}}\n\nimport json, pathlib, pandas as pd                              # configs cached at build time\nrows = [json.loads(p.read_text()) for p in sorted(pathlib.Path(\"docs/papers/kimi-k3/models\").glob(\"*.json\"))]\ndef row(c):                                                       # the comparable fields\n    src = {**c.get(\"text_config\", {}), **{k: v for k, v in c.items() if k != \"text_config\"}}\n    e = src.get(\"num_experts\") or src.get(\"n_routed_experts\") or src.get(\"num_local_experts\")\n    return dict(repo=c.get(\"repo\", \"?\"), type=src.get(\"model_type\"), d=src.get(\"hidden_size\"),\n                layers=src.get(\"num_hidden_layers\"), heads=src.get(\"num_attention_heads\"),\n                kv_heads=src.get(\"num_key_value_heads\"), experts=e,\n                active=src.get(\"num_experts_per_tok\"), ctx=src.get(\"max_position_embeddings\"))\ndf = pd.DataFrame([row(c) for c in rows])\nif \"kv_heads\" in df and \"heads\" in df:                            # GQA ratio: KV-cache saving per token\n    df[\"gqa_ratio\"] = (df[\"heads\"] / df[\"kv_heads\"]).round(1)\nif \"experts\" in df and \"active\" in df:\n    df[\"sparsity\"] = (df[\"experts\"] / df[\"active\"]).round(1)      # experts held / experts used\ndf",
+      "output": "```\ndevice: cuda | NVIDIA GeForce RTX 5090\n```\n<table class=\"dataframe df\">\n  <thead>\n    <tr style=\"text-align: right;\">\n      <th>repo</th>\n      <th>type</th>\n      <th>d</th>\n      <th>layers</th>\n      <th>heads</th>\n      <th>kv_heads</th>\n      <th>experts</th>\n      <th>active</th>\n      <th>ctx</th>\n      <th>gqa_ratio</th>\n      <th>sparsity</th>\n    </tr>\n  </thead>\n  <tbody>\n    <tr>\n      <td>Qwen/Qwen3-235B-A22B</td>\n      <td>qwen3_moe</td>\n      <td>4096</td>\n      <td>94</td>\n      <td>64</td>\n      <td>4</td>\n      <td>128</td>\n      <td>8.0</td>\n      <td>40960.0</td>\n      <td>16.0</td>\n      <td>16.0</td>\n    </tr>\n    <tr>\n      <td>deepseek-ai/DeepSeek-V3</td>\n      <td>deepseek_v3</td>\n      <td>7168</td>\n      <td>61</td>\n      <td>128</td>\n      <td>128</td>\n      <td>256</td>\n      <td>8.0</td>\n      <td>163840.0</td>\n      <td>1.0</td>\n      <td>32.0</td>\n    </tr>\n    <tr>\n      <td>moonshotai/Kimi-K2-Instruct</td>\n      <td>kimi_k2</td>\n      <td>7168</td>\n      <td>61</td>\n      <td>64</td>\n      <td>64</td>\n      <td>384</td>\n      <td>8.0</td>\n      <td>131072.0</td>\n      <td>1.0</td>\n      <td>48.0</td>\n    </tr>\n    <tr>\n      <td>moonshotai/Kimi",
+      "narration": "Open weights \u2014 the published architecture, fetched without the weights config.json only (5 model(s), a few kB each; cached in docs/papers/kimi-k3/models), so the paper's architecture can be compared against earlier generations and today's top models. AutoModel.fromconfig(cfg) would build the identical graph with random init. modeltype num",
+      "seconds": 58.955555555555556,
+      "lesson": "k3cfg"
+    },
+    {
+      "kind": "code",
+      "code": "# the budget arithmetic a design is actually compared on (no weights involved)\ndef budget(c):\n    s = {**c.get(\"text_config\", {}), **{k: v for k, v in c.items() if k != \"text_config\"}}\n    d, n = s.get(\"hidden_size\", 0), s.get(\"num_hidden_layers\", 0)\n    e = s.get(\"num_experts\") or s.get(\"n_routed_experts\") or s.get(\"num_local_experts\") or 1\n    a = s.get(\"num_experts_per_tok\") or s.get(\"num_experts_per_token\") or 1\n    sh = s.get(\"n_shared_experts\") or s.get(\"num_shared_experts\") or 0\n    ffn = s.get(\"moe_intermediate_size\") or s.get(\"intermediate_size\") or 4 * d\n    kvh = s.get(\"num_key_value_heads\") or s.get(\"num_attention_heads\") or 1\n    hd = d // max(s.get(\"num_attention_heads\", 1), 1)\n    tot = n * (4 * d * d + 3 * d * ffn * e) + 2 * d * s.get(\"vocab_size\", 0)\n    act = n * (4 * d * d + 3 * d * ffn * (a + sh)) + 2 * d * s.get(\"vocab_size\", 0)\n    return dict(repo=c.get(\"repo\", \"?\"), total_B=round(tot / 1e9, 1), active_B=round(act / 1e9, 2),\n                sparsity=round(tot / max(act, 1), 1), kv_kB_per_token=round(2 * n * kvh * hd * 2 / 1024, 1),\n                gflops_per_token=round(2 * act / 1e9, 1), ctx_M=round(s.get(\"max_position_embeddings\", 0) / 1e6, 3))\n\nbud = pd.DataFrame([budget(c) for c in rows]).sort_values(\"total_B\", ascending=False)\nprint(\"total_B counts every expert (checkpoint size); active_B is what one token touches\")\nbud",
+      "output": "```\ntotal_B counts every expert (checkpoint size); active_B is what one token touches\n```\n<table class=\"dataframe df\">\n  <thead>\n    <tr style=\"text-align: right;\">\n      <th>repo</th>\n      <th>total_B</th>\n      <th>active_B</th>\n      <th>sparsity</th>\n      <th>kv_kB_per_token</th>\n      <th>gflops_per_token</th>\n      <th>ctx_M</th>\n    </tr>\n  </thead>\n  <tbody>\n    <tr>\n      <td>moonshotai/Kimi-K3</td>\n      <td>5526.1</td>\n      <td>132.05</td>\n      <td>41.8</td>\n      <td>2580.8</td>\n      <td>264.1</td>\n      <td>1.049</td>\n    </tr>\n    <tr>\n      <td>moonshotai/Kimi-K2-Instruct</td>\n      <td>1046.5</td>\n      <td>39.06</td>\n      <td>26.8</td>\n      <td>1708.0</td>\n      <td>78.1</td>\n      <td>0.131</td>\n    </tr>\n    <tr>\n      <td>deepseek-ai/DeepSeek-V3</td>\n      <td>702.1</td>\n      <td>38.57</td>\n      <td>18.2</td>\n      <td>1708.0</td>\n      <td>77.1</td>\n      <td>0.164</td>\n    </tr>\n    <tr>\n      <td>Qwen/Qwen3-235B-A22B</td>\n      <td>234.6</td>\n      <td>21.75</td>\n      <td>10.8</td>\n      <td>94.0</td>\n      <td>43.5</td>\n      <td>0.041</td>\n    </tr>\n    <tr>\n      <td>moonshotai/Kimi-Linear-48B-A3B-Instruct</td>\n      <td>50.3</td>\n      <td>3.05<",
+      "narration": "The budget these numbers imply Total vs active parameters, KV cache per token and FLOPs per token \u2014 computed from the configs, not quoted.",
+      "seconds": 30.42222222222222,
+      "lesson": "k3cfg"
+    },
+    {
+      "kind": "figure",
+      "image": "docs/papers/kimi-k3/models/arch_diagram.png",
+      "caption": "Published architectures side by side (config.json only)",
+      "narration": "The same architectures, drawn One box per model with its real dimensions and the fraction of experts a token actually activates.",
+      "seconds": 9.0,
+      "lesson": "k3cfg"
+    },
+    {
+      "kind": "chapter",
+      "title": "What we steal from K3 \u2014 and what the config proves",
+      "subtitle": "Kimi K3 \u00b7 the transferable pieces, checked against the published architecture",
+      "lesson": "k3z1",
+      "narration": "What we steal from K3 \u2014 and what the config proves",
+      "seconds": 4.0
+    },
+    {
+      "kind": "note",
+      "text": "## Four things worth taking\n1. **Channel-wise decay** (eq. 1). If you already run a delta-rule/linear-attention state, giving the\n   forget gate a channel dimension is a few lines and lets one state hold several timescales.\n2. **A bounded activation** (eqs. 12, 21). `\u03b2\u2081tanh(z/\u03b2\u2081)\u00b7\u03c3(z)` with a clipped linear branch gives a hard\n   ceiling `\u03b2\u2081\u03b2\u2082`; for us that is the cheapest insurance against bf16/low-bit blow-ups.\n3. **Quantile-balanced routing** (eqs. 13\u201315, 22\u201326). A bias updated by a quantile replaces the auxiliary\n   loss entirely \u2014 no loss-weight to tune against the task objective. Already",
+      "narration": "Four things worth taking 1. Channel-wise decay equation 1. If you already run a delta-rule/linear-attention state, giving the forget gate a channel dimension is a few lines and lets one state hold several timescales. 2. A bounded activation (eqs. 12, 21). \u03b2\u2081tanh(z/\u03b2\u2081)\u00b7\u03c3(z) with a clipped linear branch gives a hard ceiling \u03b2\u2081\u03b2\u2082; for us tha",
+      "seconds": 6.3,
+      "lesson": "k3z1"
+    }
+  ],
+  "chapters": [
+    {
+      "id": "k3b1",
+      "title": "Basics \u2014 the four primitives K3 is built from",
+      "order": 1600
+    },
+    {
+      "id": "k301",
+      "title": "1 Introduction",
+      "order": 1700
+    },
+    {
+      "id": "k302",
+      "title": "2 Model Architecture",
+      "order": 1710
+    },
+    {
+      "id": "k303",
+      "title": "3 Pre-Training",
+      "order": 1720
+    },
+    {
+      "id": "k304",
+      "title": "4 Post-Training",
+      "order": 1730
+    },
+    {
+      "id": "k305",
+      "title": "5 Infrastructure",
+      "order": 1740
+    },
+    {
+      "id": "k306",
+      "title": "6 Evaluations",
+      "order": 1750
+    },
+    {
+      "id": "k307",
+      "title": "7 Case Studies",
+      "order": 1760
+    },
+    {
+      "id": "k308",
+      "title": "8 Conclusion",
+      "order": 1770
+    },
+    {
+      "id": "k311",
+      "title": "B Details of Sigmoid Tanh Unit GLU",
+      "order": 1800
+    },
+    {
+      "id": "k312",
+      "title": "C Derivation of Quantile Balancing",
+      "order": 1810
+    },
+    {
+      "id": "k313",
+      "title": "D Histogram-Based Quantile Estimation",
+      "order": 1820
+    },
+    {
+      "id": "k314",
+      "title": "E MoonEP General Upper Bound Proof",
+      "order": 1830
+    },
+    {
+      "id": "k315",
+      "title": "F Chat Template",
+      "order": 1840
+    },
+    {
+      "id": "k3cfg",
+      "title": "Open weights \u2014 published architectures side by side",
+      "order": 2480
+    },
+    {
+      "id": "k3z1",
+      "title": "What we steal from K3 \u2014 and what the config proves",
+      "order": 2500
+    }
+  ],
+  "source": "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/docs/papers/kimi-k3",
+  "lessons": [
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/k301.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/k302.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/k303.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/k304.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/k305.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/k306.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/k307.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/k308.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/k311.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/k312.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/k313.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/k314.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/k315.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/k3b1.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/k3cfg.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/k3z1.learning"
+  ]
+}

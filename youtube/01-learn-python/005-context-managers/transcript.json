@@ -1,0 +1,50 @@
+[
+  {
+    "text": "A context manager guarantees that cleanup happens, no matter how your code exits.",
+    "until_line": 1
+  },
+  {
+    "text": "Any class with two special methods can be one — enter and exit.",
+    "until_line": 1
+  },
+  {
+    "text": "Enter runs when the with block starts, and whatever it returns is what you bind with as.",
+    "until_line": 2
+  },
+  {
+    "text": "Here it prints starting and hands back the object itself.",
+    "until_line": 4
+  },
+  {
+    "text": "Exit runs when the block finishes, and star exc catches any exception details Python passes in.",
+    "until_line": 6
+  },
+  {
+    "text": "It prints done, then returns False, meaning don't suppress errors — let them propagate.",
+    "until_line": 8
+  },
+  {
+    "text": "If exit returned True instead, it would swallow the exception entirely, which is rarely what you want.",
+    "until_line": 8
+  },
+  {
+    "text": "Now the with statement itself. Timer parentheses creates the object and enters it.",
+    "until_line": 11
+  },
+  {
+    "text": "This is exactly how open works when you read a file with a with statement.",
+    "until_line": 11
+  },
+  {
+    "text": "Inside the block we do the actual work.",
+    "until_line": 12
+  },
+  {
+    "text": "Starting, then working, then done — and that done is guaranteed even if the body raises.",
+    "until_line": 12
+  },
+  {
+    "text": "Video 6 tackles dataclasses. Comment PYTHON if you want the cheat sheet.",
+    "until_line": 12
+  }
+]

@@ -1,0 +1,42 @@
+[
+  {
+    "text": "Python classes support three kinds of methods, each with a different job.",
+    "until_line": 9
+  },
+  {
+    "text": "The most common is the instance method — it takes self and works with a specific object's data.",
+    "until_line": 9
+  },
+  {
+    "text": "area uses self dot radius to compute the area for this particular circle.",
+    "until_line": 9
+  },
+  {
+    "text": "[chuckle] A class method takes cls instead of self, and works with the class as a whole.",
+    "until_line": 14
+  },
+  {
+    "text": "It's perfect as a factory — here unit builds and returns a ready-made circle of radius one.",
+    "until_line": 14
+  },
+  {
+    "text": "[sniff] A static method takes neither self nor cls — it's just a plain function living inside the class.",
+    "until_line": 19
+  },
+  {
+    "text": "Use it for helper logic that belongs with the class but doesn't need any object or class data.",
+    "until_line": 19
+  },
+  {
+    "text": "describe simply returns a description, needing nothing from any instance.",
+    "until_line": 24
+  },
+  {
+    "text": "[groan] Instance methods for object data, class methods for factories, static methods for related helpers — that's the trio.",
+    "until_line": 24
+  },
+  {
+    "text": "Video 41 tackles encapsulation. Tell me in the comments if this clicked.",
+    "until_line": 24
+  }
+]

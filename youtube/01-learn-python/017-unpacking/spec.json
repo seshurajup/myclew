@@ -1,0 +1,13 @@
+{
+  "language": "python",
+  "title": "unpacking.py",
+  "hook": "Swap two variables without a temp",
+  "playlist": "Learn Python",
+  "target_seconds": 90,
+  "tts_engine": "chatterbox",
+  "music_prompt": "lofi hip hop, chill study beat, instrumental",
+  "code_path": "code.py",
+  "transcript_path": "transcript.json",
+  "outputs_path": "outputs.json",
+  "max_seconds": 120
+}

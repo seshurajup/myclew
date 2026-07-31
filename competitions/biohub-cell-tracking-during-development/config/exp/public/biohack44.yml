@@ -1,0 +1,10 @@
+# PUBLIC notebook config — **biohack44** / UNet + gap-closing
+name: pub_biohack44
+source: **biohack44** / UNet + gap-closing
+family: other
+base: unknown
+lb: None
+golden_cv: 0.8708
+mined_params: ""
+run: manual
+score: golden-12 (adj_edge_J + 0.1*div_J), by_embryo

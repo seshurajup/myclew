@@ -1,0 +1,12 @@
+[
+  {
+    "after_line": 8,
+    "text": ">>> [1, 4, 9, 16, 25, 36]\n>>> [2, 4, 6]",
+    "caption": "map transforms, filter selects"
+  },
+  {
+    "after_line": 10,
+    "text": ">>> 120",
+    "caption": "chain them together"
+  }
+]

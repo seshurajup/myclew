@@ -1,0 +1,92 @@
+[
+  {
+    "n": 1,
+    "latex": "CFG[\"hidden_size\"], CFG[\"num_hidden_layers\"], CFG[\"intermediate_size\"], CFG[\"vocab_size\"]",
+    "name": "The published shape"
+  },
+  {
+    "n": 2,
+    "latex": "CFG_S[\"num_hidden_layers\"] vs CFG[\"num_hidden_layers\"]",
+    "name": "230M vs 350M differ in DEPTH only"
+  },
+  {
+    "n": 3,
+    "latex": "CFG[\"tie_word_embeddings\"] is True",
+    "name": "Tied embeddings \u2014 the MLM head is free"
+  },
+  {
+    "n": 4,
+    "latex": "params = embed + sum(per-layer conv|attention + SwiGLU FFN)",
+    "name": "A parameter budget from the config alone"
+  },
+  {
+    "n": 5,
+    "latex": "B, C, x = split(in_proj(u));  y = out_proj(B * conv1d(C * x, depthwise, k=3))",
+    "name": "The gated short convolution"
+  },
+  {
+    "n": 6,
+    "latex": "receptive_field(1 layer, k=3) = 3 tokens",
+    "name": "A width-3 kernel sees \u00b11 token \u2014 and that is the point"
+  },
+  {
+    "n": 7,
+    "latex": "time(ShortConv, L) ~ O(L)   vs   time(attention, L) ~ O(L^2)",
+    "name": "Cost is linear in length \u2014 measured, not asserted"
+  },
+  {
+    "n": 8,
+    "latex": "CFG[\"conv_L_cache\"] == 3   # k-1 = 2 past activations per channel",
+    "name": "conv_L_cache = 3 is a streaming state, not a KV cache"
+  },
+  {
+    "n": 9,
+    "latex": "receptive_field(n layers, k) = n*(k-1) + 1",
+    "name": "Stacked convs grow the receptive field only LINEARLY"
+  },
+  {
+    "n": 10,
+    "latex": "CFG[\"layer_types\"] \u2014 conv, conv, full_attention, conv, conv, full_attention, \u2026",
+    "name": "The interleave pattern, as published"
+  },
+  {
+    "n": 11,
+    "latex": "cost_hybrid / cost_all_attention = (n_attn + n_conv*k/(2L)) / n_layers",
+    "name": "What the hybrid actually saves at 8k"
+  },
+  {
+    "n": 12,
+    "latex": "Lfm2BidirectionalModel \u2014 the causal mask is replaced by full attention",
+    "name": "Bidirectional, not causal"
+  },
+  {
+    "n": 13,
+    "latex": "CFG[\"use_cache\"] is False",
+    "name": "use_cache = False follows necessarily"
+  },
+  {
+    "n": 14,
+    "latex": "perturbing position t+1 changes the representation at position t",
+    "name": "The measurable consequence: a token depends on its FUTURE"
+  },
+  {
+    "n": 15,
+    "latex": "the L at which one hybrid layer becomes cheaper than one attention layer",
+    "name": "The crossover length"
+  },
+  {
+    "n": 16,
+    "latex": "num_key_value_heads=8 vs num_attention_heads=16 -> half the KV",
+    "name": "What GQA saves in the six attention layers"
+  },
+  {
+    "n": 17,
+    "latex": "16 layers, CFG['layer_types'] pattern, vs 16 attention layers",
+    "name": "A real hybrid stack vs an all-attention stack"
+  },
+  {
+    "n": 18,
+    "latex": "'Matches or beats ModernBERT throughput, with a long-context edge on CPU'",
+    "name": "The CPU claim \u2014 where it holds and where it does not"
+  }
+]

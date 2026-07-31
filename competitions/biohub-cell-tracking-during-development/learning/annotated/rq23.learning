@@ -1,0 +1,12 @@
+@ id: rq23
+@ order: 2320
+@ title: N Sensitivity Proxy Ablation
+@ subtitle: RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory §N
+@ source: docs/papers/ratequant/ratequant.md
+
+--- note
+## N Sensitivity Proxy Ablation
+**Paper:** RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory · §N · pages 20–20 · equations (none) · 0 figures.
+
+> TODO(author): the *why* of §N in 3–5 lines.
+

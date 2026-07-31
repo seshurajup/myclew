@@ -1,0 +1,234 @@
+{
+  "slug": "hope-hilbert",
+  "source": "docs/papers/paper3/source.pdf",
+  "pdf": "docs/papers/paper3/source.pdf",
+  "title": "Hilbert Operator for Progressive Encoding (HOPE)",
+  "backend": "docling+pymupdf-assets",
+  "pages": 70,
+  "figures": [
+    {
+      "page": 1,
+      "path": "assets/fig/p01_0.png",
+      "y0": 43.119747161865234,
+      "y1": 61.04998779296875,
+      "caption": "",
+      "label": "",
+      "w": 3810,
+      "h": 512
+    },
+    {
+      "page": 20,
+      "path": "assets/fig/p20_0.png",
+      "y0": 361.10699462890625,
+      "y1": 488.2430419921875,
+      "caption": "",
+      "label": "",
+      "w": 2929,
+      "h": 1724
+    }
+  ],
+  "tables": [
+    {
+      "page": 9,
+      "rows": 12,
+      "cols": 11,
+      "image": "assets/tab/p09_0.png"
+    }
+  ],
+  "sections": [
+    {
+      "level": 1,
+      "page": 1,
+      "num": "1",
+      "title": "Introduction",
+      "heading": "1. Introduction"
+    },
+    {
+      "level": 1,
+      "page": 3,
+      "num": "2",
+      "title": "Related Works",
+      "heading": "2. Related Works"
+    },
+    {
+      "level": 1,
+      "page": 4,
+      "num": "3",
+      "title": "The Neuron",
+      "heading": "3. The Neuron"
+    },
+    {
+      "level": 1,
+      "page": 6,
+      "num": "4",
+      "title": "The Neural Signal Distribution",
+      "heading": "4. The Neural Signal Distribution"
+    },
+    {
+      "level": 1,
+      "page": 7,
+      "num": "5",
+      "title": "A Hilbert Functional Perspective on Neurons",
+      "heading": "5. A Hilbert Functional Perspective on Neurons"
+    },
+    {
+      "level": 2,
+      "page": 9,
+      "num": "",
+      "title": "ReLU",
+      "heading": "ReLU"
+    },
+    {
+      "level": 2,
+      "page": 9,
+      "num": "",
+      "title": "ReLU",
+      "heading": "ReLU"
+    },
+    {
+      "level": 1,
+      "page": 10,
+      "num": "6",
+      "title": "Layer Transition Costs",
+      "heading": "6. Layer Transition Costs"
+    },
+    {
+      "level": 1,
+      "page": 13,
+      "num": "7",
+      "title": "Generating the Parent Neuron",
+      "heading": "7. Generating the Parent Neuron"
+    },
+    {
+      "level": 1,
+      "page": 16,
+      "num": "8",
+      "title": "Block Eviction",
+      "heading": "8. Block Eviction"
+    },
+    {
+      "level": 1,
+      "page": 18,
+      "num": "9",
+      "title": "Balancing Compression and Distortion",
+      "heading": "9. Balancing Compression and Distortion"
+    },
+    {
+      "level": 1,
+      "page": 19,
+      "num": "10",
+      "title": "The Encoding Loop",
+      "heading": "10. The Encoding Loop"
+    },
+    {
+      "level": 1,
+      "page": 20,
+      "num": "11",
+      "title": "Proof-of-Concept Applications",
+      "heading": "11. Proof-of-Concept Applications"
+    },
+    {
+      "level": 1,
+      "page": 24,
+      "num": "12",
+      "title": "Acknowledgment",
+      "heading": "12. Acknowledgment"
+    },
+    {
+      "level": 1,
+      "page": 25,
+      "num": "",
+      "title": "References",
+      "heading": "References"
+    },
+    {
+      "level": 1,
+      "page": 33,
+      "num": "",
+      "title": "Appendix Table of Contents",
+      "heading": "Appendix Table of Contents"
+    },
+    {
+      "level": 1,
+      "page": 35,
+      "num": "A",
+      "title": "Hilbert Spaces",
+      "heading": "A. Hilbert Spaces"
+    },
+    {
+      "level": 1,
+      "page": 38,
+      "num": "B",
+      "title": "Implementation Notes",
+      "heading": "B. Implementation Notes"
+    },
+    {
+      "level": 1,
+      "page": 42,
+      "num": "C",
+      "title": "Main Paper Proofs",
+      "heading": "C. Main Paper Proofs"
+    },
+    {
+      "level": 1,
+      "page": 50,
+      "num": "D",
+      "title": "Derivation of Physical BN Parameters",
+      "heading": "D. Derivation of Physical BN Parameters"
+    },
+    {
+      "level": 1,
+      "page": 52,
+      "num": "E",
+      "title": "Kernel Formulation",
+      "heading": "E. Kernel Formulation"
+    },
+    {
+      "level": 1,
+      "page": 56,
+      "num": "F",
+      "title": "Derivations for Block Eviction",
+      "heading": "F. Derivations for Block Eviction"
+    },
+    {
+      "level": 1,
+      "page": 59,
+      "num": "G",
+      "title": "Reproducibility Protocols for Cross-Domain Transfer",
+      "heading": "G. Reproducibility Protocols for Cross-Domain Transfer"
+    },
+    {
+      "level": 1,
+      "page": 62,
+      "num": "H",
+      "title": "Theoretical Guarantees of DEFT",
+      "heading": "H. Theoretical Guarantees of DEFT"
+    },
+    {
+      "level": 1,
+      "page": 67,
+      "num": "I",
+      "title": "Algorithms",
+      "heading": "I. Algorithms"
+    }
+  ],
+  "equations": 768,
+  "numbered": 46,
+  "md": "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/docs/papers/hope-hilbert/hope-hilbert.md",
+  "equations_json": "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/docs/papers/hope-hilbert/equations.json",
+  "available": {
+    "pymupdf": true,
+    "marker": true,
+    "docling": true
+  },
+  "score": {
+    "chars": 232487,
+    "headings": 105,
+    "equations": 158,
+    "eq_tags": 1,
+    "images": 48,
+    "tables": 57,
+    "latex_cmds": 1857,
+    "mojibake": 1
+  }
+}

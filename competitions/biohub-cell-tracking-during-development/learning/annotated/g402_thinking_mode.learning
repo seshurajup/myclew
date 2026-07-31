@@ -1,0 +1,37 @@
+@ id: g402
+@ order: 402
+@ title: Thinking mode
+@ subtitle: emit a reasoning trace before the answer — the reasoning lever
+@ source: arxiv 2607.02770
+
+--- note
+## The mechanism
+Gemma 4 adds a **thinking mode**: before producing the final response, the model first generates a
+**reasoning trace** (an internal chain of thought), and only then answers. This is the same idea
+popularised by reasoning models (the report cites OpenAI, 2024). The trace is a first-class part of
+generation, carried in a dedicated **thought channel** in the chat format (see g409): the model writes
+`<|channel>thought ...<channel|>` and then the user-visible answer.
+
+Why it helps: reasoning-heavy tasks (mathematics, competitive coding, science) benefit from the model
+"spending tokens to think" — it can decompose, plan, and check work before committing to an answer,
+instead of answering in one forward pass.
+
+--- note
+## Turning it on
+Thinking is a **toggle**, activated by placing a `<|think|>` control token in a leading **system
+turn**. All Gemma 4 models share one tokenizer; a handful of control tokens are reserved for this
+instruction-tuned (IT) formatting. So the *same weights* run with or without a visible reasoning
+trace, depending on the prompt. (Full formatting example in **g409 / Table 11**.)
+
+--- note
+## The evidence
+The report says most of its benchmark numbers are reported **in thinking mode** (Table 5 header:
+"All models are in thinking mode unless explicitly stated"). The reasoning-heavy jumps over the prior
+generation are large — e.g. **AIME 2026** goes from 20.8 (Gemma 3 27B) to **89.2** (Gemma 4 31B), and
+**Codeforces Elo** from 110 to **2150**. Those gains are the combined effect of a better base model
+*and* thinking mode; the report does not isolate thinking-mode's marginal contribution with an
+ablation, so we take the table at face value: thinking-mode models are strong on STEM/coding.
+
+--- image
+learning/assets/gemma4/t05_static_bench.png
+Table 5 — static benchmarks, Gemma 3 27B vs the Gemma 4 sizes, all in thinking mode unless noted. Note the reasoning-heavy rows (AIME 2026, LiveCodeBench, Codeforces Elo, GPQA Diamond, Big Bench Extra Hard) where the newer models leap ahead. This table is read in full in g410.

@@ -1,0 +1,282 @@
+{
+  "slug": "paper-2607-05297",
+  "source": "https://arxiv.org/pdf/2607.05297",
+  "pdf": "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/docs/papers/paper-2607-05297/source.pdf",
+  "title": "MetaSkill-Evolve: Recursive Self-Improvement of LLM Agents",
+  "backend": "docling+pymupdf-assets",
+  "pages": 14,
+  "figures": [
+    {
+      "page": 5,
+      "path": "assets/fig/p05_0.png",
+      "y0": 141.35182189941406,
+      "y1": 155.96083068847656,
+      "caption": "",
+      "label": "",
+      "w": 720,
+      "h": 918
+    },
+    {
+      "page": 5,
+      "path": "assets/fig/p05_1.png",
+      "y0": 166.96267700195312,
+      "y1": 181.39132690429688,
+      "caption": "",
+      "label": "",
+      "w": 1320,
+      "h": 314
+    },
+    {
+      "page": 5,
+      "path": "assets/fig/p05_2.png",
+      "y0": 192.2128143310547,
+      "y1": 210.24862670898438,
+      "caption": "Figure 2: System overview. The branch state b = (s, m, h) (left) feeds the five-agent pipeline (centre), whose output is appended to the SQLite node graph (right). Frontier selection (Eq. 4) draws the next parent from the graph.",
+      "label": "Figure 2",
+      "w": 588,
+      "h": 416
+    },
+    {
+      "page": 5,
+      "path": "assets/fig/p05_3.png",
+      "y0": 163.89657592773438,
+      "y1": 190.4092254638672,
+      "caption": "",
+      "label": "",
+      "w": 712,
+      "h": 678
+    },
+    {
+      "page": 5,
+      "path": "assets/fig/p05_4.png",
+      "y0": 164.7983856201172,
+      "y1": 192.0,
+      "caption": "",
+      "label": "",
+      "w": 804,
+      "h": 760
+    },
+    {
+      "page": 5,
+      "path": "assets/fig/p05_5.png",
+      "y0": 165.51980590820312,
+      "y1": 193.83602905273438,
+      "caption": "",
+      "label": "",
+      "w": 810,
+      "h": 852
+    },
+    {
+      "page": 5,
+      "path": "assets/fig/p05_6.png",
+      "y0": 164.16351318359375,
+      "y1": 192.21279907226562,
+      "caption": "",
+      "label": "",
+      "w": 700,
+      "h": 802
+    },
+    {
+      "page": 5,
+      "path": "assets/fig/p05_7.png",
+      "y0": 188.06455993652344,
+      "y1": 200.1485595703125,
+      "caption": "",
+      "label": "",
+      "w": 748,
+      "h": 772
+    },
+    {
+      "page": 5,
+      "path": "assets/fig/p05_8.png",
+      "y0": 158.48583984375,
+      "y1": 170.56983947753906,
+      "caption": "",
+      "label": "",
+      "w": 748,
+      "h": 772
+    },
+    {
+      "page": 5,
+      "path": "assets/fig/p05_9.png",
+      "y0": 134.1374969482422,
+      "y1": 146.22149658203125,
+      "caption": "",
+      "label": "",
+      "w": 748,
+      "h": 772
+    }
+  ],
+  "tables": [
+    {
+      "page": 2,
+      "rows": 2,
+      "cols": 3,
+      "image": "assets/tab/p02_0.png"
+    },
+    {
+      "page": 7,
+      "rows": 5,
+      "cols": 2,
+      "image": "assets/tab/p07_0.png"
+    },
+    {
+      "page": 8,
+      "rows": 4,
+      "cols": 2,
+      "image": "assets/tab/p08_0.png"
+    },
+    {
+      "page": 8,
+      "rows": 4,
+      "cols": 2,
+      "image": "assets/tab/p08_1.png"
+    },
+    {
+      "page": 8,
+      "rows": 2,
+      "cols": 4,
+      "image": "assets/tab/p08_2.png"
+    }
+  ],
+  "sections": [
+    {
+      "level": 1,
+      "page": 1,
+      "num": "",
+      "title": "via Two-Timescale Meta-Skill Evolution",
+      "heading": "via Two-Timescale Meta-Skill Evolution"
+    },
+    {
+      "level": 1,
+      "page": 1,
+      "num": "",
+      "title": "Zefeng Wang , Minxi Yan , Jinhe Bi , Sikuan Yan , Volker Tresp , Yunpu Ma",
+      "heading": "Zefeng Wang , Minxi Yan , Jinhe Bi , Sikuan Yan , Volker Tresp , Yunpu Ma"
+    },
+    {
+      "level": 1,
+      "page": 1,
+      "num": "",
+      "title": "Abstract",
+      "heading": "Abstract"
+    },
+    {
+      "level": 1,
+      "page": 1,
+      "num": "1",
+      "title": "Introduction",
+      "heading": "1 Introduction"
+    },
+    {
+      "level": 1,
+      "page": 3,
+      "num": "2",
+      "title": "Related Work",
+      "heading": "2 Related Work"
+    },
+    {
+      "level": 1,
+      "page": 3,
+      "num": "3",
+      "title": "MetaSkill-Evolve",
+      "heading": "3 MetaSkill-Evolve"
+    },
+    {
+      "level": 1,
+      "page": 6,
+      "num": "4",
+      "title": "Experiments",
+      "heading": "4 Experiments"
+    },
+    {
+      "level": 1,
+      "page": 9,
+      "num": "5",
+      "title": "Conclusion",
+      "heading": "5 Conclusion"
+    },
+    {
+      "level": 1,
+      "page": 9,
+      "num": "",
+      "title": "Limitations",
+      "heading": "Limitations"
+    },
+    {
+      "level": 1,
+      "page": 9,
+      "num": "",
+      "title": "References",
+      "heading": "References"
+    },
+    {
+      "level": 1,
+      "page": 12,
+      "num": "B",
+      "title": "Meta-Skill Representation and Skill-Catalog Disclosure",
+      "heading": "B Meta-Skill Representation and Skill-Catalog Disclosure"
+    },
+    {
+      "level": 1,
+      "page": 12,
+      "num": "A",
+      "title": "Five-Agent Pipeline Details",
+      "heading": "A Five-Agent Pipeline Details"
+    },
+    {
+      "level": 1,
+      "page": 12,
+      "num": "C",
+      "title": "Meta-Skill Prompt Templates",
+      "heading": "C Meta-Skill Prompt Templates"
+    },
+    {
+      "level": 1,
+      "page": 12,
+      "num": "D",
+      "title": "Hyperparameter Sensitivity",
+      "heading": "D Hyperparameter Sensitivity"
+    },
+    {
+      "level": 1,
+      "page": 13,
+      "num": "F",
+      "title": "Evaluation Protocol: Native Held-Out Test",
+      "heading": "F Evaluation Protocol: Native Held-Out Test"
+    },
+    {
+      "level": 1,
+      "page": 13,
+      "num": "G",
+      "title": "Train/Validation Split Ratio Sensitivity",
+      "heading": "G Train/Validation Split Ratio Sensitivity"
+    },
+    {
+      "level": 1,
+      "page": 13,
+      "num": "E",
+      "title": "Full Ablation Tables",
+      "heading": "E Full Ablation Tables"
+    }
+  ],
+  "equations": 33,
+  "numbered": 1,
+  "md": "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/docs/papers/paper-2607-05297/paper-2607-05297.md",
+  "equations_json": "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/docs/papers/paper-2607-05297/equations.json",
+  "available": {
+    "pymupdf": true,
+    "marker": true,
+    "docling": true
+  },
+  "score": {
+    "chars": 59143,
+    "headings": 31,
+    "equations": 4,
+    "eq_tags": 1,
+    "images": 11,
+    "tables": 33,
+    "latex_cmds": 26,
+    "mojibake": 0
+  }
+}

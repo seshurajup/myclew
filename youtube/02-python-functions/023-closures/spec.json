@@ -1,0 +1,14 @@
+{
+  "language": "python",
+  "title": "closures.py",
+  "hook": "Meet the function that remembers its past",
+  "playlist": "Learn Python",
+  "target_seconds": 90,
+  "max_seconds": 120,
+  "tts_engine": "chatterbox",
+  "music_prompt": "memorable, layered, functional",
+  "code_path": "code.py",
+  "transcript_path": "transcript.json",
+  "outputs_path": "outputs.json",
+  "accent": "violet"
+}

@@ -1,0 +1,26 @@
+[
+  {
+    "after_line": 4,
+    "text": ">>> [2, 4, 6, 8, 10, 12]",
+    "caption": "map() transforms every item"
+  },
+  {
+    "after_line": 7,
+    "text": ">>> [2, 4, 6]",
+    "caption": "filter() keeps matching items"
+  },
+  {
+    "after_line": 14,
+    "text": ">>> [32.0, 68.0, 98.6]",
+    "caption": "map() with a named function"
+  },
+  {
+    "after_line": 18,
+    "text": ">>> [4, 16, 36]",
+    "caption": "filter then map, chained"
+  },
+  {
+    "after_line": 18,
+    "image": "artifacts/terminal.png"
+  }
+]

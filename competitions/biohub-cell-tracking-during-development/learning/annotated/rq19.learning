@@ -1,0 +1,12 @@
+@ id: rq19
+@ order: 2280
+@ title: J Calibration Overhead
+@ subtitle: RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory §J
+@ source: docs/papers/ratequant/ratequant.md
+
+--- note
+## J Calibration Overhead
+**Paper:** RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory · §J · pages 18–18 · equations (none) · 0 figures.
+
+> TODO(author): the *why* of §J in 3–5 lines.
+

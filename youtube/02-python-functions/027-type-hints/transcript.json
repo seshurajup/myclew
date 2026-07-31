@@ -1,0 +1,42 @@
+[
+  {
+    "text": "Type hints let you annotate what types your function expects and returns, right in the signature.",
+    "until_line": 2
+  },
+  {
+    "text": "Name colon str says name should be a string, and the arrow str says greet returns a string.",
+    "until_line": 2
+  },
+  {
+    "text": "[chuckle] Here's the key thing — Python does not enforce these at runtime, they're documentation and tooling.",
+    "until_line": 5
+  },
+  {
+    "text": "So add still runs normally, but now anyone reading it instantly knows it takes two integers.",
+    "until_line": 8
+  },
+  {
+    "text": "[sigh] Editors and tools like mypy read these hints to catch bugs before you ever run the code.",
+    "until_line": 8
+  },
+  {
+    "text": "You can hint containers too — list of float tells readers exactly what's inside the list.",
+    "until_line": 14
+  },
+  {
+    "text": "And Optional means the value might be a string, or it might be None — an honest, explicit maybe.",
+    "until_line": 18
+  },
+  {
+    "text": "[sniff] find returns admin for alice, but None for bob, exactly as the Optional hint promised.",
+    "until_line": 21
+  },
+  {
+    "text": "[groan] On big projects, type hints turn confusing code into self-documenting code that tools can check for you.",
+    "until_line": 21
+  },
+  {
+    "text": "Up next, enumerate. Save this one for when you need it.",
+    "until_line": 21
+  }
+]

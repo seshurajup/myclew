@@ -1,0 +1,54 @@
+[
+  {
+    "text": "Unpacking pulls values out of a sequence and into variables, in one line.",
+    "until_line": 1
+  },
+  {
+    "text": "First takes the head, last takes the tail, and star middle absorbs everything between.",
+    "until_line": 1
+  },
+  {
+    "text": "Star middle always becomes a list, even when it catches nothing at all.",
+    "until_line": 1
+  },
+  {
+    "text": "You can only use one star in a target list, since two would be ambiguous.",
+    "until_line": 1
+  },
+  {
+    "text": "So first and last are one and five.",
+    "until_line": 2
+  },
+  {
+    "text": "And middle is two, three, four, collected automatically.",
+    "until_line": 3
+  },
+  {
+    "text": "Unpacking also gives you the cleanest swap in any language.",
+    "until_line": 5
+  },
+  {
+    "text": "a, b equals b, a. The right side is built first, so no temporary variable is needed.",
+    "until_line": 6
+  },
+  {
+    "text": "Two and one, swapped without a third name.",
+    "until_line": 7
+  },
+  {
+    "text": "Double star unpacks dictionaries, and later keys win over earlier ones.",
+    "until_line": 10
+  },
+  {
+    "text": "That makes it the neatest way to override defaults without mutating the original.",
+    "until_line": 10
+  },
+  {
+    "text": "So colour becomes blue while size keeps its default of M.",
+    "until_line": 11
+  },
+  {
+    "text": "Up next, sets. Comment PYTHON if you want the cheat sheet.",
+    "until_line": 11
+  }
+]

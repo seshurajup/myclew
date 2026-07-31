@@ -1,0 +1,3 @@
+[
+  {"after_line": 8, "text": ">>> Hi Sam!\n>>> Hi Sam! Hi Sam! Hi Sam!\n>>> ['amy']", "caption": "hints document intent, Python still runs it"}
+]

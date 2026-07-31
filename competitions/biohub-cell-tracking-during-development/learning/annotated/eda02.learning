@@ -1,0 +1,25 @@
+@ id: eda02
+@ order: 1910
+@ title: 1 Introduction
+@ subtitle: Erase-then-Delta Attention: Decoupling Erase and Write Addresses in Delta-Rule Linear Attention §1
+@ source: docs/papers/eda-delta-attention/eda-delta-attention.md
+
+--- note
+## 1 Introduction
+**Paper:** Erase-then-Delta Attention: Decoupling Erase and Write Addresses in Delta-Rule Linear Attention · §1 · pages 1–1 · equations (none) · 1 figures.
+
+**The claim.** Delta-rule linear attention corrects what is stored at the
+current write address before writing. EDA decouples *where to erase* from *where to write*: a targeted
+erase along a learned direction `e_t`, then the standard delta write along `k_t`. Reported across dense
+2.5B and MoE 25B-A2.8B pre-training, EDA is best in both settings and the gain persists with scale.
+
+For us the interesting part is not the benchmark — it is that the erase turns out to be one gradient step
+on an explicit objective, and that the whole rule folds back into a plain DeltaNet recurrence on a
+doubled sequence, so it costs no new kernel.
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/eda-delta-attention/p01_0.png
+

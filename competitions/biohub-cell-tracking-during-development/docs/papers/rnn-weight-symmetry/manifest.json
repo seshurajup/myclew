@@ -1,0 +1,80 @@
+{
+  "slug": "rnn-weight-symmetry",
+  "source": "https://arxiv.org/pdf/2606.18457",
+  "pdf": "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/docs/papers/rnn-weight-symmetry/source.pdf",
+  "title": "Task-Restricted Symmetries in Recurrent Weight Space",
+  "backend": "docling+pymupdf-assets",
+  "pages": 6,
+  "figures": [],
+  "tables": [],
+  "sections": [
+    {
+      "level": 1,
+      "page": 1,
+      "num": "",
+      "title": "Abstract",
+      "heading": "Abstract"
+    },
+    {
+      "level": 1,
+      "page": 1,
+      "num": "1",
+      "title": "Introduction",
+      "heading": "1. Introduction"
+    },
+    {
+      "level": 1,
+      "page": 2,
+      "num": "2",
+      "title": "Ordered Schur Coordinates",
+      "heading": "2. Ordered Schur Coordinates"
+    },
+    {
+      "level": 1,
+      "page": 3,
+      "num": "3",
+      "title": "Approximate Stabilizers in the Copy Task",
+      "heading": "3. Approximate Stabilizers in the Copy Task"
+    },
+    {
+      "level": 1,
+      "page": 4,
+      "num": "4",
+      "title": "Task Dependence Beyond the Copy Task",
+      "heading": "4. Task Dependence Beyond the Copy Task"
+    },
+    {
+      "level": 1,
+      "page": 4,
+      "num": "5",
+      "title": "Discussion and Limitations",
+      "heading": "5. Discussion and Limitations"
+    },
+    {
+      "level": 1,
+      "page": 5,
+      "num": "",
+      "title": "References",
+      "heading": "References"
+    }
+  ],
+  "equations": 64,
+  "numbered": 7,
+  "md": "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/docs/papers/rnn-weight-symmetry/rnn-weight-symmetry.md",
+  "equations_json": "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/docs/papers/rnn-weight-symmetry/equations.json",
+  "available": {
+    "pymupdf": true,
+    "marker": true,
+    "docling": true
+  },
+  "score": {
+    "chars": 31721,
+    "headings": 11,
+    "equations": 18,
+    "eq_tags": 2,
+    "images": 7,
+    "tables": 8,
+    "latex_cmds": 93,
+    "mojibake": 0
+  }
+}

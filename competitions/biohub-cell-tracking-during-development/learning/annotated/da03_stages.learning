@@ -1,0 +1,225 @@
+@ id: da03
+@ order: 3
+@ title: Density → developmental stage
+@ subtitle: Full EDA: TRUE density, the annotation inversion, the S0–S4 stages, and the confound
+@ source: learning/annotated/da03_stages.py
+
+--- note
+## From counts to biology
+da01's counts were *annotated* cells (sparse). Each `.geff` also stores the organisers' TRUE
+estimate — `estimated_number_of_nodes` (estN). Divide by frames → real cells/frame, which tracks
+the **developmental stage** (gastrula → segmentation). We explore that fully below — real outputs.
+
+--- note
+### Read the TRUE density for every embryo
+Pull estN from each geff's attributes, divide by its frame count → true cells/frame.
+
+--- code
+import json, numpy as np, pandas as pd, zarr              # tools
+rows = []                                                     # per-embryo true density
+for g in sorted(TRAIN.glob("*.geff")):                        # every embryo
+    attrs = json.load(open(f"{g}/zarr.json"))["attributes"]["geff"]  # geff metadata
+    estN = attrs["extra"]["estimated_number_of_nodes"]        # organisers' TRUE node estimate
+    t = np.asarray(zarr.open(f"{g}/nodes/props/t/values")[:])  # annotated node frames
+    n_frames = len(np.unique(t))                              # frames this embryo spans
+    rows.append({"group": g.name[:4], "true_per_frame": round(estN / n_frames)})  # true cells/frame
+df = pd.DataFrame(rows)                                       # 199-row density table
+df["true_per_frame"].describe().loc[["min", "50%", "max"]].astype(int)  # the real range 38..1015
+
+--- output
+<table class="dataframe df">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>true_per_frame</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>min</th>
+      <td>38</td>
+    </tr>
+    <tr>
+      <th>50%</th>
+      <td>186</td>
+    </tr>
+    <tr>
+      <th>max</th>
+      <td>1015</td>
+    </tr>
+  </tbody>
+</table>
+
+--- note
+### The inversion — annotation density is BACKWARDS from biology
+`44b6` has FEW annotated cells (da01: ~3/frame) but the HIGHEST true density → the biologically
+**late/dense** group. `6bba` is the opposite. So "6bba looks denser" (labels) reverses the truth.
+
+--- code
+(df.groupby("group")                                    # 44b6 vs 6bba
+   .agg(n=("group", "size"),
+        true_per_frame_median=("true_per_frame", "median"),
+        true_per_frame_max=("true_per_frame", "max"))
+   .astype(int).reset_index())                                # the real per-group TRUE density
+
+--- output
+<table class="dataframe df">
+  <thead>
+    <tr style="text-align: right;">
+      <th>group</th>
+      <th>n</th>
+      <th>true_per_frame_median</th>
+      <th>true_per_frame_max</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>44b6</td>
+      <td>71</td>
+      <td>397</td>
+      <td>888</td>
+    </tr>
+    <tr>
+      <td>6bba</td>
+      <td>128</td>
+      <td>97</td>
+      <td>1015</td>
+    </tr>
+  </tbody>
+</table>
+
+--- note
+### Cluster into 5 developmental stages (S0–S4)
+Split the log of true density into 5 bins — a simple stand-in for the developmental stages
+(gastrula → segmentation). Count how many embryos land in each stage.
+
+--- code
+x = np.log10(df["true_per_frame"].clip(lower=1))         # log density (spans ~1.5 decades)
+edges = np.linspace(x.min(), x.max() + 1e-9, 6)              # 5 equal log-width stage bins
+df["stage"] = pd.cut(x, bins=edges, labels=["S0", "S1", "S2", "S3", "S4"], include_lowest=True)
+(df.groupby("stage", observed=True)                          # per stage
+   .agg(n=("group", "size"),
+        density_min=("true_per_frame", "min"),
+        density_max=("true_per_frame", "max")).reset_index())  # stage -> count + density range
+
+--- output
+<table class="dataframe df">
+  <thead>
+    <tr style="text-align: right;">
+      <th>stage</th>
+      <th>n</th>
+      <th>density_min</th>
+      <th>density_max</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>S0</td>
+      <td>47</td>
+      <td>38</td>
+      <td>73</td>
+    </tr>
+    <tr>
+      <td>S1</td>
+      <td>38</td>
+      <td>74</td>
+      <td>140</td>
+    </tr>
+    <tr>
+      <td>S2</td>
+      <td>37</td>
+      <td>145</td>
+      <td>271</td>
+    </tr>
+    <tr>
+      <td>S3</td>
+      <td>46</td>
+      <td>276</td>
+      <td>495</td>
+    </tr>
+    <tr>
+      <td>S4</td>
+      <td>31</td>
+      <td>527</td>
+      <td>1015</td>
+    </tr>
+  </tbody>
+</table>
+
+--- note
+### The confound — stage is tangled with embryo
+Cross-tabulate stage × group. `6bba` dominates the early stages (S0–S1), `44b6` the late (S3–S4).
+**[Why it matters]** an embryo-disjoint split secretly tests a **stage shift** — so we prefer
+leave-one-STAGE-out validation (see rs02).
+
+--- code
+pd.crosstab(df["stage"], df["group"])                   # embryos per (stage, group)
+
+--- output
+<table class="dataframe df">
+  <thead>
+    <tr style="text-align: right;">
+      <th>group</th>
+      <th>44b6</th>
+      <th>6bba</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th></th>
+      <td>1</td>
+      <td>46</td>
+    </tr>
+    <tr>
+      <th></th>
+      <td>4</td>
+      <td>34</td>
+    </tr>
+    <tr>
+      <th></th>
+      <td>15</td>
+      <td>22</td>
+    </tr>
+    <tr>
+      <th></th>
+      <td>28</td>
+      <td>18</td>
+    </tr>
+    <tr>
+      <th></th>
+      <td>23</td>
+      <td>8</td>
+    </tr>
+  </tbody>
+</table>
+
+--- note
+### Stage plot — every embryo on the density axis
+Sort by true density, colour by group. The clean early→late gradient is gastrula → segmentation;
+red `44b6` clusters late, blue `6bba` early — the confound made visible.
+
+--- code
+import matplotlib; matplotlib.use("Agg"); import matplotlib.pyplot as plt
+s = df.sort_values("true_per_frame").reset_index(drop=True)   # sort early -> late
+col = s["group"].map({"44b6": "#E15759", "6bba": "#4E79A7"})  # colour by group
+fig, ax = plt.subplots(figsize=(11, 4.5))                     # canvas
+ax.scatter(range(len(s)), s["true_per_frame"], c=col, s=16)   # each embryo one dot
+ax.set_yscale("log"); ax.set_ylabel("TRUE cells / frame (estN / n_frames)")
+ax.set_xlabel("199 embryos, sorted early → late")
+fig.savefig(f"{ASSETS}/da03_stages.png", dpi=110, bbox_inches="tight", facecolor="white")
+print("saved da03_stages.png")
+
+--- output
+```
+saved da03_stages.png
+```
+
+--- image
+learning/assets/da03_stages.png
+Real true-density per embryo (log scale). early→late gradient = gastrula→segmentation; red 44b6 = late/dense, blue 6bba = early/sparse — the embryo↔stage confound.
+
+--- note
+**[Recap]** True density spans ~38→1015/frame (gastrula→segmentation), annotation
+density is the inverse of biology, and stage is confounded with embryo — so validation must
+stratify by stage. **Next → pt01: the conv block**, where we start building the detector.
+

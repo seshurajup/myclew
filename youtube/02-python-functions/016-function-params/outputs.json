@@ -1,0 +1,21 @@
+[
+  {
+    "after_line": 10,
+    "text": ">>> Hello, Alice Smith!\\n>>> Fluffy is a dog\\n>>> Tweety is a parrot",
+    "caption": "positional args + a default"
+  },
+  {
+    "after_line": 13,
+    "text": ">>> Whiskers is a cat",
+    "caption": "keyword args: any order"
+  },
+  {
+    "after_line": 19,
+    "text": ">>> 2 medium coffee\\n>>> 1 large tea",
+    "caption": "positional first, then keyword"
+  },
+  {
+    "after_line": 19,
+    "image": "artifacts/terminal.png"
+  }
+]

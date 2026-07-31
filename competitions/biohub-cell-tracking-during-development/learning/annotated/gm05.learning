@@ -1,0 +1,42 @@
+@ id: gm05
+@ order: 2240
+@ title: 3 Experiments and Results
+@ subtitle: GradMem: Learning to Write Context into Memory §3
+@ source: docs/papers/gradmem/gradmem.md
+
+--- note
+## 3 Experiments and Results
+**Paper:** GradMem: Learning to Write Context into Memory · §3 · pages 5–7 · equations (none) · 4 figures.
+
+> TODO(author): the *why* of §3 in 3–5 lines.
+
+--- note
+### Figure 3 — as printed in the paper
+
+Figure 3. Gradient-based memory updates (GradMem) out-
+
+--- image
+learning/assets/gradmem/p07_0.png
+Figure 3. Gradient-based memory updates (GradMem) out-
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/gradmem/p07_1.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/gradmem/p07_2.png
+
+--- note
+### Figure 4 — as printed in the paper
+
+Figure 4. More gradient steps at test-time lead to better per-
+
+--- image
+learning/assets/gradmem/p07_3.png
+Figure 4. More gradient steps at test-time lead to better per-
+

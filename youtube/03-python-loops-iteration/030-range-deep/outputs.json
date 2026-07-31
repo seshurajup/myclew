@@ -1,0 +1,31 @@
+[
+  {
+    "after_line": 2,
+    "text": ">>> [0, 1, 2, 3, 4]",
+    "caption": "range(stop)"
+  },
+  {
+    "after_line": 5,
+    "text": ">>> [2, 3, 4, 5, 6, 7]",
+    "caption": "range(start, stop)"
+  },
+  {
+    "after_line": 8,
+    "text": ">>> [0, 5, 10, 15]",
+    "caption": "range(start, stop, step)"
+  },
+  {
+    "after_line": 11,
+    "text": ">>> [10, 8, 6, 4, 2]",
+    "caption": "negative step counts down"
+  },
+  {
+    "after_line": 16,
+    "text": ">>> 500\\n>>> 1000000",
+    "caption": "lazy: no memory used"
+  },
+  {
+    "after_line": 16,
+    "image": "artifacts/terminal.png"
+  }
+]

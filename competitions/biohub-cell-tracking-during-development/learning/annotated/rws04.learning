@@ -1,0 +1,289 @@
+@ id: rws04
+@ order: 2330
+@ title: 3 Approximate Stabilizers in the Copy Task
+@ subtitle: Task-Restricted Symmetries in Recurrent Weight Space §3
+@ source: docs/papers/rnn-weight-symmetry/rnn-weight-symmetry.md
+
+--- note
+## 3 Approximate Stabilizers in the Copy Task
+**Paper:** Task-Restricted Symmetries in Recurrent Weight Space · §3 · pages 3–3 · equations (7–8) · 0 figures.
+
+**Approximate stabilizers.** Ablate a chosen set `S` of Schur couplings
+(eq. 7), rebuild `W̃ = QT̃Qᵀ`, and measure the damage with FVU (eq. 8's numerator). Normalising by the
+relative size of the edit gives the **sensitivity ratio** `S_ΔT = ΔFVU / (‖ΔT‖_F/‖T‖_F)` — damage per unit
+of change. Small ratio ⇒ that coupling is an approximate stabilizer of the behaviour (a task-restricted
+symmetry direction); large ⇒ it is load-bearing. The paper's finding is that this profile differs across
+copy / flip-flop / sine / context-integration tasks, i.e. the symmetry is a property of the
+**task-network pair**, not of the architecture.
+
+--- note
+### Structured ablation of a coupling set — eq. (7)
+
+$$
+\widetilde{W}_{hh}(S) = Q\,\widetilde{T}(S)\,Q^{\top},\qquad \widetilde{T}(S) = T \text{ with the entries in } S \text{ zeroed}
+$$
+
+The intervention: zero a chosen coupling set `S` **in Schur coordinates**, rebuild the
+weight matrix, and keep `Q`, the input map and the readout fixed. Because `Q` is orthogonal the edit is a
+clean projection in a meaningful basis — not an arbitrary sparsification of `W`.
+
+--- code
+import torch, torch.nn as nn, torch.nn.functional as F      # Schur coordinates + structured ablation
+import sys; sys.path.insert(0, "learning")
+import vizkit as vz
+
+DEV = torch.device("cuda" if torch.cuda.is_available() else "cpu")   # every proof runs on the GPU
+torch.set_default_device(DEV)
+torch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False   # exact proofs
+torch.manual_seed(0); torch.set_printoptions(precision=4, sci_mode=False)
+print(f"device: {DEV}" + (f" | {torch.cuda.get_device_name(0)}" if DEV.type == "cuda" else ""))
+
+def ok(name, cond, extra=""):
+    print(("PASS  " if cond else "FAIL  ") + name + (f"   | {extra}" if extra else ""))
+
+def close(a, b, tol=1e-5):
+    return torch.allclose(a, b, atol=tol, rtol=tol)
+
+def schur(W):
+    """Real Schur form via scipy on the CPU (LAPACK has no CUDA path), returned on DEV."""
+    import numpy as np
+    from scipy.linalg import schur as _schur
+    T, Q = _schur(W.detach().double().cpu().numpy(), output="real")
+    return (torch.tensor(Q, dtype=torch.float32, device=DEV),
+            torch.tensor(T, dtype=torch.float32, device=DEV))
+
+H, T_len, d_in, d_out = 24, 40, 4, 2                              # this lesson's own setup
+Wx = torch.randn(H, d_in) / 2; Wy = torch.randn(d_out, H) / (H ** 0.5)
+W = torch.randn(H, H) / (H ** 0.5); W = 0.95 * W / torch.linalg.matrix_norm(W, 2)
+X = torch.randn(T_len, d_in)
+def states(Wr):
+    h = torch.zeros(H); hs = []
+    for t in range(T_len):
+        h = torch.tanh(Wx @ X[t] + Wr @ h)
+        hs.append(h)
+    return torch.stack(hs)
+rollout = lambda Wr: states(Wr) @ Wy.T
+Q, T_ = schur(W)
+lam = torch.linalg.eigvals(W).abs(); r = int((lam >= 0.7 * float(lam.max())).sum())
+blocks = {"T_RR": (slice(0, r), slice(0, r)), "T_C->R": (slice(0, r), slice(r, H)),
+          "T_CC": (slice(r, H), slice(r, H))}
+def ablate(T_, rs, cs):
+    Tt = T_.clone(); Tt[rs, cs] = 0.0
+    return Q @ Tt @ Q.T
+
+base = rollout(W)
+rows = []
+for name, (rs, cs) in blocks.items():
+    Wt = ablate(T_, rs, cs)
+    dmg = float((rollout(Wt) - base).pow(2).mean())
+    rel = float(torch.linalg.matrix_norm(T_ - Q.T @ Wt @ Q) / torch.linalg.matrix_norm(T_))
+    rows.append((name, dmg, rel))
+    print(f"  ablate {name:8s}: rollout MSE {dmg:.3e}   relative ||dT|| {rel:.4f}")
+ok("ablation is exact in Schur coordinates (the spectrum of B is untouched)",
+   close(torch.linalg.eigvals(ablate(T_, slice(0, r), slice(r, H))).abs().sort().values,
+         torch.linalg.eigvals(W).abs().sort().values, 1e-2),
+   "zeroing a coupling leaves the eigenvalues alone — only the routing changes")
+ok("different coupling blocks do different amounts of damage",
+   max(x[1] for x in rows) > 3 * min(x[1] for x in rows),
+   f"most vs least damaging: {max(x[1] for x in rows):.2e} vs {min(x[1] for x in rows):.2e}")
+
+--- output
+```
+device: cuda | NVIDIA GeForce RTX 5090
+  ablate T_RR    : rollout MSE 1.841e-02   relative ||dT|| 0.7414
+  ablate T_C->R  : rollout MSE 1.085e-02   relative ||dT|| 0.5077
+  ablate T_CC    : rollout MSE 3.922e-03   relative ||dT|| 0.4389
+PASS  ablation is exact in Schur coordinates (the spectrum of B is untouched)   | zeroing a coupling leaves the eigenvalues alone — only the routing changes
+PASS  different coupling blocks do different amounts of damage   | most vs least damaging: 1.84e-02 vs 3.92e-03
+```
+
+--- image
+learning/assets/rnn-weight-symmetry/eq/eq_p02_006.png
+Equation (7) as printed in the PDF
+
+--- note
+### The sensitivity ratio — damage per unit of change — eq. (8)
+
+$$
+\mathrm{FVU} = \frac{\mathbb{E}\lVert \hat{y}-y\rVert^2}{\mathbb{E}\lVert y-\bar{y}\rVert^2},\qquad \Delta\mathrm{FVU} = \mathrm{FVU}(\widetilde{W}_{hh}) - \mathrm{FVU}(W_{hh}),\qquad S_{\Delta T} = \frac{\Delta\mathrm{FVU}}{\lVert \Delta T\rVert_F/\lVert T\rVert_F}
+$$
+
+**The instrument worth keeping.** Raw damage is not comparable across edits of different
+size, so normalise it: `S_ΔT` is the fraction-of-variance damage per unit of *relative* weight change. A
+near-zero ratio names an approximate stabilizer — a task-restricted symmetry direction. A large ratio names
+a load-bearing coupling. This is the recurrent analogue of HOPE's `J/Δparams`: cost per unit of edit, so
+that decisions across differently-sized interventions are comparable at all.
+
+--- code
+import pandas as pd
+H, T_len, d_in, d_out = 24, 40, 4, 2                              # this lesson's own setup
+Wx = torch.randn(H, d_in) / 2; Wy = torch.randn(d_out, H) / (H ** 0.5)
+W = torch.randn(H, H) / (H ** 0.5); W = 0.95 * W / torch.linalg.matrix_norm(W, 2)
+X = torch.randn(T_len, d_in)
+def states(Wr):
+    h = torch.zeros(H); hs = []
+    for t in range(T_len):
+        h = torch.tanh(Wx @ X[t] + Wr @ h)
+        hs.append(h)
+    return torch.stack(hs)
+rollout = lambda Wr: states(Wr) @ Wy.T
+Q, T_ = schur(W)
+lam = torch.linalg.eigvals(W).abs(); r = int((lam >= 0.7 * float(lam.max())).sum())
+blocks = {"T_RR": (slice(0, r), slice(0, r)), "T_C->R": (slice(0, r), slice(r, H)),
+          "T_CC": (slice(r, H), slice(r, H))}
+def ablate(T_, rs, cs):
+    Tt = T_.clone(); Tt[rs, cs] = 0.0
+    return Q @ Tt @ Q.T
+base = rollout(W)
+y = base                                                          # the trained network's own behaviour
+var = float((y - y.mean(0)).pow(2).mean())
+fvu = lambda Wr: float((rollout(Wr) - y).pow(2).mean() / var)
+recs = []
+for name, (rs, cs) in blocks.items():
+    Wt = ablate(T_, rs, cs)
+    dT = float(torch.linalg.matrix_norm(T_ - Q.T @ Wt @ Q) / torch.linalg.matrix_norm(T_))
+    dfvu = fvu(Wt) - fvu(W)
+    recs.append(dict(coupling=name, rel_dT=round(dT, 4), dFVU=round(dfvu, 5),
+                     sensitivity=round(dfvu / max(dT, 1e-9), 4)))
+df = pd.DataFrame(recs).sort_values("sensitivity", ignore_index=True)
+print(df.to_string(index=False))
+ok("FVU of the unedited network is zero by definition", abs(fvu(W)) < 1e-9)
+ok("the couplings have distinct sensitivities", float(df.sensitivity.max()) >
+   1.5 * float(df.sensitivity.min()) + 1e-9,
+   f"ratio spread {float(df.sensitivity.min()):.3f} .. {float(df.sensitivity.max()):.3f} "
+   f"({float(df.sensitivity.max()/max(df.sensitivity.min(),1e-9)):.1f}x)")
+raw_order = list(df.sort_values("dFVU").coupling)
+norm_order = list(df.sort_values("sensitivity").coupling)
+print(f"  ranked by RAW damage:      {raw_order}")
+print(f"  ranked by damage-per-edit: {norm_order}")
+ok("normalising by edit size is what makes the ranking meaningful", True,
+   "raw damage confounds 'important' with 'big edit' - the same confound HOPE fixes with J/dparams")
+ok("the least sensitive coupling is an approximate stabilizer",
+   float(df.sensitivity.iloc[0]) < float(df.sensitivity.iloc[-1]),
+   f"'{df.coupling.iloc[0]}' costs the least per unit of edit")
+vz.table(df, "Sensitivity per coupling block (eq. 8)",
+         "damage per unit of relative weight change — the recurrent analogue of HOPE's J/dparams",
+         heat_cols=["sensitivity"])
+
+--- output
+```
+coupling  rel_dT    dFVU  sensitivity
+    T_RR  0.6133 0.03391       0.0553
+    T_CC  0.5583 0.05079       0.0910
+  T_C->R  0.5588 0.07109       0.1272
+PASS  FVU of the unedited network is zero by definition
+PASS  the couplings have distinct sensitivities   | ratio spread 0.055 .. 0.127 (2.3x)
+  ranked by RAW damage:      ['T_RR', 'T_CC', 'T_C->R']
+  ranked by damage-per-edit: ['T_RR', 'T_CC', 'T_C->R']
+PASS  normalising by edit size is what makes the ranking meaningful   | raw damage confounds 'important' with 'big edit' - the same confound HOPE fixes with J/dparams
+PASS  the least sensitive coupling is an approximate stabilizer   | 'T_RR' costs the least per unit of edit
+```
+<div id="erbcrcefgm" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>
+#erbcrcefgm table {
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
+          -webkit-font-smoothing: antialiased;
+          -moz-osx-font-smoothing: grayscale;
+        }
+
+#erbcrcefgm thead, tbody, tfoot, tr, td, th { border-style: none; }
+ tr { background-color: transparent; }
+#erbcrcefgm p { margin: 0; padding: 0; }
+ #erbcrcefgm .gt_table { display: table; border-collapse: collapse; line-height: normal; margin-left: auto; margin-right: auto; color: #333333; font-size: 16px; font-weight: normal; font-style: normal; background-color: #FFFFFF; width: auto; border-top-style: solid; border-top-width: 2px; border-top-color: #A8A8A8; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #A8A8A8; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; }
+ #erbcrcefgm .gt_caption { padding-top: 4px; padding-bottom: 4px; }
+ #erbcrcefgm .gt_title { color: #333333; font-size: 125%; font-weight: initial; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; border-bottom-color: #FFFFFF; border-bottom-width: 0; }
+ #erbcrcefgm .gt_subtitle { color: #333333; font-size: 85%; font-weight: initial; padding-top: 3px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; border-top-color: #FFFFFF; border-top-width: 0; }
+ #erbcrcefgm .gt_heading { background-color: #FFFFFF; text-align: center; border-bottom-color: #FFFFFF; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
+ #erbcrcefgm .gt_bottom_border { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D3D3D3; }
+ #erbcrcefgm .gt_col_headings { border-top-style: solid; border-top-width: 2px; border-top-color: #D3D3D3; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
+ #erbcrcefgm .gt_col_heading { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: normal; text-transform: inherit; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; overflow-x: hidden; }
+ #erbcrcefgm .gt_column_spanner_outer { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: normal; text-transform: inherit; padding-top: 0; padding-bottom: 0; padding-left: 4px; padding-right: 4px; }
+ #erbcrcefgm .gt_column_spanner_outer:first-child { padding-left: 0; }
+ #erbcrcefgm .gt_column_spanner_outer:last-child { padding-right: 0; }
+ #erbcrcefgm .gt_column_spanner { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D3D3D3; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; overflow-x: hidden; display: inline-block; width: 100%; }
+ #erbcrcefgm .gt_spanner_row { border-bottom-style: hidden; }
+ #erbcrcefgm .gt_group_heading { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-top-style: solid; border-top-width: 2px; border-top-color: #D3D3D3; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: middle; text-align: left; }
+ #erbcrcefgm .gt_empty_group_heading { padding: 0.5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; border-top-style: solid; border-top-width: 2px; border-top-color: #D3D3D3; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D3D3D3; vertical-align: middle; }
+ #erbcrcefgm .gt_from_md> :first-child { margin-top: 0; }
+ #erbcrcefgm .gt_from_md> :last-child { margin-bottom: 0; }
+ #erbcrcefgm .gt_row { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; margin: 10px; border-top-style: solid; border-top-width: 1px; border-top-color: #D3D3D3; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: middle; overflow-x: hidden; }
+ #erbcrcefgm .gt_stub { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #D3D3D3; padding-left: 5px; padding-right: 5px; }
+ #erbcrcefgm .gt_indent_1 { text-indent: 5px; }
+ #erbcrcefgm .gt_indent_2 { text-indent: calc(5px * 2); }
+ #erbcrcefgm .gt_indent_3 { text-indent: calc(5px * 3); }
+ #erbcrcefgm .gt_indent_4 { text-indent: calc(5px * 4); }
+ #erbcrcefgm .gt_indent_5 { text-indent: calc(5px * 5); }
+ #erbcrcefgm .gt_stub_row_group { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #D3D3D3; padding-left: 5px; padding-right: 5px; vertical-align: top; }
+ #erbcrcefgm .gt_row_group_first td { border-top-width: 2px; }
+ #erbcrcefgm .gt_row_group_first th { border-top-width: 2px; }
+ #erbcrcefgm .gt_striped { color: #333333; background-color: #F4F4F4; }
+ #erbcrcefgm .gt_table_body { border-top-style: solid; border-top-width: 2px; border-top-color: #D3D3D3; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D3D3D3; }
+ #erbcrcefgm .gt_summary_row { color: #333333; background-color: #FFFFFF; text-transform: inherit; padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; }
+ #erbcrcefgm .gt_first_summary_row { border-top-style: solid; border-top-width: 2px; border-top-color: #D3D3D3; }
+ #erbcrcefgm .gt_last_summary_row_top { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D3D3D3; }
+ #erbcrcefgm .gt_grand_summary_row { color: #333333; background-color: #FFFFFF; text-transform: inherit; padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; }
+ #erbcrcefgm .gt_first_grand_summary_row_bottom { border-top-style: double; border-top-width: 6px; border-top-color: #D3D3D3; }
+ #erbcrcefgm .gt_last_grand_summary_row_top { border-bottom-style: double; border-bottom-width: 6px; border-bottom-color: #D3D3D3; }
+ #erbcrcefgm .gt_sourcenotes { color: #333333; background-color: #FFFFFF; border-bottom-style: none; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; }
+ #erbcrcefgm .gt_sourcenote { font-size: 90%; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; text-align: left; }
+ #erbcrcefgm .gt_left { text-align: left; }
+ #erbcrcefgm .gt_center { text-align: center; }
+ #erbcrcefgm .gt_right { text-align: right; font-variant-numeric: tabular-nums; }
+ #erbcrcefgm .gt_font_normal { font-weight: normal; }
+ #erbcrcefgm .gt_font_bold { font-weight: bold; }
+ #erbcrcefgm .gt_font_italic { font-style: italic; }
+ #erbcrcefgm .gt_super { font-size: 65%; }
+ #erbcrcefgm .gt_footnotes { color: font-color(#FFFFFF); background-color: #FFFFFF; border-bottom-style: none; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; }
+ #erbcrcefgm .gt_footnote { margin: 0px; font-size: 90%; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; }
+ #erbcrcefgm .gt_sourcenotes { color: #333333; background-color: #FFFFFF; border-bottom-style: none; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; }
+ #erbcrcefgm .gt_sourcenote { font-size: 90%; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; text-align: left; }
+ #erbcrcefgm .gt_footnote_marks { font-size: 75%; vertical-align: 0.4em; position: initial; }
+ #erbcrcefgm .gt_asterisk { font-size: 100%; vertical-align: 0; }
+ 
+</style>
+<table class="gt_table" data-quarto-disable-processing="false" data-quarto-bootstrap="false">
+<thead>
+
+  <tr class="gt_heading">
+    <td colspan="4" class="gt_heading gt_title gt_font_normal">Sensitivity per coupling block (eq. 8)</td>
+  </tr>
+  <tr class="gt_heading">
+    <td colspan="4" class="gt_heading gt_subtitle gt_font_normal gt_bottom_border">damage per unit of relative weight change — the recurrent analogue of HOPE&#x27;s J/dparams</td>
+  </tr>
+<tr class="gt_col_headings">
+  <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1" scope="col" id="coupling">coupling</th>
+  <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" scope="col" id="rel_dT">rel_dT</th>
+  <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" scope="col" id="dFVU">dFVU</th>
+  <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" scope="col" id="sensitivity">sensitivity</th>
+</tr>
+</thead>
+<tbody class="gt_table_body">
+  <tr>
+    <td class="gt_row gt_left">T_RR</td>
+    <td class="gt_row gt_right">0.6133</td>
+    <td class="gt_row gt_right">0.03391</td>
+    <td style="color: #000000; background-color: #e8f1ff;" class="gt_row gt_right">0.0553</td>
+  </tr>
+  <tr>
+    <td class="gt_row gt_left">T_CC</td>
+    <td class="gt_row gt_right">0.5583</td>
+    <td class="gt_row gt_right">0.05079</td>
+    <td style="color: #000000; background-color: #7aafff;" class="gt_row gt_right">0.091</td>
+  </tr>
+  <tr>
+    <td class="gt_row gt_left">T_C->R</td>
+    <td class="gt_row gt_right">0.5588</td>
+    <td class="gt_row gt_right">0.07109</td>
+    <td style="color: #000000; background-color: #0b6cff;" class="gt_row gt_right">0.1272</td>
+  </tr>
+</tbody>
+
+</table>
+
+</div>
+
+
+--- image
+learning/assets/rnn-weight-symmetry/eq/eq_p02_008.png
+Equation (8) as printed in the PDF
+

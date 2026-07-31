@@ -1,0 +1,16 @@
+[
+  {
+    "after_line": 8,
+    "text": ">>> Hello, Alice!\\n>>> 7",
+    "caption": "hints document, don't enforce"
+  },
+  {
+    "after_line": 21,
+    "text": ">>> 7.0\\n>>> admin None",
+    "caption": "list[float] and Optional[str]"
+  },
+  {
+    "after_line": 21,
+    "image": "artifacts/terminal.png"
+  }
+]

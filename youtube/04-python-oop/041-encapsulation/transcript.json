@@ -1,0 +1,42 @@
+[
+  {
+    "text": "Encapsulation means bundling data with the methods that guard it, and controlling access from outside.",
+    "until_line": 3
+  },
+  {
+    "text": "A single leading underscore is a convention — it signals this attribute is internal, please don't touch it directly.",
+    "until_line": 3
+  },
+  {
+    "text": "Python won't stop you, but other developers know to leave underscore-balance alone.",
+    "until_line": 3
+  },
+  {
+    "text": "[chuckle] A double underscore goes further — Python name-mangles it, making it genuinely hard to reach by accident.",
+    "until_line": 4
+  },
+  {
+    "text": "The idea is to expose safe methods, like deposit, that validate changes before touching the data.",
+    "until_line": 8
+  },
+  {
+    "text": "[sniff] deposit refuses negative amounts, so the balance can only change through controlled, checked paths.",
+    "until_line": 15
+  },
+  {
+    "text": "You read the balance through a method too, keeping the actual attribute protected inside.",
+    "until_line": 15
+  },
+  {
+    "text": "[sigh] Reaching the double-underscore pin from outside fails, because Python renamed it behind the scenes.",
+    "until_line": 24
+  },
+  {
+    "text": "[groan] Encapsulation is about trust and safety — expose a clean interface, and hide the fragile internals.",
+    "until_line": 24
+  },
+  {
+    "text": "Next video: properties. Comment PYTHON if you want the cheat sheet.",
+    "until_line": 24
+  }
+]

@@ -1,0 +1,42 @@
+[
+  {
+    "text": "List comprehensions are one of Python's most loved features — they build a whole list in a single readable line.",
+    "until_line": 3
+  },
+  {
+    "text": "The pattern is: the expression you want, then for, then the item, then the sequence.",
+    "until_line": 3
+  },
+  {
+    "text": "So x times two for x in numbers doubles every value, replacing a three-line loop entirely.",
+    "until_line": 4
+  },
+  {
+    "text": "[chuckle] Add an if at the end and it becomes a filter — keep only the numbers where the condition is true.",
+    "until_line": 7
+  },
+  {
+    "text": "Here we keep just the even ones, all in that same compact line.",
+    "until_line": 7
+  },
+  {
+    "text": "[sniff] And you can do both at once — transform and filter together, squaring only the even numbers.",
+    "until_line": 10
+  },
+  {
+    "text": "Comprehensions work on any sequence, not just numbers — here we uppercase every word in a list.",
+    "until_line": 15
+  },
+  {
+    "text": "[groan] You can even nest them to build a grid, a list of lists, with one comprehension inside another.",
+    "until_line": 19
+  },
+  {
+    "text": "Just don't overdo the nesting — if it stops being readable, a plain loop is the kinder choice.",
+    "until_line": 19
+  },
+  {
+    "text": "Video 21 tackles dict comprehensions. Follow so you don't miss it.",
+    "until_line": 19
+  }
+]

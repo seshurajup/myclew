@@ -1,0 +1,9 @@
+{
+  "ref": "54225063",
+  "description": "no-train pipeline: det=0.998 + ILP edge=0.3/ad=0.3 + count (local fold-0 CV 0.8392)",
+  "public": 0.829,
+  "private": null,
+  "cv": 0.8392,
+  "status": "SubmissionStatus.COMPLETE",
+  "source": "kaggle competitions submissions"
+}

@@ -1,0 +1,21 @@
+[
+  {
+    "after_line": 8,
+    "text": ">>> inside: local\\n>>> outside: global",
+    "caption": "local shadows global"
+  },
+  {
+    "after_line": 18,
+    "text": ">>> counter: 2",
+    "caption": "global keyword rebinds module var"
+  },
+  {
+    "after_line": 27,
+    "text": ">>> enclosing",
+    "caption": "LEGB name resolution"
+  },
+  {
+    "after_line": 27,
+    "image": "artifacts/terminal.png"
+  }
+]

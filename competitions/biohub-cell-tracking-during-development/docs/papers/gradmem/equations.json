@@ -1,0 +1,272 @@
+[
+  {
+    "n": "2",
+    "page": 3,
+    "latex": "\\mathcal{M} = \\mathcal{E}_{\\theta}(C). \\tag{2}",
+    "raw": "M = E\u03b8(C). (2)",
+    "image": "assets/eq/eq_p03_000.png",
+    "y0": 406.7017822265625,
+    "y1": 417.634521484375
+  },
+  {
+    "n": null,
+    "page": 3,
+    "latex": "f_{\\theta}(Y | \\mathcal{M}, Q) \u225cf_{\\theta}",
+    "raw": "f\u03b8(Y | M, Q) \u225cf\u03b8",
+    "image": "assets/eq/eq_p03_001.png",
+    "y0": 462.1854248046875,
+    "y1": 475.16656494140625
+  },
+  {
+    "n": null,
+    "page": 3,
+    "latex": "",
+    "raw": "\u0000",
+    "image": "assets/eq/eq_p03_002.png",
+    "y0": 463.4553527832031,
+    "y1": 473.4179382324219
+  },
+  {
+    "n": null,
+    "page": 3,
+    "latex": "",
+    "raw": "\u0001",
+    "image": "assets/eq/eq_p03_003.png",
+    "y0": 463.4553527832031,
+    "y1": 473.4179382324219
+  },
+  {
+    "n": null,
+    "page": 3,
+    "latex": "Y | [\\mathcal{M}; Q]",
+    "raw": "Y | [M; Q]",
+    "image": "assets/eq/eq_p03_004.png",
+    "y0": 464.2328186035156,
+    "y1": 474.32452392578125
+  },
+  {
+    "n": null,
+    "page": 3,
+    "latex": "f_{\\theta}(Y | C, Q) \u225cf_{\\theta}",
+    "raw": "f\u03b8(Y | C, Q) \u225cf\u03b8",
+    "image": "assets/eq/eq_p03_005.png",
+    "y0": 650.6644287109375,
+    "y1": 663.64453125
+  },
+  {
+    "n": null,
+    "page": 3,
+    "latex": "",
+    "raw": "\u0000",
+    "image": "assets/eq/eq_p03_006.png",
+    "y0": 651.934326171875,
+    "y1": 661.89697265625
+  },
+  {
+    "n": null,
+    "page": 3,
+    "latex": "",
+    "raw": "\u0001",
+    "image": "assets/eq/eq_p03_007.png",
+    "y0": 651.934326171875,
+    "y1": 661.89697265625
+  },
+  {
+    "n": null,
+    "page": 3,
+    "latex": "Y | [C; Q]",
+    "raw": "Y | [C; Q]",
+    "image": "assets/eq/eq_p03_008.png",
+    "y0": 652.7117919921875,
+    "y1": 662.8035278320312
+  },
+  {
+    "n": "7",
+    "page": 4,
+    "latex": "f_{\\theta}(Y | \\mathcal{M}\u02c6, Q). \\tag{7}",
+    "raw": "f\u03b8(Y | \u02c6 M, Q). (7)",
+    "image": "assets/eq/eq_p04_009.png",
+    "y0": 190.2609100341797,
+    "y1": 203.58258056640625
+  },
+  {
+    "n": null,
+    "page": 4,
+    "latex": "",
+    "raw": "\u0010",
+    "image": "assets/eq/eq_p04_010.png",
+    "y0": 259.2944030761719,
+    "y1": 269.2569885253906
+  },
+  {
+    "n": null,
+    "page": 4,
+    "latex": "",
+    "raw": "\u0011",
+    "image": "assets/eq/eq_p04_011.png",
+    "y0": 259.2944030761719,
+    "y1": 269.2569885253906
+  },
+  {
+    "n": null,
+    "page": 4,
+    "latex": "\\mathcal{L}_{task}(\\mathcal{M} \u02c6, Q, Y ) = -log f_{\\theta}",
+    "raw": "Ltask( \u02c6 M, Q, Y ) = \u2212log f\u03b8",
+    "image": "assets/eq/eq_p04_012.png",
+    "y0": 260.67193603515625,
+    "y1": 274.15496826171875
+  },
+  {
+    "n": null,
+    "page": 4,
+    "latex": "Y | \\mathcal{M}\u02c6, Q",
+    "raw": "Y | \u02c6 M, Q",
+    "image": "assets/eq/eq_p04_013.png",
+    "y0": 260.6719970703125,
+    "y1": 273.152587890625
+  },
+  {
+    "n": null,
+    "page": 4,
+    "latex": "X^{N}",
+    "raw": "N X",
+    "image": "assets/eq/eq_p04_014.png",
+    "y0": 459.1407470703125,
+    "y1": 476.9199523925781
+  },
+  {
+    "n": null,
+    "page": 4,
+    "latex": "\\mathcal{L}_{write}(\\mathcal{M}; C) = -",
+    "raw": "Lwrite(M; C) = \u2212",
+    "image": "assets/eq/eq_p04_015.png",
+    "y0": 469.1288146972656,
+    "y1": 480.22393798828125
+  },
+  {
+    "n": "4",
+    "page": 4,
+    "latex": "log f_{\\theta}(t_{i} | [\\mathcal{M}; t_{<i}]) , \\tag{4}",
+    "raw": "log f\u03b8(ti | [M; t<i]) , (4)",
+    "image": "assets/eq/eq_p04_016.png",
+    "y0": 469.1288146972656,
+    "y1": 480.5863952636719
+  },
+  {
+    "n": null,
+    "page": 4,
+    "latex": "^{i=1}",
+    "raw": "i=1",
+    "image": "assets/eq/eq_p04_017.png",
+    "y0": 483.3487548828125,
+    "y1": 490.32257080078125
+  },
+  {
+    "n": "5",
+    "page": 4,
+    "latex": "\\mathcal{M}_{k+1} = \\mathcal{M}_{k} -\\alpha \\nabla _{\\mathcal{M}k}\\mathcal{L}_{write}(\\mathcal{M}_{k}; C), \\tag{5}",
+    "raw": "Mk+1 = Mk \u2212\u03b1 \u2207MkLwrite(Mk; C), (5)",
+    "image": "assets/eq/eq_p04_018.png",
+    "y0": 643.2398071289062,
+    "y1": 654.8255004882812
+  },
+  {
+    "n": "6",
+    "page": 4,
+    "latex": "\\mathcal{M}\u02c6 = \\mathcal{E}_{\\theta}(C) \u225cGD_{K}(\\mathcal{M}_{0}, \\mathcal{L}_{write}(\\cdot ; C)) . \\tag{6}",
+    "raw": "\u02c6 M = E\u03b8(C) \u225cGDK(M0, Lwrite(\u00b7; C)) . (6)",
+    "image": "assets/eq/eq_p04_019.png",
+    "y0": 704.7559204101562,
+    "y1": 718.2399291992188
+  },
+  {
+    "n": null,
+    "page": 5,
+    "latex": "C = !k_{1}:v_{1}!!k_{2}:v_{2}! \\cdot \\cdot \\cdot !k_{N}:v_{N}!",
+    "raw": "C = !k1:v1!!k2:v2! \u00b7 \u00b7 \u00b7 !kN:vN!",
+    "image": "assets/eq/eq_p05_020.png",
+    "y0": 329.2193908691406,
+    "y1": 340.3025207519531
+  },
+  {
+    "n": null,
+    "page": 5,
+    "latex": "Q = ?!k_{j}:,Y = v_{j}.",
+    "raw": "Q = ?!kj:, Y = vj.",
+    "image": "assets/eq/eq_p05_021.png",
+    "y0": 381.8174133300781,
+    "y1": 392.9005432128906
+  },
+  {
+    "n": "9",
+    "page": 18,
+    "latex": "^{2} T_{full} \\approx c+ cqN. \\tag{9}",
+    "raw": "Tfull \u2248c2 + cqN. (9)",
+    "image": "assets/eq/eq_p18_022.png",
+    "y0": 237.48997497558594,
+    "y1": 252.93142700195312
+  },
+  {
+    "n": "10",
+    "page": 18,
+    "latex": "^{22} T_{GradMem} \\approx R(c + m)K + m+ mqN. \\tag{10}",
+    "raw": "TGradMem \u2248R(c + m)2K + m2 + mqN. (10)",
+    "image": "assets/eq/eq_p18_023.png",
+    "y0": 310.34991455078125,
+    "y1": 325.7913818359375
+  },
+  {
+    "n": null,
+    "page": 18,
+    "latex": "^{22} + 2 c(RK -1) + (1 + RK)mcmRK N >",
+    "raw": "N > c2(RK \u22121) + (1 + RK)m2 + 2cmRK",
+    "image": "assets/eq/eq_p18_024.png",
+    "y0": 371.3939208984375,
+    "y1": 391.7115173339844
+  },
+  {
+    "n": "11",
+    "page": 18,
+    "latex": ".(11) q(c -m) \\tag{11}",
+    "raw": "q(c \u2212m) . (11)",
+    "image": "assets/eq/eq_p18_025.png",
+    "y0": 381.7489013671875,
+    "y1": 398.5455017089844
+  },
+  {
+    "n": null,
+    "page": 18,
+    "latex": "",
+    "raw": "\u0000",
+    "image": "assets/eq/eq_p18_026.png",
+    "y0": 425.4213562011719,
+    "y1": 435.3839416503906
+  },
+  {
+    "n": null,
+    "page": 18,
+    "latex": "",
+    "raw": "\u0001",
+    "image": "assets/eq/eq_p18_027.png",
+    "y0": 425.4213562011719,
+    "y1": 435.3839416503906
+  },
+  {
+    "n": null,
+    "page": 18,
+    "latex": "c(RK -1)",
+    "raw": "c(RK \u22121)",
+    "image": "assets/eq/eq_p18_028.png",
+    "y0": 426.1988220214844,
+    "y1": 436.29052734375
+  },
+  {
+    "n": null,
+    "page": 24,
+    "latex": "_{3:4:2:}^{rate}_{for\\mathcal{M} \\gets \\mathcal{M}\\mathcal{L} k}^{\\alpha}_{write = 1(\\mathcal{M}, . . . , K0; C) \\gets - doPN\u25b7Initialize from meta-learned state}",
+    "raw": "rate \u03b1 2: M \u2190M0 \u25b7Initialize from meta-learned state 3: for k = 1, . . . , K do 4: Lwrite(M; C) \u2190\u2212PN",
+    "image": "assets/eq/eq_p24_029.png",
+    "y0": 111.76646423339844,
+    "y1": 152.2262420654297
+  }
+]

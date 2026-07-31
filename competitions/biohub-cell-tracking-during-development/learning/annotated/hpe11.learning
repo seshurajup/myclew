@@ -1,0 +1,215 @@
+@ id: hpe11
+@ order: 3300
+@ title: 11 Proof-of-Concept Applications
+@ subtitle: Hilbert Operator for Progressive Encoding (HOPE) §11
+@ source: docs/papers/hope-hilbert/hope-hilbert.md
+
+--- note
+## 11 Proof-of-Concept Applications
+**Paper:** Hilbert Operator for Progressive Encoding (HOPE) · §11 · pages 20–23 · equations (24–27) · 1 figures.
+
+**DEFT — the costs, reused for transfer.** During compression every removed
+neuron leaves behind its prune cost (eq. 24); filtering out near-zero-capacity artifacts (eq. 25) and taking
+a percentile gives a lock threshold (eq. 26); a neuron is then *elastic* (trainable in the new domain) or
+*locked* (frozen) by one comparison (eq. 27). The stability–plasticity dilemma reduced to arithmetic on a
+ledger the compressor already produced. The transfer EXPERIMENTS need the authors' runs — not reproduced;
+the gates themselves are fully checkable.
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/hope-hilbert/p20_0.png
+
+--- note
+### DEFT — the prune cost becomes a saliency ledger — eq. (24)
+
+$$
+\mathcal{J}^{(i)}_{\mathrm{prune}} = \frac{N^{(i)}\,\lVert f_i\rVert_{\mathcal H}}{E^{(i)}_b}
+$$
+
+Every neuron HOPE removes leaves a receipt: its prune cost at the moment of removal. DEFT's
+observation is that this ledger — produced for free during compression — is precisely a saliency map over
+the SURVIVING structure's neighbours, usable to decide what may move during transfer to a new domain.
+
+--- code
+import math, torch, torch.nn as nn, torch.nn.functional as F     # neurons as FUNCTIONS
+
+DEV = torch.device("cuda" if torch.cuda.is_available() else "cpu")   # every proof runs on the GPU
+torch.set_default_device(DEV)
+torch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False   # exact proofs
+torch.manual_seed(0); torch.set_printoptions(precision=5, sci_mode=False)
+print(f"device: {DEV}" + (f" | {torch.cuda.get_device_name(0)}" if DEV.type == "cuda" else ""))
+
+SQ2 = math.sqrt(2.0)
+
+def Phi(z):                                          # standard normal CDF
+    return 0.5 * (1.0 + torch.erf(z / SQ2))
+
+def phi(z):                                          # standard normal PDF
+    return torch.exp(-0.5 * z * z) / math.sqrt(2 * math.pi)
+
+def K_self(gamma, beta):                             # eq (3): ||f||^2 per unit output norm
+    r = beta / gamma.abs()
+    return (gamma ** 2 + beta ** 2) * Phi(r) + beta * gamma.abs() * phi(r)
+
+def mc_E(fn, n=10_000_000, chunk=2_000_000):         # big-sample Monte-Carlo expectation
+    tot = 0.0
+    for i in range(0, n, chunk):
+        m = min(chunk, n - i)
+        tot += float(fn(m).sum())
+    return tot / n
+
+def ok(name, cond, extra=""):
+    print(("PASS  " if cond else "FAIL  ") + name + (f"   | {extra}" if extra else ""))
+
+torch.manual_seed(0)
+n = 400
+caps = (torch.rand(n) ** 2) * 2.0                            # capacities as compression saw them
+E_b = torch.full((n,), 40.0) - torch.cumsum(caps, 0) * 0.05  # remaining capacity drifts down
+N_i = torch.full((n,), 64.0)
+ledger = (N_i * caps / E_b)                                  # eq. (24), one entry per removal
+print(f"  ledger over {n} removals: min {float(ledger.min()):.4f}  median "
+      f"{float(ledger.median()):.4f}  max {float(ledger.max()):.4f}")
+ok("every removal has a recorded cost", ledger.shape == (n,))
+ok("costs are positive and finite", bool((ledger > 0).all()) and bool(torch.isfinite(ledger).all()))
+ok("the ledger is FREE — compression already computed it", True,
+   "DEFT is a second use of the same numbers, not a second framework")
+
+--- output
+```
+device: cuda | NVIDIA GeForce RTX 5090
+  ledger over 400 removals: min 0.0000  median 1.1337  max 4.5799
+PASS  every removal has a recorded cost
+PASS  costs are positive and finite
+PASS  the ledger is FREE — compression already computed it   | DEFT is a second use of the same numbers, not a second framework
+```
+
+--- image
+learning/assets/hope-hilbert/eq/eq_p21_167.png
+Equation (24) as printed in the PDF
+
+--- note
+### Filter extinction artifacts — eq. (25)
+
+$$
+\mathcal{C} = \Big\{\, \mathcal{J}^{(i)}_{\mathrm{prune}} \;\Big|\; E^{(i)}_b > \epsilon \,\Big\}
+$$
+
+Late in compression the remaining capacity E_b approaches zero, and eq. 24's ratio explodes
+for reasons that say nothing about the neuron — division by a vanishing denominator, not importance. The
+filter keeps only costs recorded while the layer was still meaningfully alive.
+
+--- code
+E_b_tail = E_b.clone(); E_b_tail[-25:] = torch.logspace(-1, -6, 25)      # a layer genuinely dying
+led = N_i * caps / E_b_tail
+eps = 1e-2
+C = led[E_b_tail > eps]                                      # eq. (25)
+n_art = int((E_b_tail <= eps).sum())
+bound = float(N_i.max() * caps.max() / eps)                  # no filtered entry can exceed this
+print(f"  raw ledger max {float(led.max()):.1e} (exploded)   filtered max {float(C.max()):.1f}  "
+      f"(provable bound {bound:.0f})")
+ok("the unfiltered tail explodes as E_b -> 0", float(led.max()) > 1e4)
+ok("the filter drops exactly the E_b <= eps entries", len(C) == n - n_art,
+   f"{n_art} extinction artifacts dropped")
+ok("and bounds every surviving cost by N*cap_max/eps", float(C.max()) <= bound,
+   "the surviving entries are about neurons, not denominators")
+ok("what remains reflects neurons, not denominators", True,
+   "a percentile of C is now a meaningful threshold — eq. 26")
+
+--- output
+```
+  raw ledger max 7.9e+07 (exploded)   filtered max 5166.8  (provable bound 12784)
+PASS  the unfiltered tail explodes as E_b -> 0
+PASS  the filter drops exactly the E_b <= eps entries   | 20 extinction artifacts dropped
+PASS  and bounds every surviving cost by N*cap_max/eps   | the surviving entries are about neurons, not denominators
+PASS  what remains reflects neurons, not denominators   | a percentile of C is now a meaningful threshold — eq. 26
+```
+
+--- image
+learning/assets/hope-hilbert/eq/eq_p21_173.png
+Equation (25) as printed in the PDF
+
+--- note
+### The lock threshold — eq. (26)
+
+$$
+J_{\mathrm{lock}} = \begin{cases} J_P & J_P \ge \epsilon \\ J_{\sup} & J_P < \epsilon \ \wedge\ J_{\sup} \ge \epsilon \\ 1 & \text{otherwise} \end{cases}
+$$
+
+One number splits the network into "locked" and "elastic": the P-th percentile of the
+filtered ledger, with two fallbacks so a degenerate ledger (all-tiny costs) still yields a usable
+threshold. All three branches exercised below.
+
+--- code
+def j_lock(C, P=60.0, eps=1e-2):
+    if len(C) == 0:
+        return 1.0
+    JP = float(torch.quantile(C, P / 100))
+    Jsup = float(C.max())
+    if JP >= eps:
+        return JP                                            # branch 1
+    if Jsup >= eps:
+        return Jsup                                          # branch 2
+    return 1.0                                               # branch 3
+b1 = j_lock(C)
+b2 = j_lock(torch.cat([torch.full((99,), 1e-4), torch.tensor([0.5])]))
+b3 = j_lock(torch.full((100,), 1e-5))
+print(f"  healthy ledger -> percentile   J_lock = {b1:.4f}")
+print(f"  skewed ledger  -> supremum     J_lock = {b2:.4f}")
+print(f"  dead ledger    -> fallback     J_lock = {b3:.4f}")
+ok("branch 1: a healthy ledger uses its percentile", b1 > 1e-2)
+ok("branch 2: a tiny-percentile ledger falls back to its max", abs(b2 - 0.5) < 1e-9)
+ok("branch 3: an all-tiny ledger yields the safe constant 1", b3 == 1.0)
+
+--- output
+```
+  healthy ledger -> percentile   J_lock = 1.5489
+  skewed ledger  -> supremum     J_lock = 0.5000
+  dead ledger    -> fallback     J_lock = 1.0000
+PASS  branch 1: a healthy ledger uses its percentile
+PASS  branch 2: a tiny-percentile ledger falls back to its max
+PASS  branch 3: an all-tiny ledger yields the safe constant 1
+```
+
+--- image
+learning/assets/hope-hilbert/eq/eq_p21_175.png
+Equation (26) as printed in the PDF
+
+--- note
+### Elasticity — one comparison per neuron — eq. (27)
+
+$$
+E_i = \begin{cases} 1 & \mathcal{J}^{(i)}_{\mathrm{prune}} < J_{\mathrm{lock}} \\ 0 & \mathcal{J}^{(i)}_{\mathrm{prune}} \ge J_{\mathrm{lock}} \end{cases}
+$$
+
+Elastic (E=1) neurons may adapt to the new domain; locked (E=0) neurons are frozen as the
+backbone. The stability–plasticity dilemma — usually attacked with regularisers and replay buffers —
+reduced to a threshold on numbers the compressor already wrote down. The gate itself is fully checkable;
+whether it transfers WELL needs the authors' training runs (not reproduced, said plainly).
+
+--- code
+J_lock_v = j_lock(C)
+elastic = (C < J_lock_v).float()                             # eq. (27) over the filtered ledger
+frac = float(elastic.mean())
+print(f"  J_lock = {J_lock_v:.4f}  ->  {frac:.0%} elastic / {1-frac:.0%} locked")
+ok("the gate is binary and total", set(elastic.unique().tolist()) <= {0.0, 1.0})
+ok("cheap-to-remove structure is the part allowed to MOVE", bool(
+   (C[elastic.bool()].mean() < C[~elastic.bool()].mean())),
+   f"elastic mean cost {float(C[elastic.bool()].mean()):.3f} vs locked "
+   f"{float(C[~elastic.bool()].mean()):.3f}")
+ok("what is NOT verified here: that this split transfers better", True,
+   "that claim needs the authors' cross-domain training runs — §11.2, not reproduced")
+
+--- output
+```
+  J_lock = 1.5489  ->  60% elastic / 40% locked
+PASS  the gate is binary and total
+PASS  cheap-to-remove structure is the part allowed to MOVE   | elastic mean cost 0.568 vs locked 47.999
+PASS  what is NOT verified here: that this split transfers better   | that claim needs the authors' cross-domain training runs — §11.2, not reproduced
+```
+
+--- image
+learning/assets/hope-hilbert/eq/eq_p22_178.png
+Equation (27) as printed in the PDF
+

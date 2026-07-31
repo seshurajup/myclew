@@ -1,0 +1,12 @@
+@ id: gm12
+@ order: 2310
+@ title: B Implementation, Training, and Hyperparameter Details
+@ subtitle: GradMem: Learning to Write Context into Memory §B
+@ source: docs/papers/gradmem/gradmem.md
+
+--- note
+## B Implementation, Training, and Hyperparameter Details
+**Paper:** GradMem: Learning to Write Context into Memory · §B · pages 15–16 · equations (none) · 0 figures.
+
+> TODO(author): the *why* of §B in 3–5 lines.
+

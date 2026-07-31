@@ -1,0 +1,47 @@
+"""Working code for aug02 — brightness jitter. Runs the real brightness shift on a real
+frame and attaches real before/after numbers.
+"""
+from pathlib import Path
+import sys
+ROOT = Path("/home/seshu/kaggle/2026/biohub-cell-tracking-during-development")
+sys.path.insert(0, str(ROOT / "learning"))
+from lessonkit import build_lesson
+TRAIN = ROOT / "input/biohub-cell-tracking-during-development/train"
+
+META = dict(id="aug02", order=19, title="Augmentation — brightness jitter",
+            subtitle="A one-line shift, justified by the real intensity spread in this data",
+            source="research/pilkwang_support_pack/repo/scripts/augmentations.py")
+
+CELLS = [
+    dict(note="""## The simplest augmentation that matters here
+`brightness_augment` is one line — add a small random constant to the whole volume:
+`imgs + shift`, `shift ~ U(-0.1, 0.1)`. **[Domain]** the reason it's right for *this* competition:
+real embryos/stages vary a lot in brightness, and we want the detector to fire on **shape**, not
+absolute intensity. Below it runs on a real frame; every output is real."""),
+
+    dict(note="""### Run the real brightness shift on a real frame
+First normalise the real frame to ~[0,1] (as the loader does), then add the real ±shift and
+compare the mean intensity before/after — the augmentation moves brightness, not cells.""",
+         code="""import numpy as np, zarr, torch                                      # tools
+vol = np.asarray(zarr.open(f"{TRAIN}/6bba_09961292.zarr/0")[50]).astype(np.float32)  # a real frame (Z,Y,X)
+lo, hi = np.quantile(vol, 0.01), np.quantile(vol, 0.99)                  # robust range (as the loader uses)
+imgs = torch.from_numpy(np.clip((vol - lo) / (hi - lo + 1e-6), 0, 1))    # normalised real frame ~[0,1]
+rng = np.random.default_rng(0)                                          # the aug's RNG
+shift = rng.uniform(-0.1, 0.1)                                          # the real brightness shift
+brightened = imgs + shift                                              # brightness_augment: imgs + shift
+{"shift": round(float(shift), 3), "mean before": round(float(imgs.mean()), 3),  # real numbers
+ "mean after": round(float(brightened.mean()), 3)}                     # brightness moved, shape unchanged""",
+         image="learning/assets/aug_brightness.png\nbrightness_augment on a real frame (6bba_09961292): dimming/brightening the same real nuclei. Real embryos span a huge intensity range, so at test time the detector meets brightnesses it never trained on."),
+
+    dict(note="""### Why the range is what it is
+**[Data — measured on this frame]** The raw intensities here span a wide range; that spread across
+embryos/stages is exactly what the ±0.1 shift mimics (after normalisation). Show the real raw range.""",
+         code="""{"raw min": int(vol.min()), "raw 1%": int(lo), "raw 99%": int(hi), "raw max": int(vol.max())}  # real intensity spread"""),
+
+    dict(note="""**[Recap]** brightness = a tiny additive shift, coordinates untouched, justified by
+the real intensity spread. Combined with flips (aug01), these are the only two augmentations —
+each domain-justified. **Next → me01: the official metric.**"""),
+]
+
+if __name__ == "__main__":
+    build_lesson(META, CELLS, Path(__file__).with_suffix(".learning"), {"TRAIN": TRAIN})

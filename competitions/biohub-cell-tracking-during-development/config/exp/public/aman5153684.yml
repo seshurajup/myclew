@@ -1,0 +1,10 @@
+# PUBLIC notebook config — **aman5153684** / tuning the ILP
+name: pub_aman5153684
+source: **aman5153684** / tuning the ILP
+family: other
+base: unknown
+lb: None
+golden_cv: 0.8708
+mined_params: ""
+run: manual
+score: golden-12 (adj_edge_J + 0.1*div_J), by_embryo

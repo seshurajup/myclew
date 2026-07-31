@@ -1,0 +1,39 @@
+{
+  "slug": "transformers-succinct",
+  "lessons": 8,
+  "ids": [
+    "tscb1",
+    "tsc01",
+    "tsc02",
+    "tsc03",
+    "tsc04",
+    "tsc05",
+    "tsc06",
+    "tscz1"
+  ],
+  "coverage": {
+    "total": 19,
+    "placed": 19,
+    "missing": [],
+    "taught": 19,
+    "untaught": [],
+    "proven": 19,
+    "unproven": [],
+    "cropped": 23,
+    "figures": 0,
+    "figures_placed": 0,
+    "lessons": 6
+  },
+  "curriculum": {
+    "appended": true,
+    "section": "Transformers are Inherently Succinct (2026) \u2014 the theory, executed",
+    "lessons": 8
+  },
+  "pruned": [],
+  "code_cells": 22,
+  "cells_with_output": 22,
+  "silent_lessons": [],
+  "out_dir": "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated",
+  "assets": "learning/assets/transformers-succinct",
+  "python": "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/research/cellmot_venv/bin/python"
+}

@@ -1,0 +1,48 @@
+name: augabl_rot90
+purpose: 'Test whether data-grounded augmentation fixes the embryo-overfit collapse
+  seen in LOEO (0.88 -> 0.79 as training continues on a single embryo). Augmentations
+  chosen from the 5-embryo EDA (E50): geometric XY-only (Z-flip is unphysical), density
+  crop/cutout (embryos span 3.5x density + big developmental swings), and photometric
+  intensity/contrast/gamma/bias/blur/noise (per-embryo staining & optics differ).
+  Same fold/data/grid as loeo_detector.yml so it is a clean A/B on augmentation only.
+
+  '
+paths:
+  python: research/cellmot_venv/bin/python
+  trainer: research/official_repo/scripts/train_unet_transformer.py
+  pythonpath:
+  - research/official_repo/src
+  - research/official_repo/scripts
+  - .
+  data_dir: input/biohub-cell-tracking-during-development/train
+  splits: learning/ensemble_work/finetune/splits_screen_matched.json
+  cache_dir: research/cache/ds1x4x4
+mlflow:
+  tracking_uri: http://localhost:5000
+  experiment: kaggle-biohub-loeo
+  run_name: augabl_rot90
+  log_artifacts: false
+gpu:
+  power_limit_w: 400
+train:
+  method: augabl_rot90
+  split: '0'
+  downsample: 1,4,4
+  epochs: 10
+  lr: 1e-4
+  batch_size: 16
+  num_workers: 6
+  det_loss_weight: 10.0
+  det_neg_weight: 0.01
+  window_size: 2
+  pool_kernel_um: 5.0
+  max_iters: 150
+augment:
+- name: brightness
+  p: 0.5
+  shift_range: 0.08
+- name: flip
+  pz: 0.0
+  py: 0.5
+  px: 0.5
+- name: rot90_xy

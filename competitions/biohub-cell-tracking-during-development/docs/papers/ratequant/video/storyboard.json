@@ -1,0 +1,696 @@
+{
+  "title": "RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory",
+  "subtitle": "ratequant",
+  "scenes": [
+    {
+      "kind": "title",
+      "title": "RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory",
+      "subtitle": "36 pages \u00b7 150 formulas \u00b7 every one proved in PyTorch",
+      "narration": "RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory. We go through this paper formula by formula, and every claim you hear is checked by code that runs.",
+      "seconds": 6.0
+    },
+    {
+      "kind": "chapter",
+      "title": "1 Introduction",
+      "subtitle": "RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory \u00a71",
+      "lesson": "rq02",
+      "narration": "1 Introduction",
+      "seconds": 4.0
+    },
+    {
+      "kind": "note",
+      "text": "## 1 Introduction\n**Paper:** RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory \u00b7 \u00a71 \u00b7 pages 1\u20131 \u00b7 equations (1\u20134) \u00b7 0 figures.\n\n**The problem, and its answer.** Minimise total weighted distortion subject to a\nbit budget (eq. 1). Because the distortion is exponential in bits, the optimum is *logarithmic in\nimportance* (eq. 2): every head starts from the average budget `b\u0304` and is nudged by how far its\nlog-importance sits from the mean log-importance. Eq. 4 is the punchline \u2014 uniform allocation costs exactly\nthe **AM/GM ratio** of the importances, a number you c",
+      "narration": "1 Introduction Paper: RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory \u00b7 \u00a71 \u00b7 pages 1\u20131 \u00b7 equations (1\u20134) \u00b7 0 figures. The problem, and its answer. Minimise total weighted distortion subject to a bit budget equation 1. Because the distortion is exponential in bits, the optimum is logarithmic in importanc",
+      "seconds": 6.3,
+      "lesson": "rq02"
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/ratequant/eq/eq_p03_016.png",
+      "caption": "Equation (1) as printed in the PDF",
+      "narration": "The bit-allocation problem \u2014 eq. (1) the formula on screen. Total distortion is the importance-weighted sum of per-head distortions, under a fixed bit budget. Note the shape: this is HOPE's rate\u2013distortion criterion with the roles made explicit \u2014 wi D(bi) is the cost and bi is the rate we are spending.",
+      "seconds": 9.0,
+      "lesson": "rq02"
+    },
+    {
+      "kind": "code",
+      "code": "bbar = B / N\nlogw = torch.log(w)\nb_star = bbar + (logw - logw.mean()) / torch.log(torch.tensor(beta))\nok(\"the allocation respects the budget exactly\", abs(float(b_star.sum()) - B) < 1e-4,\n   f\"sum = {float(b_star.sum()):.4f} vs B = {B}\")\nok(\"it beats uniform allocation\", J(b_star) < J(b_uniform),\n   f\"J: uniform {J(b_uniform):.6f} -> optimal {J(b_star):.6f} \"\n   f\"({J(b_uniform)/J(b_star):.2f}x better)\")\ni_hi, i_lo = int(w.argmax()), int(w.argmin())\nratio = float(w[i_hi] / w[i_lo])\nok(\"a beta-times more important head earns exactly one more bit\",\n   abs(float(b_star[i_hi] - b_star[i_lo]) -\n       float(torch.log(torch.tensor(ratio)) / torch.log(torch.tensor(beta)))) < 1e-4,\n   f\"importance ratio {ratio:.1f}x -> {float(b_star[i_hi]-b_star[i_lo]):.2f} bits apart\")\nok(\"and the allocation is invariant to rescaling every importance\",\n   close(bbar + (torch.log(100 * w) - torch.log(100 * w).mean()) / torch.log(torch.tensor(beta)), b_star,\n         1e-4), \"only RELATIVE importance matters\")",
+      "output": "```\nPASS  the allocation respects the budget exactly   | sum = 64.0000 vs B = 64.0\nPASS  it beats uniform allocation   | J: uniform 0.124838 -> optimal 0.047186 (2.65x better)\nPASS  a beta-times more important head earns exactly one more bit   | importance ratio 361.8x -> 4.25 bits apart\nPASS  and the allocation is invariant to rescaling every importance   | only RELATIVE importance matters\n```",
+      "narration": "The closed-form optimum \u2014 bits are logarithmic in importance \u2014 eq. (2) the formula on screen. The result. Start every head at the average budget and shift it by its log-importance relative to the mean log-importance, scaled by 1/ln \u03b2. Consequences worth internalising: a head that is \u03b2\u00d7 more important earns exactly one more bit; the alloca",
+      "seconds": 22.177777777777777,
+      "lesson": "rq02"
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/ratequant/eq/eq_p04_025.png",
+      "caption": "Equation (3) as printed in the PDF",
+      "narration": "\u2026where the two averages are \u2014 eq. (3) the formula on screen. Book-keeping, but it makes the invariance visible: the allocation depends on ln wi \u2212 mean ln w, i.e. only on relative log-importance, so the units of w are irrelevant.",
+      "seconds": 9.0,
+      "lesson": "rq02"
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/ratequant/eq/eq_p14_072.png",
+      "caption": "Equation (4) as printed in the PDF",
+      "narration": "The price of uniform allocation is AM/GM \u2014 eq. (4) the formula on screen. The number to compute before writing any code. The ratio of uniform to optimal distortion is the arithmetic mean over the geometric mean of the importances. Equal importances \u2192 ratio 1 \u2192 mixed precision is pointless. Heavy-tailed importances \u2192 the ratio is the exact",
+      "seconds": 9.0,
+      "lesson": "rq02"
+    },
+    {
+      "kind": "chapter",
+      "title": "3 R Q",
+      "subtitle": "RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory \u00a73",
+      "lesson": "rq04",
+      "narration": "3 R Q",
+      "seconds": 4.0
+    },
+    {
+      "kind": "note",
+      "text": "## 3 R Q\n**Paper:** RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory \u00b7 \u00a73 \u00b7 pages 3\u20135 \u00b7 equations (5\u20139) \u00b7 0 figures.\n\n**RateQuant proper.** The constrained problem with box constraints\n(`b_min \u2264 b \u2264 b_max`, eq. 5), its Lagrangian (eq. 6), the stationarity condition that produces the\nlog-allocation (eq. 7), and the optimal cost in closed form (eq. 8). Eq. 9 is the importance model: a\nsecond-order expansion of the task loss in the cache perturbation, which is what justifies using\ngradient norms as the weights `w_i`.",
+      "narration": "3 R Q Paper: RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory \u00b7 \u00a73 \u00b7 pages 3\u20135 \u00b7 equations (5\u20139) \u00b7 0 figures. RateQuant proper. The constrained problem with box constraints (bmin \u2264 b \u2264 bmax, eq. 5), its Lagrangian equation 6, the stationarity condition that produces the log-allocation equation 7, and the",
+      "seconds": 6.3,
+      "lesson": "rq04"
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/ratequant/eq/eq_p26_101.png",
+      "caption": "Equation (5) as printed in the PDF",
+      "narration": "The problem with box constraints (what you can actually ship) \u2014 eq. (5) the formula on screen. Hardware only has 2/3/4/8-bit kernels, and a head cannot get \u22121 bits. Adding box constraints keeps the problem convex, so the unconstrained log-allocation followed by clipping and re-normalising is a legitimate (and standard) water-filling solut",
+      "seconds": 9.0,
+      "lesson": "rq04"
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/ratequant/eq/eq_p26_106.png",
+      "caption": "Equation (6) as printed in the PDF",
+      "narration": "The Lagrangian \u2014 eq. (6) the formula on screen. One multiplier \u03bb for the budget and KKT multipliers for the box. \u03bb has a clean meaning: the marginal distortion bought by one more bit anywhere \u2014 at the optimum it is equal across all unclipped heads, which is exactly the water-filling picture.",
+      "seconds": 9.0,
+      "lesson": "rq04"
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/ratequant/eq/eq_p26_110.png",
+      "caption": "Equation (7) as printed in the PDF",
+      "narration": "Stationarity gives the log-allocation \u2014 eq. (7) the formula on screen. Set the derivative to zero and take logs \u2014 the exponential distortion turns the condition linear, which is why the answer is closed-form and not a search. \u03bb is then fixed by the budget (one bisection, eq. 5's water-filling).",
+      "seconds": 9.0,
+      "lesson": "rq04"
+    },
+    {
+      "kind": "code",
+      "code": "J_star_closed = alpha * beta ** (-bbar) * N * gm\nok(\"the closed form matches the evaluated optimum\", abs(J(b_star) - J_star_closed) / J(b_star) < 1e-4,\n   f\"evaluated {J(b_star):.6f} vs closed form {J_star_closed:.6f}\")\nJ_unif_closed = alpha * beta ** (-bbar) * N * am\nok(\"and the uniform cost is the same expression with the ARITHMETIC mean\",\n   abs(J(b_uniform) - J_unif_closed) / J(b_uniform) < 1e-6,\n   f\"uniform {J(b_uniform):.6f} vs {J_unif_closed:.6f}\")",
+      "output": "```\nPASS  the closed form matches the evaluated optimum   | evaluated 0.047186 vs closed form 0.047186\nPASS  and the uniform cost is the same expression with the ARITHMETIC mean   | uniform 0.124838 vs 0.124838\n```",
+      "narration": "The optimal cost, in closed form \u2014 eq. (8) the formula on screen. Substituting the optimum collapses the sum to N\u00b7(geometric mean of w)\u00b7\u03b1\u03b2^{-b\u0304}. That is where AM/GM comes from: the uniform cost has the arithmetic mean in the same slot. Two lines of algebra, and it turns a design question into a computable number.",
+      "seconds": 10.222222222222221,
+      "lesson": "rq04"
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/ratequant/eq/eq_p26_115.png",
+      "caption": "Equation (9) as printed in the PDF",
+      "narration": "Why gradient norms are the right importance \u2014 eq. (9) the formula on screen. Expand the task loss in the quantisation perturbation \u03b4. To first order the damage a head does is governed by the gradient flowing through its cache, so wi = \u2016\u2202L/\u2202Ki\u2016\u00b2 is not a heuristic \u2014 it is the coefficient in the expansion. This is the same move HOPE makes w",
+      "seconds": 9.0,
+      "lesson": "rq04"
+    },
+    {
+      "kind": "chapter",
+      "title": "4 Experiments",
+      "subtitle": "RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory \u00a74",
+      "lesson": "rq05",
+      "narration": "4 Experiments",
+      "seconds": 4.0
+    },
+    {
+      "kind": "note",
+      "text": "## 4 Experiments\n**Paper:** RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory \u00b7 \u00a74 \u00b7 pages 6\u20138 \u00b7 equations (none) \u00b7 2 figures.\n\n> TODO(author): the *why* of \u00a74 in 3\u20135 lines.",
+      "narration": "4 Experiments Paper: RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory \u00b7 \u00a74 \u00b7 pages 6\u20138 \u00b7 equations (none) \u00b7 2 figures. TODO(author): the why of \u00a74 in 3\u20135 lines.",
+      "seconds": 6.3,
+      "lesson": "rq05"
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/ratequant/p08_0.png",
+      "caption": "Figure 4: Per-head sensitivity for Qwen3-8B (36 layers \u00d7 8 KV heads, log scale). Left: Gradient-based shows a U-shaped pattern (early + late layers sensitive). Right: Activation-based is monotonically increasing.",
+      "narration": "Figure 4 \u2014 as printed in the paper Figure 4: Per-head sensitivity for Qwen3-8B (36 layers \u00d7 8 KV heads, log scale). Left: Gradient-based shows a U-shaped pattern (early + late layers sensitive). Right: Activation-based is monotonically increasing.",
+      "seconds": 9.0,
+      "lesson": "rq05"
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/ratequant/p08_1.png",
+      "caption": "Figure 5: PPL vs. bits (Qwen3-8B). Gap is largest at 2.5\u20133.5 bits.",
+      "narration": "Figure 5 \u2014 as printed in the paper Figure 5: PPL vs. bits (Qwen3-8B). Gap is largest at 2.5\u20133.5 bits.",
+      "seconds": 9.0,
+      "lesson": "rq05"
+    },
+    {
+      "kind": "chapter",
+      "title": "6 Conclusion",
+      "subtitle": "RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory \u00a76",
+      "lesson": "rq07",
+      "narration": "6 Conclusion",
+      "seconds": 4.0
+    },
+    {
+      "kind": "note",
+      "text": "## 6 Conclusion\n**Paper:** RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory \u00b7 \u00a76 \u00b7 pages 9\u20139 \u00b7 equations (none) \u00b7 0 figures.\n\n> TODO(author): the *why* of \u00a76 in 3\u20135 lines.",
+      "narration": "6 Conclusion Paper: RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory \u00b7 \u00a76 \u00b7 pages 9\u20139 \u00b7 equations (none) \u00b7 0 figures. TODO(author): the why of \u00a76 in 3\u20135 lines.",
+      "seconds": 6.3,
+      "lesson": "rq07"
+    },
+    {
+      "kind": "chapter",
+      "title": "A Related Work Comparison Table",
+      "subtitle": "RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory \u00a7A",
+      "lesson": "rq10",
+      "narration": "A Related Work Comparison Table",
+      "seconds": 4.0
+    },
+    {
+      "kind": "note",
+      "text": "## A Related Work Comparison Table\n**Paper:** RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory \u00b7 \u00a7A \u00b7 pages 13\u201313 \u00b7 equations (none) \u00b7 0 figures.\n\n> TODO(author): the *why* of \u00a7A in 3\u20135 lines.",
+      "narration": "A Related Work Comparison Table Paper: RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory \u00b7 \u00a7A \u00b7 pages 13\u201313 \u00b7 equations (none) \u00b7 0 figures. TODO(author): the why of \u00a7A in 3\u20135 lines.",
+      "seconds": 6.3,
+      "lesson": "rq10"
+    },
+    {
+      "kind": "chapter",
+      "title": "B Proofs",
+      "subtitle": "RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory \u00a7B",
+      "lesson": "rq11",
+      "narration": "B Proofs",
+      "seconds": 4.0
+    },
+    {
+      "kind": "note",
+      "text": "## B Proofs\n**Paper:** RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory \u00b7 \u00a7B \u00b7 pages 14\u201314 \u00b7 equations (10\u201315) \u00b7 0 figures.\n\n**Appendix B \u2014 the proofs, and they are short.** The Lagrangian (eq. 10), the\nper-head first-order condition (eq. 11), the same condition for a per-head exponential model (eqs. 12\u201313),\nJensen's inequality (eq. 14) \u2014 which is where AM/GM comes from \u2014 and the AM/GM identity itself (eq. 15).\nThe convexity that makes all of this legitimate is eq. 16's diminishing-returns property: each additional\nbit buys strictly less than the previous one",
+      "narration": "B Proofs Paper: RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory \u00b7 \u00a7B \u00b7 pages 14\u201314 \u00b7 equations (10\u201315) \u00b7 0 figures. Appendix B \u2014 the proofs, and they are short. The Lagrangian equation 10, the per-head first-order condition equation 11, the same condition for a per-head exponential model (eqs. 12\u201313), J",
+      "seconds": 6.3,
+      "lesson": "rq11"
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/ratequant/eq/eq_p26_120.png",
+      "caption": "Equation (10) as printed in the PDF",
+      "narration": "Appendix B \u2014 the general Lagrangian \u2014 eq. (10) the formula on screen. The same Lagrangian with a general per-head distortion Di, so the result does not depend on the exponential model \u2014 only on convexity and monotonicity.",
+      "seconds": 9.0,
+      "lesson": "rq11"
+    },
+    {
+      "kind": "code",
+      "code": "bg = b_uniform.clone().requires_grad_(True)\nJt = sum(w[i] * Dgen[i](bg[i]) for i in range(N))\nJt.backward()\nok(\"marginal gains are NOT equal at a uniform allocation (so uniform is not optimal)\",\n   float(bg.grad.std() / bg.grad.abs().mean()) > 0.05,\n   f\"relative spread {float(bg.grad.std()/bg.grad.abs().mean()):.3f}\")\nprint(\"equalising those marginals is exactly what the multiplier does\")",
+      "output": "```\nPASS  marginal gains are NOT equal at a uniform allocation (so uniform is not optimal)   | relative spread 1.768\nequalising those marginals is exactly what the multiplier does\n```",
+      "narration": "\u2026and its first-order condition \u2014 eq. (11) the formula on screen. Every head is pushed to the bit-width where its marginal distortion reduction, weighted by importance, equals one common \u03bb. This is the general water-filling statement; the exponential model is only what makes it solvable in closed form.",
+      "seconds": 9.0,
+      "lesson": "rq11"
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/ratequant/eq/eq_p27_130.png",
+      "caption": "Equation (12) as printed in the PDF",
+      "narration": "The per-head exponential condition \u2014 eq. (12) the formula on screen. With Di(b) = \u03b1i e^{-\u03b2i b} the condition is explicit per head \u2014 heads may now have different curve steepness \u03b2i, which matters in practice because some heads' caches tolerate quantisation far better than others.",
+      "seconds": 9.0,
+      "lesson": "rq11"
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/ratequant/eq/eq_p27_139.png",
+      "caption": "Equation (13) as printed in the PDF",
+      "narration": "\u2026solved for the bits \u2014 eq. (13) the formula on screen. The general closed form. Still logarithmic in importance, but now scaled by each head's own curve steepness 1/\u03b2i \u2014 a head whose distortion falls slowly gets more bits for the same importance. \u03bb is again set by the budget.",
+      "seconds": 9.0,
+      "lesson": "rq11"
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/ratequant/eq/eq_p27_146.png",
+      "caption": "Equation (14) as printed in the PDF",
+      "narration": "Jensen's inequality \u2014 the source of the AM/GM bound \u2014 eq. (14) the formula on screen. The one-line reason mixed precision can never lose: applying Jensen to exp over the log-importances gives arithmetic \u2265 geometric mean, hence Ju/J \u2265 1.",
+      "seconds": 9.0,
+      "lesson": "rq11"
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/ratequant/eq/eq_p27_147.png",
+      "caption": "Equation (15) as printed in the PDF",
+      "narration": "The AM/GM identity, written out \u2014 eq. (15) the formula on screen. The suboptimality factor as an explicit formula \u2014 and it is precisely the log-variance of the importances to leading order, so the gain from mixed precision grows with how unequal your heads are. That is the diagnostic to compute before implementing anything.",
+      "seconds": 9.0,
+      "lesson": "rq11"
+    },
+    {
+      "kind": "chapter",
+      "title": "C Distortion Model Parameters",
+      "subtitle": "RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory \u00a7C",
+      "lesson": "rq12",
+      "narration": "C Distortion Model Parameters",
+      "seconds": 4.0
+    },
+    {
+      "kind": "note",
+      "text": "## C Distortion Model Parameters\n**Paper:** RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory \u00b7 \u00a7C \u00b7 pages 15\u201315 \u00b7 equations (16\u201316) \u00b7 0 figures.\n\n**Appendix C \u2014 the distortion model's parameters.** `D_i(b) = \u03b1_i e^{-\u03b2_i b}`\nfitted per head, plus the decreasing-marginal-gain property that makes the greedy and the closed-form\nsolutions agree.",
+      "narration": "C Distortion Model Parameters Paper: RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory \u00b7 \u00a7C \u00b7 pages 15\u201315 \u00b7 equations (16\u201316) \u00b7 0 figures. Appendix C \u2014 the distortion model's parameters. Di(b) = \u03b1i e^{-\u03b2i b} fitted per head, plus the decreasing-marginal-gain property that makes the greedy and the closed-f",
+      "seconds": 6.3,
+      "lesson": "rq12"
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/ratequant/eq/eq_p27_148.png",
+      "caption": "Equation (16) as printed in the PDF",
+      "narration": "Diminishing returns makes it convex \u2014 eq. (16) the formula on screen. The property that licenses everything: each extra bit buys strictly less than the previous one. It makes the problem convex (so the closed form is a global optimum) and it makes a greedy \"give the next bit to whoever gains most\" agree with the closed form \u2014 which is how",
+      "seconds": 9.0,
+      "lesson": "rq12"
+    },
+    {
+      "kind": "chapter",
+      "title": "D Component Ablation Waterfall",
+      "subtitle": "RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory \u00a7D",
+      "lesson": "rq13",
+      "narration": "D Component Ablation Waterfall",
+      "seconds": 4.0
+    },
+    {
+      "kind": "note",
+      "text": "## D Component Ablation Waterfall\n**Paper:** RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory \u00b7 \u00a7D \u00b7 pages 15\u201315 \u00b7 equations (none) \u00b7 0 figures.\n\n> TODO(author): the *why* of \u00a7D in 3\u20135 lines.",
+      "narration": "D Component Ablation Waterfall Paper: RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory \u00b7 \u00a7D \u00b7 pages 15\u201315 \u00b7 equations (none) \u00b7 0 figures. TODO(author): the why of \u00a7D in 3\u20135 lines.",
+      "seconds": 6.3,
+      "lesson": "rq13"
+    },
+    {
+      "kind": "chapter",
+      "title": "E Mixed-Precision Baseline Comparison",
+      "subtitle": "RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory \u00a7E",
+      "lesson": "rq14",
+      "narration": "E Mixed-Precision Baseline Comparison",
+      "seconds": 4.0
+    },
+    {
+      "kind": "note",
+      "text": "## E Mixed-Precision Baseline Comparison\n**Paper:** RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory \u00b7 \u00a7E \u00b7 pages 15\u201315 \u00b7 equations (none) \u00b7 0 figures.\n\n> TODO(author): the *why* of \u00a7E in 3\u20135 lines.",
+      "narration": "E Mixed-Precision Baseline Comparison Paper: RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory \u00b7 \u00a7E \u00b7 pages 15\u201315 \u00b7 equations (none) \u00b7 0 figures. TODO(author): the why of \u00a7E in 3\u20135 lines.",
+      "seconds": 6.3,
+      "lesson": "rq14"
+    },
+    {
+      "kind": "chapter",
+      "title": "F Distortion Model Validation",
+      "subtitle": "RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory \u00a7F",
+      "lesson": "rq15",
+      "narration": "F Distortion Model Validation",
+      "seconds": 4.0
+    },
+    {
+      "kind": "note",
+      "text": "## F Distortion Model Validation\n**Paper:** RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory \u00b7 \u00a7F \u00b7 pages 15\u201315 \u00b7 equations (none) \u00b7 0 figures.\n\n> TODO(author): the *why* of \u00a7F in 3\u20135 lines.",
+      "narration": "F Distortion Model Validation Paper: RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory \u00b7 \u00a7F \u00b7 pages 15\u201315 \u00b7 equations (none) \u00b7 0 figures. TODO(author): the why of \u00a7F in 3\u20135 lines.",
+      "seconds": 6.3,
+      "lesson": "rq15"
+    },
+    {
+      "kind": "chapter",
+      "title": "G Multi-Seed Reliability",
+      "subtitle": "RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory \u00a7G",
+      "lesson": "rq16",
+      "narration": "G Multi-Seed Reliability",
+      "seconds": 4.0
+    },
+    {
+      "kind": "note",
+      "text": "## G Multi-Seed Reliability\n**Paper:** RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory \u00b7 \u00a7G \u00b7 pages 16\u201316 \u00b7 equations (none) \u00b7 0 figures.\n\n> TODO(author): the *why* of \u00a7G in 3\u20135 lines.",
+      "narration": "G Multi-Seed Reliability Paper: RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory \u00b7 \u00a7G \u00b7 pages 16\u201316 \u00b7 equations (none) \u00b7 0 figures. TODO(author): the why of \u00a7G in 3\u20135 lines.",
+      "seconds": 6.3,
+      "lesson": "rq16"
+    },
+    {
+      "kind": "chapter",
+      "title": "H K/V Asymmetry Visualization",
+      "subtitle": "RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory \u00a7H",
+      "lesson": "rq17",
+      "narration": "H K/V Asymmetry Visualization",
+      "seconds": 4.0
+    },
+    {
+      "kind": "note",
+      "text": "## H K/V Asymmetry Visualization\n**Paper:** RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory \u00b7 \u00a7H \u00b7 pages 16\u201316 \u00b7 equations (none) \u00b7 0 figures.\n\n> TODO(author): the *why* of \u00a7H in 3\u20135 lines.",
+      "narration": "H K/V Asymmetry Visualization Paper: RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory \u00b7 \u00a7H \u00b7 pages 16\u201316 \u00b7 equations (none) \u00b7 0 figures. TODO(author): the why of \u00a7H in 3\u20135 lines.",
+      "seconds": 6.3,
+      "lesson": "rq17"
+    },
+    {
+      "kind": "chapter",
+      "title": "I Bit Allocation Visualization",
+      "subtitle": "RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory \u00a7I",
+      "lesson": "rq18",
+      "narration": "I Bit Allocation Visualization",
+      "seconds": 4.0
+    },
+    {
+      "kind": "note",
+      "text": "## I Bit Allocation Visualization\n**Paper:** RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory \u00b7 \u00a7I \u00b7 pages 17\u201317 \u00b7 equations (none) \u00b7 1 figures.\n\n> TODO(author): the *why* of \u00a7I in 3\u20135 lines.",
+      "narration": "I Bit Allocation Visualization Paper: RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory \u00b7 \u00a7I \u00b7 pages 17\u201317 \u00b7 equations (none) \u00b7 1 figures. TODO(author): the why of \u00a7I in 3\u20135 lines.",
+      "seconds": 6.3,
+      "lesson": "rq18"
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/ratequant/p17_0.png",
+      "caption": "Figure 6: KIVI per-layer MSE at different bit-widths. Left: Key cache has high distortion with strong per-layer variation. Right: Value cache has \u223c4\u00d7 lower MSE, driving the optimal K/V split (2.85/2.15 at 2.5 bits).",
+      "narration": "Figure 6 \u2014 as printed in the paper Figure 6: KIVI per-layer MSE at different bit-widths. Left: Key cache has high distortion with strong per-layer variation. Right: Value cache has \u223c4\u00d7 lower MSE, driving the optimal K/V split (2.85/2.15 at 2.5 bits).",
+      "seconds": 9.0,
+      "lesson": "rq18"
+    },
+    {
+      "kind": "chapter",
+      "title": "J Calibration Overhead",
+      "subtitle": "RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory \u00a7J",
+      "lesson": "rq19",
+      "narration": "J Calibration Overhead",
+      "seconds": 4.0
+    },
+    {
+      "kind": "note",
+      "text": "## J Calibration Overhead\n**Paper:** RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory \u00b7 \u00a7J \u00b7 pages 18\u201318 \u00b7 equations (none) \u00b7 0 figures.\n\n> TODO(author): the *why* of \u00a7J in 3\u20135 lines.",
+      "narration": "J Calibration Overhead Paper: RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory \u00b7 \u00a7J \u00b7 pages 18\u201318 \u00b7 equations (none) \u00b7 0 figures. TODO(author): the why of \u00a7J in 3\u20135 lines.",
+      "seconds": 6.3,
+      "lesson": "rq19"
+    },
+    {
+      "kind": "chapter",
+      "title": "K Calibration Size Ablation",
+      "subtitle": "RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory \u00a7K",
+      "lesson": "rq20",
+      "narration": "K Calibration Size Ablation",
+      "seconds": 4.0
+    },
+    {
+      "kind": "note",
+      "text": "## K Calibration Size Ablation\n**Paper:** RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory \u00b7 \u00a7K \u00b7 pages 18\u201318 \u00b7 equations (none) \u00b7 0 figures.\n\n> TODO(author): the *why* of \u00a7K in 3\u20135 lines.",
+      "narration": "K Calibration Size Ablation Paper: RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory \u00b7 \u00a7K \u00b7 pages 18\u201318 \u00b7 equations (none) \u00b7 0 figures. TODO(author): the why of \u00a7K in 3\u20135 lines.",
+      "seconds": 6.3,
+      "lesson": "rq20"
+    },
+    {
+      "kind": "chapter",
+      "title": "L Memory Footprint",
+      "subtitle": "RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory \u00a7L",
+      "lesson": "rq21",
+      "narration": "L Memory Footprint",
+      "seconds": 4.0
+    },
+    {
+      "kind": "note",
+      "text": "## L Memory Footprint\n**Paper:** RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory \u00b7 \u00a7L \u00b7 pages 18\u201318 \u00b7 equations (none) \u00b7 0 figures.\n\n> TODO(author): the *why* of \u00a7L in 3\u20135 lines.",
+      "narration": "L Memory Footprint Paper: RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory \u00b7 \u00a7L \u00b7 pages 18\u201318 \u00b7 equations (none) \u00b7 0 figures. TODO(author): the why of \u00a7L in 3\u20135 lines.",
+      "seconds": 6.3,
+      "lesson": "rq21"
+    },
+    {
+      "kind": "chapter",
+      "title": "M Complete Per-Model Results",
+      "subtitle": "RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory \u00a7M",
+      "lesson": "rq22",
+      "narration": "M Complete Per-Model Results",
+      "seconds": 4.0
+    },
+    {
+      "kind": "note",
+      "text": "## M Complete Per-Model Results\n**Paper:** RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory \u00b7 \u00a7M \u00b7 pages 19\u201319 \u00b7 equations (none) \u00b7 0 figures.\n\n> TODO(author): the *why* of \u00a7M in 3\u20135 lines.",
+      "narration": "M Complete Per-Model Results Paper: RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory \u00b7 \u00a7M \u00b7 pages 19\u201319 \u00b7 equations (none) \u00b7 0 figures. TODO(author): the why of \u00a7M in 3\u20135 lines.",
+      "seconds": 6.3,
+      "lesson": "rq22"
+    },
+    {
+      "kind": "chapter",
+      "title": "N Sensitivity Proxy Ablation",
+      "subtitle": "RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory \u00a7N",
+      "lesson": "rq23",
+      "narration": "N Sensitivity Proxy Ablation",
+      "seconds": 4.0
+    },
+    {
+      "kind": "note",
+      "text": "## N Sensitivity Proxy Ablation\n**Paper:** RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory \u00b7 \u00a7N \u00b7 pages 20\u201320 \u00b7 equations (none) \u00b7 0 figures.\n\n> TODO(author): the *why* of \u00a7N in 3\u20135 lines.",
+      "narration": "N Sensitivity Proxy Ablation Paper: RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory \u00b7 \u00a7N \u00b7 pages 20\u201320 \u00b7 equations (none) \u00b7 0 figures. TODO(author): the why of \u00a7N in 3\u20135 lines.",
+      "seconds": 6.3,
+      "lesson": "rq23"
+    },
+    {
+      "kind": "chapter",
+      "title": "O Scope and Extensions",
+      "subtitle": "RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory \u00a7O",
+      "lesson": "rq24",
+      "narration": "O Scope and Extensions",
+      "seconds": 4.0
+    },
+    {
+      "kind": "note",
+      "text": "## O Scope and Extensions\n**Paper:** RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory \u00b7 \u00a7O \u00b7 pages 20\u201320 \u00b7 equations (none) \u00b7 0 figures.\n\n> TODO(author): the *why* of \u00a7O in 3\u20135 lines.",
+      "narration": "O Scope and Extensions Paper: RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory \u00b7 \u00a7O \u00b7 pages 20\u201320 \u00b7 equations (none) \u00b7 0 figures. TODO(author): the why of \u00a7O in 3\u20135 lines.",
+      "seconds": 6.3,
+      "lesson": "rq24"
+    },
+    {
+      "kind": "chapter",
+      "title": "P Implementation Details",
+      "subtitle": "RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory \u00a7P",
+      "lesson": "rq25",
+      "narration": "P Implementation Details",
+      "seconds": 4.0
+    },
+    {
+      "kind": "note",
+      "text": "## P Implementation Details\n**Paper:** RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory \u00b7 \u00a7P \u00b7 pages 20\u201320 \u00b7 equations (none) \u00b7 0 figures.\n\n> TODO(author): the *why* of \u00a7P in 3\u20135 lines.",
+      "narration": "P Implementation Details Paper: RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory \u00b7 \u00a7P \u00b7 pages 20\u201320 \u00b7 equations (none) \u00b7 0 figures. TODO(author): the why of \u00a7P in 3\u20135 lines.",
+      "seconds": 6.3,
+      "lesson": "rq25"
+    },
+    {
+      "kind": "chapter",
+      "title": "Q Downstream Task Details",
+      "subtitle": "RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory \u00a7Q",
+      "lesson": "rq26",
+      "narration": "Q Downstream Task Details",
+      "seconds": 4.0
+    },
+    {
+      "kind": "note",
+      "text": "## Q Downstream Task Details\n**Paper:** RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory \u00b7 \u00a7Q \u00b7 pages 21\u201321 \u00b7 equations (none) \u00b7 0 figures.\n\n> TODO(author): the *why* of \u00a7Q in 3\u20135 lines.",
+      "narration": "Q Downstream Task Details Paper: RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory \u00b7 \u00a7Q \u00b7 pages 21\u201321 \u00b7 equations (none) \u00b7 0 figures. TODO(author): the why of \u00a7Q in 3\u20135 lines.",
+      "seconds": 6.3,
+      "lesson": "rq26"
+    },
+    {
+      "kind": "chapter",
+      "title": "R Sensitivity Distribution Analysis",
+      "subtitle": "RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory \u00a7R",
+      "lesson": "rq27",
+      "narration": "R Sensitivity Distribution Analysis",
+      "seconds": 4.0
+    },
+    {
+      "kind": "note",
+      "text": "## R Sensitivity Distribution Analysis\n**Paper:** RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory \u00b7 \u00a7R \u00b7 pages 21\u201321 \u00b7 equations (none) \u00b7 0 figures.\n\n> TODO(author): the *why* of \u00a7R in 3\u20135 lines.",
+      "narration": "R Sensitivity Distribution Analysis Paper: RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory \u00b7 \u00a7R \u00b7 pages 21\u201321 \u00b7 equations (none) \u00b7 0 figures. TODO(author): the why of \u00a7R in 3\u20135 lines.",
+      "seconds": 6.3,
+      "lesson": "rq27"
+    },
+    {
+      "kind": "chapter",
+      "title": "S Cross-Architecture Comparison",
+      "subtitle": "RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory \u00a7S",
+      "lesson": "rq28",
+      "narration": "S Cross-Architecture Comparison",
+      "seconds": 4.0
+    },
+    {
+      "kind": "note",
+      "text": "## S Cross-Architecture Comparison\n**Paper:** RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory \u00b7 \u00a7S \u00b7 pages 22\u201322 \u00b7 equations (none) \u00b7 2 figures.\n\n> TODO(author): the *why* of \u00a7S in 3\u20135 lines.",
+      "narration": "S Cross-Architecture Comparison Paper: RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory \u00b7 \u00a7S \u00b7 pages 22\u201322 \u00b7 equations (none) \u00b7 2 figures. TODO(author): the why of \u00a7S in 3\u20135 lines.",
+      "seconds": 6.3,
+      "lesson": "rq28"
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/ratequant/p22_0.png",
+      "caption": "Figure 8: Per-head gradient sensitivity for Qwen3-8B (left: Key, right: Value). Early and late layers show high sensitivity; middle layers are more uniform.",
+      "narration": "Figure 8 \u2014 as printed in the paper Figure 8: Per-head gradient sensitivity for Qwen3-8B (left: Key, right: Value). Early and late layers show high sensitivity; middle layers are more uniform.",
+      "seconds": 9.0,
+      "lesson": "rq28"
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/ratequant/p22_1.png",
+      "caption": "Table 19: Head sensitivity heterogeneity across models (gradient proxy).",
+      "narration": "Table 19 \u2014 as printed in the paper Table 19: Head sensitivity heterogeneity across models (gradient proxy).",
+      "seconds": 9.0,
+      "lesson": "rq28"
+    },
+    {
+      "kind": "chapter",
+      "title": "T Distortion Curve Visualization",
+      "subtitle": "RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory \u00a7T",
+      "lesson": "rq29",
+      "narration": "T Distortion Curve Visualization",
+      "seconds": 4.0
+    },
+    {
+      "kind": "note",
+      "text": "## T Distortion Curve Visualization\n**Paper:** RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory \u00b7 \u00a7T \u00b7 pages 22\u201322 \u00b7 equations (none) \u00b7 2 figures.\n\n> TODO(author): the *why* of \u00a7T in 3\u20135 lines.",
+      "narration": "T Distortion Curve Visualization Paper: RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory \u00b7 \u00a7T \u00b7 pages 22\u201322 \u00b7 equations (none) \u00b7 2 figures. TODO(author): the why of \u00a7T in 3\u20135 lines.",
+      "seconds": 6.3,
+      "lesson": "rq29"
+    }
+  ],
+  "chapters": [
+    {
+      "id": "rq02",
+      "title": "1 Introduction",
+      "order": 2110
+    },
+    {
+      "id": "rq04",
+      "title": "3 R Q",
+      "order": 2130
+    },
+    {
+      "id": "rq05",
+      "title": "4 Experiments",
+      "order": 2140
+    },
+    {
+      "id": "rq07",
+      "title": "6 Conclusion",
+      "order": 2160
+    },
+    {
+      "id": "rq10",
+      "title": "A Related Work Comparison Table",
+      "order": 2190
+    },
+    {
+      "id": "rq11",
+      "title": "B Proofs",
+      "order": 2200
+    },
+    {
+      "id": "rq12",
+      "title": "C Distortion Model Parameters",
+      "order": 2210
+    },
+    {
+      "id": "rq13",
+      "title": "D Component Ablation Waterfall",
+      "order": 2220
+    },
+    {
+      "id": "rq14",
+      "title": "E Mixed-Precision Baseline Comparison",
+      "order": 2230
+    },
+    {
+      "id": "rq15",
+      "title": "F Distortion Model Validation",
+      "order": 2240
+    },
+    {
+      "id": "rq16",
+      "title": "G Multi-Seed Reliability",
+      "order": 2250
+    },
+    {
+      "id": "rq17",
+      "title": "H K/V Asymmetry Visualization",
+      "order": 2260
+    },
+    {
+      "id": "rq18",
+      "title": "I Bit Allocation Visualization",
+      "order": 2270
+    },
+    {
+      "id": "rq19",
+      "title": "J Calibration Overhead",
+      "order": 2280
+    },
+    {
+      "id": "rq20",
+      "title": "K Calibration Size Ablation",
+      "order": 2290
+    },
+    {
+      "id": "rq21",
+      "title": "L Memory Footprint",
+      "order": 2300
+    },
+    {
+      "id": "rq22",
+      "title": "M Complete Per-Model Results",
+      "order": 2310
+    },
+    {
+      "id": "rq23",
+      "title": "N Sensitivity Proxy Ablation",
+      "order": 2320
+    },
+    {
+      "id": "rq24",
+      "title": "O Scope and Extensions",
+      "order": 2330
+    },
+    {
+      "id": "rq25",
+      "title": "P Implementation Details",
+      "order": 2340
+    },
+    {
+      "id": "rq26",
+      "title": "Q Downstream Task Details",
+      "order": 2350
+    },
+    {
+      "id": "rq27",
+      "title": "R Sensitivity Distribution Analysis",
+      "order": 2360
+    },
+    {
+      "id": "rq28",
+      "title": "S Cross-Architecture Comparison",
+      "order": 2370
+    },
+    {
+      "id": "rq29",
+      "title": "T Distortion Curve Visualization",
+      "order": 2380
+    }
+  ],
+  "source": "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/docs/papers/ratequant",
+  "lessons": [
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/rq02.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/rq04.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/rq05.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/rq07.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/rq10.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/rq11.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/rq12.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/rq13.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/rq14.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/rq15.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/rq16.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/rq17.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/rq18.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/rq19.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/rq20.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/rq21.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/rq22.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/rq23.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/rq24.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/rq25.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/rq26.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/rq27.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/rq28.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/rq29.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/rq30.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/rq31.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/rq32.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/rq33.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/rqb1.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/rqz1.learning"
+  ]
+}

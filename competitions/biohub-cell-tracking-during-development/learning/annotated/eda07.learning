@@ -1,0 +1,12 @@
+@ id: eda07
+@ order: 1960
+@ title: 6 Conclusion
+@ subtitle: Erase-then-Delta Attention: Decoupling Erase and Write Addresses in Delta-Rule Linear Attention §6
+@ source: docs/papers/eda-delta-attention/eda-delta-attention.md
+
+--- note
+## 6 Conclusion
+**Paper:** Erase-then-Delta Attention: Decoupling Erase and Write Addresses in Delta-Rule Linear Attention · §6 · pages 11–11 · equations (none) · 0 figures.
+
+> TODO(author): the *why* of §6 in 3–5 lines.
+

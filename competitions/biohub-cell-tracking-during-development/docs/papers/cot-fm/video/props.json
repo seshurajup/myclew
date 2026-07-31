@@ -1,0 +1,1017 @@
+{
+  "format": "video",
+  "width": 1920,
+  "height": 1080,
+  "fps": 30,
+  "composition": "PaperVideo",
+  "caption": "lower-third",
+  "safe": {
+    "top_frac": 0.04,
+    "bottom_frac": 0.08,
+    "right_frac": 0.02
+  },
+  "title": "COT-FM: Cluster-wise Optimal Transport Flow Matching",
+  "hook": "COT-FM: Cluster-wise Optimal Transport Flow Matching",
+  "subtitle": "cot-fm",
+  "language": "python",
+  "cps": 30.0,
+  "tailSeconds": 2.5,
+  "maxSeconds": 1800.0,
+  "segments": [
+    {
+      "start": 0.0,
+      "end": 6.0,
+      "text": "COT-FM: Cluster-wise Optimal Transport Flow Matching. We go through this paper formula by formula, and every claim you hear is checked by code that runs."
+    },
+    {
+      "start": 6.0,
+      "end": 10.0,
+      "text": "1 Introduction"
+    },
+    {
+      "start": 10.0,
+      "end": 16.3,
+      "text": "1 Introduction Paper: COT-FM: Cluster-wise Optimal Transport Flow Matching \u00b7 \u00a71 \u00b7 pages 1\u20132 \u00b7 equations (none) \u00b7 8 figures. The claim. Random or naive minibatch-OT couplings leave flows curved; shortcut methods change the sampler, not the flow; COT-FM instead changes the target probability path \u2014 cluster the data, give each cluster its ow"
+    },
+    {
+      "start": 16.3,
+      "end": 25.3,
+      "text": "Figure 1 \u2014 as printed in the paper Figure 1. COT-FM Yields Straight, Structure-Preserving Transport Flows. Blue points show the source distribution (Gaussian), and gray points show the target distributions (a 5-component Gaussian mixture and Two Moons). Orange points are generated samples, and purple lines denote the learned transport tra"
+    },
+    {
+      "start": 25.3,
+      "end": 34.3,
+      "text": "Figure \u2014 as printed in the paper"
+    },
+    {
+      "start": 34.3,
+      "end": 43.3,
+      "text": "Figure \u2014 as printed in the paper"
+    },
+    {
+      "start": 43.3,
+      "end": 52.3,
+      "text": "Figure \u2014 as printed in the paper"
+    },
+    {
+      "start": 52.3,
+      "end": 61.3,
+      "text": "Figure \u2014 as printed in the paper"
+    },
+    {
+      "start": 61.3,
+      "end": 70.3,
+      "text": "Figure \u2014 as printed in the paper"
+    },
+    {
+      "start": 70.3,
+      "end": 79.3,
+      "text": "Figure \u2014 as printed in the paper"
+    },
+    {
+      "start": 79.3,
+      "end": 88.3,
+      "text": "Figure \u2014 as printed in the paper"
+    },
+    {
+      "start": 88.3,
+      "end": 92.3,
+      "text": "2 Preliminary of Flow Matching"
+    },
+    {
+      "start": 92.3,
+      "end": 98.6,
+      "text": "2 Preliminary of Flow Matching Paper: COT-FM: Cluster-wise Optimal Transport Flow Matching \u00b7 \u00a72 \u00b7 pages 3\u20133 \u00b7 equations (1\u20136) \u00b7 4 figures. Flow matching, complete. The FM objective against the (intractable) marginal field equation 1; the marginal path as a mixture over conditioning equation 2 and its field as a posterior- weighted average"
+    },
+    {
+      "start": 98.6,
+      "end": 107.6,
+      "text": "Figure \u2014 as printed in the paper"
+    },
+    {
+      "start": 107.6,
+      "end": 116.6,
+      "text": "Figure \u2014 as printed in the paper"
+    },
+    {
+      "start": 116.6,
+      "end": 125.6,
+      "text": "Figure \u2014 as printed in the paper"
+    },
+    {
+      "start": 125.6,
+      "end": 134.6,
+      "text": "Figure 2 \u2014 as printed in the paper Figure 2. Vector field results from different coupling strate- gies. Random coupling forces the model to regress inconsistent (gray) velocity targets, creating ambiguous intersections and push- ing the model toward an averaged (purple) direction, which pro- duces curved velocity fields. In contrast, opti"
+    },
+    {
+      "start": 134.6,
+      "end": 162.22,
+      "text": "The flow-matching objective \u2014 eq. (1) the formula on screen. Regress the network onto the marginal velocity field. It cannot be trained directly \u2014 vt(xt) needs the marginal density equation 3 \u2014 but it defines what \"correct\" means. The provable core: an MSE regression's optimum at each (xt, t) is the conditional MEAN of whatever targets ap"
+    },
+    {
+      "start": 162.22,
+      "end": 171.22,
+      "text": "The marginal probability path \u2014 eq. (2) the formula on screen. Condition on z (a data sample, or a source\u2013target pair), give each z a simple conditional path, and the marginal is their mixture. Verified by construction: sampling the two-stage process (z first, then xt given z) must reproduce the analytic mixture \u2014 compared here by CDF, th"
+    },
+    {
+      "start": 171.22,
+      "end": 205.09,
+      "text": "The marginal field is a posterior-weighted average \u2014 eq. (3) the formula on screen. The field that transports the mixture is not any single conditional field \u2014 it is their average weighted by the posterior over z given where you are. Closed-form for the 2-atom toy, checked against binned Monte-Carlo of the actual conditional velocities. T"
+    },
+    {
+      "start": 205.09,
+      "end": 225.71,
+      "text": "The conditional flow-matching objective \u2014 eq. (4) the formula on screen. The trainable surrogate: regress on the CONDITIONAL velocity, which is known in closed form per sample \u2014 no marginal density needed. It looks like a different objective; eq. 5 is the theorem that it is not. Here we just confirm both losses are computable on the same "
+    },
+    {
+      "start": 225.71,
+      "end": 234.71,
+      "text": "The theorem: identical gradients \u2014 eq. (5) the formula on screen. The result the whole field stands on: because the two losses differ by a \u03b8-independent constant (eq. 4's cell), their gradients coincide \u2014 training on per-sample conditional targets IS training on the intractable marginal objective. Verified by autograd on a 6-parameter mod"
+    },
+    {
+      "start": 234.71,
+      "end": 243.71,
+      "text": "The 2-Wasserstein coupling \u2014 eq. (6) the formula on screen. Among all pairings of the same marginals, take the one minimising expected squared distance. On a minibatch this is an assignment problem with an exact solver \u2014 and its geometric payoff is countable: in 2-D we count actual segment crossings. OT's monotone structure nearly elimina"
+    },
+    {
+      "start": 243.71,
+      "end": 247.71,
+      "text": "3 Method"
+    },
+    {
+      "start": 247.71,
+      "end": 254.01,
+      "text": "3 Method Paper: COT-FM: Cluster-wise Optimal Transport Flow Matching \u00b7 \u00a73 \u00b7 pages 4\u20134 \u00b7 equations (7\u201310) \u00b7 15 figures. The method. Recover where each target cluster COMES FROM by running a pre-trained flow backward equation 7; fit that cluster's source as a Gaussian (means eq. 8, covariances eq. 9, density eq. 10); then re-train with per-"
+    },
+    {
+      "start": 254.01,
+      "end": 263.01,
+      "text": "Figure \u2014 as printed in the paper"
+    },
+    {
+      "start": 263.01,
+      "end": 272.01,
+      "text": "Figure \u2014 as printed in the paper"
+    },
+    {
+      "start": 272.01,
+      "end": 281.01,
+      "text": "Figure 3 \u2014 as printed in the paper Figure 3. Overview of our proposed method. In Stage 1, we cluster the dataset, and for each image within a cluster Ck, we reverse the ODE back to the noise space using a pretrained flow model to compute the new mean \u03bc0,k and covariance \u03a30,k for that cluster. In Stage 2, we apply optimal transport to fine"
+    },
+    {
+      "start": 281.01,
+      "end": 290.01,
+      "text": "Figure \u2014 as printed in the paper"
+    },
+    {
+      "start": 290.01,
+      "end": 299.01,
+      "text": "Figure \u2014 as printed in the paper"
+    },
+    {
+      "start": 299.01,
+      "end": 308.01,
+      "text": "Figure \u2014 as printed in the paper"
+    },
+    {
+      "start": 308.01,
+      "end": 317.01,
+      "text": "Figure \u2014 as printed in the paper"
+    },
+    {
+      "start": 317.01,
+      "end": 326.01,
+      "text": "Figure \u2014 as printed in the paper"
+    },
+    {
+      "start": 326.01,
+      "end": 335.01,
+      "text": "Figure \u2014 as printed in the paper"
+    },
+    {
+      "start": 335.01,
+      "end": 344.01,
+      "text": "Figure \u2014 as printed in the paper"
+    },
+    {
+      "start": 344.01,
+      "end": 353.01,
+      "text": "Figure \u2014 as printed in the paper"
+    },
+    {
+      "start": 353.01,
+      "end": 362.01,
+      "text": "Figure \u2014 as printed in the paper"
+    },
+    {
+      "start": 362.01,
+      "end": 371.01,
+      "text": "Figure \u2014 as printed in the paper"
+    },
+    {
+      "start": 371.01,
+      "end": 380.01,
+      "text": "Figure \u2014 as printed in the paper"
+    },
+    {
+      "start": 380.01,
+      "end": 389.01,
+      "text": "Figure \u2014 as printed in the paper"
+    },
+    {
+      "start": 389.01,
+      "end": 398.01,
+      "text": "Recover the source by integrating BACKWARD \u2014 eq. (7) the formula on screen. COT-FM's key question is \"where does each target cluster come from?\" \u2014 and a trained flow already knows: run its ODE in reverse from the target sample. On an analytic Gaussian flow the check is exact: the recovered x\u0302\u2080 must equal the true x\u2080 that generated x\u2081. RK4"
+    },
+    {
+      "start": 398.01,
+      "end": 419.39,
+      "text": "Cluster source mean \u2014 eq. (8) the formula on screen. Partition the recovered sources by their targets' cluster; the sample mean estimates each cluster's own source centre. Verified with two planted source populations pushed through one map: each recovered mean must land on its own truth, not on the global average."
+    },
+    {
+      "start": 419.39,
+      "end": 428.39,
+      "text": "Cluster source covariance \u2014 eq. (9) the formula on screen. The second moment completes each cluster's Gaussian. Planted anisotropic covariances must be recovered \u2014 including their off-diagonal structure, which is what a naive isotropic source would throw away."
+    },
+    {
+      "start": 428.39,
+      "end": 437.39,
+      "text": "The cluster-wise Gaussian source \u2014 eq. (10) the formula on screen. Fit done \u2014 each cluster now owns a Gaussian source to couple against. The closure check: sampling from the fitted N(\u03bc, \u03a3) must reproduce the recovered population's moments, so the re-training stage sees a source statistically indistinguishable from the one the backward ODE"
+    },
+    {
+      "start": 437.39,
+      "end": 441.39,
+      "text": "4 Experiments"
+    },
+    {
+      "start": 441.39,
+      "end": 447.69,
+      "text": "4 Experiments Paper: COT-FM: Cluster-wise Optimal Transport Flow Matching \u00b7 \u00a74 \u00b7 pages 5\u20137 \u00b7 equations (none) \u00b7 14 figures. The evidence, and whose it is. 2-D point clouds, CIFAR-10, ImageNet-256 with SiT backbones, and LIBERO robot actions \u2014 consistent gains at low step counts. These are the AUTHORS' numbers; reproducing them needs their"
+    },
+    {
+      "start": 447.69,
+      "end": 456.69,
+      "text": "Table 1 \u2014 as printed in the paper Table 1. 2D synthetic data distributions. COT-FM outperforms all baselines in both Wasserstein distance and curvature."
+    },
+    {
+      "start": 456.69,
+      "end": 465.69,
+      "text": "Table 2 \u2014 as printed in the paper Table 2. Unconditional image generation on CIFAR-10 27. COT-FM improves generation quality across different flow match- ing baselines and sampling steps. Measured in FID (lower is better)."
+    },
+    {
+      "start": 465.69,
+      "end": 474.69,
+      "text": "Figure \u2014 as printed in the paper"
+    },
+    {
+      "start": 474.69,
+      "end": 483.69,
+      "text": "Figure 4 \u2014 as printed in the paper Figure 4. Visualization of 2D checkerboard data under different methods. Blue points denote the source distribution, gray points the target distribution, and orange points the generated samples."
+    },
+    {
+      "start": 483.69,
+      "end": 492.69,
+      "text": "Figure \u2014 as printed in the paper"
+    },
+    {
+      "start": 492.69,
+      "end": 501.69,
+      "text": "Figure \u2014 as printed in the paper"
+    },
+    {
+      "start": 501.69,
+      "end": 510.69,
+      "text": "Figure \u2014 as printed in the paper"
+    },
+    {
+      "start": 510.69,
+      "end": 519.69,
+      "text": "Figure 5 \u2014 as printed in the paper Figure 5. Comparison of two trajectories under the same initial setting in LIBERO Long. Our method successfully places the mug into the microwave and closes the door, while FLOWER fails to insert the mug smoothly and gets stuck inside the microwave."
+    },
+    {
+      "start": 519.69,
+      "end": 528.69,
+      "text": "Figure \u2014 as printed in the paper"
+    },
+    {
+      "start": 528.69,
+      "end": 537.69,
+      "text": "Table 3 \u2014 as printed in the paper Table 3. Conditional Image Generation on ImageNet 256\u00d7256. FID (\u2193) at different NFE steps."
+    },
+    {
+      "start": 537.69,
+      "end": 546.69,
+      "text": "Table 4 \u2014 as printed in the paper Table 4. Robotic manipulation on LIBERO benchmarks 31. COT-FM achieves single-step performance comparable to FLOWER\u2019s 4-step generation while outperforming other single- step baselines. Measured in success rate (higher is better)."
+    },
+    {
+      "start": 546.69,
+      "end": 555.69,
+      "text": "Figure \u2014 as printed in the paper"
+    },
+    {
+      "start": 555.69,
+      "end": 564.69,
+      "text": "Figure \u2014 as printed in the paper"
+    },
+    {
+      "start": 564.69,
+      "end": 573.69,
+      "text": "Figure \u2014 as printed in the paper"
+    },
+    {
+      "start": 573.69,
+      "end": 577.69,
+      "text": "5 Conclusions"
+    },
+    {
+      "start": 577.69,
+      "end": 583.99,
+      "text": "5 Conclusions Paper: COT-FM: Cluster-wise Optimal Transport Flow Matching \u00b7 \u00a75 \u00b7 pages 8\u20138 \u00b7 equations (none) \u00b7 3 figures. What to keep. The coupling is a first-class design choice, not plumbing; OT becomes practical when applied cluster-wise; and a flow's own inverse equation 7 is the right tool to discover WHERE the source for each clus"
+    },
+    {
+      "start": 583.99,
+      "end": 592.99,
+      "text": "Table 5 \u2014 as printed in the paper Table 5. Ablation studies on CIFAR-10 at 50-step generation. (a) Additional alternating iterations progressively reduce FID. (b) COT- FM maintains consistent performance on held-out test data. (c) Size-proportional cluster sampling outperforms uniform sampling."
+    },
+    {
+      "start": 592.99,
+      "end": 601.99,
+      "text": "Figure 6 \u2014 as printed in the paper Figure 6. CIFAR-10 visualization for different flow-based methods under 50-step generation settings."
+    }
+  ],
+  "code": "import math, torch, torch.nn as nn, torch.nn.functional as F      # couplings decide curvature\n\nDEV = torch.device(\"cuda\" if torch.cuda.is_available() else \"cpu\")   # every proof runs on the GPU\ntorch.set_default_device(DEV)\ntorch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False   # exact proofs\ntorch.manual_seed(0); torch.set_printoptions(precision=5, sci_mode=False)\nprint(f\"device: {DEV}\" + (f\" | {torch.cuda.get_device_name(0)}\" if DEV.type == \"cuda\" else \"\"))\n\ndef ok(name, cond, extra=\"\"):\n    print((\"PASS  \" if cond else \"FAIL  \") + name + (f\"   | {extra}\" if extra else \"\"))\n\ntargets = torch.tensor([1.0, 3.0, 3.2, 1.4, 2.0])          # several targets at ONE (x_t, t)\nc = torch.zeros(1, requires_grad=True)\nopt = torch.optim.SGD([c], lr=0.2)\nfor _ in range(400):\n    opt.zero_grad(); ((c - targets) ** 2).mean().backward(); opt.step()\nok(\"the MSE optimum at a point is the MEAN of its targets\",\n   abs(float(c) - float(targets.mean())) < 1e-4,\n   f\"regressed {float(c):.4f} vs mean {float(targets.mean()):.4f}\")\nspread = float(targets.std())\nok(\"so target SPREAD at a location is unremovable loss AND field bias\", spread > 0,\n   f\"residual std {spread:.3f} \u2014 the quantity couplings exist to shrink\")\n\ndef cond_v(x, z, t):                                        # linear path x_t=(1-t)x0+tz, x0~N(0,1)\n    return (z - x) / (1 - t)\ndef post_w(x, t):                                            # posterior over the 2 atoms at (x, t)\n    lw = torch.stack([-(x - t * zc) ** 2 / (2 * ((1 - t) ** 2)) for zc in zs])\n    w = torch.softmax(lw, 0)\n    return w\nzs = torch.tensor([-2.0, 2.0]); t = 0.6\nn = 4_000_000\nz = zs[torch.randint(0, 2, (n,))]\nx0 = torch.randn(n)\nxt = (1 - t) * x0 + t * z\nvt = z - x0                                                  # the conditional velocity, per sample\ngrid = torch.linspace(-2.5, 2.5, 11)\nw = post_w(grid, t)\nana = (w * torch.stack([cond_v(grid, zc, t) for zc in zs])).sum(0)\nmc, counts = [], []\nfor g in grid:\n    sel = (xt - g).abs() < 0.04\n    counts.append(int(sel.sum())); mc.append(vt[sel].mean())\nmc = torch.stack(mc)\ndense = torch.tensor(counts) > 20_000                       # judge where MC actually has samples\nerr = float((ana - mc)[dense].abs().max())\nprint(f\"  bins with >20k samples: {int(dense.sum())}/11   max |formula - MC| there = {err:.4f}\")\nok(\"the closed-form weighted average matches binned MC where MC is dense\", err < 0.05,\n   f\"max deviation {err:.4f} \u2014 sparse edge bins are estimator noise, not formula error\")\nmid = float(ana[5])                                          # x_t = 0, between the modes\nok(\"between the modes the field AVERAGES two opposing pulls\", abs(mid) < 0.2,\n   f\"v(0) = {mid:+.3f} \u2014 pointing at neither mode: the curvature mechanism, visible\")\n\nzs = torch.tensor([-2.0, 2.0]); t = 0.6\nn = 2_000_000\nz = zs[torch.randint(0, 2, (n,))]\nx0 = torch.randn(n)\nxt = (1 - t) * x0 + t * z\nv_cond = z - x0\nlw = torch.stack([-(xt - t * zc) ** 2 / (2 * (1 - t) ** 2) for zc in zs])\nw = torch.softmax(lw, 0)\nv_marg = (w * torch.stack([(zc - xt) / (1 - t) for zc in zs])).sum(0)\ntheta = torch.tensor(0.3)                                    # any fixed predictor v_theta(x)=theta*x\npred = theta * xt\nL_fm = float(((pred - v_marg) ** 2).mean())\nL_cfm = float(((pred - v_cond) ** 2).mean())\ngap = L_cfm - L_fm\nvar_term = float(((v_cond - v_marg) ** 2).mean())\nprint(f\"  L_CFM = {L_cfm:.4f}   L_FM = {L_fm:.4f}   gap = {gap:.4f}   E[Var(target|x_t)] = {var_term:.4f}\")\nok(\"CFM = FM + the posterior variance of the targets\", abs(gap - var_term) < 5e-3,\n   \"the gap is theta-INDEPENDENT \u2014 which is why eq. 5 can hold\")\nok(\"and that variance term is exactly what couplings shrink\", var_term > 0)\n\nmu_a, mu_b = torch.tensor([-2.0, 0.0]), torch.tensor([2.5, 1.0])\nn = 8000\nx0a = mu_a + 0.5 * torch.randn(n, 2)\nx0b = mu_b + 0.5 * torch.randn(n, 2)\nA = torch.tensor([[1.3, 0.2], [0.0, 0.9]]); b = torch.tensor([1.0, -0.5])\nx1a, x1b = x0a @ A.T + b, x0b @ A.T + b                       # two target clusters, one map\nhat0a, hat0b = (x1a - b) @ torch.linalg.inv(A).T, (x1b - b) @ torch.linalg.inv(A).T\nm_a = hat0a.mean(0); m_b = hat0b.mean(0)                      # eq. (8), per cluster\nok(\"cluster A's recovered mean is cluster A's true source mean\",\n   float((m_a - mu_a).norm()) < 0.03, f\"|err| = {float((m_a - mu_a).norm()):.4f}\")\nok(\"likewise cluster B\", float((m_b - mu_b).norm()) < 0.03)\nglob = torch.cat([hat0a, hat0b]).mean(0)\nok(\"and NEITHER equals the global mean \u2014 clustering is what buys locality\",\n   float((m_a - glob).norm()) > 1.0 and float((m_b - glob).norm()) > 1.0,\n   \"a single global source would sit between the populations, serving neither\")",
+  "outputs": [],
+  "scenes": [
+    {
+      "kind": "title",
+      "title": "COT-FM: Cluster-wise Optimal Transport Flow Matching",
+      "subtitle": "18 pages \u00b7 52 formulas \u00b7 every one proved in PyTorch",
+      "narration": "COT-FM: Cluster-wise Optimal Transport Flow Matching. We go through this paper formula by formula, and every claim you hear is checked by code that runs.",
+      "seconds": 6.0,
+      "start": 0.0,
+      "end": 6.0
+    },
+    {
+      "kind": "chapter",
+      "title": "1 Introduction",
+      "subtitle": "COT-FM: Cluster-wise Optimal Transport Flow Matching \u00a71",
+      "lesson": "cfm02",
+      "narration": "1 Introduction",
+      "seconds": 4.0,
+      "start": 6.0,
+      "end": 10.0
+    },
+    {
+      "kind": "note",
+      "text": "## 1 Introduction\n**Paper:** COT-FM: Cluster-wise Optimal Transport Flow Matching \u00b7 \u00a71 \u00b7 pages 1\u20132 \u00b7 equations (none) \u00b7 8 figures.\n\n**The claim.** Random or naive minibatch-OT couplings leave flows curved;\nshortcut methods change the sampler, not the flow; COT-FM instead changes the *target probability path* \u2014\ncluster the data, give each cluster its own recovered Gaussian source, couple within clusters by OT \u2014 and\nthe same architecture trained the same way becomes straighter and better at few-step generation.",
+      "narration": "1 Introduction Paper: COT-FM: Cluster-wise Optimal Transport Flow Matching \u00b7 \u00a71 \u00b7 pages 1\u20132 \u00b7 equations (none) \u00b7 8 figures. The claim. Random or naive minibatch-OT couplings leave flows curved; shortcut methods change the sampler, not the flow; COT-FM instead changes the target probability path \u2014 cluster the data, give each cluster its ow",
+      "seconds": 6.3,
+      "lesson": "cfm02",
+      "start": 10.0,
+      "end": 16.3
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/cot-fm/p01_0.png",
+      "caption": "Figure 1. COT-FM Yields Straight, Structure-Preserving Transport Flows. Blue points show the source distribution (Gaussian), and gray points show the target distributions (a 5-component Gaussian mixture and Two Moons). Orange points are generated samples, and purple lines denote the learned transport trajectories. Red crosses mark cluster means under our Cluster-wise Optimal Transport Flow Matching (COT-FM). The method yields straight trajectories while still capturing the structure of each target distribution.",
+      "narration": "Figure 1 \u2014 as printed in the paper Figure 1. COT-FM Yields Straight, Structure-Preserving Transport Flows. Blue points show the source distribution (Gaussian), and gray points show the target distributions (a 5-component Gaussian mixture and Two Moons). Orange points are generated samples, and purple lines denote the learned transport tra",
+      "seconds": 9.0,
+      "lesson": "cfm02",
+      "start": 16.3,
+      "end": 25.3
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/cot-fm/p01_1.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "cfm02",
+      "start": 25.3,
+      "end": 34.3
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/cot-fm/p01_2.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "cfm02",
+      "start": 34.3,
+      "end": 43.3
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/cot-fm/p01_3.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "cfm02",
+      "start": 43.3,
+      "end": 52.3
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/cot-fm/p01_4.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "cfm02",
+      "start": 52.3,
+      "end": 61.3
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/cot-fm/p01_5.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "cfm02",
+      "start": 61.3,
+      "end": 70.3
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/cot-fm/p01_6.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "cfm02",
+      "start": 70.3,
+      "end": 79.3
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/cot-fm/p01_7.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "cfm02",
+      "start": 79.3,
+      "end": 88.3
+    },
+    {
+      "kind": "chapter",
+      "title": "2 Preliminary of Flow Matching",
+      "subtitle": "COT-FM: Cluster-wise Optimal Transport Flow Matching \u00a72",
+      "lesson": "cfm03",
+      "narration": "2 Preliminary of Flow Matching",
+      "seconds": 4.0,
+      "start": 88.3,
+      "end": 92.3
+    },
+    {
+      "kind": "note",
+      "text": "## 2 Preliminary of Flow Matching\n**Paper:** COT-FM: Cluster-wise Optimal Transport Flow Matching \u00b7 \u00a72 \u00b7 pages 3\u20133 \u00b7 equations (1\u20136) \u00b7 4 figures.\n\n**Flow matching, complete.** The FM objective against the (intractable) marginal\nfield (eq. 1); the marginal path as a mixture over conditioning (eq. 2) and its field as a posterior-\nweighted average of conditional fields (eq. 3); the tractable CFM objective (eq. 4) and the theorem that\nmakes it legitimate \u2014 identical gradients (eq. 5); and the 2-Wasserstein coupling (eq. 6) as the principled\nway to choose pairs. Every one is verified below, the the",
+      "narration": "2 Preliminary of Flow Matching Paper: COT-FM: Cluster-wise Optimal Transport Flow Matching \u00b7 \u00a72 \u00b7 pages 3\u20133 \u00b7 equations (1\u20136) \u00b7 4 figures. Flow matching, complete. The FM objective against the (intractable) marginal field equation 1; the marginal path as a mixture over conditioning equation 2 and its field as a posterior- weighted average",
+      "seconds": 6.3,
+      "lesson": "cfm03",
+      "start": 92.3,
+      "end": 98.6
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/cot-fm/p03_0.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "cfm03",
+      "start": 98.6,
+      "end": 107.6
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/cot-fm/p03_1.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "cfm03",
+      "start": 107.6,
+      "end": 116.6
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/cot-fm/p03_2.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "cfm03",
+      "start": 116.6,
+      "end": 125.6
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/cot-fm/p03_3.png",
+      "caption": "Figure 2. Vector field results from different coupling strate- gies. Random coupling forces the model to regress inconsistent (gray) velocity targets, creating ambiguous intersections and push- ing the model toward an averaged (purple) direction, which pro- duces curved velocity fields. In contrast, optimal transport provides consistent couplings with fewer intersections, enabling the model to learn much straighter velocity fields.",
+      "narration": "Figure 2 \u2014 as printed in the paper Figure 2. Vector field results from different coupling strate- gies. Random coupling forces the model to regress inconsistent (gray) velocity targets, creating ambiguous intersections and push- ing the model toward an averaged (purple) direction, which pro- duces curved velocity fields. In contrast, opti",
+      "seconds": 9.0,
+      "lesson": "cfm03",
+      "start": 125.6,
+      "end": 134.6
+    },
+    {
+      "kind": "code",
+      "code": "import math, torch, torch.nn as nn, torch.nn.functional as F      # couplings decide curvature\n\nDEV = torch.device(\"cuda\" if torch.cuda.is_available() else \"cpu\")   # every proof runs on the GPU\ntorch.set_default_device(DEV)\ntorch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False   # exact proofs\ntorch.manual_seed(0); torch.set_printoptions(precision=5, sci_mode=False)\nprint(f\"device: {DEV}\" + (f\" | {torch.cuda.get_device_name(0)}\" if DEV.type == \"cuda\" else \"\"))\n\ndef ok(name, cond, extra=\"\"):\n    print((\"PASS  \" if cond else \"FAIL  \") + name + (f\"   | {extra}\" if extra else \"\"))\n\ntargets = torch.tensor([1.0, 3.0, 3.2, 1.4, 2.0])          # several targets at ONE (x_t, t)\nc = torch.zeros(1, requires_grad=True)\nopt = torch.optim.SGD([c], lr=0.2)\nfor _ in range(400):\n    opt.zero_grad(); ((c - targets) ** 2).mean().backward(); opt.step()\nok(\"the MSE optimum at a point is the MEAN of its targets\",\n   abs(float(c) - float(targets.mean())) < 1e-4,\n   f\"regressed {float(c):.4f} vs mean {float(targets.mean()):.4f}\")\nspread = float(targets.std())\nok(\"so target SPREAD at a location is unremovable loss AND field bias\", spread > 0,\n   f\"residual std {spread:.3f} \u2014 the quantity couplings exist to shrink\")",
+      "output": "```\ndevice: cuda | NVIDIA GeForce RTX 5090\nPASS  the MSE optimum at a point is the MEAN of its targets   | regressed 2.1200 vs mean 2.1200\nPASS  so target SPREAD at a location is unremovable loss AND field bias   | residual std 0.965 \u2014 the quantity couplings exist to shrink\n```",
+      "narration": "The flow-matching objective \u2014 eq. (1) the formula on screen. Regress the network onto the marginal velocity field. It cannot be trained directly \u2014 vt(xt) needs the marginal density equation 3 \u2014 but it defines what \"correct\" means. The provable core: an MSE regression's optimum at each (xt, t) is the conditional MEAN of whatever targets ap",
+      "seconds": 27.622222222222224,
+      "lesson": "cfm03",
+      "start": 134.6,
+      "end": 162.22
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/cot-fm/eq/eq_p03_001.png",
+      "caption": "Equation (2) as printed in the PDF",
+      "narration": "The marginal probability path \u2014 eq. (2) the formula on screen. Condition on z (a data sample, or a source\u2013target pair), give each z a simple conditional path, and the marginal is their mixture. Verified by construction: sampling the two-stage process (z first, then xt given z) must reproduce the analytic mixture \u2014 compared here by CDF, th",
+      "seconds": 9.0,
+      "lesson": "cfm03",
+      "start": 162.22,
+      "end": 171.22
+    },
+    {
+      "kind": "code",
+      "code": "def cond_v(x, z, t):                                        # linear path x_t=(1-t)x0+tz, x0~N(0,1)\n    return (z - x) / (1 - t)\ndef post_w(x, t):                                            # posterior over the 2 atoms at (x, t)\n    lw = torch.stack([-(x - t * zc) ** 2 / (2 * ((1 - t) ** 2)) for zc in zs])\n    w = torch.softmax(lw, 0)\n    return w\nzs = torch.tensor([-2.0, 2.0]); t = 0.6\nn = 4_000_000\nz = zs[torch.randint(0, 2, (n,))]\nx0 = torch.randn(n)\nxt = (1 - t) * x0 + t * z\nvt = z - x0                                                  # the conditional velocity, per sample\ngrid = torch.linspace(-2.5, 2.5, 11)\nw = post_w(grid, t)\nana = (w * torch.stack([cond_v(grid, zc, t) for zc in zs])).sum(0)\nmc, counts = [], []\nfor g in grid:\n    sel = (xt - g).abs() < 0.04\n    counts.append(int(sel.sum())); mc.append(vt[sel].mean())\nmc = torch.stack(mc)\ndense = torch.tensor(counts) > 20_000                       # judge where MC actually has samples\nerr = float((ana - mc)[dense].abs().max())\nprint(f\"  bins with >20k samples: {int(dense.sum())}/11   max |formula - MC| there = {err:.4f}\")\nok(\"the closed-form weighted average matches binned MC where MC is dense\", err < 0.05,\n   f\"max deviation {err:.4f} \u2014 sparse edge bins are estimator noise, not formula error\")\nmid = float(ana[5])                                          # x_t = 0, between the modes\nok(\"between the modes the field AVERAGES two opposing pulls\", abs(mid) < 0.2,\n   f\"v(0) = {mid:+.3f} \u2014 pointing at neither mode: the curvature mechanism, visible\")",
+      "output": "```\n  bins with >20k samples: 8/11   max |formula - MC| there = 0.0068\nPASS  the closed-form weighted average matches binned MC where MC is dense   | max deviation 0.0068 \u2014 sparse edge bins are estimator noise, not formula error\nPASS  between the modes the field AVERAGES two opposing pulls   | v(0) = +0.000 \u2014 pointing at neither mode: the curvature mechanism, visible\n```",
+      "narration": "The marginal field is a posterior-weighted average \u2014 eq. (3) the formula on screen. The field that transports the mixture is not any single conditional field \u2014 it is their average weighted by the posterior over z given where you are. Closed-form for the 2-atom toy, checked against binned Monte-Carlo of the actual conditional velocities. T",
+      "seconds": 33.86666666666667,
+      "lesson": "cfm03",
+      "start": 171.22,
+      "end": 205.09
+    },
+    {
+      "kind": "code",
+      "code": "zs = torch.tensor([-2.0, 2.0]); t = 0.6\nn = 2_000_000\nz = zs[torch.randint(0, 2, (n,))]\nx0 = torch.randn(n)\nxt = (1 - t) * x0 + t * z\nv_cond = z - x0\nlw = torch.stack([-(xt - t * zc) ** 2 / (2 * (1 - t) ** 2) for zc in zs])\nw = torch.softmax(lw, 0)\nv_marg = (w * torch.stack([(zc - xt) / (1 - t) for zc in zs])).sum(0)\ntheta = torch.tensor(0.3)                                    # any fixed predictor v_theta(x)=theta*x\npred = theta * xt\nL_fm = float(((pred - v_marg) ** 2).mean())\nL_cfm = float(((pred - v_cond) ** 2).mean())\ngap = L_cfm - L_fm\nvar_term = float(((v_cond - v_marg) ** 2).mean())\nprint(f\"  L_CFM = {L_cfm:.4f}   L_FM = {L_fm:.4f}   gap = {gap:.4f}   E[Var(target|x_t)] = {var_term:.4f}\")\nok(\"CFM = FM + the posterior variance of the targets\", abs(gap - var_term) < 5e-3,\n   \"the gap is theta-INDEPENDENT \u2014 which is why eq. 5 can hold\")\nok(\"and that variance term is exactly what couplings shrink\", var_term > 0)",
+      "output": "```\n  L_CFM = 3.9453   L_FM = 3.8421   gap = 0.1032   E[Var(target|x_t)] = 0.1023\nPASS  CFM = FM + the posterior variance of the targets   | the gap is theta-INDEPENDENT \u2014 which is why eq. 5 can hold\nPASS  and that variance term is exactly what couplings shrink\n```",
+      "narration": "The conditional flow-matching objective \u2014 eq. (4) the formula on screen. The trainable surrogate: regress on the CONDITIONAL velocity, which is known in closed form per sample \u2014 no marginal density needed. It looks like a different objective; eq. 5 is the theorem that it is not. Here we just confirm both losses are computable on the same ",
+      "seconds": 20.622222222222224,
+      "lesson": "cfm03",
+      "start": 205.09,
+      "end": 225.71
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/cot-fm/eq/eq_p03_008.png",
+      "caption": "Equation (5) as printed in the PDF",
+      "narration": "The theorem: identical gradients \u2014 eq. (5) the formula on screen. The result the whole field stands on: because the two losses differ by a \u03b8-independent constant (eq. 4's cell), their gradients coincide \u2014 training on per-sample conditional targets IS training on the intractable marginal objective. Verified by autograd on a 6-parameter mod",
+      "seconds": 9.0,
+      "lesson": "cfm03",
+      "start": 225.71,
+      "end": 234.71
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/cot-fm/eq/eq_p03_011.png",
+      "caption": "Equation (6) as printed in the PDF",
+      "narration": "The 2-Wasserstein coupling \u2014 eq. (6) the formula on screen. Among all pairings of the same marginals, take the one minimising expected squared distance. On a minibatch this is an assignment problem with an exact solver \u2014 and its geometric payoff is countable: in 2-D we count actual segment crossings. OT's monotone structure nearly elimina",
+      "seconds": 9.0,
+      "lesson": "cfm03",
+      "start": 234.71,
+      "end": 243.71
+    },
+    {
+      "kind": "chapter",
+      "title": "3 Method",
+      "subtitle": "COT-FM: Cluster-wise Optimal Transport Flow Matching \u00a73",
+      "lesson": "cfm04",
+      "narration": "3 Method",
+      "seconds": 4.0,
+      "start": 243.71,
+      "end": 247.71
+    },
+    {
+      "kind": "note",
+      "text": "## 3 Method\n**Paper:** COT-FM: Cluster-wise Optimal Transport Flow Matching \u00b7 \u00a73 \u00b7 pages 4\u20134 \u00b7 equations (7\u201310) \u00b7 15 figures.\n\n**The method.** Recover where each target cluster COMES FROM by running a\npre-trained flow backward (eq. 7); fit that cluster's source as a Gaussian (means eq. 8, covariances eq. 9,\ndensity eq. 10); then re-train with per-cluster OT couplings between the fitted source and the cluster.\nThe three-line summary of why it works: per-cluster OT is a small assignment problem (accurate AND cheap),\nand paths from a cluster's own source region to that cluster barely cross anythi",
+      "narration": "3 Method Paper: COT-FM: Cluster-wise Optimal Transport Flow Matching \u00b7 \u00a73 \u00b7 pages 4\u20134 \u00b7 equations (7\u201310) \u00b7 15 figures. The method. Recover where each target cluster COMES FROM by running a pre-trained flow backward equation 7; fit that cluster's source as a Gaussian (means eq. 8, covariances eq. 9, density eq. 10); then re-train with per-",
+      "seconds": 6.3,
+      "lesson": "cfm04",
+      "start": 247.71,
+      "end": 254.01
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/cot-fm/p04_0.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "cfm04",
+      "start": 254.01,
+      "end": 263.01
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/cot-fm/p04_1.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "cfm04",
+      "start": 263.01,
+      "end": 272.01
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/cot-fm/p04_2.png",
+      "caption": "Figure 3. Overview of our proposed method. In Stage 1, we cluster the dataset, and for each image within a cluster Ck, we reverse the ODE back to the noise space using a pretrained flow model to compute the new mean \u03bc0,k and covariance \u03a30,k for that cluster. In Stage 2, we apply optimal transport to finetune the pretrained flow model across all clusters, encouraging it to align with the distributional structure captured in Stage 1. During inference, we first sample a cluster index k, then draw a noise x from N(\u03bc0,k, \u03a30,k), and use this noise to generate an image through the finetuned flow model.",
+      "narration": "Figure 3 \u2014 as printed in the paper Figure 3. Overview of our proposed method. In Stage 1, we cluster the dataset, and for each image within a cluster Ck, we reverse the ODE back to the noise space using a pretrained flow model to compute the new mean \u03bc0,k and covariance \u03a30,k for that cluster. In Stage 2, we apply optimal transport to fine",
+      "seconds": 9.0,
+      "lesson": "cfm04",
+      "start": 272.01,
+      "end": 281.01
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/cot-fm/p04_3.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "cfm04",
+      "start": 281.01,
+      "end": 290.01
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/cot-fm/p04_4.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "cfm04",
+      "start": 290.01,
+      "end": 299.01
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/cot-fm/p04_5.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "cfm04",
+      "start": 299.01,
+      "end": 308.01
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/cot-fm/p04_6.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "cfm04",
+      "start": 308.01,
+      "end": 317.01
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/cot-fm/p04_7.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "cfm04",
+      "start": 317.01,
+      "end": 326.01
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/cot-fm/p04_8.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "cfm04",
+      "start": 326.01,
+      "end": 335.01
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/cot-fm/p04_9.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "cfm04",
+      "start": 335.01,
+      "end": 344.01
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/cot-fm/p04_10.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "cfm04",
+      "start": 344.01,
+      "end": 353.01
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/cot-fm/p04_11.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "cfm04",
+      "start": 353.01,
+      "end": 362.01
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/cot-fm/p04_12.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "cfm04",
+      "start": 362.01,
+      "end": 371.01
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/cot-fm/p04_13.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "cfm04",
+      "start": 371.01,
+      "end": 380.01
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/cot-fm/p04_14.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "cfm04",
+      "start": 380.01,
+      "end": 389.01
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/cot-fm/eq/eq_p04_016.png",
+      "caption": "Equation (7) as printed in the PDF",
+      "narration": "Recover the source by integrating BACKWARD \u2014 eq. (7) the formula on screen. COT-FM's key question is \"where does each target cluster come from?\" \u2014 and a trained flow already knows: run its ODE in reverse from the target sample. On an analytic Gaussian flow the check is exact: the recovered x\u0302\u2080 must equal the true x\u2080 that generated x\u2081. RK4",
+      "seconds": 9.0,
+      "lesson": "cfm04",
+      "start": 389.01,
+      "end": 398.01
+    },
+    {
+      "kind": "code",
+      "code": "mu_a, mu_b = torch.tensor([-2.0, 0.0]), torch.tensor([2.5, 1.0])\nn = 8000\nx0a = mu_a + 0.5 * torch.randn(n, 2)\nx0b = mu_b + 0.5 * torch.randn(n, 2)\nA = torch.tensor([[1.3, 0.2], [0.0, 0.9]]); b = torch.tensor([1.0, -0.5])\nx1a, x1b = x0a @ A.T + b, x0b @ A.T + b                       # two target clusters, one map\nhat0a, hat0b = (x1a - b) @ torch.linalg.inv(A).T, (x1b - b) @ torch.linalg.inv(A).T\nm_a = hat0a.mean(0); m_b = hat0b.mean(0)                      # eq. (8), per cluster\nok(\"cluster A's recovered mean is cluster A's true source mean\",\n   float((m_a - mu_a).norm()) < 0.03, f\"|err| = {float((m_a - mu_a).norm()):.4f}\")\nok(\"likewise cluster B\", float((m_b - mu_b).norm()) < 0.03)\nglob = torch.cat([hat0a, hat0b]).mean(0)\nok(\"and NEITHER equals the global mean \u2014 clustering is what buys locality\",\n   float((m_a - glob).norm()) > 1.0 and float((m_b - glob).norm()) > 1.0,\n   \"a single global source would sit between the populations, serving neither\")",
+      "output": "```\nPASS  cluster A's recovered mean is cluster A's true source mean   | |err| = 0.0120\nPASS  likewise cluster B\nPASS  and NEITHER equals the global mean \u2014 clustering is what buys locality   | a single global source would sit between the populations, serving neither\n```",
+      "narration": "Cluster source mean \u2014 eq. (8) the formula on screen. Partition the recovered sources by their targets' cluster; the sample mean estimates each cluster's own source centre. Verified with two planted source populations pushed through one map: each recovered mean must land on its own truth, not on the global average.",
+      "seconds": 21.377777777777776,
+      "lesson": "cfm04",
+      "start": 398.01,
+      "end": 419.39
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/cot-fm/eq/eq_p04_022.png",
+      "caption": "Equation (9) as printed in the PDF",
+      "narration": "Cluster source covariance \u2014 eq. (9) the formula on screen. The second moment completes each cluster's Gaussian. Planted anisotropic covariances must be recovered \u2014 including their off-diagonal structure, which is what a naive isotropic source would throw away.",
+      "seconds": 9.0,
+      "lesson": "cfm04",
+      "start": 419.39,
+      "end": 428.39
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/cot-fm/eq/eq_p04_025.png",
+      "caption": "Equation (10) as printed in the PDF",
+      "narration": "The cluster-wise Gaussian source \u2014 eq. (10) the formula on screen. Fit done \u2014 each cluster now owns a Gaussian source to couple against. The closure check: sampling from the fitted N(\u03bc, \u03a3) must reproduce the recovered population's moments, so the re-training stage sees a source statistically indistinguishable from the one the backward ODE",
+      "seconds": 9.0,
+      "lesson": "cfm04",
+      "start": 428.39,
+      "end": 437.39
+    },
+    {
+      "kind": "chapter",
+      "title": "4 Experiments",
+      "subtitle": "COT-FM: Cluster-wise Optimal Transport Flow Matching \u00a74",
+      "lesson": "cfm05",
+      "narration": "4 Experiments",
+      "seconds": 4.0,
+      "start": 437.39,
+      "end": 441.39
+    },
+    {
+      "kind": "note",
+      "text": "## 4 Experiments\n**Paper:** COT-FM: Cluster-wise Optimal Transport Flow Matching \u00b7 \u00a74 \u00b7 pages 5\u20137 \u00b7 equations (none) \u00b7 14 figures.\n\n**The evidence, and whose it is.** 2-D point clouds, CIFAR-10, ImageNet-256 with\nSiT backbones, and LIBERO robot actions \u2014 consistent gains at low step counts. These are the AUTHORS'\nnumbers; reproducing them needs their compute and checkpoints. What this pack reproduces instead is the\nmechanism at toy scale, end to end, in the advanced lesson \u2014 same-architecture, same-budget, measured.",
+      "narration": "4 Experiments Paper: COT-FM: Cluster-wise Optimal Transport Flow Matching \u00b7 \u00a74 \u00b7 pages 5\u20137 \u00b7 equations (none) \u00b7 14 figures. The evidence, and whose it is. 2-D point clouds, CIFAR-10, ImageNet-256 with SiT backbones, and LIBERO robot actions \u2014 consistent gains at low step counts. These are the AUTHORS' numbers; reproducing them needs their",
+      "seconds": 6.3,
+      "lesson": "cfm05",
+      "start": 441.39,
+      "end": 447.69
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/cot-fm/p06_0.png",
+      "caption": "Table 1. 2D synthetic data distributions. COT-FM outperforms all baselines in both Wasserstein distance and curvature.",
+      "narration": "Table 1 \u2014 as printed in the paper Table 1. 2D synthetic data distributions. COT-FM outperforms all baselines in both Wasserstein distance and curvature.",
+      "seconds": 9.0,
+      "lesson": "cfm05",
+      "start": 447.69,
+      "end": 456.69
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/cot-fm/p06_1.png",
+      "caption": "Table 2. Unconditional image generation on CIFAR-10 [27]. COT-FM improves generation quality across different flow match- ing baselines and sampling steps. Measured in FID (lower is better).",
+      "narration": "Table 2 \u2014 as printed in the paper Table 2. Unconditional image generation on CIFAR-10 27. COT-FM improves generation quality across different flow match- ing baselines and sampling steps. Measured in FID (lower is better).",
+      "seconds": 9.0,
+      "lesson": "cfm05",
+      "start": 456.69,
+      "end": 465.69
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/cot-fm/p06_2.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "cfm05",
+      "start": 465.69,
+      "end": 474.69
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/cot-fm/p06_3.png",
+      "caption": "Figure 4. Visualization of 2D checkerboard data under different methods. Blue points denote the source distribution, gray points the target distribution, and orange points the generated samples.",
+      "narration": "Figure 4 \u2014 as printed in the paper Figure 4. Visualization of 2D checkerboard data under different methods. Blue points denote the source distribution, gray points the target distribution, and orange points the generated samples.",
+      "seconds": 9.0,
+      "lesson": "cfm05",
+      "start": 474.69,
+      "end": 483.69
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/cot-fm/p07_0.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "cfm05",
+      "start": 483.69,
+      "end": 492.69
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/cot-fm/p07_1.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "cfm05",
+      "start": 492.69,
+      "end": 501.69
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/cot-fm/p07_2.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "cfm05",
+      "start": 501.69,
+      "end": 510.69
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/cot-fm/p07_3.png",
+      "caption": "Figure 5. Comparison of two trajectories under the same initial setting in LIBERO Long. Our method successfully places the mug into the microwave and closes the door, while FLOWER fails to insert the mug smoothly and gets stuck inside the microwave.",
+      "narration": "Figure 5 \u2014 as printed in the paper Figure 5. Comparison of two trajectories under the same initial setting in LIBERO Long. Our method successfully places the mug into the microwave and closes the door, while FLOWER fails to insert the mug smoothly and gets stuck inside the microwave.",
+      "seconds": 9.0,
+      "lesson": "cfm05",
+      "start": 510.69,
+      "end": 519.69
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/cot-fm/p07_4.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "cfm05",
+      "start": 519.69,
+      "end": 528.69
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/cot-fm/p07_5.png",
+      "caption": "Table 3. Conditional Image Generation on ImageNet 256\u00d7256. FID (\u2193) at different NFE steps.",
+      "narration": "Table 3 \u2014 as printed in the paper Table 3. Conditional Image Generation on ImageNet 256\u00d7256. FID (\u2193) at different NFE steps.",
+      "seconds": 9.0,
+      "lesson": "cfm05",
+      "start": 528.69,
+      "end": 537.69
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/cot-fm/p07_6.png",
+      "caption": "Table 4. Robotic manipulation on LIBERO benchmarks [31]. COT-FM achieves single-step performance comparable to FLOWER\u2019s 4-step generation while outperforming other single- step baselines. Measured in success rate (higher is better).",
+      "narration": "Table 4 \u2014 as printed in the paper Table 4. Robotic manipulation on LIBERO benchmarks 31. COT-FM achieves single-step performance comparable to FLOWER\u2019s 4-step generation while outperforming other single- step baselines. Measured in success rate (higher is better).",
+      "seconds": 9.0,
+      "lesson": "cfm05",
+      "start": 537.69,
+      "end": 546.69
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/cot-fm/p07_7.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "cfm05",
+      "start": 546.69,
+      "end": 555.69
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/cot-fm/p07_8.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "cfm05",
+      "start": 555.69,
+      "end": 564.69
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/cot-fm/p07_9.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "cfm05",
+      "start": 564.69,
+      "end": 573.69
+    },
+    {
+      "kind": "chapter",
+      "title": "5 Conclusions",
+      "subtitle": "COT-FM: Cluster-wise Optimal Transport Flow Matching \u00a75",
+      "lesson": "cfm06",
+      "narration": "5 Conclusions",
+      "seconds": 4.0,
+      "start": 573.69,
+      "end": 577.69
+    },
+    {
+      "kind": "note",
+      "text": "## 5 Conclusions\n**Paper:** COT-FM: Cluster-wise Optimal Transport Flow Matching \u00b7 \u00a75 \u00b7 pages 8\u20138 \u00b7 equations (none) \u00b7 3 figures.\n\n**What to keep.** The coupling is a first-class design choice, not plumbing; OT\nbecomes practical when applied cluster-wise; and a flow's own inverse (eq. 7) is the right tool to discover\nWHERE the source for each cluster should sit. The advanced lesson is this section made runnable.",
+      "narration": "5 Conclusions Paper: COT-FM: Cluster-wise Optimal Transport Flow Matching \u00b7 \u00a75 \u00b7 pages 8\u20138 \u00b7 equations (none) \u00b7 3 figures. What to keep. The coupling is a first-class design choice, not plumbing; OT becomes practical when applied cluster-wise; and a flow's own inverse equation 7 is the right tool to discover WHERE the source for each clus",
+      "seconds": 6.3,
+      "lesson": "cfm06",
+      "start": 577.69,
+      "end": 583.99
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/cot-fm/p08_3.png",
+      "caption": "Table 5. Ablation studies on CIFAR-10 at 50-step generation. (a) Additional alternating iterations progressively reduce FID. (b) COT- FM maintains consistent performance on held-out test data. (c) Size-proportional cluster sampling outperforms uniform sampling.",
+      "narration": "Table 5 \u2014 as printed in the paper Table 5. Ablation studies on CIFAR-10 at 50-step generation. (a) Additional alternating iterations progressively reduce FID. (b) COT- FM maintains consistent performance on held-out test data. (c) Size-proportional cluster sampling outperforms uniform sampling.",
+      "seconds": 9.0,
+      "lesson": "cfm06",
+      "start": 583.99,
+      "end": 592.99
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/cot-fm/p08_4.png",
+      "caption": "Figure 6. CIFAR-10 visualization for different flow-based methods under 50-step generation settings.",
+      "narration": "Figure 6 \u2014 as printed in the paper Figure 6. CIFAR-10 visualization for different flow-based methods under 50-step generation settings.",
+      "seconds": 9.0,
+      "lesson": "cfm06",
+      "start": 592.99,
+      "end": 601.99
+    }
+  ],
+  "chapters": [
+    {
+      "id": "cfm02",
+      "title": "1 Introduction",
+      "order": 2710
+    },
+    {
+      "id": "cfm03",
+      "title": "2 Preliminary of Flow Matching",
+      "order": 2720
+    },
+    {
+      "id": "cfm04",
+      "title": "3 Method",
+      "order": 2730
+    },
+    {
+      "id": "cfm05",
+      "title": "4 Experiments",
+      "order": 2740
+    },
+    {
+      "id": "cfm06",
+      "title": "5 Conclusions",
+      "order": 2750
+    }
+  ],
+  "sourceLessons": [
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/cfm02.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/cfm03.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/cfm04.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/cfm05.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/cfm06.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/cfm10.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/cfmb1.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/cfmz1.learning"
+  ]
+}

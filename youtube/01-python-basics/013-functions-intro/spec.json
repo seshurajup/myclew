@@ -1,0 +1,13 @@
+{
+  "language": "python",
+  "title": "functions.py",
+  "hook": "Turn 20 lines into one reusable function",
+  "playlist": "Learn Python",
+  "target_seconds": 90,
+  "tts_engine": "chatterbox",
+  "music_prompt": "modular, clean, organized lo-fi",
+  "code_path": "code.py",
+  "transcript_path": "transcript.json",
+  "outputs_path": "outputs.json",
+  "accent": "ocean"
+}

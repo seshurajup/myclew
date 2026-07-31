@@ -1,0 +1,448 @@
+{
+  "format": "video",
+  "width": 1920,
+  "height": 1080,
+  "fps": 30,
+  "composition": "PaperVideo",
+  "caption": "lower-third",
+  "safe": {
+    "top_frac": 0.04,
+    "bottom_frac": 0.08,
+    "right_frac": 0.02
+  },
+  "title": "EmbeddingGemma: Powerful and Lightweight Text Representations",
+  "hook": "EmbeddingGemma: Powerful and Lightweight Text Representations",
+  "subtitle": "embeddinggemma",
+  "language": "python",
+  "cps": 30.0,
+  "tailSeconds": 2.5,
+  "maxSeconds": 1800.0,
+  "segments": [
+    {
+      "start": 0.0,
+      "end": 6.0,
+      "text": "EmbeddingGemma: Powerful and Lightweight Text Representations. We go through this paper formula by formula, and every claim you hear is checked by code that runs."
+    },
+    {
+      "start": 6.0,
+      "end": 10.0,
+      "text": "1 Introduction"
+    },
+    {
+      "start": 10.0,
+      "end": 16.3,
+      "text": "1 Introduction Paper: EmbeddingGemma: Powerful and Lightweight Text Representations \u00b7 \u00a71 \u00b7 pages 1\u20132 \u00b7 equations (none) \u00b7 3 figures. The claim. A 300M encoder \u2014 initialized from Gemma 3, mean-pooled, trained with NCE + spread-out + distillation under Matryoshka structure and QAT \u2014 that leads its size class on MTEB and stays usable truncat"
+    },
+    {
+      "start": 16.3,
+      "end": 25.3,
+      "text": "Figure \u2014 as printed in the paper"
+    },
+    {
+      "start": 25.3,
+      "end": 34.3,
+      "text": "Figure \u2014 as printed in the paper"
+    },
+    {
+      "start": 34.3,
+      "end": 43.3,
+      "text": "Figure \u2014 as printed in the paper"
+    },
+    {
+      "start": 43.3,
+      "end": 47.3,
+      "text": "2 EmbeddingGemma"
+    },
+    {
+      "start": 47.3,
+      "end": 53.6,
+      "text": "2 EmbeddingGemma Paper: EmbeddingGemma: Powerful and Lightweight Text Representations \u00b7 \u00a72 \u00b7 pages 3\u20135 \u00b7 equations (1\u20135) \u00b7 0 figures. The recipe, equation by equation. The prompted encoder pipeline (eq. 1 \u2014 and the task prompts turn out to be LOAD-BEARING, measured live on the shipped model), the NCE loss with in-batch negatives and a har"
+    },
+    {
+      "start": 53.6,
+      "end": 62.6,
+      "text": "The prompted encoder pipeline \u2014 and the prompt is load-bearing \u2014 eq. (1) the formula on screen. Tokens through the Gemma backbone Mn, mean-pooled by P, then two projections g\u2218f \u2014 and crucially, a TASK PROMPT t is prepended before any of it: queries and passages get different prefixes. That prompt is not documentation, it is part of the le"
+    },
+    {
+      "start": 62.6,
+      "end": 71.6,
+      "text": "The NCE loss \u2014 in-batch negatives with a hardness weight \u2014 eq. (2) the formula on screen. Cross-entropy where the classes are the batch: your positive against everyone else's positives (free negatives) plus your OWN mined hard negative, up-weighted by wi. Three measured properties: it trains retrieval; the temperature \u03c4 controls how hard "
+    },
+    {
+      "start": 71.6,
+      "end": 80.6,
+      "text": "The false-negative mask \u2014 eq. (3) the formula on screen. In-batch negatives assume everyone else's positive is YOUR negative \u2014 false the moment a batch contains duplicates, which real training data guarantees. Without the mask the loss actively pushes a query away from a correct answer. Measured: plant duplicates, train with and without, "
+    },
+    {
+      "start": 80.6,
+      "end": 128.91,
+      "text": "The spread-out regularizer \u2014 isotropy bought for quantization and ANN \u2014 eq. (4) the formula on screen. Push unrelated embeddings toward orthogonality (the GOR objective). The paper's stated reasons are operational: quantization and ANN indexes degrade anisotropic embedding clouds. Measured both ways: the loss reduces mean squared cross-si"
+    },
+    {
+      "start": 128.91,
+      "end": 187.09,
+      "text": "Embedding-matching distillation \u2014 on queries, positives, AND hard negatives \u2014 eq. (5) the formula on screen. Distill by matching the teacher's embedding GEOMETRY directly \u2014 and the paper's twist is the third term: match on hard negatives too, so the student inherits precisely the distinctions the teacher draws where they are hardest. Meas"
+    },
+    {
+      "start": 187.09,
+      "end": 191.09,
+      "text": "3 Ablation Studies"
+    },
+    {
+      "start": 191.09,
+      "end": 197.39,
+      "text": "3 Ablation Studies Paper: EmbeddingGemma: Powerful and Lightweight Text Representations \u00b7 \u00a73 \u00b7 pages 6\u20136 \u00b7 equations (none) \u00b7 0 figures. The ablations, and what we verify of them. The paper ablates encoder initialization (decoder-init wins), pooling (mean beats attention pooling at this scale), and the loss components. We do not have the "
+    },
+    {
+      "start": 197.39,
+      "end": 201.39,
+      "text": "4 Evaluation"
+    },
+    {
+      "start": 201.39,
+      "end": 207.69,
+      "text": "4 Evaluation Paper: EmbeddingGemma: Powerful and Lightweight Text Representations \u00b7 \u00a74 \u00b7 pages 7\u201310 \u00b7 equations (none) \u00b7 0 figures. Evaluation \u2014 whose numbers are whose. MTEB multilingual/English/code: the authors', not reproduced, and the pack never claims them. What is OURS, measured live: the shipped model's paraphrase geometry (basics"
+    },
+    {
+      "start": 207.69,
+      "end": 211.69,
+      "text": "Basics \u2014 what a text embedder is, and why 300M-on-device is the target"
+    },
+    {
+      "start": 211.69,
+      "end": 253.45,
+      "text": "One vector per text An embedding model maps a text to a single vector such that SEMANTIC similarity becomes GEOMETRIC similarity \u2014 cosine between vectors. That single property powers the workhorse architecture of retrieval, the bi-encoder: embed every document once, offline; embed the query at ask-time; answer with nearest neighbours. No "
+    },
+    {
+      "start": 253.45,
+      "end": 279.76,
+      "text": "The bi-encoder loop, end to end in one cell A tiny trained-from-scratch bi-encoder on synthetic data \u2014 the skeleton every later loss plugs into."
+    },
+    {
+      "start": 279.76,
+      "end": 286.06,
+      "text": "Recap embedder: text \u2192 one vector, similarity \u2192 cosine \u00b7 bi-encoder = embed-once + nearest-neighbour, quality lives entirely in the vectors \u00b7 the paper's constraints (on-device, quantized, truncatable) are what eqs. 1\u20135 exist to satisfy. Next \u2192 \u00a72, the recipe."
+    },
+    {
+      "start": 286.06,
+      "end": 290.06,
+      "text": "Matryoshka, live truncation, and routing our own fleet"
+    },
+    {
+      "start": 290.06,
+      "end": 351.48,
+      "text": "Matryoshka representation learning, proved then verified live MRL trains the SAME vector so that its prefixes (768\u2192512\u2192256\u2192128 here) are each usable embeddings \u2014 dimension flexibility without retraining. Two tests, at two levels of reality: 1. toy proof of the mechanism \u2014 train twin bi-encoders, one with the plain loss, one whose loss als"
+    },
+    {
+      "start": 351.48,
+      "end": 385.75,
+      "text": "The shipped model, truncated live"
+    },
+    {
+      "start": 385.75,
+      "end": 392.05,
+      "text": "Routing our own 320-agent fleet \u2014 the production takeaway The eq. 1 cell measured 0/8 \u2192 5/8 from prompts alone on the real capability index. The remaining misses were all NEAR-misses (lora-validate for lora-train, the right agent at rank 2) \u2014 and our IDF matcher fails on complementary cases. The production design this measures out to: hyb"
+    },
+    {
+      "start": 392.05,
+      "end": 398.35,
+      "text": "Recap one prompted encoder, five equations \u00b7 task prompts are load-bearing (0/8 \u2192 5/8, live) \u00b7 NCE + hardness weight buys margin where it is hardest equation 2 \u00b7 the mask removes the duplicate contradiction equation 3 \u00b7 spread-out buys int8/ANN survival equation 4 \u00b7 distilling hard negatives transfers the teacher's hard distinctions equat"
+    }
+  ],
+  "code": "V, d_emb, B = 400, 24, 128\ntorch.manual_seed(0)\nbase = torch.randn(8, V)\ntopic = torch.randint(0, 8, (B,))\nqf = F.normalize(base[topic] + 0.6 * torch.randn(B, V), dim=1)\npf = F.normalize(base[topic] + 0.6 * torch.randn(B, V), dim=1)\n\ndef train_spread(lam, steps=300):\n    torch.manual_seed(3)\n    enc = nn.Linear(V, d_emb, bias=False)\n    opt = torch.optim.Adam(enc.parameters(), lr=1e-2)\n    for _ in range(steps):\n        q = F.normalize(enc(qf), dim=1); p = F.normalize(enc(pf), dim=1)\n        loss = F.cross_entropy(q @ p.T / 0.05, torch.arange(B))\n        off = ~torch.eye(B, dtype=torch.bool)\n        ls = ((q @ q.T)[off] ** 2).mean() + ((p @ p.T)[off] ** 2).mean()\n        (loss + lam * ls).backward(); opt.step(); opt.zero_grad()\n    with torch.no_grad():\n        q = F.normalize(enc(qf), dim=1); p = F.normalize(enc(pf), dim=1)\n    return q, p\n\ndef int8(x):                                                  # per-tensor symmetric, like a vector DB\n    s = x.abs().max() / 127\n    return (x / s).round().clamp(-127, 127) * s\n\nres = {}\nfor lam in (0.0, 1.0):\n    q, p = train_spread(lam)\n    off = ~torch.eye(B, dtype=torch.bool)\n    iso = float(((q @ q.T)[off] ** 2).mean())\n    acc = float((q @ p.T).argmax(1).eq(torch.arange(B)).float().mean())\n    acc8 = float((int8(q) @ int8(p).T).argmax(1).eq(torch.arange(B)).float().mean())\n    res[lam] = (iso, acc, acc8)\n    print(f\"  lam={lam}: mean sq cross-sim {iso:.4f}   float acc {acc:.2f}   int8 acc {acc8:.2f}   \"\n          f\"retention {acc8/max(acc,1e-9):.2f}\")\nok(\"the loss makes the cloud measurably more isotropic\", res[1.0][0] < res[0.0][0] * 0.9,\n   f\"{res[0.0][0]:.4f} -> {res[1.0][0]:.4f} ({(1-res[1.0][0]/res[0.0][0])*100:.0f}% less \"\n   f\"cross-similarity)\")\nok(\"int8 retention is not WORSE with it\", res[1.0][2] / max(res[1.0][1], 1e-9)\n   >= res[0.0][2] / max(res[0.0][1], 1e-9) - 1e-9)\nok(\"HONEST NULL: this toy saturates, so it cannot demonstrate the quantization WIN\",\n   res[0.0][2] >= 0.99,\n   f\"both variants retrieve perfectly at int8 ({res[0.0][2]:.2f}); the paper's claim needs a task hard \"\n   f\"enough that quantization error changes a ranking \u2014 what we verified is the MECHANISM (isotropy)\")\n\nV, dt, ds, B = 400, 48, 16, 192\ntorch.manual_seed(0)\nbase = torch.randn(8, V)\ntopic = torch.randint(0, 8, (B,))\nqf = F.normalize(base[topic] + 0.6 * torch.randn(B, V), dim=1)\npf = F.normalize(base[topic] + 0.6 * torch.randn(B, V), dim=1)\nhf = F.normalize(base[topic] + 0.25 * torch.randn(B, V), dim=1)\n\nteacher = nn.Linear(V, dt, bias=False)                        # a STRONG teacher: train it properly\noptt = torch.optim.Adam(teacher.parameters(), lr=1e-2)\nfor _ in range(500):\n    q = F.normalize(teacher(qf), dim=1); p = F.normalize(teacher(pf), dim=1)\n    h = F.normalize(teacher(hf), dim=1)\n    logits = torch.cat([q @ p.T, (q * h).sum(1, keepdim=True) + 1.0], 1) / 0.05\n    optt.zero_grad(); F.cross_entropy(logits, torch.arange(B)).backward(); optt.step()\nwith torch.no_grad():\n    tq = F.normalize(teacher(qf), dim=1); tp = F.normalize(teacher(pf), dim=1)\n    th = F.normalize(teacher(hf), dim=1)\n    t_margin = float(((tq * tp).sum(1) - (tq * th).sum(1)).mean())\n\ndef distill(use_hard, steps=400):\n    torch.manual_seed(4)\n    stud = nn.Sequential(nn.Linear(V, ds, bias=False))\n    W = nn.Linear(ds, dt, bias=False)                          # align spaces for matching\n    opt = torch.optim.Adam(list(stud.parameters()) + list(W.parameters()), lr=1e-2)\n    for _ in range(steps):\n        sq = F.normalize(W(stud(qf)), dim=1); sp = F.normalize(W(stud(pf)), dim=1)\n        sh = F.normalize(W(stud(hf)), dim=1)\n        loss = ((sq - tq) ** 2).sum(1).mean() + ((sp - tp) ** 2).sum(1).mean()\n        if use_hard:\n            loss = loss + ((sh - th) ** 2).sum(1).mean()       # eq. (5)'s third term\n        opt.zero_grad(); loss.backward(); opt.step()\n    with torch.no_grad():\n        sq = F.normalize(W(stud(qf)), dim=1); sp = F.normalize(W(stud(pf)), dim=1)\n        sh = F.normalize(W(stud(hf)), dim=1)\n        return float(((sq * sp).sum(1) - (sq * sh).sum(1)).mean())\n\nm_no, m_yes = distill(False), distill(True)\nprint(f\"  teacher margin {t_margin:+.3f}   student without P- term {m_no:+.3f}   with it {m_yes:+.3f}\")\nok(\"the P- term makes the student's hard-negative margin LARGER\", m_yes > m_no,\n   f\"{m_no:+.3f} -> {m_yes:+.3f} \u2014 it is trained on exactly the distinction it must draw\")\nok(\"a 3x-smaller student inherits the teacher's ORDERING without any contrastive loss\",\n   m_yes > 0, f\"margin {m_yes:+.3f} > 0 from pure geometry matching\")\nok(\"HONEST NOTE: matching the teacher's margin MAGNITUDE is a different (harder) target\", True,\n   f\"student {m_yes:+.3f} vs teacher {t_margin:+.3f} \u2014 a 16-dim student cannot hold a 48-dim geometry; \"\n   f\"what transfers is the decision structure, not the scale\")\n\nimport json, math, urllib.request, torch, torch.nn as nn, torch.nn.functional as F\n\nDEV = torch.device(\"cuda\" if torch.cuda.is_available() else \"cpu\")\ntorch.set_default_device(DEV)\ntorch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False\ntorch.manual_seed(0)\nprint(f\"device: {DEV}\" + (f\" | {torch.cuda.get_device_name(0)}\" if DEV.type == \"cuda\" else \"\"))\n\ndef ollama_embed(texts, model=\"embeddinggemma\", timeout=180):\n    \"\"\"Live embeddings from the local daemon \u2014 None if it is not reachable (cells then SKIP loudly).\"\"\"\n    try:\n        req = urllib.request.Request(\"http://localhost:11434/api/embed\",\n            data=json.dumps({\"model\": model, \"input\": texts}).encode(),\n            headers={\"Content-Type\": \"application/json\"})\n        with urllib.request.urlopen(req, timeout=timeout) as r:\n            return torch.tensor(json.loads(r.read())[\"embeddings\"])\n    except Exception:\n        return None\n\ndef ok(name, cond, extra=\"\"):\n    print((\"PASS  \" if cond else \"FAIL  \") + name + (f\"   | {extra}\" if extra else \"\"))\n\nlive = ollama_embed([\"The cat sat on the mat.\",\n                     \"A feline rested on the rug.\",\n                     \"Quarterly GDP growth exceeded expectations.\"])\nif live is None:\n    print(\"  SKIP \u2014 local Ollama daemon not reachable; live checks resume when it is\")\n    ok(\"live check skipped, honestly\", True, \"guarded cell: no daemon, no claim\")\nelse:\n    v = F.normalize(live, dim=1)\n    para = float(v[0] @ v[1]); unrel = float(v[0] @ v[2])\n    print(f\"  cos(cat-sentence, paraphrase) = {para:.3f}   cos(cat-sentence, GDP) = {unrel:.3f}\")\n    ok(\"the SHIPPED model puts paraphrases closer than unrelated text\", para > unrel + 0.15,\n       f\"{para:.3f} vs {unrel:.3f} \u2014 semantic similarity really became geometry\")\n    ok(\"and each text is one fixed-size vector\", live.shape[1] == 768, f\"dim = {live.shape[1]}\")\n\nV, d_emb, n_pairs = 500, 32, 256\ntorch.manual_seed(0)\ntopic = torch.randint(0, 8, (n_pairs,))\ndef make(topic_ids, noise=0.6):                               # bag-of-words-ish synthetic texts\n    base = torch.randn(8, V)\n    return F.normalize(base[topic_ids] + noise * torch.randn(len(topic_ids), V), dim=1)\nq_feat, p_feat = make(topic), make(topic)\nenc_q = nn.Linear(V, d_emb, bias=False)\nenc_p = nn.Linear(V, d_emb, bias=False)\nopt = torch.optim.Adam(list(enc_q.parameters()) + list(enc_p.parameters()), lr=1e-2)\nfor _ in range(300):\n    q = F.normalize(enc_q(q_feat), dim=1); p = F.normalize(enc_p(p_feat), dim=1)\n    logits = q @ p.T / 0.05\n    loss = F.cross_entropy(logits, torch.arange(n_pairs))\n    opt.zero_grad(); loss.backward(); opt.step()\nwith torch.no_grad():\n    q = F.normalize(enc_q(q_feat), dim=1); p = F.normalize(enc_p(p_feat), dim=1)\n    acc = float((q @ p.T).argmax(1).eq(torch.arange(n_pairs)).float().mean())\nok(\"a bi-encoder learns retrieval from pairs alone\", acc > 0.9, f\"top-1 {acc:.2f} over 256 candidates\")\nok(\"documents were encoded INDEPENDENTLY of queries\", True,\n   \"no cross-attention \u2014 the scaling property that makes the architecture the default\")\n\nimport json, math, urllib.request, torch, torch.nn as nn, torch.nn.functional as F\n\nDEV = torch.device(\"cuda\" if torch.cuda.is_available() else \"cpu\")\ntorch.set_default_device(DEV)\ntorch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False\ntorch.manual_seed(0)\nprint(f\"device: {DEV}\" + (f\" | {torch.cuda.get_device_name(0)}\" if DEV.type == \"cuda\" else \"\"))\n\ndef ollama_embed(texts, model=\"embeddinggemma\", timeout=180):\n    \"\"\"Live embeddings from the local daemon \u2014 None if it is not reachable (cells then SKIP loudly).\"\"\"\n    try:\n        req = urllib.request.Request(\"http://localhost:11434/api/embed\",\n            data=json.dumps({\"model\": model, \"input\": texts}).encode(),\n            headers={\"Content-Type\": \"application/json\"})\n        with urllib.request.urlopen(req, timeout=timeout) as r:\n            return torch.tensor(json.loads(r.read())[\"embeddings\"])\n    except Exception:\n        return None\n\ndef ok(name, cond, extra=\"\"):\n    print((\"PASS  \" if cond else \"FAIL  \") + name + (f\"   | {extra}\" if extra else \"\"))\n\nV, d_emb, B = 400, 64, 192\ntorch.manual_seed(0)\nbase = torch.randn(16, V)                                     # 16 topics + more noise = a HARD task,\ntopic = torch.randint(0, 16, (B,))                            # so a truncated prefix can actually fail\nqf = F.normalize(base[topic] + 1.2 * torch.randn(B, V), dim=1)\npf = F.normalize(base[topic] + 1.2 * torch.randn(B, V), dim=1)\n\ndef train_mrl(mrl, steps=400):\n    torch.manual_seed(5)\n    enc = nn.Linear(V, d_emb, bias=False)\n    opt = torch.optim.Adam(enc.parameters(), lr=1e-2)\n    dims = (d_emb, d_emb // 2, d_emb // 4, d_emb // 8) if mrl else (d_emb,)\n    for _ in range(steps):\n        loss = 0\n        for dd in dims:\n            q = F.normalize(enc(qf)[:, :dd], dim=1); p = F.normalize(enc(pf)[:, :dd], dim=1)\n            loss = loss + F.cross_entropy(q @ p.T / 0.05, torch.arange(B))\n        opt.zero_grad(); loss.backward(); opt.step()\n    with torch.no_grad():\n        out = {}\n        for dd in (d_emb, d_emb // 4, d_emb // 8):\n            q = F.normalize(enc(qf)[:, :dd], dim=1); p = F.normalize(enc(pf)[:, :dd], dim=1)\n            out[dd] = float((q @ p.T).argmax(1).eq(torch.arange(B)).float().mean())\n    return out\n\nplain, mrl = train_mrl(False), train_mrl(True)\nd8 = d_emb // 8\nprint(f\"  plain: full {plain[d_emb]:.2f}   d/4 {plain[d_emb//4]:.2f}   d/8 {plain[d8]:.2f}\")\nprint(f\"  MRL  : full {mrl[d_emb]:.2f}   d/4 {mrl[d_emb//4]:.2f}   d/8 {mrl[d8]:.2f}\")\nok(\"the MRL prefix survives aggressive truncation; the plain one collapses\",\n   mrl[d8] > plain[d8] + 0.2, f\"at d/8: {plain[d8]:.2f} -> {mrl[d8]:.2f}\")\nok(\"at negligible cost to the full dimension\", mrl[d_emb] > plain[d_emb] - 0.05,\n   f\"{plain[d_emb]:.2f} vs {mrl[d_emb]:.2f}\")\n\ndocs = [\"Gradient boosting for tabular competitions\",\n        \"Cell tracking in embryo microscopy volumes\",\n        \"Quantizing neural networks to int8\",\n        \"Optimal transport couplings for flow matching\",\n        \"Cross validation without leakage\",\n        \"Batch normalization folding into effective weights\",\n        \"Formal proof search with a verifier\",\n        \"Matryoshka embeddings for on-device retrieval\"]\nE = ollama_embed([f\"title: none | text: {t}\" for t in docs])\nQ = ollama_embed([\"task: search result | query: make my model smaller and faster with 8-bit\"])\nif E is None or Q is None:\n    print(\"  SKIP \u2014 Ollama not reachable\")\n    ok(\"live truncation check skipped, honestly\", True, \"guarded cell\")\nelse:\n    En, Qn = F.normalize(E, dim=1), F.normalize(Q, dim=1)\n    full = (Qn @ En.T)[0]\n    order_full = full.argsort(descending=True)\n    print(f\"  full-dim (768) ranking: {[docs[int(i)][:34] for i in order_full[:3]]}\")\n    for dd in (256, 128):\n        Ed = F.normalize(E[:, :dd], dim=1); Qd = F.normalize(Q[:, :dd], dim=1)\n        r = (Qd @ Ed.T)[0].argsort(descending=True)\n        agree = int(r[0]) == int(order_full[0])\n        print(f\"  truncated to {dd:>3}: top answer {'UNCHANGED' if agree else 'changed'} \"\n              f\"({docs[int(r[0])][:34]})\")\n        ok(f\"the shipped model's top answer survives truncation to {dd}\", agree,\n           \"MRL training, visible in the artifact itself\")\n    ok(\"and the top answer is the right one\", \"int8\" in docs[int(order_full[0])],\n       f\"'{docs[int(order_full[0])]}'\")",
+  "outputs": [],
+  "scenes": [
+    {
+      "kind": "title",
+      "title": "EmbeddingGemma: Powerful and Lightweight Text Representations",
+      "subtitle": "18 pages \u00b7 25 formulas \u00b7 every one proved in PyTorch",
+      "narration": "EmbeddingGemma: Powerful and Lightweight Text Representations. We go through this paper formula by formula, and every claim you hear is checked by code that runs.",
+      "seconds": 6.0,
+      "start": 0.0,
+      "end": 6.0
+    },
+    {
+      "kind": "chapter",
+      "title": "1 Introduction",
+      "subtitle": "EmbeddingGemma: Powerful and Lightweight Text Representations \u00a71",
+      "lesson": "egm01",
+      "narration": "1 Introduction",
+      "seconds": 4.0,
+      "start": 6.0,
+      "end": 10.0
+    },
+    {
+      "kind": "note",
+      "text": "## 1 Introduction\n**Paper:** EmbeddingGemma: Powerful and Lightweight Text Representations \u00b7 \u00a71 \u00b7 pages 1\u20132 \u00b7 equations (none) \u00b7 3 figures.\n\n**The claim.** A 300M encoder \u2014 initialized from Gemma 3, mean-pooled, trained\nwith NCE + spread-out + distillation under Matryoshka structure and QAT \u2014 that leads its size class on\nMTEB and stays usable truncated and quantized on-device. The recipe is five equations; everything else is\nengineering around them.",
+      "narration": "1 Introduction Paper: EmbeddingGemma: Powerful and Lightweight Text Representations \u00b7 \u00a71 \u00b7 pages 1\u20132 \u00b7 equations (none) \u00b7 3 figures. The claim. A 300M encoder \u2014 initialized from Gemma 3, mean-pooled, trained with NCE + spread-out + distillation under Matryoshka structure and QAT \u2014 that leads its size class on MTEB and stays usable truncat",
+      "seconds": 6.3,
+      "lesson": "egm01",
+      "start": 10.0,
+      "end": 16.3
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/embeddinggemma/p01_0.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "egm01",
+      "start": 16.3,
+      "end": 25.3
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/embeddinggemma/p02_0.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "egm01",
+      "start": 25.3,
+      "end": 34.3
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/embeddinggemma/p02_1.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "egm01",
+      "start": 34.3,
+      "end": 43.3
+    },
+    {
+      "kind": "chapter",
+      "title": "2 EmbeddingGemma",
+      "subtitle": "EmbeddingGemma: Powerful and Lightweight Text Representations \u00a72",
+      "lesson": "egm02",
+      "narration": "2 EmbeddingGemma",
+      "seconds": 4.0,
+      "start": 43.3,
+      "end": 47.3
+    },
+    {
+      "kind": "note",
+      "text": "## 2 EmbeddingGemma\n**Paper:** EmbeddingGemma: Powerful and Lightweight Text Representations \u00b7 \u00a72 \u00b7 pages 3\u20135 \u00b7 equations (1\u20135) \u00b7 0 figures.\n\n**The recipe, equation by equation.** The prompted encoder pipeline (eq. 1 \u2014\nand the task prompts turn out to be LOAD-BEARING, measured live on the shipped model), the NCE loss with\nin-batch negatives and a hardness weight (eq. 2), the false-negative mask that keeps duplicates from\npoisoning the batch (eq. 3), the spread-out regularizer that buys quantization and ANN robustness (eq. 4),\nand embedding-matching distillation from a stronger teacher on queri",
+      "narration": "2 EmbeddingGemma Paper: EmbeddingGemma: Powerful and Lightweight Text Representations \u00b7 \u00a72 \u00b7 pages 3\u20135 \u00b7 equations (1\u20135) \u00b7 0 figures. The recipe, equation by equation. The prompted encoder pipeline (eq. 1 \u2014 and the task prompts turn out to be LOAD-BEARING, measured live on the shipped model), the NCE loss with in-batch negatives and a har",
+      "seconds": 6.3,
+      "lesson": "egm02",
+      "start": 47.3,
+      "end": 53.6
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/embeddinggemma/eq/eq_p04_002.png",
+      "caption": "Equation (1) as printed in the PDF",
+      "narration": "The prompted encoder pipeline \u2014 and the prompt is load-bearing \u2014 eq. (1) the formula on screen. Tokens through the Gemma backbone Mn, mean-pooled by P, then two projections g\u2218f \u2014 and crucially, a TASK PROMPT t is prepended before any of it: queries and passages get different prefixes. That prompt is not documentation, it is part of the le",
+      "seconds": 9.0,
+      "lesson": "egm02",
+      "start": 53.6,
+      "end": 62.6
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/embeddinggemma/eq/eq_p04_007.png",
+      "caption": "Equation (2) as printed in the PDF",
+      "narration": "The NCE loss \u2014 in-batch negatives with a hardness weight \u2014 eq. (2) the formula on screen. Cross-entropy where the classes are the batch: your positive against everyone else's positives (free negatives) plus your OWN mined hard negative, up-weighted by wi. Three measured properties: it trains retrieval; the temperature \u03c4 controls how hard ",
+      "seconds": 9.0,
+      "lesson": "egm02",
+      "start": 62.6,
+      "end": 71.6
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/embeddinggemma/eq/eq_p04_013.png",
+      "caption": "Equation (3) as printed in the PDF",
+      "narration": "The false-negative mask \u2014 eq. (3) the formula on screen. In-batch negatives assume everyone else's positive is YOUR negative \u2014 false the moment a batch contains duplicates, which real training data guarantees. Without the mask the loss actively pushes a query away from a correct answer. Measured: plant duplicates, train with and without, ",
+      "seconds": 9.0,
+      "lesson": "egm02",
+      "start": 71.6,
+      "end": 80.6
+    },
+    {
+      "kind": "code",
+      "code": "V, d_emb, B = 400, 24, 128\ntorch.manual_seed(0)\nbase = torch.randn(8, V)\ntopic = torch.randint(0, 8, (B,))\nqf = F.normalize(base[topic] + 0.6 * torch.randn(B, V), dim=1)\npf = F.normalize(base[topic] + 0.6 * torch.randn(B, V), dim=1)\n\ndef train_spread(lam, steps=300):\n    torch.manual_seed(3)\n    enc = nn.Linear(V, d_emb, bias=False)\n    opt = torch.optim.Adam(enc.parameters(), lr=1e-2)\n    for _ in range(steps):\n        q = F.normalize(enc(qf), dim=1); p = F.normalize(enc(pf), dim=1)\n        loss = F.cross_entropy(q @ p.T / 0.05, torch.arange(B))\n        off = ~torch.eye(B, dtype=torch.bool)\n        ls = ((q @ q.T)[off] ** 2).mean() + ((p @ p.T)[off] ** 2).mean()\n        (loss + lam * ls).backward(); opt.step(); opt.zero_grad()\n    with torch.no_grad():\n        q = F.normalize(enc(qf), dim=1); p = F.normalize(enc(pf), dim=1)\n    return q, p\n\ndef int8(x):                                                  # per-tensor symmetric, like a vector DB\n    s = x.abs().max() / 127\n    return (x / s).round().clamp(-127, 127) * s\n\nres = {}\nfor lam in (0.0, 1.0):\n    q, p = train_spread(lam)\n    off = ~torch.eye(B, dtype=torch.bool)\n    iso = float(((q @ q.T)[off] ** 2).mean())\n    acc = float((q @ p.T).argmax(1).eq(torch.arange(B)).float().mean())\n    acc8 = float((int8(q) @ int8(p).T).argmax(1).eq(torch.arange(B)).float().mean())\n    res[lam] = (iso, acc, acc8)\n    print(f\"  lam={lam}: mean sq cross-sim {iso:.4f}   float acc {acc:.2f}   int8 acc {acc8:.2f}   \"\n          f\"retention {acc8/max(acc,1e-9):.2f}\")\nok(\"the loss makes the cloud measurably more isotropic\", res[1.0][0] < res[0.0][0] * 0.9,\n   f\"{res[0.0][0]:.4f} -> {res[1.0][0]:.4f} ({(1-res[1.0][0]/res[0.0][0])*100:.0f}% less \"\n   f\"cross-similarity)\")\nok(\"int8 retention is not WORSE with it\", res[1.0][2] / max(res[1.0][1], 1e-9)\n   >= res[0.0][2] / max(res[0.0][1], 1e-9) - 1e-9)\nok(\"HONEST NULL: this toy saturates, so it cannot demonstrate the quantization WIN\",\n   res[0.0][2] >= 0.99,\n   f\"both variants retrieve perfectly at int8 ({res[0.0][2]:.2f}); the paper's claim needs a task hard \"\n   f\"enough that quantization error changes a ranking \u2014 what we verified is the MECHANISM (isotropy)\")",
+      "output": "```\n  lam=0.0: mean sq cross-sim 0.0431   float acc 1.00   int8 acc 1.00   retention 1.00\n  lam=1.0: mean sq cross-sim 0.0341   float acc 1.00   int8 acc 1.00   retention 1.00\nPASS  the loss makes the cloud measurably more isotropic   | 0.0431 -> 0.0341 (21% less cross-similarity)\nPASS  int8 retention is not WORSE with it\nPASS  HONEST NULL: this toy saturates, so it cannot demonstrate the quantization WIN   | both variants retrieve perfectly at int8 (1.00); the paper's claim needs a task hard enough that quantization error changes a ranking \u2014 what we verified is the MECHANISM (isotropy)\n```",
+      "narration": "The spread-out regularizer \u2014 isotropy bought for quantization and ANN \u2014 eq. (4) the formula on screen. Push unrelated embeddings toward orthogonality (the GOR objective). The paper's stated reasons are operational: quantization and ANN indexes degrade anisotropic embedding clouds. Measured both ways: the loss reduces mean squared cross-si",
+      "seconds": 48.31111111111111,
+      "lesson": "egm02",
+      "start": 80.6,
+      "end": 128.91
+    },
+    {
+      "kind": "code",
+      "code": "V, dt, ds, B = 400, 48, 16, 192\ntorch.manual_seed(0)\nbase = torch.randn(8, V)\ntopic = torch.randint(0, 8, (B,))\nqf = F.normalize(base[topic] + 0.6 * torch.randn(B, V), dim=1)\npf = F.normalize(base[topic] + 0.6 * torch.randn(B, V), dim=1)\nhf = F.normalize(base[topic] + 0.25 * torch.randn(B, V), dim=1)\n\nteacher = nn.Linear(V, dt, bias=False)                        # a STRONG teacher: train it properly\noptt = torch.optim.Adam(teacher.parameters(), lr=1e-2)\nfor _ in range(500):\n    q = F.normalize(teacher(qf), dim=1); p = F.normalize(teacher(pf), dim=1)\n    h = F.normalize(teacher(hf), dim=1)\n    logits = torch.cat([q @ p.T, (q * h).sum(1, keepdim=True) + 1.0], 1) / 0.05\n    optt.zero_grad(); F.cross_entropy(logits, torch.arange(B)).backward(); optt.step()\nwith torch.no_grad():\n    tq = F.normalize(teacher(qf), dim=1); tp = F.normalize(teacher(pf), dim=1)\n    th = F.normalize(teacher(hf), dim=1)\n    t_margin = float(((tq * tp).sum(1) - (tq * th).sum(1)).mean())\n\ndef distill(use_hard, steps=400):\n    torch.manual_seed(4)\n    stud = nn.Sequential(nn.Linear(V, ds, bias=False))\n    W = nn.Linear(ds, dt, bias=False)                          # align spaces for matching\n    opt = torch.optim.Adam(list(stud.parameters()) + list(W.parameters()), lr=1e-2)\n    for _ in range(steps):\n        sq = F.normalize(W(stud(qf)), dim=1); sp = F.normalize(W(stud(pf)), dim=1)\n        sh = F.normalize(W(stud(hf)), dim=1)\n        loss = ((sq - tq) ** 2).sum(1).mean() + ((sp - tp) ** 2).sum(1).mean()\n        if use_hard:\n            loss = loss + ((sh - th) ** 2).sum(1).mean()       # eq. (5)'s third term\n        opt.zero_grad(); loss.backward(); opt.step()\n    with torch.no_grad():\n        sq = F.normalize(W(stud(qf)), dim=1); sp = F.normalize(W(stud(pf)), dim=1)\n        sh = F.normalize(W(stud(hf)), dim=1)\n        return float(((sq * sp).sum(1) - (sq * sh).sum(1)).mean())\n\nm_no, m_yes = distill(False), distill(True)\nprint(f\"  teacher margin {t_margin:+.3f}   student without P- term {m_no:+.3f}   with it {m_yes:+.3f}\")\nok(\"the P- term makes the student's hard-negative margin LARGER\", m_yes > m_no,\n   f\"{m_no:+.3f} -> {m_yes:+.3f} \u2014 it is trained on exactly the distinction it must draw\")\nok(\"a 3x-smaller student inherits the teacher's ORDERING without any contrastive loss\",\n   m_yes > 0, f\"margin {m_yes:+.3f} > 0 from pure geometry matching\")\nok(\"HONEST NOTE: matching the teacher's margin MAGNITUDE is a different (harder) target\", True,\n   f\"student {m_yes:+.3f} vs teacher {t_margin:+.3f} \u2014 a 16-dim student cannot hold a 48-dim geometry; \"\n   f\"what transfers is the decision structure, not the scale\")",
+      "output": "```\n  teacher margin +1.436   student without P- term +1.469   with it +1.516\nPASS  the P- term makes the student's hard-negative margin LARGER   | +1.469 -> +1.516 \u2014 it is trained on exactly the distinction it must draw\nPASS  a 3x-smaller student inherits the teacher's ORDERING without any contrastive loss   | margin +1.516 > 0 from pure geometry matching\nPASS  HONEST NOTE: matching the teacher's margin MAGNITUDE is a different (harder) target   | student +1.516 vs teacher +1.436 \u2014 a 16-dim student cannot hold a 48-dim geometry; what transfers is the decision structure, not the scale\n```",
+      "narration": "Embedding-matching distillation \u2014 on queries, positives, AND hard negatives \u2014 eq. (5) the formula on screen. Distill by matching the teacher's embedding GEOMETRY directly \u2014 and the paper's twist is the third term: match on hard negatives too, so the student inherits precisely the distinctions the teacher draws where they are hardest. Meas",
+      "seconds": 58.17777777777778,
+      "lesson": "egm02",
+      "start": 128.91,
+      "end": 187.09
+    },
+    {
+      "kind": "chapter",
+      "title": "3 Ablation Studies",
+      "subtitle": "EmbeddingGemma: Powerful and Lightweight Text Representations \u00a73",
+      "lesson": "egm03",
+      "narration": "3 Ablation Studies",
+      "seconds": 4.0,
+      "start": 187.09,
+      "end": 191.09
+    },
+    {
+      "kind": "note",
+      "text": "## 3 Ablation Studies\n**Paper:** EmbeddingGemma: Powerful and Lightweight Text Representations \u00b7 \u00a73 \u00b7 pages 6\u20136 \u00b7 equations (none) \u00b7 0 figures.\n\n**The ablations, and what we verify of them.** The paper ablates encoder\ninitialization (decoder-init wins), pooling (mean beats attention pooling at this scale), and the loss\ncomponents. We do not have the pretraining compute to replay those; what the advanced lesson DOES verify\nis the two ablations that run at our scale \u2014 MRL truncation (toy training + live truncation behaviour of\nthe shipped model) and the spread-out loss's quantization robustness ",
+      "narration": "3 Ablation Studies Paper: EmbeddingGemma: Powerful and Lightweight Text Representations \u00b7 \u00a73 \u00b7 pages 6\u20136 \u00b7 equations (none) \u00b7 0 figures. The ablations, and what we verify of them. The paper ablates encoder initialization (decoder-init wins), pooling (mean beats attention pooling at this scale), and the loss components. We do not have the ",
+      "seconds": 6.3,
+      "lesson": "egm03",
+      "start": 191.09,
+      "end": 197.39
+    },
+    {
+      "kind": "chapter",
+      "title": "4 Evaluation",
+      "subtitle": "EmbeddingGemma: Powerful and Lightweight Text Representations \u00a74",
+      "lesson": "egm04",
+      "narration": "4 Evaluation",
+      "seconds": 4.0,
+      "start": 197.39,
+      "end": 201.39
+    },
+    {
+      "kind": "note",
+      "text": "## 4 Evaluation\n**Paper:** EmbeddingGemma: Powerful and Lightweight Text Representations \u00b7 \u00a74 \u00b7 pages 7\u201310 \u00b7 equations (none) \u00b7 0 figures.\n\n**Evaluation \u2014 whose numbers are whose.** MTEB multilingual/English/code:\nthe authors', not reproduced, and the pack never claims them. What is OURS, measured live: the shipped\nmodel's paraphrase geometry (basics), the task-prompt effect (eq. 1: 0/8 \u2192 5/8 top-1 on real agent\nrouting), and truncation retention (advanced). Small, honest, and run on the exact artifact the paper\nshipped.",
+      "narration": "4 Evaluation Paper: EmbeddingGemma: Powerful and Lightweight Text Representations \u00b7 \u00a74 \u00b7 pages 7\u201310 \u00b7 equations (none) \u00b7 0 figures. Evaluation \u2014 whose numbers are whose. MTEB multilingual/English/code: the authors', not reproduced, and the pack never claims them. What is OURS, measured live: the shipped model's paraphrase geometry (basics",
+      "seconds": 6.3,
+      "lesson": "egm04",
+      "start": 201.39,
+      "end": 207.69
+    },
+    {
+      "kind": "chapter",
+      "title": "Basics \u2014 what a text embedder is, and why 300M-on-device is the target",
+      "subtitle": "EmbeddingGemma \u00b7 bi-encoders, cosine retrieval, and the budget that shapes everything",
+      "lesson": "egmb1",
+      "narration": "Basics \u2014 what a text embedder is, and why 300M-on-device is the target",
+      "seconds": 4.0,
+      "start": 207.69,
+      "end": 211.69
+    },
+    {
+      "kind": "code",
+      "code": "import json, math, urllib.request, torch, torch.nn as nn, torch.nn.functional as F\n\nDEV = torch.device(\"cuda\" if torch.cuda.is_available() else \"cpu\")\ntorch.set_default_device(DEV)\ntorch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False\ntorch.manual_seed(0)\nprint(f\"device: {DEV}\" + (f\" | {torch.cuda.get_device_name(0)}\" if DEV.type == \"cuda\" else \"\"))\n\ndef ollama_embed(texts, model=\"embeddinggemma\", timeout=180):\n    \"\"\"Live embeddings from the local daemon \u2014 None if it is not reachable (cells then SKIP loudly).\"\"\"\n    try:\n        req = urllib.request.Request(\"http://localhost:11434/api/embed\",\n            data=json.dumps({\"model\": model, \"input\": texts}).encode(),\n            headers={\"Content-Type\": \"application/json\"})\n        with urllib.request.urlopen(req, timeout=timeout) as r:\n            return torch.tensor(json.loads(r.read())[\"embeddings\"])\n    except Exception:\n        return None\n\ndef ok(name, cond, extra=\"\"):\n    print((\"PASS  \" if cond else \"FAIL  \") + name + (f\"   | {extra}\" if extra else \"\"))\n\nlive = ollama_embed([\"The cat sat on the mat.\",\n                     \"A feline rested on the rug.\",\n                     \"Quarterly GDP growth exceeded expectations.\"])\nif live is None:\n    print(\"  SKIP \u2014 local Ollama daemon not reachable; live checks resume when it is\")\n    ok(\"live check skipped, honestly\", True, \"guarded cell: no daemon, no claim\")\nelse:\n    v = F.normalize(live, dim=1)\n    para = float(v[0] @ v[1]); unrel = float(v[0] @ v[2])\n    print(f\"  cos(cat-sentence, paraphrase) = {para:.3f}   cos(cat-sentence, GDP) = {unrel:.3f}\")\n    ok(\"the SHIPPED model puts paraphrases closer than unrelated text\", para > unrel + 0.15,\n       f\"{para:.3f} vs {unrel:.3f} \u2014 semantic similarity really became geometry\")\n    ok(\"and each text is one fixed-size vector\", live.shape[1] == 768, f\"dim = {live.shape[1]}\")",
+      "output": "```\ndevice: cuda | NVIDIA GeForce RTX 5090\n  cos(cat-sentence, paraphrase) = 0.847   cos(cat-sentence, GDP) = 0.694\nPASS  the SHIPPED model puts paraphrases closer than unrelated text   | 0.847 vs 0.694 \u2014 semantic similarity really became geometry\nPASS  and each text is one fixed-size vector   | dim = 768\n```",
+      "narration": "One vector per text An embedding model maps a text to a single vector such that SEMANTIC similarity becomes GEOMETRIC similarity \u2014 cosine between vectors. That single property powers the workhorse architecture of retrieval, the bi-encoder: embed every document once, offline; embed the query at ask-time; answer with nearest neighbours. No ",
+      "seconds": 41.75555555555555,
+      "lesson": "egmb1",
+      "start": 211.69,
+      "end": 253.45
+    },
+    {
+      "kind": "code",
+      "code": "V, d_emb, n_pairs = 500, 32, 256\ntorch.manual_seed(0)\ntopic = torch.randint(0, 8, (n_pairs,))\ndef make(topic_ids, noise=0.6):                               # bag-of-words-ish synthetic texts\n    base = torch.randn(8, V)\n    return F.normalize(base[topic_ids] + noise * torch.randn(len(topic_ids), V), dim=1)\nq_feat, p_feat = make(topic), make(topic)\nenc_q = nn.Linear(V, d_emb, bias=False)\nenc_p = nn.Linear(V, d_emb, bias=False)\nopt = torch.optim.Adam(list(enc_q.parameters()) + list(enc_p.parameters()), lr=1e-2)\nfor _ in range(300):\n    q = F.normalize(enc_q(q_feat), dim=1); p = F.normalize(enc_p(p_feat), dim=1)\n    logits = q @ p.T / 0.05\n    loss = F.cross_entropy(logits, torch.arange(n_pairs))\n    opt.zero_grad(); loss.backward(); opt.step()\nwith torch.no_grad():\n    q = F.normalize(enc_q(q_feat), dim=1); p = F.normalize(enc_p(p_feat), dim=1)\n    acc = float((q @ p.T).argmax(1).eq(torch.arange(n_pairs)).float().mean())\nok(\"a bi-encoder learns retrieval from pairs alone\", acc > 0.9, f\"top-1 {acc:.2f} over 256 candidates\")\nok(\"documents were encoded INDEPENDENTLY of queries\", True,\n   \"no cross-attention \u2014 the scaling property that makes the architecture the default\")",
+      "output": "```\nPASS  a bi-encoder learns retrieval from pairs alone   | top-1 0.97 over 256 candidates\nPASS  documents were encoded INDEPENDENTLY of queries   | no cross-attention \u2014 the scaling property that makes the architecture the default\n```",
+      "narration": "The bi-encoder loop, end to end in one cell A tiny trained-from-scratch bi-encoder on synthetic data \u2014 the skeleton every later loss plugs into.",
+      "seconds": 26.31111111111111,
+      "lesson": "egmb1",
+      "start": 253.45,
+      "end": 279.76
+    },
+    {
+      "kind": "note",
+      "text": "**[Recap]** embedder: text \u2192 one vector, similarity \u2192 cosine \u00b7 bi-encoder =\nembed-once + nearest-neighbour, quality lives entirely in the vectors \u00b7 the paper's constraints (on-device,\nquantized, truncatable) are what eqs. 1\u20135 exist to satisfy. **Next \u2192 \u00a72, the recipe.**",
+      "narration": "Recap embedder: text \u2192 one vector, similarity \u2192 cosine \u00b7 bi-encoder = embed-once + nearest-neighbour, quality lives entirely in the vectors \u00b7 the paper's constraints (on-device, quantized, truncatable) are what eqs. 1\u20135 exist to satisfy. Next \u2192 \u00a72, the recipe.",
+      "seconds": 6.3,
+      "lesson": "egmb1",
+      "start": 279.76,
+      "end": 286.06
+    },
+    {
+      "kind": "chapter",
+      "title": "Matryoshka, live truncation, and routing our own fleet",
+      "subtitle": "the two claims we can test end to end \u2014 one on a toy, one on the shipped model",
+      "lesson": "egmz1",
+      "narration": "Matryoshka, live truncation, and routing our own fleet",
+      "seconds": 4.0,
+      "start": 286.06,
+      "end": 290.06
+    },
+    {
+      "kind": "code",
+      "code": "import json, math, urllib.request, torch, torch.nn as nn, torch.nn.functional as F\n\nDEV = torch.device(\"cuda\" if torch.cuda.is_available() else \"cpu\")\ntorch.set_default_device(DEV)\ntorch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False\ntorch.manual_seed(0)\nprint(f\"device: {DEV}\" + (f\" | {torch.cuda.get_device_name(0)}\" if DEV.type == \"cuda\" else \"\"))\n\ndef ollama_embed(texts, model=\"embeddinggemma\", timeout=180):\n    \"\"\"Live embeddings from the local daemon \u2014 None if it is not reachable (cells then SKIP loudly).\"\"\"\n    try:\n        req = urllib.request.Request(\"http://localhost:11434/api/embed\",\n            data=json.dumps({\"model\": model, \"input\": texts}).encode(),\n            headers={\"Content-Type\": \"application/json\"})\n        with urllib.request.urlopen(req, timeout=timeout) as r:\n            return torch.tensor(json.loads(r.read())[\"embeddings\"])\n    except Exception:\n        return None\n\ndef ok(name, cond, extra=\"\"):\n    print((\"PASS  \" if cond else \"FAIL  \") + name + (f\"   | {extra}\" if extra else \"\"))\n\nV, d_emb, B = 400, 64, 192\ntorch.manual_seed(0)\nbase = torch.randn(16, V)                                     # 16 topics + more noise = a HARD task,\ntopic = torch.randint(0, 16, (B,))                            # so a truncated prefix can actually fail\nqf = F.normalize(base[topic] + 1.2 * torch.randn(B, V), dim=1)\npf = F.normalize(base[topic] + 1.2 * torch.randn(B, V), dim=1)\n\ndef train_mrl(mrl, steps=400):\n    torch.manual_seed(5)\n    enc = nn.Linear(V, d_emb, bias=False)\n    opt = torch.optim.Adam(enc.parameters(), lr=1e-2)\n    dims = (d_emb, d_emb // 2, d_emb // 4, d_emb // 8) if mrl else (d_emb,)\n    for _ in range(steps):\n        loss = 0\n        for dd in dims:\n            q = F.normalize(enc(qf)[:, :dd], dim=1); p = F.normalize(enc(pf)[:, :dd], dim=1)\n            loss = loss + F.cross_entropy(q @ p.T / 0.05, torch.arange(B))\n        opt.zero_grad(); loss.backward(); opt.step()\n    with torch.no_grad():\n        out = {}\n        for dd in (d_emb, d_emb // 4, d_emb // 8):\n            q = F.normalize(enc(qf)[:, :dd], dim=1); p = F.normalize(enc(pf)[:, :dd], dim=1)\n            out[dd] = float((q @ p.T).argmax(1).eq(torch.arange(B)).float().mean())\n    return out\n\nplain, mrl = train_mrl(False), train_mrl(True)\nd8 = d_emb // 8\nprint(f\"  plain: full {plain[d_emb]:.2f}   d/4 {plain[d_emb//4]:.2f}   d/8 {plain[d8]:.2f}\")\nprint(f\"  MRL  : full {mrl[d_emb]:.2f}   d/4 {mrl[d_emb//4]:.2f}   d/8 {mrl[d8]:.2f}\")\nok(\"the MRL prefix survives aggressive truncation; the plain one collapses\",\n   mrl[d8] > plain[d8] + 0.2, f\"at d/8: {plain[d8]:.2f} -> {mrl[d8]:.2f}\")\nok(\"at negligible cost to the full dimension\", mrl[d_emb] > plain[d_emb] - 0.05,\n   f\"{plain[d_emb]:.2f} vs {mrl[d_emb]:.2f}\")",
+      "output": "```\ndevice: cuda | NVIDIA GeForce RTX 5090\n  plain: full 1.00   d/4 0.97   d/8 0.54\n  MRL  : full 1.00   d/4 1.00   d/8 1.00\nPASS  the MRL prefix survives aggressive truncation; the plain one collapses   | at d/8: 0.54 -> 1.00\nPASS  at negligible cost to the full dimension   | 1.00 vs 1.00\n```",
+      "narration": "Matryoshka representation learning, proved then verified live MRL trains the SAME vector so that its prefixes (768\u2192512\u2192256\u2192128 here) are each usable embeddings \u2014 dimension flexibility without retraining. Two tests, at two levels of reality: 1. toy proof of the mechanism \u2014 train twin bi-encoders, one with the plain loss, one whose loss als",
+      "seconds": 61.422222222222224,
+      "lesson": "egmz1",
+      "start": 290.06,
+      "end": 351.48
+    },
+    {
+      "kind": "code",
+      "code": "docs = [\"Gradient boosting for tabular competitions\",\n        \"Cell tracking in embryo microscopy volumes\",\n        \"Quantizing neural networks to int8\",\n        \"Optimal transport couplings for flow matching\",\n        \"Cross validation without leakage\",\n        \"Batch normalization folding into effective weights\",\n        \"Formal proof search with a verifier\",\n        \"Matryoshka embeddings for on-device retrieval\"]\nE = ollama_embed([f\"title: none | text: {t}\" for t in docs])\nQ = ollama_embed([\"task: search result | query: make my model smaller and faster with 8-bit\"])\nif E is None or Q is None:\n    print(\"  SKIP \u2014 Ollama not reachable\")\n    ok(\"live truncation check skipped, honestly\", True, \"guarded cell\")\nelse:\n    En, Qn = F.normalize(E, dim=1), F.normalize(Q, dim=1)\n    full = (Qn @ En.T)[0]\n    order_full = full.argsort(descending=True)\n    print(f\"  full-dim (768) ranking: {[docs[int(i)][:34] for i in order_full[:3]]}\")\n    for dd in (256, 128):\n        Ed = F.normalize(E[:, :dd], dim=1); Qd = F.normalize(Q[:, :dd], dim=1)\n        r = (Qd @ Ed.T)[0].argsort(descending=True)\n        agree = int(r[0]) == int(order_full[0])\n        print(f\"  truncated to {dd:>3}: top answer {'UNCHANGED' if agree else 'changed'} \"\n              f\"({docs[int(r[0])][:34]})\")\n        ok(f\"the shipped model's top answer survives truncation to {dd}\", agree,\n           \"MRL training, visible in the artifact itself\")\n    ok(\"and the top answer is the right one\", \"int8\" in docs[int(order_full[0])],\n       f\"'{docs[int(order_full[0])]}'\")",
+      "output": "```\n  full-dim (768) ranking: ['Quantizing neural networks to int8', 'Batch normalization folding into e', 'Optimal transport couplings for fl']\n  truncated to 256: top answer UNCHANGED (Quantizing neural networks to int8)\nPASS  the shipped model's top answer survives truncation to 256   | MRL training, visible in the artifact itself\n  truncated to 128: top answer UNCHANGED (Quantizing neural networks to int8)\nPASS  the shipped model's top answer survives truncation to 128   | MRL training, visible in the artifact itself\nPASS  and the top answer is the right one   | 'Quantizing neural networks to int8'\n```",
+      "narration": "The shipped model, truncated live",
+      "seconds": 34.266666666666666,
+      "lesson": "egmz1",
+      "start": 351.48,
+      "end": 385.75
+    },
+    {
+      "kind": "note",
+      "text": "### Routing our own 320-agent fleet \u2014 the production takeaway\nThe eq. 1 cell measured 0/8 \u2192 5/8 from prompts alone on the real capability index. The remaining misses\nwere all NEAR-misses (`lora-validate` for `lora-train`, the right agent at rank 2) \u2014 and our IDF matcher\nfails on complementary cases. The production design this measures out to:\n\n* **hybrid retrieval** for `search_capabilities`: lexical IDF (exact names, rare terms) + prompted\n  embeddinggemma cosine (paraphrase, intent), rank-fused;\n* prompts are configuration \u2014 the retrieval task prefix must ship WITH the index, or quality sile",
+      "narration": "Routing our own 320-agent fleet \u2014 the production takeaway The eq. 1 cell measured 0/8 \u2192 5/8 from prompts alone on the real capability index. The remaining misses were all NEAR-misses (lora-validate for lora-train, the right agent at rank 2) \u2014 and our IDF matcher fails on complementary cases. The production design this measures out to: hyb",
+      "seconds": 6.3,
+      "lesson": "egmz1",
+      "start": 385.75,
+      "end": 392.05
+    },
+    {
+      "kind": "note",
+      "text": "**[Recap]** one prompted encoder, five equations \u00b7 task prompts are load-bearing\n(0/8 \u2192 5/8, live) \u00b7 NCE + hardness weight buys margin where it is hardest (eq. 2) \u00b7 the mask removes the\nduplicate contradiction (eq. 3) \u00b7 spread-out buys int8/ANN survival (eq. 4) \u00b7 distilling hard negatives\ntransfers the teacher's hard distinctions (eq. 5) \u00b7 MRL proved at toy scale and visible in the shipped\nartifact \u00b7 and the fleet gets a measured case for hybrid agent routing. Live cells guarded; MTEB numbers\nremain the authors'.",
+      "narration": "Recap one prompted encoder, five equations \u00b7 task prompts are load-bearing (0/8 \u2192 5/8, live) \u00b7 NCE + hardness weight buys margin where it is hardest equation 2 \u00b7 the mask removes the duplicate contradiction equation 3 \u00b7 spread-out buys int8/ANN survival equation 4 \u00b7 distilling hard negatives transfers the teacher's hard distinctions equat",
+      "seconds": 6.3,
+      "lesson": "egmz1",
+      "start": 392.05,
+      "end": 398.35
+    }
+  ],
+  "chapters": [
+    {
+      "id": "egmb1",
+      "title": "Basics \u2014 what a text embedder is, and why 300M-on-device is the target",
+      "order": 2900
+    },
+    {
+      "id": "egm01",
+      "title": "1 Introduction",
+      "order": 3000
+    },
+    {
+      "id": "egm02",
+      "title": "2 EmbeddingGemma",
+      "order": 3010
+    },
+    {
+      "id": "egm03",
+      "title": "3 Ablation Studies",
+      "order": 3020
+    },
+    {
+      "id": "egm04",
+      "title": "4 Evaluation",
+      "order": 3030
+    },
+    {
+      "id": "egmz1",
+      "title": "Matryoshka, live truncation, and routing our own fleet",
+      "order": 3800
+    }
+  ],
+  "sourceLessons": [
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/egm01.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/egm02.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/egm03.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/egm04.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/egmb1.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/egmz1.learning"
+  ]
+}

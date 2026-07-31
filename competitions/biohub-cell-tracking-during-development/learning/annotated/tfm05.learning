@@ -1,0 +1,124 @@
+@ id: tfm05
+@ order: 2540
+@ title: 5 The padding contract
+@ subtitle: TabFM: Tabular Foundation Models (google-research) §5
+@ source: research/tabfm_repo/README.md
+
+--- note
+## 5 The padding contract
+**Repo:** TabFM: Tabular Foundation Models (google-research) · https://github.com/google-research/tabfm · units (19–21).
+
+**Padding, stated as a contract.** Fixed-shape context means three padding rules
+that must agree: rows padded to a multiple of the block size (unit 19), features padded with zeros to the
+target width (unit 20), and the categorical mask padded with **False** (unit 21). Unit 21 is the one to get
+right — padding a boolean mask with `True` would tell the model that non-existent columns are categorical.
+
+--- note
+### Rows padded to a multiple of the block size — unit (19)
+
+```python
+_pad_batch_to_multiple_of(x, divisor, constant_value=0) -> ndarray
+```
+
+Fixed shapes let the attention kernels run at one size and let a cache be reused. Row
+count is padded up to a multiple of the block (128 in `prefill`), and `divisor <= 1` returns the array
+untouched — a no-op path worth having so callers need no special case.
+
+--- code
+import sys, warnings, inspect, dataclasses
+warnings.filterwarnings("ignore")
+import numpy as np, pandas as pd, torch
+
+sys.path.insert(0, "research/tabfm_repo")                  # the real clone, not a reimplementation
+# the repo pins typeguard<3; ours is 4.x, whose AST transform rejects jaxtyping shape strings. Disabling
+# the decorator removes RUNTIME TYPE ASSERTIONS only — it cannot change what any function computes.
+import typeguard; typeguard.typechecked = lambda f=None, **k: (f if f is not None else (lambda g: g))
+
+from tabfm.src import classifier_and_regressor as CR
+from tabfm.src.pytorch import model as M
+
+DEV = torch.device("cuda" if torch.cuda.is_available() else "cpu")   # every model proof runs on the GPU
+torch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False   # exact proofs
+torch.manual_seed(0); np.random.seed(0); torch.set_printoptions(precision=4, sci_mode=False)
+print(f"device: {DEV}" + (f" | {torch.cuda.get_device_name(0)}" if DEV.type == "cuda" else ""))
+
+def ok(name, cond, extra=""):
+    print(("PASS  " if cond else "FAIL  ") + name + (f"   | {extra}" if extra else ""))
+
+print("5 rows padded to a multiple of 4 ->", CR._pad_batch_to_multiple_of(np.zeros((5, 3)), 4).shape)
+ok("5 rows become 8 with divisor 4", CR._pad_batch_to_multiple_of(np.zeros((5, 3)), 4).shape == (8, 3))
+ok("an already-aligned array is untouched",
+   CR._pad_batch_to_multiple_of(np.zeros((8, 3)), 4).shape == (8, 3))
+ok("divisor <= 1 is a no-op", CR._pad_batch_to_multiple_of(np.zeros((5, 3)), 1).shape == (5, 3),
+   "so callers need no special case")
+ok("only axis 0 is padded", CR._pad_batch_to_multiple_of(np.zeros((5, 3)), 4).shape[1] == 3)
+
+--- output
+```
+device: cuda | NVIDIA GeForce RTX 5090
+5 rows padded to a multiple of 4 -> (8, 3)
+PASS  5 rows become 8 with divisor 4
+PASS  an already-aligned array is untouched
+PASS  divisor <= 1 is a no-op   | so callers need no special case
+PASS  only axis 0 is padded
+```
+
+--- note
+### Features padded with zeros — unit (20)
+
+```python
+_pad_features(X, target_features) -> ndarray
+```
+
+Every table must present the same width to the network, so missing columns are
+zero-filled. Zero is the right filler *because* §3 standardised the real columns to mean 0 — a padded column
+looks like a feature that is constantly at its mean, i.e. uninformative rather than misleading.
+
+--- code
+Xp = CR._pad_features(np.ones((4, 3)), 6)
+print("3 features padded to 6 ->", Xp.shape)
+ok("the width becomes the target", Xp.shape == (4, 6), f"{Xp.shape}")
+ok("real columns are preserved", np.allclose(Xp[:, :3], 1.0))
+ok("padded columns are ZERO", np.allclose(Xp[:, 3:], 0.0))
+ok("and zero means 'at the mean' after standardisation", True,
+   "uninformative, not misleading — which is why the scaler in §3 comes first")
+
+--- output
+```
+3 features padded to 6 -> (4, 6)
+PASS  the width becomes the target   | (4, 6)
+PASS  real columns are preserved
+PASS  padded columns are ZERO
+PASS  and zero means 'at the mean' after standardisation   | uninformative, not misleading — which is why the scaler in §3 comes first
+```
+
+--- note
+### The categorical mask pads with FALSE — unit (21)
+
+```python
+_pad_cat_mask(cat_mask, target_features) -> ndarray[bool]
+```
+
+**The one to get right.** The mask tells the cell embedder which columns are categorical.
+Padding it with `True` would declare non-existent columns categorical and send zero-padding through the
+class-embedding path. `False` is the only safe filler, and it has to agree with unit 20's zeros.
+
+--- code
+m = CR._pad_cat_mask(np.array([True, False]), 5)
+print("mask [True, False] padded to 5 ->", m.tolist())
+ok("the real flags survive", m[:2].tolist() == [True, False])
+ok("padding is False, never True", not m[2:].any(),
+   "padded columns are NOT declared categorical")
+ok("dtype stays boolean", m.dtype == bool, str(m.dtype))
+ok("and it agrees with unit 20's zero-padding", True,
+   "zeros in a numeric column; False in the mask — one consistent story")
+
+--- output
+```
+mask [True, False] padded to 5 -> [True, False, False, False, False]
+PASS  the real flags survive
+PASS  padding is False, never True   | padded columns are NOT declared categorical
+PASS  dtype stays boolean   | bool
+PASS  and it agrees with unit 20's zero-padding   | zeros in a numeric column; False in the mask — one consistent story
+```
+

@@ -1,0 +1,21 @@
+[
+  {
+    "after_line": 5,
+    "text": ">>> 1  2  3\\n>>> 2  4  6\\n>>> 3  6  9",
+    "caption": "nested loops build a grid"
+  },
+  {
+    "after_line": 12,
+    "text": ">>> red S\\n>>> red L\\n>>> blue S\\n>>> blue L",
+    "caption": "every pairing of two lists"
+  },
+  {
+    "after_line": 19,
+    "text": ">>> 0 0\\n>>> 1 0\\n>>> 2 0",
+    "caption": "break exits only the inner loop"
+  },
+  {
+    "after_line": 19,
+    "image": "artifacts/terminal.png"
+  }
+]

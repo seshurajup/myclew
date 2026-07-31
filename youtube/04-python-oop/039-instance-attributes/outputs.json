@@ -1,0 +1,21 @@
+[
+  {
+    "after_line": 14,
+    "text": ">>> Alice Red\\n>>> Bob Red",
+    "caption": "shared class attribute"
+  },
+  {
+    "after_line": 18,
+    "text": ">>> Blue Blue",
+    "caption": "class change affects all"
+  },
+  {
+    "after_line": 22,
+    "text": ">>> Green Blue",
+    "caption": "instance can override"
+  },
+  {
+    "after_line": 22,
+    "image": "artifacts/terminal.png"
+  }
+]

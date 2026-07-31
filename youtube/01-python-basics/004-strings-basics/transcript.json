@@ -1,0 +1,46 @@
+[
+  {
+    "text": "Strings are sequences of characters in quotes, single or double.",
+    "until_line": 1
+  },
+  {
+    "text": "[cough] You can concatenate strings with plus, or repeat them with times.",
+    "until_line": 3
+  },
+  {
+    "text": "The len function tells you how many characters a string has.",
+    "until_line": 8
+  },
+  {
+    "text": "You can use single or double quotes interchangeably, and triple quotes let a string stretch across multiple lines.",
+    "until_line": 8
+  },
+  {
+    "text": "Python gives strings a whole toolbox of methods — upper and lower change the case entirely.",
+    "until_line": 11
+  },
+  {
+    "text": "And replace swaps out one piece of text for another, [sigh] returning a brand new string each time.",
+    "until_line": 11
+  },
+  {
+    "text": "That's important — strings are immutable, so no method ever changes the original, it always hands you a fresh copy.",
+    "until_line": 14
+  },
+  {
+    "text": "[sniff] The in keyword works on strings too, instantly telling you whether one piece of text appears inside another.",
+    "until_line": 14
+  },
+  {
+    "text": "Strip removes leading and trailing whitespace, [chuckle] handy for cleaning up user input.",
+    "until_line": 14
+  },
+  {
+    "text": "And split breaks a sentence into a list of individual words, using spaces by default.",
+    "until_line": 21
+  },
+  {
+    "text": "lists is next, video number 5. Tell me in the comments if this clicked.",
+    "until_line": 21
+  }
+]

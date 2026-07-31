@@ -1,0 +1,36 @@
+# loeo_both — FINAL-coverage model: train BOTH embryos (44b6+6bba, golden-12 held out for checkpoint), 129ep.
+# CAVEAT: NOT embryo-disjoint-CV-able (only 2 embryos, both in train) — validate the RECIPE on fold0; this is the submission bet on coverage for the unseen Kaggle embryo.
+# = the EXACT embryo-disjoint setup that measured adjJ_44b6~0.023 (the Kaggle-faithful collapse). loeo_no_aug MUST
+# reproduce that ~0.02 floor; loeo_translate_static / loeo_crop_scale judged on adjJ_44b6 LIFT off the floor = NORTH STAR.
+# One-change A/B: identical to loeo_no_aug except the augment entry. crop_scale = DIRECTIONAL density-UP (zoom-out
+# s in [0.5,1.0]) to densify sparse 6bba toward 44b6. FROZEN split is READ-ONLY (referenced, never rewritten). NO Kaggle.
+name: loeo_both
+paths:
+  python:  research/cellmot_venv/bin/python
+  trainer: research/official_repo/scripts/train_unet_transformer.py
+  pythonpath: [research/official_repo/src, research/official_repo/scripts, .]
+  data_dir: input/biohub-cell-tracking-during-development/train
+  splits:   learning/ensemble_work/finetune/splits_train_both.json
+  cache_dir: research/cache/ds1x4x4
+mlflow:
+  tracking_uri: http://localhost:5000
+  experiment:   kaggle-biohub-stagebridge
+  run_name:     loeo_both
+  log_artifacts: false
+gpu:
+  power_limit_w: 400
+train:
+  method:          loeo_both
+  split:           0
+  downsample:      "1,4,4"
+  epochs:          129        # final-coverage model, match pilkwang epochs
+  lr:              1e-4
+  batch_size:      8
+  num_workers:     6
+  det_loss_weight: 10.0
+  det_neg_weight:  0.01
+  window_size:     2
+  pool_kernel_um:  5.0
+  max_iters:       150
+  seed:            1234
+augment: []                 # TRUE no-aug — MUST reproduce the ~0.02 adjJ_44b6 collapse FLOOR (validates substrate)

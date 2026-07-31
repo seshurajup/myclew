@@ -1,0 +1,10 @@
+# Per-embryo pool sweep on golden-12 (support-pack fresh re-detect). method=pilk_redetect resolves the
+# support-pack weights via the symlink (official_repo/weights/pilk_redetect/split_0). 44b6 pool swept
+# (via predict_pool_by_embryo.sh arg), 6bba fixed 5.0. Score: golden-12 canonical.
+name: pool_sweep_golden12
+paths:
+  python: research/cellmot_venv/bin/python
+  data_dir: input/biohub-cell-tracking-during-development/train
+  splits:  learning/ensemble_work/golden12_splits.json
+gpu: {power_limit_w: 400}
+train: {method: pilk_redetect, split: 0, downsample: "1,4,4", pool_kernel_um: 5.0}

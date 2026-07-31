@@ -1,0 +1,65 @@
+# fp8_qat_test.yml — SMALL dense byte-LM in QAT int4 mode (PART A.2 proof). fleet_agents/lowbit_qat
+# QuantLinear (fake-quant + STE) replaces fp8. Tiny/short — proves int4 QAT trains + converges (loss down).
+run:
+  name: fp8_qat_test
+  seed: 42
+  device: cuda
+  out_dir: experiments/fp8_ckpt
+  comp: biohub-cell-tracking-during-development
+  track: true
+  dry_run_first: true
+
+model:
+  d_model: 512
+  ffn: 2048
+  depth: 3
+  heads: 8
+  seq: 128
+  vocab: 32000
+  activation: gelu
+  norm: layer
+  n_experts: 1
+  moe_top_k: 2
+  moe_layers: all
+  mtp_heads: 0
+
+precision:
+  amp_dtype: auto
+  path: native
+  torch_compile: true     # auto-forced OFF (QAT STE path is eager)
+  qat: int4               # PART A.2: int4 QAT via lowbit_qat.wrap_qat
+
+train:
+  batch: 16
+  accum_steps: 1
+  epochs: 3
+  steps_per_epoch: 200
+  warmup_steps: 5
+  optimizer: adamw
+  lr: 3.0e-4
+  val_frac: 0.05
+  moe_aux_coef: 0.01
+  mtp_coef: 0.3
+
+data:
+  source: corpus
+  corpus: experiments/fp8_corpus.txt
+
+gate:
+  measure_fp8_vs_bf16: false
+  track_val: true
+  val_batches: 8
+  capture_failures: true
+  capture_failures_topn: 6
+  xai_every: 0
+  power_limit_w: 400
+
+infer:
+  checkpoint: ""
+  arch_config: ""
+  seed_bytes: 96
+  gen_tokens: 24
+  spec_gamma: 0
+  greedy: true
+  budget_s: 120
+  out_dir: experiments/fp8_infer

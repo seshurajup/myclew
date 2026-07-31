@@ -1,0 +1,16 @@
+[
+  {
+    "after_line": 10,
+    "text": ">>> 30\\n>>> 50",
+    "caption": "each closure remembers its factor"
+  },
+  {
+    "after_line": 22,
+    "text": ">>> 1 2 3",
+    "caption": "nonlocal = private evolving state"
+  },
+  {
+    "after_line": 22,
+    "image": "artifacts/terminal.png"
+  }
+]

@@ -1,0 +1,132 @@
+name: gnn_arch
+model: message_passing_edge_division_net
+input:
+  pair_features: 4
+  context_features: 4
+  flow_out: 3
+graph:
+  radius_um: 53.4
+  k_neighbors: 34
+  _why_radius: "motion |disp| p99=53.4\xB5m covers ~99% of true links (p50=6.3, p90=20.1)"
+  _why_k: "median local cell count within 53.4\xB5m = the real graph degree"
+backbone:
+  hidden_dim: SEARCH
+  n_layers: SEARCH
+  activation: SEARCH
+  norm: SEARCH
+  pooling: SEARCH
+  _capacity_is_search: "hidden/layers/activation/norm/pooling have no closed-form\
+    \ \u2192 arch-search proves them (avg/max/both all allowed)"
+moe:
+  style: llm_sparse_moe
+  n_experts: SEARCH
+  top_k: SEARCH
+  expert: swiglu_ffn
+  router: top_k_softmax_gating
+  load_balancing_loss: true
+  _hypothesis: "experts may specialise per data-regime (density/dev-stage S0\u2013\
+    S4); 1 expert = no MoE"
+  _why_search: "n_experts NOT asserted \u2014 prove whether sparse experts beat a\
+    \ dense FFN on golden-CV"
+heads:
+  edge:
+    type: binary
+    loss: bce
+  division:
+    type: binary
+    loss: weighted_bce
+    pos_weight: 189.1
+    _why_pos_weight: "division_rate=0.0053 \u2192 up-weight rare class 1/rate"
+  flow:
+    type: regression
+    dim: 3
+    loss: masked_l1
+detector_cnn:
+  kernel_size:
+  - 11
+  - 43
+  - 43
+  padding:
+  - 5
+  - 21
+  - 21
+  stride:
+  - 1
+  - 1
+  - 1
+  dilation:
+  - 1
+  - 1
+  - 1
+  pool:
+  - 1
+  - 2
+  - 2
+  _why_kernel: "cell\u224817.4\xB5m / voxel(z 1.625,xy 0.40625) \u2192 anisotropic\
+    \ 11\xD743\xD743"
+  _why_padding: "'same' = (kernel-1)//2 per axis \u2192 [5, 21, 21] preserves resolution\
+    \ for dense small nuclei"
+  _why_stride: "stride 1 \u2014 dense small objects, no spatial downsampling in detection"
+  _why_pool: "pool xy only (z:xy anisotropy = 4.0\xD7 \u2192 z already coarse, don't\
+    \ pool it)"
+attention:
+  type: graph_temporal_attention
+  head_dim: 64
+  n_heads: SEARCH
+  depth: SEARCH
+  spatial_attn_radius_um: 53.4
+  temporal_window: 7
+  _why_spatial: "attend within link radius 53.4\xB5m \u2014 a cell's measured interaction\
+    \ range"
+  _why_temporal: "window 7 of 790 frames \u2014 measured motion horizon"
+  _heads_are_search: "n_heads NOT asserted \u2014 1/2/4/8 to be TRAINED & measured\
+    \ (was wrongly 'derived' 512/64)"
+search_space:
+  hidden_dim:
+  - 128
+  - 256
+  - 512
+  n_layers:
+  - 2
+  - 3
+  - 4
+  n_heads:
+  - 1
+  - 2
+  - 4
+  - 8
+  n_experts_moe:
+  - 1
+  - 2
+  - 4
+  pooling:
+  - avg
+  - max
+  - avgmax_concat
+  activation:
+  - gelu
+  - relu
+  - swiglu
+  norm:
+  - layer
+  - rms
+  - batch
+  precision:
+  - fp32
+  - bf16
+  - fp16
+  - fp8
+  - nvfp4
+  - int8
+  _note: "these are HYPOTHESES \u2014 arch-search must train each and pick the golden-CV-best;\
+    \ NOT asserted. pooling/activation/norm included so no single type is hardcoded\
+    \ (avg+max combos allowed)."
+data:
+  nodes: 24406224
+  divisions: 129050
+  division_rate: 0.005287585658477935
+  cell_um: 17.4
+  voxel_scale:
+  - 1.625
+  - 0.40625
+  - 0.40625

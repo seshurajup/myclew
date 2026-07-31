@@ -1,0 +1,42 @@
+[
+  {
+    "text": "The os and sys modules connect your program to the operating system and the Python runtime.",
+    "until_line": 2
+  },
+  {
+    "text": "os lets you interact with the system — here, asking for the current working directory.",
+    "until_line": 4
+  },
+  {
+    "text": "It reads environment variables too, like HOME, with a safe default if they're missing.",
+    "until_line": 5
+  },
+  {
+    "text": "[chuckle] os dot path joins folder and file names using the correct separator for any operating system.",
+    "until_line": 6
+  },
+  {
+    "text": "[sniff] You can list the contents of a directory, walking every file and folder inside it.",
+    "until_line": 10
+  },
+  {
+    "text": "That's the foundation for tools that scan, organize, or process files in bulk.",
+    "until_line": 10
+  },
+  {
+    "text": "[sigh] sys, by contrast, is about Python itself — its version, the platform it's running on.",
+    "until_line": 14
+  },
+  {
+    "text": "And sys dot argv holds the command-line arguments passed to your script, so it can react to user input at launch.",
+    "until_line": 15
+  },
+  {
+    "text": "[groan] os and sys are how Python scripts become real tools that read their environment and adapt to it.",
+    "until_line": 15
+  },
+  {
+    "text": "argparse is next, video number 80. Comment the topic you want after that.",
+    "until_line": 15
+  }
+]

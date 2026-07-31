@@ -1,0 +1,31 @@
+[
+  {
+    "after_line": 6,
+    "text": ">>> {'name': 'Alice', ...}\n>>> Alice\n>>> 25\n>>> NYC\n>>> 3",
+    "caption": "key access via [] or .get()"
+  },
+  {
+    "after_line": 11,
+    "text": ">>> {'name': 'Alice', 'age': 26, 'city': 'NYC', 'email': '...'}",
+    "caption": "add/update keys directly"
+  },
+  {
+    "after_line": 15,
+    "text": ">>> ['name', 'age', 'city', 'email']\n>>> ['Alice', 26, 'NYC', '...']",
+    "caption": ".keys() / .values()"
+  },
+  {
+    "after_line": 18,
+    "text": ">>> not provided",
+    "caption": ".get() with a safe default"
+  },
+  {
+    "after_line": 21,
+    "text": ">>> {'name': 'Alice', 'age': 26, 'email': '...'}",
+    "caption": ".pop() removes a key"
+  },
+  {
+    "after_line": 23,
+    "image": "artifacts/terminal.png"
+  }
+]

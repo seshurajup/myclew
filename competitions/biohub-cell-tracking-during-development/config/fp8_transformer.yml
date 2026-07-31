@@ -1,0 +1,109 @@
+# ============================================================================
+# fp8_transformer.yml — FULLY config-driven fp8 large-matmul transformer training (RTX 5090 sm_120).
+# The PROVEN fp8 path, productionized: resumable, val/CV-tracked, :7788-dashboard-tracked, MoE-capable.
+# Measured end-to-end (docs/fp8_training_proof.md):
+#   fp8 1.33–1.40× vs bf16, converges ≈bf16, ~12% less VRAM. HARD conditions the guardrail enforces:
+#     • d_model ≥ 3072   (2048 FAILS the bar at 1.27×; tiny matmuls 0.52× = SLOWER)
+#     • torch.compile ON (eager fp8 loses — graph_breaks must be 0)
+#     • matmul/transformer-heavy only (no conv — fp8 has no conv3d kernel)
+#   Batch fits fp8 where bf16 can't: bs36 = 26GB fp8 vs 31.6GB bf16 (fp8 speedup GROWS with batch: 1.33×→1.40×).
+# NOT for the biohub conv UNet (that's bf16). This is the reusable Gemma-scale / transformer trainer.
+#
+# HONEST BOUNDARY: the LM's "CV score" is VAL-LOSS / PERPLEXITY (below). The biohub CV agents
+# (official-score edge_jaccard, lever-hunt, feasibility-gate) are CELL-competition-specific and are
+# INTENTIONALLY NOT wired here — applying edge_jaccard to a byte LM is a category error.
+# ============================================================================
+
+run:
+  name: fp8_transformer                # checkpoints → out_dir/<name>.pt (resume) + <name>_best.pt (best val)
+  seed: 42
+  device: cuda                         # cuda | cpu
+  out_dir: experiments/fp8_ckpt        # checkpoint + best + failures dir
+  comp: biohub-cell-tracking-during-development   # tags the :7788 events (dashboard board)
+  track: true                          # emit run/epoch/val/ckpt/failure/xai events to the :7788 thread
+  dry_run_first: true                  # ALWAYS --dry-run before a real run (project rule)
+
+model:
+  d_model: 3072                        # ≥3072 → real fp8 win (MEASURED); below = fp8 loses (guardrail warns)
+  ffn: 12288
+  depth: 8
+  heads: 16
+  seq: 512
+  vocab: 32000                         # ignored when data.source=corpus (byte LM → vocab auto 256)
+  activation: gelu                     # PROVEN model is GELU (other values NOTED + kept as GELU to preserve fp8 path)
+  norm: layer                          # PROVEN model is LayerNorm (other values NOTED + kept as LayerNorm)
+  # ---- MoE (OFF by default: n_experts=1 = DENSE, byte-identical to the proven path) ----
+  n_experts: 1                         # >1 enables MoE-FFN. sm_120 has NO grouped fp8 kernel
+                                       #   (torch._scaled_grouped_mm needs Hopper cc==9.0, RAISES on sm_120) →
+                                       #   we LOOP _scaled_mm per expert (each expert a normal fp8 Fp8Linear).
+                                       #   MoE runs EAGER (compile off) so aux-loss collects + no grouped kernel.
+  # Example enable:  n_experts: 4  /  moe_top_k: 2  /  moe_layers: all
+  moe_top_k: 2                         # tokens routed to top-k experts (used only when n_experts>1)
+  moe_layers: all                      # 'all' or a list of block indices, e.g. [1,3,5,7]
+  # ---- MTP (PART A.1, OFF by default: mtp_heads=0 = byte-identical to phase-1) ----
+  mtp_heads: 0                         # >0 → N extra prediction heads for tokens t+2..t+N+1 (Gemma-4/DeepSeek MTP).
+                                       #   Trains a self-speculative DRAFTER; infer_fp8_transformer uses it for
+                                       #   speculative decode (mtp_speculative_pack supplies the speedup arithmetic).
+                                       #   Total loss = next-token CE + train.mtp_coef·Σ(extra-head CE). Runs EAGER.
+
+precision:
+  amp_dtype: auto                      # 'auto' → hardware_tune.select_train_precision(model) → fp8 for this net
+  path: native                         # native Fp8Linear (torch._scaled_mm, no install) | torchao (fused float8)
+  torch_compile: true                  # REQUIRED for the fp8 win (fuses quantize; graph_breaks=0). Forced OFF when MoE/QAT/MTP on.
+  # ---- QAT (PART A.2, OFF by default) — ALTERNATIVE low-bit mode to fp8 ----
+  qat: off                             # off | int8 | int4 | ternary. When set, model Linears are wrapped with
+                                       #   fleet_agents/lowbit_qat QuantLinear (fake-quant + STE master weights)
+                                       #   INSTEAD of fp8. fp8=FAST-TRAIN (native _scaled_mm, compiled);
+                                       #   QAT=SHRINK-TO-DEPLOY (int4/int8/ternary, eager). They never stack.
+
+train:
+  batch: 36                            # fits ~26GB fp8 on the 5090 (bf16 barely fits at 31.6GB)
+  accum_steps: 1                       # grad-accum: EFFECTIVE batch = batch × accum_steps, WITHOUT more VRAM
+                                       #   (honest way to scale batch — fp8 only freed ~12%). e.g. accum_steps: 2 → eff 72.
+  epochs: 3                            # default; --epochs N trains N MORE epochs THIS invocation (continues from checkpoint)
+  steps_per_epoch: 1000                # OPTIMIZER steps per epoch (each = accum_steps micro-batches)
+  warmup_steps: 15
+  optimizer: adamw                     # muon optional (bf16/fp16 friendly)
+  lr: 3.0e-4
+  val_frac: 0.05                       # contiguous LAST 5% of the corpus held out for val/CV (no train overlap)
+  moe_aux_coef: 0.01                   # load-balance aux-loss coeff (only when MoE on; keeps experts from collapsing)
+  mtp_coef: 0.3                        # MTP aux-loss weight (only when model.mtp_heads>0): loss += mtp_coef·Σ head_CE
+
+data:
+  source: corpus                       # corpus = REAL byte-level data (vocab auto→256) | synthetic = random tokens (proof only)
+  corpus: experiments/fp8_corpus.txt   # 2.9MB real text+code (docs/*.md + fleet_agents/*.py); next-byte LM
+
+gate:
+  measure_fp8_vs_bf16: true            # log the REAL speedup each run (rule #11 — never assume). Dense path only.
+  convergence_check: true              # loss must decrease and track bf16
+  track_val: true                      # per-epoch val_loss + perplexity=exp(val_loss); best-val → <name>_best.pt
+  val_batches: 20                      # fixed seeded val batches evaluated each epoch (val CV set)
+  capture_failures: true               # on a NEW best-val, dump worst-N val windows + confusion → <name>_failures.jsonl
+  capture_failures_topn: 20            # how many worst held-out windows to capture
+  xai_every: 0                         # native LM XAI probe every N epochs (0 = once at end). fleet_agents/xai.py is
+                                       #   biohub-cell-specific → we run a native LM probe (conf/entropy/top-bytes) instead.
+  hardware_config: docs/hardware_config.json
+  power_limit_w: 400                   # sudo nvidia-smi -pl 400 (systemd nvidia-powerlimit)
+
+# RESUME behavior: after each epoch the trainer saves {model,optimizer,epoch,global_step,loss,val,best_val,history,
+# cfg_hash,arch} to out_dir/<name>.pt. On the next launch (no --fresh) it LOADS that + the optimizer and trains
+# --epochs MORE epochs (epoch 3→4, not restart at 1). cfg_hash guards arch/vocab/MoE changes (mismatch ⇒ --fresh).
+# The saved `arch` dict lets infer_fp8_transformer.py rebuild the exact model offline.
+
+# ============================================================================
+# PART B — Kaggle-offline-STYLE local inference companion (infer_fp8_transformer.py).
+# Loads a checkpoint by PATH (offline, no internet), rebuilds the model from the saved `arch`, and:
+#   • KV-CACHE generation (kv_cache_pack for the cache-memory accounting; runtime incremental cache inline)
+#   • SPECULATIVE DECODE from the MTP drafter heads (mtp_speculative_pack for the speedup arithmetic)
+#   • MoE-INFERENCE-COST active-vs-total params (moe_inference_pack) — N/A when dense
+# TIMES the whole run against infer.budget_s, writes generated_sample.txt + infer_report.json, :7788-tracked.
+# ============================================================================
+infer:
+  checkpoint: ""                       # "" → <out_dir>/<name>_best.pt. Discovered by PATH (offline).
+  arch_config: ""                      # optional fallback yml for n_heads if a legacy ckpt lacks `arch`
+  seed_bytes: 128                      # bytes of real-corpus prompt to seed generation from
+  gen_tokens: 192                      # bytes to generate (auto-capped so seed+gen ≤ model seq_len)
+  spec_gamma: 0                        # speculative draft length; 0 → use all MTP heads (mtp_heads)
+  greedy: true                         # greedy decode → cache vs no-cache outputs must be IDENTICAL (a cache correctness proof)
+  budget_s: 120                        # inference must complete under this wall-clock budget (Kaggle-offline discipline)
+  out_dir: experiments/fp8_infer       # generated_sample.txt + infer_report.json land here

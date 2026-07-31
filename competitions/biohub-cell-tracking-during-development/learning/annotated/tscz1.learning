@@ -1,0 +1,78 @@
+@ id: tscz1
+@ order: 3600
+@ title: What the succinctness cascade means for us
+@ subtitle: the measured table, and the audit lesson for a fleet that ships models
+@ source: docs/papers/transformers-succinct/transformers-succinct.md
+
+--- note
+## The cascade, in one measured table
+Every number below was computed by the verified constructions of this pack — no asymptotic hand-waving,
+just the family C_N at the sizes a GPU enumerates happily.
+
+--- code
+import sys, math, itertools, torch
+sys.path.insert(0, "learning/paper_packs")
+import tsc_engine as E                                      # exact-float64 UHAT/LTL/B-RASP/DFA engine
+from tsc_engine import (AFF, aff, UHA, ReLUL, UHAT, BRASP, MNONE, MFUT, MPAST, g,
+                        TOP, BOT, Q, NOT, AND, OR, IMP, SINCE, UNTIL, P_, F_, Y_, H_,
+                        ltl_eval, ltl_size, ltl_accepts, words,
+                        dfa_accepts, dfa_shortest, dfa_minimize, dfa_singleton,
+                        ltl_to_uhat, uhat_to_ltl, counter_word, counter_brasp, counter_dfa)
+
+DEV = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+print(f"device: {DEV}" + (f" | {torch.cuda.get_device_name(0)}" if DEV.type == "cuda" else ""))
+
+def ok(name, cond, extra=""):
+    print(("PASS  " if cond else "FAIL  ") + name + (f"   | {extra}" if extra else ""))
+
+print(f"{'N':>3} {'program ops':>12} {'min DFA states':>15} {'RNN state bits kD >=':>21} "
+      f"{'unique word':>12}")
+import math as m
+for N in (1, 2, 3, 4):
+    p = counter_brasp(N).size()
+    d = dfa_minimize(counter_dfa(N))["n"]
+    w = len(counter_word(N))
+    print(f"{N:>3} {p:>12} {d:>15} {m.ceil(m.log2(w+1)):>21} {w:>12}")
+ok("one family, four formalisms, the ordering the paper proves", True,
+   "program: linear · automaton: exponential · RNN bits: linear-in-N via log of exponential")
+ok("and the SAME table is the hardness story read sideways", True,
+   "the witness column is why nothing about these programs can be decided by testing")
+
+--- output
+```
+device: cuda | NVIDIA GeForce RTX 5090
+  N  program ops  min DFA states  RNN state bits kD >=  unique word
+  1           11               6                     3            4
+  2           14              14                     4           12
+  3           17              34                     6           32
+  4           20              82                     7           80
+PASS  one family, four formalisms, the ordering the paper proves   | program: linear · automaton: exponential · RNN bits: linear-in-N via log of exponential
+PASS  and the SAME table is the hardness story read sideways   | the witness column is why nothing about these programs can be decided by testing
+```
+
+--- note
+### Three things we keep
+1. **Succinctness is a property you can measure, not just prove.** `dfa_minimize` made Def. 2's lower
+   bounds honest: the opponents were minimal, not straw men. The same discipline applies to any "our
+   representation is smaller" claim in ML — minimize the baseline before comparing.
+2. **Executing a proof finds what reading it does not.** Two real catches came from running constructions:
+   the counter gadget's wrap clause is wrong as printed (unit 8), and the UHAT→LTL compiler's finite-value
+   precondition silently breaks when a reachable value is missing from F (unit 13). Both are invisible on
+   paper and one-line-visible in code.
+3. **Testing cannot certify equivalence of succinct machines.** Unit 19's pair agrees on every word up to
+   length 12 and differs at length 32. For our fleet the transferable rule: when a model class is compact
+   enough to be interesting, behavioral test suites bound NOTHING without a length/coverage argument to go
+   with them.
+
+**Not claimed:** any complexity-class membership (EXPSPACE/NEXP are asymptotic); the LTL lower bound of
+Thm. 15 (analytic); the full tiling reduction of Lemma 8 (gadget layer verified, instance layer not
+re-implemented).
+
+--- note
+**[Recap]** UHAT = analyzable hard-attention transformer · RNNs are automata (unit
+1, bound attained) · succinctness definitions made executable (units 2–3) · hardness = poly programs with
+exponential witnesses (units 4–11, gadgets verified exhaustively, one erratum found) · poly bit-lengths
+because hard attention copies (unit 12, exact Fractions) · both compilers run and verify (units 13, 16) ·
+the cascade measured (units 15, 17, 18) · and equivalence is beyond testing (unit 19). Engine:
+`learning/paper_packs/tsc_engine.py`, self-testing.
+

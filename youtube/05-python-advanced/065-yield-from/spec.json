@@ -1,0 +1,14 @@
+{
+  "language": "python",
+  "title": "yield_from.py",
+  "hook": "Chain generators with yield from",
+  "playlist": "Learn Python",
+  "target_seconds": 90,
+  "max_seconds": 120,
+  "tts_engine": "chatterbox",
+  "music_prompt": "flowing, nested, streaming",
+  "code_path": "code.py",
+  "transcript_path": "transcript.json",
+  "outputs_path": "outputs.json",
+  "accent": "rose"
+}

@@ -1,0 +1,65 @@
+@ id: gm03
+@ order: 2220
+@ title: 1 Introduction
+@ subtitle: GradMem: Learning to Write Context into Memory §1
+@ source: docs/papers/gradmem/gradmem.md
+
+--- note
+## 1 Introduction
+**Paper:** GradMem: Learning to Write Context into Memory · §1 · pages 1–2 · equations (1–1) · 1 figures.
+
+**The baseline, stated precisely.** Conditioning on a context is concatenation
+(eq. 1): the model sees `[C; Q]`. Everything else in the paper is an attempt to replace `C` in that bracket
+with something much shorter without losing what the queries need.
+
+--- note
+### Figure 1 — as printed in the paper
+
+Figure 1. GradMem learns to write context into memory via
+
+--- image
+learning/assets/gradmem/p01_0.png
+Figure 1. GradMem learns to write context into memory via
+
+--- note
+### Conditioning is concatenation — eq. (1)
+
+$$
+f_{\theta}\big(Y \,\big|\, C, Q\big) \;\triangleq\; f_{\theta}\big(Y \,\big|\, [C;Q]\big)
+$$
+
+The definition being replaced: "using the context" means putting it in the prompt. The
+cost of that is the `c²` term of eq. 11 and a cache that grows with `c`.
+
+--- code
+import torch, torch.nn as nn, torch.nn.functional as F      # a memory is the argmin of a write loss
+import sys; sys.path.insert(0, "learning")
+import vizkit as vz
+
+DEV = torch.device("cuda" if torch.cuda.is_available() else "cpu")   # every proof runs on the GPU
+torch.set_default_device(DEV)
+torch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False   # exact proofs
+torch.manual_seed(0); torch.set_printoptions(precision=4, sci_mode=False)
+print(f"device: {DEV}" + (f" | {torch.cuda.get_device_name(0)}" if DEV.type == "cuda" else ""))
+
+def ok(name, cond, extra=""):
+    print(("PASS  " if cond else "FAIL  ") + name + (f"   | {extra}" if extra else ""))
+
+def close(a, b, tol=1e-5):
+    return torch.allclose(a, b, atol=tol, rtol=tol)
+
+d, c_len, q_len = 32, 24, 4
+C = torch.randn(c_len, d); Q = torch.randn(q_len, d)
+prompt = torch.cat([C, Q], 0)                                   # eq. 1
+ok("conditioning = concatenation along the sequence axis", prompt.shape == (c_len + q_len, d),
+   f"{tuple(C.shape)} + {tuple(Q.shape)} -> {tuple(prompt.shape)}")
+ok("attention cost is quadratic in the concatenated length",
+   (c_len + q_len) ** 2 > c_len ** 2 + q_len ** 2, f"{(c_len+q_len)**2} vs {c_len**2 + q_len**2}")
+
+--- output
+```
+device: cuda | NVIDIA GeForce RTX 5090
+PASS  conditioning = concatenation along the sequence axis   | (24, 32) + (4, 32) -> (28, 32)
+PASS  attention cost is quadratic in the concatenated length   | 784 vs 592
+```
+

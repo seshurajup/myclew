@@ -1,0 +1,42 @@
+[
+  {
+    "text": "Functools is a treasure chest of tools that supercharge your functions.",
+    "until_line": 1
+  },
+  {
+    "text": "The lru_cache decorator remembers past results, so repeated calls return instantly instead of recomputing.",
+    "until_line": 6
+  },
+  {
+    "text": "Slap it on a recursive fibonacci, and computing the fiftieth number becomes immediate.",
+    "until_line": 7
+  },
+  {
+    "text": "[chuckle] Without caching, that same call would trigger billions of redundant computations.",
+    "until_line": 7
+  },
+  {
+    "text": "[sniff] partial creates a new function by pre-filling some of another function's arguments.",
+    "until_line": 14
+  },
+  {
+    "text": "Here we lock exp to two, turning the general power function into a dedicated square function.",
+    "until_line": 15
+  },
+  {
+    "text": "[sigh] reduce folds an entire sequence down to a single value, applying a function pairwise.",
+    "until_line": 17
+  },
+  {
+    "text": "Multiplying the list one, two, three, four step by step gives twenty-four, the product of them all.",
+    "until_line": 17
+  },
+  {
+    "text": "[groan] Caching, partials, and reduce are the kind of tools that make advanced Python both faster and more elegant.",
+    "until_line": 17
+  },
+  {
+    "text": "Up next, the collections module. Save this one for when you need it.",
+    "until_line": 17
+  }
+]

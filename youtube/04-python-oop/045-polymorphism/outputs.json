@@ -1,0 +1,11 @@
+[
+  {
+    "after_line": 19,
+    "text": ">>> 9\\n>>> 12.57",
+    "caption": "same call, different behavior"
+  },
+  {
+    "after_line": 19,
+    "image": "artifacts/terminal.png"
+  }
+]

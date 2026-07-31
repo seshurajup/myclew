@@ -1,0 +1,39 @@
+@ id: g412
+@ order: 412
+@ title: Compute infrastructure
+@ subtitle: TPU sharding, ZeRO-3, Pathways, GSPMD, and slice-granularity elasticity
+@ source: arxiv 2607.02770
+
+--- note
+## Hardware
+Gemma 4 is trained on **TPU v5p and TPU v6e** (Table 2). Each model configuration is tuned to
+**minimize training step time**. The chip counts are large: e.g. 12B on **v5p with 12,288 chips**, 31B
+on **v6e with 10,240 chips**, E4B and 26B-A4B on **v6e with 6,144 chips**, E2B on **v6e with 4,096
+chips**.
+
+--- image
+learning/assets/gemma4/t02_pretrain_infra.png
+Table 2 — pre-training infrastructure. Each model's parallelism is a product of three shardings: **Data**, **Sequence (Seq)**, and **Replica**. E.g. E2B = 16 data × 8 seq × 32 replica shards over 4,096 v6e chips.
+
+--- note
+## Parallelism & sharding
+- The **optimizer state is sharded with an implementation of ZeRO-3** (Ren et al., 2021) — the
+  optimizer moments are partitioned across chips instead of replicated, which is what makes large
+  models fit.
+- For **multi-pod** training they do a **data-replica reduction over the data-center network**, using
+  the **Pathways** approach (Barham et al., 2022).
+- The software stack is **single-controller JAX + Pathways**, with the **GSPMD partitioner** (Xu et
+  al., 2021) and the **MegaScale XLA compiler**.
+
+--- note
+## Slice-Granularity Elasticity — resilience to failures
+For the larger models they use **Slice-Granularity Elasticity** (Gemini Team, 2025): on a **localized
+hardware failure**, training **continues with fewer "slices" of TPU chips** rather than halting. This
+reconfiguration **cuts the interruption delay from many minutes to a few seconds** — a big deal at
+10k-chip scale, where failures are frequent and a full restart is expensive.
+
+--- note
+## Takeaway
+The infra story is "standard-but-industrial-scale JAX/TPU": ZeRO-3 optimizer sharding, GSPMD/Pathways
+partitioning, XLA compilation, and elasticity for fault tolerance. The report gives chip counts and
+sharding factors (Table 2) but not wall-clock training time or cost — so we do not estimate those.

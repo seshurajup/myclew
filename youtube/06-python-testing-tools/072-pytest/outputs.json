@@ -1,0 +1,12 @@
+[
+  {
+    "after_line": 21,
+    "text": ">>> 6 passed in 0.01s",
+    "caption": "plain asserts + parametrize",
+    "volatile": true
+  },
+  {
+    "after_line": 21,
+    "image": "artifacts/terminal.png"
+  }
+]

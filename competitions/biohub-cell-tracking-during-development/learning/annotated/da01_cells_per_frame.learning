@@ -1,0 +1,236 @@
+@ id: da01
+@ order: 1
+@ title: How many cells per frame?
+@ subtitle: Full EDA of the tracking graph — counts, distribution, and the sparse-label trap
+@ source: learning/annotated/da01_cells_per_frame.py
+
+--- note
+## The very first question
+Each training embryo is a `.geff` **tracking graph**; every **node = one annotated cell at one
+timepoint**, and node property `t` is the frame index. So "cells in frame `t`" = how many nodes
+share that `t`. Below, we explore this fully on the real data — every output is the real result of
+running the code.
+
+--- note
+### Cells per frame, for one embryo
+Read `t` for every node of `6bba_09961292` and count per frame.
+
+--- code
+t = np.asarray(zarr.open(f"{TRAIN}/6bba_09961292.geff/nodes/props/t/values")[:])  # frame of every node
+cpf = pd.Series(t).value_counts().sort_index()             # cells per frame
+cpf.head(6).rename_axis("frame").rename("cells").reset_index()  # first 6 frames
+
+--- output
+<table class="dataframe df">
+  <thead>
+    <tr style="text-align: right;">
+      <th>frame</th>
+      <th>cells</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>0</td>
+      <td>18</td>
+    </tr>
+    <tr>
+      <td>1</td>
+      <td>21</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>23</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>25</td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td>25</td>
+    </tr>
+    <tr>
+      <td>5</td>
+      <td>26</td>
+    </tr>
+  </tbody>
+</table>
+
+--- note
+### Scan ALL 199 embryos
+Loop every `.geff`, and for each record its group, #frames, total nodes, and the min/mean/max
+cells-per-frame. We keep every per-frame count too (for the distribution below).
+
+--- code
+import numpy as np, pandas as pd, zarr, json                # tools
+rows, all_cpf = [], []                                       # per-embryo stats, and every frame's count
+for g in sorted(TRAIN.glob("*.geff")):                       # each embryo
+    t = np.asarray(zarr.open(f"{g}/nodes/props/t/values")[:])  # node frames
+    vc = pd.Series(t).value_counts()                          # cells per frame
+    all_cpf.extend(vc.tolist())                               # remember every frame's count
+    estN = json.load(open(f"{g}/zarr.json"))["attributes"]["geff"]["extra"]["estimated_number_of_nodes"]  # TRUE count
+    rows.append({"group": g.name[:4], "n_frames": len(vc), "n_nodes": int(len(t)),
+                 "cpf_min": int(vc.min()), "cpf_mean": round(vc.mean(), 1),
+                 "cpf_max": int(vc.max()), "estN": int(estN)})  # this embryo's stats
+eda = pd.DataFrame(rows)                                      # 199-row EDA table
+eda.describe().loc[["min", "50%", "max"]].round(1)           # overall min/median/max of each column
+
+--- output
+<table class="dataframe df">
+  <thead>
+    <tr style="text-align: right;">
+      <th>n_frames</th>
+      <th>n_nodes</th>
+      <th>cpf_min</th>
+      <th>cpf_mean</th>
+      <th>cpf_max</th>
+      <th>estN</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>40.0</td>
+      <td>50.0</td>
+      <td>1.0</td>
+      <td>1.0</td>
+      <td>1.0</td>
+      <td>3783.0</td>
+    </tr>
+    <tr>
+      <td>100.0</td>
+      <td>659.0</td>
+      <td>2.0</td>
+      <td>6.6</td>
+      <td>10.0</td>
+      <td>17909.0</td>
+    </tr>
+    <tr>
+      <td>100.0</td>
+      <td>1950.0</td>
+      <td>15.0</td>
+      <td>20.1</td>
+      <td>33.0</td>
+      <td>78644.0</td>
+    </tr>
+  </tbody>
+</table>
+
+--- note
+### The two groups — annotated density
+Group by the 4-char embryo prefix. `44b6` is sparsely annotated (~3/frame), `6bba` denser (~9).
+
+--- code
+(eda.groupby("group")                                    # 44b6 vs 6bba
+    .agg(n=("group", "size"), n_frames_median=("n_frames", "median"),
+         cpf_mean=("cpf_mean", "mean"), cpf_max=("cpf_max", "max"))
+    .round(1).reset_index())                                 # per-group table
+
+--- output
+<table class="dataframe df">
+  <thead>
+    <tr style="text-align: right;">
+      <th>group</th>
+      <th>n</th>
+      <th>n_frames_median</th>
+      <th>cpf_mean</th>
+      <th>cpf_max</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>44b6</td>
+      <td>71</td>
+      <td>100.0</td>
+      <td>3.0</td>
+      <td>16</td>
+    </tr>
+    <tr>
+      <td>6bba</td>
+      <td>128</td>
+      <td>100.0</td>
+      <td>9.0</td>
+      <td>33</td>
+    </tr>
+  </tbody>
+</table>
+
+--- note
+### The distribution — how sparse is it really?
+Bin every frame's cell count. Almost all frames have very few annotated cells — a max of ~33
+anywhere, and ~78% of frames under 10.
+
+--- code
+bins = [0, 10, 25, 50, 1000]                              # count ranges
+labels = ["1-10", "11-25", "26-50", "50+"]                   # readable labels
+dist = pd.cut(all_cpf, bins=bins, labels=labels).value_counts().reindex(labels)  # frames per range
+dist.rename_axis("cells/frame").rename("n_frames").reset_index()  # the real histogram
+
+--- output
+<table class="dataframe df">
+  <thead>
+    <tr style="text-align: right;">
+      <th>cells/frame</th>
+      <th>n_frames</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1-10</td>
+      <td>14820</td>
+    </tr>
+    <tr>
+      <td>11-25</td>
+      <td>4045</td>
+    </tr>
+    <tr>
+      <td>26-50</td>
+      <td>68</td>
+    </tr>
+    <tr>
+      <td>50+</td>
+      <td>0</td>
+    </tr>
+  </tbody>
+</table>
+
+--- note
+### The trap — annotated ≠ real
+**[Domain]** A max of ~33 cells/frame is impossibly low for a mid-development zebrafish embryo.
+The `.geff` only **sparsely labels** a subset of tracks. `estN` (`estimated_number_of_nodes`) is
+the organisers' TRUE estimate. Compare: the annotated fraction is tiny.
+
+--- code
+eda["annot_frac_%"] = (100 * eda["n_nodes"] / eda["estN"]).round(1)  # labelled / true
+eda["annot_frac_%"].describe().loc[["min", "50%", "max"]].round(1)   # real label-fraction range
+
+--- output
+<table class="dataframe df">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>annot_frac_%</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>min</th>
+      <td>0.1</td>
+    </tr>
+    <tr>
+      <th>50%</th>
+      <td>3.6</td>
+    </tr>
+    <tr>
+      <th>max</th>
+      <td>20.2</td>
+    </tr>
+  </tbody>
+</table>
+
+--- note
+**[Recap]** 199 embryos, two groups (44b6 sparse-annotated, 6bba denser), ~78% of
+frames have <10 *annotated* cells, and only a few % of real cells are labelled. That sparse-label
+fact is the single most important thing to remember — it's why our local CV can mislead (see rs02).
+
+**Next → da02: following time** — how counts change across the movie, and when embryos start.
+

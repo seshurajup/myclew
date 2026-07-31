@@ -1,0 +1,42 @@
+[
+  {
+    "text": "Objects can have two kinds of attributes, and knowing the difference prevents a lot of confusion.",
+    "until_line": 3
+  },
+  {
+    "text": "A class attribute, defined right in the class body, is shared by every single instance.",
+    "until_line": 3
+  },
+  {
+    "text": "Here team equals Red belongs to the whole Player class at once.",
+    "until_line": 3
+  },
+  {
+    "text": "[chuckle] Instance attributes, set inside init using self, are unique to each object.",
+    "until_line": 8
+  },
+  {
+    "text": "So every player gets their own name and their own score, but they all share the same team.",
+    "until_line": 14
+  },
+  {
+    "text": "[sniff] Change the class attribute on the class itself, and the update ripples out to everyone.",
+    "until_line": 18
+  },
+  {
+    "text": "Suddenly both Alice and Bob are on the Blue team, because they shared that value.",
+    "until_line": 18
+  },
+  {
+    "text": "[sigh] But if you set the attribute on one instance, that object gets its own private copy, overriding the shared one.",
+    "until_line": 22
+  },
+  {
+    "text": "[groan] Use class attributes for shared constants, and instance attributes for the data that makes each object unique.",
+    "until_line": 22
+  },
+  {
+    "text": "methods is next, video number 40. Save this one for when you need it.",
+    "until_line": 22
+  }
+]

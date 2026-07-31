@@ -1,0 +1,12 @@
+@ id: rfm17
+@ order: 2560
+@ title: E Additional Experiment Results
+@ subtitle: Routing-Free Mixture-of-Experts §E
+@ source: docs/papers/routing-free-moe/routing-free-moe.md
+
+--- note
+## E Additional Experiment Results
+**Paper:** Routing-Free Mixture-of-Experts · §E · pages 21–22 · equations (none) · 0 figures.
+
+> TODO(author): the *why* of §E in 3–5 lines.
+

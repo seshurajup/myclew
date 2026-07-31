@@ -1,0 +1,39 @@
+# aug_journey STAGEBRIDGE substrate — REAL collapse-recovery test. sb_10_crop_scale
+# Train 6bba-ALONE (24, non-leaky) -> TEST 44b6 (money: does adjJ_44b6 lift off the LOEO ~0.02 collapse toward
+# 0.44?) + 6bba (guardrail: not crashing). This substrate DOES reproduce the collapse (screen_matched does NOT).
+# One-change A/B: identical to sb_00_no_aug except the augment entry. crop_scale = DIRECTIONAL density-UP
+# (zoom-out s in [0.5,1.0]) because we densify sparse 6bba toward 44b6. LABEL results 'stagebridge'. NO Kaggle.
+name: sb_10_crop_scale
+paths:
+  python:  research/cellmot_venv/bin/python
+  trainer: research/official_repo/scripts/train_unet_transformer.py
+  pythonpath: [research/official_repo/src, research/official_repo/scripts, .]
+  data_dir: input/biohub-cell-tracking-during-development/train
+  splits:   learning/ensemble_work/finetune/splits_stagebridge_6bba.json
+  cache_dir: research/cache/ds1x4x4
+mlflow:
+  tracking_uri: http://localhost:5000
+  experiment:   kaggle-biohub-stagebridge
+  run_name:     sb_10_crop_scale
+  log_artifacts: false
+gpu:
+  power_limit_w: 400
+train:
+  method:          sb_10_crop_scale
+  split:           0
+  downsample:      "1,4,4"
+  epochs:          10
+  lr:              1e-4
+  batch_size:      8
+  num_workers:     6
+  det_loss_weight: 10.0
+  det_neg_weight:  0.01
+  window_size:     2
+  pool_kernel_um:  5.0
+  max_iters:       150
+  seed:            1234
+augment:
+  - name: crop_scale
+    p: 0.5
+    smin: 0.5
+    smax: 1.0

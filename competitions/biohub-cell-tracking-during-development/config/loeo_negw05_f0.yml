@@ -1,0 +1,72 @@
+# =====================================================================
+# LOEO detector + SMART AUGMENTATION — does grounded augmentation flatten the
+# embryo-overfit collapse? Baseline fold-0 (train 6bba -> test UNSEEN 44b6) peaked
+# 0.88 @epoch1 then decayed to ~0.79 by epoch10 (overfit the 1 training embryo).
+# Augment settings are grounded in the 5-embryo profile (experiments/eda/e50_findings.md):
+#   XY flip + rot90 valid (in-plane isotropic 0.40625um); Z-flip OFF (depth
+#   attenuation directional); density crop/cutout (3.5x cross-embryo density range);
+#   intensity/contrast/gamma/bias (contrast 18x ours vs 70x zebrahub).
+# Run:  bash start_train.sh config/loeo_detector_aug.yml
+# Success = higher PEAK disjoint recall AND flatter late-epoch curve vs no-aug fold-0.
+# =====================================================================
+name: loeo_negw05_f0
+
+purpose: >
+  Test whether data-grounded augmentation fixes the embryo-overfit collapse seen in
+  LOEO (0.88 -> 0.79 as training continues on a single embryo). Augmentations chosen
+  from the 5-embryo EDA (E50): geometric XY-only (Z-flip is unphysical), density
+  crop/cutout (embryos span 3.5x density + big developmental swings), and photometric
+  intensity/contrast/gamma/bias/blur/noise (per-embryo staining & optics differ).
+  Same fold/data/grid as loeo_detector.yml so it is a clean A/B on augmentation only.
+
+paths:
+  python:  research/cellmot_venv/bin/python
+  trainer: research/official_repo/scripts/train_unet_transformer.py
+  pythonpath:
+    - research/official_repo/src
+    - research/official_repo/scripts
+    - .
+  data_dir: input/biohub-cell-tracking-during-development/train
+  splits:   research/student/loeo_splits.json    # 2 EMBRYO-DISJOINT folds (golden holdout excluded)
+  cache_dir: research/cache/ds1x4x4               # fast pre-downsampled+normalized fp16 cache
+
+mlflow:
+  tracking_uri: http://localhost:5000
+  experiment:   kaggle-biohub-loeo
+  run_name:     loeo_detector_aug_f0_train6bba_test44b6
+  log_artifacts: false
+
+gpu:
+  power_limit_w: 400
+
+train:
+  method:          loeo_negw05_f0
+  split:           0              # fold 0: train 6bba -> test UNSEEN 44b6 (same as baseline)
+  downsample:      "1,4,4"
+  epochs:          12
+  lr:              1e-4
+  batch_size:      8               # bs8 (dense fold OOMs 32GB@16; k1-explosion showed OOM risk)
+  num_workers:     6
+  det_loss_weight: 10.0
+  det_neg_weight:  0.05        # A/B lever: 0.01->0.05 = 5x FP penalty (tighten predN->estN over-detection)
+  window_size:     2
+  pool_kernel_um:  5.0
+  max_iters:       150
+
+# Smart augmentation pipeline (grounded in E50). Each entry: name + prob p + params.
+# GENTLE by design: flip+rot90 are free (no intensity change) and always on; the rest
+# fire probabilistically so only ~2-3 stack per sample — the full 11-at-once stack
+# occasionally overflowed the fp16 UNet forward (det=NaN). Combined with the input
+# safety-net + NaN-batch-skip in the trainer, this trains stably.
+augment:
+  - {name: flip,       pz: 0.0, py: 0.5, px: 0.5}   # Y/X only — Z-flip unphysical (depth attenuation)
+  - {name: rot90_xy}                                # in-plane isotropic across all 5 embryos
+  - {name: scale,      p: 0.3, range: 0.12}         # mild — common grid already; residual stage/size var
+  - {name: crop,       p: 0.2, min_frac: 0.65}      # density-wise field-of-view cut
+  - {name: cutout,     p: 0.2, n: 1, max_frac: 0.2} # occlusion / density-down
+  - {name: brightness, p: 0.5, shift_range: 0.08}
+  - {name: contrast,   p: 0.5, range: 0.15}
+  - {name: gamma,      p: 0.3, range: 0.25}
+  - {name: bias_field, p: 0.3, strength: 0.2}       # per-embryo illumination inhomogeneity
+  - {name: blur,       p: 0.2, sigma: 0.6}          # PSF / focus variation
+  - {name: noise,      p: 0.2, sigma: 0.02}         # read/shot noise

@@ -1,0 +1,27 @@
+[
+  {
+    "after_line": 6,
+    "text": ">>> Hello, Alice!\n>>> In 10 years, you will be 35",
+    "caption": "input() always returns a string"
+  },
+  {
+    "after_line": 11,
+    "text": ">>> a-b-c\n>>> no newline here continues on the same line",
+    "caption": "sep= and end= customize print()"
+  },
+  {
+    "after_line": 17,
+    "text": ">>> Price: $20.00\n>>>      right\n>>> left      |",
+    "caption": "f-string format specs: .2f, >, <"
+  },
+  {
+    "after_line": 24,
+    "text": ">>> That's not a valid number, defaulting to 1\n>>> You ordered 1 item(s)",
+    "caption": "always validate user input"
+  },
+  {
+    "after_line": 25,
+    "image": "artifacts/terminal.png",
+    "caption": "the real run, start to finish"
+  }
+]

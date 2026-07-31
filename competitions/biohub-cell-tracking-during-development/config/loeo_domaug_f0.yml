@@ -1,0 +1,78 @@
+# =====================================================================
+# Plan-DA — HEAVY DOMAIN-INVARIANT AUG (generalization) — fold0 (train 6bba -> test UNSEEN 44b6)
+# The ONLY forward lever past 0.897: reduce cross-embryo OVERFIT so the detector generalizes to the
+# unseen embryo. Every learned lever overfit the 1-embryo LOEO (convergence +0.017 f0 -> -0.023 f1;
+# windowed linker fits train, no transfer). Counter = manufacture the 44b6<->6bba appearance gap
+# SYNTHETICALLY via heavy INTENSITY + ELASTIC + noise/contrast aug, so the detector can't key on the
+# training embryo's staining/optics/nucleus-shape. Matched A/B vs loeo_conv_baseline_f0 (150it, GENTLE
+# E50 aug, floor 0.7152). Design: docs/domain_aug_generalization_design.md. 150it FAST-SCREEN.
+# Run:  bash start_train.sh config/loeo_domaug_f0.yml
+# Success = 2-fold MEAN > floor 0.7237 AND the fold0/fold1 gap NARROWS (overfit reduced = first
+#   lever that could GENERALIZE, hence lift the PRIVATE LB on unseen test embryos).
+# =====================================================================
+name: loeo_domaug_f0
+
+purpose: >
+  Heavy domain-invariant augmentation for cross-embryo GENERALIZATION. The honest OOD gap (~0.73 LOEO vs
+  0.897 in-distribution) is the real unsolved problem and likely decides the PRIVATE LB. The detector
+  overfits the training embryo's appearance (44b6 late/dense/large nuclei vs 6bba early/sparse/distinct);
+  heavy intensity/contrast/gamma/bias (staining+optics gap) + ELASTIC (nucleus-shape) + noise/blur (PSF)
+  make every training sample look like MANY embryos. Matched to loeo_conv_baseline_f0 (same detector/grid/
+  fold, 150it) so the only change is the augmentation strength -> clean overfit-reduction A/B.
+
+paths:
+  python:  research/cellmot_venv/bin/python
+  trainer: research/official_repo/scripts/train_unet_transformer.py
+  pythonpath:
+    - research/official_repo/src
+    - research/official_repo/scripts
+    - .
+  data_dir: input/biohub-cell-tracking-during-development/train
+  splits:   research/student/loeo_valheldout_f0.json    # train 6bba / val 6bba (leak-clean)
+  cache_dir: research/cache/ds1x4x4
+
+mlflow:
+  tracking_uri: http://localhost:5000
+  experiment:   kaggle-biohub-loeo
+  run_name:     loeo_domaug_f0_train6bba_test44b6
+  log_artifacts: false
+
+gpu:
+  power_limit_w: 400
+
+train:
+  method:          loeo_domaug_f0
+  split:           0
+  downsample:      "1,4,4"
+  epochs:          12             # 150it FAST-SCREEN (matched to the floor)
+  lr:              1e-4
+  batch_size:      4               # OOM-fix: heavy aug -> more iter-0 spurious detections -> N^2 edge tensor; bs8 OOM'd
+  num_workers:     0
+  det_loss_weight: 10.0
+  det_neg_weight:  0.01
+  early_stop_patience: 4
+  window_size:     2
+  pool_kernel_um:  5.0
+  max_iters:       150
+
+# HEAVY DOMAIN-INVARIANT augmentation (amplified vs the GENTLE E50 baseline). PHOTOMETRIC augs
+# (the actual staining/optics embryo gap) are the strongest; ELASTIC is NEW (nucleus-shape invariance).
+# NOTE (fp16 stability): the full stack at high strength can overflow the fp16 UNet (det=NaN); the trainer
+# has a NaN-batch-skip + input safety-net. Magnitudes are bounded (elastic alpha<=3 tracks coords sub-gate);
+# the 1-iter GPU smoke MUST report the NaN-skip rate before the real run (see design doc).
+augment:
+  - {name: flip,       pz: 0.0, py: 0.5, px: 0.5}   # geometric — always on (free)
+  - {name: rot90_xy}
+  # --- PHOTOMETRIC (the 44b6<->6bba staining/optics gap) — HEAVY ---
+  - {name: brightness, p: 0.7, shift_range: 0.15}   # 0.5/0.08 -> 0.7/0.15
+  - {name: contrast,   p: 0.7, range: 0.35}         # 0.5/0.15 -> 0.7/0.35
+  - {name: gamma,      p: 0.6, range: 0.5}          # 0.3/0.25 -> 0.6/0.5
+  - {name: bias_field, p: 0.6, strength: 0.4}       # 0.3/0.2  -> 0.6/0.4 (per-embryo illumination)
+  # --- SHAPE / DENSITY (nucleus appearance + crowding gap) ---
+  - {name: elastic,    p: 0.5, alpha: 2.5, ctrl: 4} # NEW: nucleus-shape / local-geometry invariance
+  - {name: scale,      p: 0.5, range: 0.25}         # density bridge (dense 44b6 <-> sparse 6bba), wider
+  - {name: crop,       p: 0.3, min_frac: 0.55}
+  - {name: cutout,     p: 0.3, n: 2, max_frac: 0.3}
+  # --- SENSOR (PSF / read noise) — HEAVY ---
+  - {name: blur,       p: 0.4, sigma: 1.0}          # 0.2/0.6 -> 0.4/1.0
+  - {name: noise,      p: 0.5, sigma: 0.05}         # 0.2/0.02 -> 0.5/0.05

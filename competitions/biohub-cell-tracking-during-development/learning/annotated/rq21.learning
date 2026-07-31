@@ -1,0 +1,12 @@
+@ id: rq21
+@ order: 2300
+@ title: L Memory Footprint
+@ subtitle: RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory §L
+@ source: docs/papers/ratequant/ratequant.md
+
+--- note
+## L Memory Footprint
+**Paper:** RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory · §L · pages 18–18 · equations (none) · 0 figures.
+
+> TODO(author): the *why* of §L in 3–5 lines.
+

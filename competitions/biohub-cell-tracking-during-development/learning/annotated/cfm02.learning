@@ -1,0 +1,66 @@
+@ id: cfm02
+@ order: 2710
+@ title: 1 Introduction
+@ subtitle: COT-FM: Cluster-wise Optimal Transport Flow Matching §1
+@ source: docs/papers/cot-fm/cot-fm.md
+
+--- note
+## 1 Introduction
+**Paper:** COT-FM: Cluster-wise Optimal Transport Flow Matching · §1 · pages 1–2 · equations (none) · 8 figures.
+
+**The claim.** Random or naive minibatch-OT couplings leave flows curved;
+shortcut methods change the sampler, not the flow; COT-FM instead changes the *target probability path* —
+cluster the data, give each cluster its own recovered Gaussian source, couple within clusters by OT — and
+the same architecture trained the same way becomes straighter and better at few-step generation.
+
+--- note
+### Figure 1 — as printed in the paper
+
+Figure 1. COT-FM Yields Straight, Structure-Preserving Transport Flows. Blue points show the source distribution (Gaussian), and gray points show the target distributions (a 5-component Gaussian mixture and Two Moons). Orange points are generated samples, and purple lines denote the learned transport trajectories. Red crosses mark cluster means under our Cluster-wise Optimal Transport Flow Matching (COT-FM). The method yields straight trajectories while still capturing the structure of each target distribution.
+
+--- image
+learning/assets/cot-fm/p01_0.png
+Figure 1. COT-FM Yields Straight, Structure-Preserving Transport Flows. Blue points show the source distribution (Gaussian), and gray points show the target distributions (a 5-component Gaussian mixture and Two Moons). Orange points are generated samples, and purple lines denote the learned transport trajectories. Red crosses mark cluster means under our Cluster-wise Optimal Transport Flow Matching (COT-FM). The method yields straight trajectories while still capturing the structure of each target distribution.
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/cot-fm/p01_1.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/cot-fm/p01_2.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/cot-fm/p01_3.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/cot-fm/p01_4.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/cot-fm/p01_5.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/cot-fm/p01_6.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/cot-fm/p01_7.png
+

@@ -1,0 +1,50 @@
+[
+  {
+    "text": "Scaled dot product attention is the heart of the transformer, and it's four lines of PyTorch.",
+    "until_line": 1
+  },
+  {
+    "text": "We import torch, and that's the only dependency.",
+    "until_line": 1
+  },
+  {
+    "text": "The function takes Q, K and V — query, key and value.",
+    "until_line": 3
+  },
+  {
+    "text": "d_k is the size of the last dimension, the width of each vector.",
+    "until_line": 4
+  },
+  {
+    "text": "Q at K transposed is a matrix of dot products, every query against every key.",
+    "until_line": 5
+  },
+  {
+    "text": "That dot product is the similarity score, how much each token should attend to each other token.",
+    "until_line": 5
+  },
+  {
+    "text": "We divide by the square root of d_k to stop those scores growing with dimension.",
+    "until_line": 5
+  },
+  {
+    "text": "Without that scaling, softmax saturates and the gradients vanish.",
+    "until_line": 6
+  },
+  {
+    "text": "Softmax turns each row of scores into weights that sum to one.",
+    "until_line": 6
+  },
+  {
+    "text": "Then weights at V takes a weighted average of the values.",
+    "until_line": 7
+  },
+  {
+    "text": "Six tokens, eight dimensions each, and the output comes back the same shape.",
+    "until_line": 12
+  },
+  {
+    "text": "That's attention, the piece everything else in the transformer is built on. Comment if you want multi-head next.",
+    "until_line": 12
+  }
+]

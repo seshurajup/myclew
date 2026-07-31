@@ -1,0 +1,54 @@
+[
+  {
+    "text": "Itertools is a standard library module full of tools for looping smarter.",
+    "until_line": 1
+  },
+  {
+    "text": "We're pulling in two of them, chain and combinations.",
+    "until_line": 1
+  },
+  {
+    "text": "Everything in it returns an iterator, so nothing is computed until you ask for it.",
+    "until_line": 1
+  },
+  {
+    "text": "Chain glues iterables together and walks them as if they were one sequence.",
+    "until_line": 3
+  },
+  {
+    "text": "It doesn't copy anything — it just steps through each source in turn, lazily.",
+    "until_line": 4
+  },
+  {
+    "text": "Notice the lists hold different types, numbers and strings, and chain doesn't care.",
+    "until_line": 4
+  },
+  {
+    "text": "That laziness is the point — you can chain over a file of a million lines without loading it.",
+    "until_line": 4
+  },
+  {
+    "text": "Combinations gives every way of picking k items, ignoring order.",
+    "until_line": 6
+  },
+  {
+    "text": "With three numbers taken two at a time, that's one-two, one-three and two-three.",
+    "until_line": 7
+  },
+  {
+    "text": "Order never repeats, so two-one is not counted separately.",
+    "until_line": 7
+  },
+  {
+    "text": "Both return lazy iterators, so we wrap them in list to actually see the values.",
+    "until_line": 7
+  },
+  {
+    "text": "Combinations is how you generate every pair from a list without a nested loop.",
+    "until_line": 7
+  },
+  {
+    "text": "In the next one we take on f-strings. Follow so you don't miss it.",
+    "until_line": 7
+  }
+]

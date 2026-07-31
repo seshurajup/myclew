@@ -1,0 +1,42 @@
+[
+  {
+    "text": "An enum is a set of named constant values grouped under one type — perfect for fixed choices.",
+    "until_line": 6
+  },
+  {
+    "text": "Instead of scattering magic numbers or loose strings, you define meaningful names like RED, GREEN, and BLUE.",
+    "until_line": 6
+  },
+  {
+    "text": "Each member has both a name and a value, which you can access separately.",
+    "until_line": 9
+  },
+  {
+    "text": "[chuckle] So Color dot RED reads clearly, and its value one is tucked away underneath.",
+    "until_line": 9
+  },
+  {
+    "text": "[sniff] Enums compare by identity, so checking if a choice equals Color dot GREEN is both safe and readable.",
+    "until_line": 13
+  },
+  {
+    "text": "No more accidentally comparing against a mistyped string that silently fails.",
+    "until_line": 13
+  },
+  {
+    "text": "You can loop over an enum too, walking through every member in order.",
+    "until_line": 17
+  },
+  {
+    "text": "[sigh] That makes enums great for menus, states, and any fixed set of options in your program.",
+    "until_line": 17
+  },
+  {
+    "text": "[groan] Reach for an enum whenever a variable should only ever hold one of a small, known set of values.",
+    "until_line": 17
+  },
+  {
+    "text": "Up next, slots. Tell me in the comments if this clicked.",
+    "until_line": 17
+  }
+]

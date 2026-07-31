@@ -1,0 +1,16 @@
+@ id: mse07
+@ order: 3160
+@ title: 4 Experiments
+@ subtitle: MetaSkill-Evolve: Recursive Self-Improvement of LLM Agents §4
+@ source: docs/papers/paper-2607-05297/paper-2607-05297.md
+
+--- note
+## 4 Experiments
+**Paper:** MetaSkill-Evolve: Recursive Self-Improvement of LLM Agents · §4 · pages 6–8 · equations (none) · 0 figures.
+
+**The experiments.** Benchmarks across agent tasks, ablations of the frontier
+terms, hyperparameter and split-ratio sensitivity (appendices D, G). These are the authors' numbers,
+produced with LLM agents we do not run here. The pack's advanced lesson instead asks the one question the
+algebra can answer on its own: does a SLOW loop that evolves the operator beat a fixed operator, at equal
+evaluation budget? Measured on a synthetic landscape where the answer is not assumed.
+

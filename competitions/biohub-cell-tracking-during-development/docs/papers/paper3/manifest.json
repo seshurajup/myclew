@@ -1,0 +1,241 @@
+{
+  "slug": "paper3",
+  "source": "https://arxiv.org/pdf/2607.21366",
+  "pdf": "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/docs/papers/paper3/source.pdf",
+  "title": "",
+  "backend": "docling+pymupdf-assets",
+  "pages": 70,
+  "figures": [
+    {
+      "page": 1,
+      "path": "assets/fig/p01_0.png",
+      "y0": 43.119747161865234,
+      "y1": 61.04998779296875,
+      "caption": "",
+      "label": "",
+      "w": 3810,
+      "h": 512
+    },
+    {
+      "page": 20,
+      "path": "assets/fig/p20_0.png",
+      "y0": 361.10699462890625,
+      "y1": 488.2430419921875,
+      "caption": "",
+      "label": "",
+      "w": 2929,
+      "h": 1724
+    }
+  ],
+  "tables": [
+    {
+      "page": 9,
+      "rows": 12,
+      "cols": 11,
+      "image": "assets/tab/p09_0.png"
+    }
+  ],
+  "sections": [
+    {
+      "level": 1,
+      "page": 1,
+      "num": "",
+      "title": "Hilbert Operator for Progressive Encoding (HOPE)",
+      "heading": "Hilbert Operator for Progressive Encoding (HOPE)"
+    },
+    {
+      "level": 2,
+      "page": 1,
+      "num": "",
+      "title": "1. Introduction",
+      "heading": "1. Introduction"
+    },
+    {
+      "level": 2,
+      "page": 3,
+      "num": "",
+      "title": "2. Related Works",
+      "heading": "2. Related Works"
+    },
+    {
+      "level": 2,
+      "page": 4,
+      "num": "",
+      "title": "3. The Neuron",
+      "heading": "3. The Neuron"
+    },
+    {
+      "level": 2,
+      "page": 6,
+      "num": "",
+      "title": "4. The Neural Signal Distribution",
+      "heading": "4. The Neural Signal Distribution"
+    },
+    {
+      "level": 2,
+      "page": 7,
+      "num": "",
+      "title": "5. A Hilbert Functional Perspective on Neurons",
+      "heading": "5. A Hilbert Functional Perspective on Neurons"
+    },
+    {
+      "level": 2,
+      "page": 9,
+      "num": "",
+      "title": "ReLU",
+      "heading": "ReLU"
+    },
+    {
+      "level": 2,
+      "page": 9,
+      "num": "",
+      "title": "ReLU",
+      "heading": "ReLU"
+    },
+    {
+      "level": 2,
+      "page": 10,
+      "num": "",
+      "title": "6. Layer Transition Costs",
+      "heading": "6. Layer Transition Costs"
+    },
+    {
+      "level": 2,
+      "page": 13,
+      "num": "",
+      "title": "7. Generating the Parent Neuron",
+      "heading": "7. Generating the Parent Neuron"
+    },
+    {
+      "level": 2,
+      "page": 16,
+      "num": "",
+      "title": "8. Block Eviction",
+      "heading": "8. Block Eviction"
+    },
+    {
+      "level": 2,
+      "page": 18,
+      "num": "",
+      "title": "9. Balancing Compression and Distortion",
+      "heading": "9. Balancing Compression and Distortion"
+    },
+    {
+      "level": 2,
+      "page": 19,
+      "num": "",
+      "title": "10. The Encoding Loop",
+      "heading": "10. The Encoding Loop"
+    },
+    {
+      "level": 2,
+      "page": 20,
+      "num": "",
+      "title": "11. Proof-of-Concept Applications",
+      "heading": "11. Proof-of-Concept Applications"
+    },
+    {
+      "level": 2,
+      "page": 24,
+      "num": "",
+      "title": "12. Acknowledgment",
+      "heading": "12. Acknowledgment"
+    },
+    {
+      "level": 2,
+      "page": 25,
+      "num": "",
+      "title": "References",
+      "heading": "References"
+    },
+    {
+      "level": 2,
+      "page": 33,
+      "num": "",
+      "title": "Appendix Table of Contents",
+      "heading": "Appendix Table of Contents"
+    },
+    {
+      "level": 2,
+      "page": 35,
+      "num": "",
+      "title": "A. Hilbert Spaces",
+      "heading": "A. Hilbert Spaces"
+    },
+    {
+      "level": 2,
+      "page": 38,
+      "num": "",
+      "title": "B. Implementation Notes",
+      "heading": "B. Implementation Notes"
+    },
+    {
+      "level": 2,
+      "page": 42,
+      "num": "",
+      "title": "C. Main Paper Proofs",
+      "heading": "C. Main Paper Proofs"
+    },
+    {
+      "level": 2,
+      "page": 50,
+      "num": "",
+      "title": "D. Derivation of Physical BN Parameters",
+      "heading": "D. Derivation of Physical BN Parameters"
+    },
+    {
+      "level": 2,
+      "page": 52,
+      "num": "",
+      "title": "E. Kernel Formulation",
+      "heading": "E. Kernel Formulation"
+    },
+    {
+      "level": 2,
+      "page": 56,
+      "num": "",
+      "title": "F. Derivations for Block Eviction",
+      "heading": "F. Derivations for Block Eviction"
+    },
+    {
+      "level": 2,
+      "page": 59,
+      "num": "",
+      "title": "G. Reproducibility Protocols for Cross-Domain Transfer",
+      "heading": "G. Reproducibility Protocols for Cross-Domain Transfer"
+    },
+    {
+      "level": 2,
+      "page": 62,
+      "num": "",
+      "title": "H. Theoretical Guarantees of DEFT",
+      "heading": "H. Theoretical Guarantees of DEFT"
+    },
+    {
+      "level": 2,
+      "page": 67,
+      "num": "",
+      "title": "I. Algorithms",
+      "heading": "I. Algorithms"
+    }
+  ],
+  "equations": 768,
+  "numbered": 46,
+  "md": "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/docs/papers/paper3/paper3.md",
+  "equations_json": "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/docs/papers/paper3/equations.json",
+  "available": {
+    "pymupdf": true,
+    "marker": true,
+    "docling": true
+  },
+  "score": {
+    "chars": 232487,
+    "headings": 105,
+    "equations": 158,
+    "eq_tags": 1,
+    "images": 48,
+    "tables": 57,
+    "latex_cmds": 1857,
+    "mojibake": 1
+  }
+}

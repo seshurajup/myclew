@@ -1,0 +1,42 @@
+[
+  {
+    "text": "A class is a blueprint for creating your own custom type of object, bundling data and behavior together.",
+    "until_line": 4
+  },
+  {
+    "text": "The dunder-init method is the constructor — it runs automatically when you create a new object.",
+    "until_line": 4
+  },
+  {
+    "text": "self refers to the specific object being built, and we attach data to it, like name and age.",
+    "until_line": 4
+  },
+  {
+    "text": "[chuckle] Methods are just functions defined inside the class — bark uses self to reach the object's own name.",
+    "until_line": 7
+  },
+  {
+    "text": "To make an actual object, you call the class like a function, passing the values init expects.",
+    "until_line": 9
+  },
+  {
+    "text": "Now Rex is a Dog object, and we can read its attributes with dot notation.",
+    "until_line": 11
+  },
+  {
+    "text": "[sniff] Calling the bark method runs its code using this particular dog's data.",
+    "until_line": 12
+  },
+  {
+    "text": "Every object you create is completely independent — Bella has her own name and age, separate from Rex.",
+    "until_line": 16
+  },
+  {
+    "text": "[groan] Classes are how you model real things in code — a Dog, a User, an Order — each with its own state and actions.",
+    "until_line": 16
+  },
+  {
+    "text": "In the next one we take on instance attributes. Follow so you don't miss it.",
+    "until_line": 16
+  }
+]

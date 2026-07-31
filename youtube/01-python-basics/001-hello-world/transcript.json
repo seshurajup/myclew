@@ -1,0 +1,42 @@
+[
+  {
+    "text": "Every Python journey starts with printing a simple message — the print function is how your program talks to the world.",
+    "until_line": 1
+  },
+  {
+    "text": "Whatever you put inside the parentheses and quotes gets displayed on the screen, exactly as you wrote it.",
+    "until_line": 1
+  },
+  {
+    "text": "Next we store a piece of text, the string Python, inside a variable we're calling name.",
+    "until_line": 3
+  },
+  {
+    "text": "A variable is just a labeled box — you put a value in once, then reuse it by name as many times as you like.",
+    "until_line": 3
+  },
+  {
+    "text": "[chuckle] Now the fun part, an f-string. Put an f before the opening quote, and Python lets you drop variables right inside the text.",
+    "until_line": 4
+  },
+  {
+    "text": "Anything inside the curly braces gets replaced with the variable's actual value the moment the line runs.",
+    "until_line": 4
+  },
+  {
+    "text": "[sigh] Lines that start with a hash are comments — Python skips them entirely, they're just notes for anyone reading your code.",
+    "until_line": 7
+  },
+  {
+    "text": "Variables aren't limited to text — here we store a number, a float, and interpolate it into another f-string just as easily.",
+    "until_line": 9
+  },
+  {
+    "text": "And that's your first toolkit — print to show output, variables to store data, and f-strings to combine them. [laugh] Three tools you'll use in almost every program you ever write.",
+    "until_line": 10
+  },
+  {
+    "text": "Next video: variables and assignment. Comment the topic you want after that.",
+    "until_line": 10
+  }
+]

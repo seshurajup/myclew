@@ -1,0 +1,58 @@
+@ id: ours02
+@ order: 41
+@ title: Our golden-CV harness — how we score everything
+@ subtitle: the official metric on pilkwang's leak-free fold, run locally
+@ source: research/official_repo/scripts/evaluate.py
+
+--- note
+## Measure like the competition does
+Every number in `rs01`–`rs07` came from one harness: score a prediction with the **official** metric
+(me01) on the **golden-12** (pilkwang's leak-free `split_0` fold, rs01). This is the bestfitting
+discipline — a single, trusted yardstick you run before ever spending a Kaggle submission.
+
+--- note
+### Predictions must be a geff in the right layout
+**[Craft]** The official `evaluate.py` discovers predictions at
+`predictions/<user>/<method>/split_0/*.geff` and matches each to its GT by filename. So we convert
+our tracks (nodes + edges) to that format first.
+--- code
+# csv_to_geff.py: build a tracksdata graph from our node/edge tables, write a .geff
+import tracksdata as td                              # the graph format the metric reads
+g = td.graph.IndexedRXGraph()                        # empty directed tracking graph
+for n in nodes.itertuples():                         # every predicted cell
+    g.add_node({"t": n.t, "z": n.z, "y": n.y, "x": n.x}, index=n.node_id)  # a node with its centroid
+for e in edges.itertuples():                         # every predicted link
+    g.add_edge(e.source_id, e.target_id, {})         # an edge (same cell across frames)
+g.to_geff(f"predictions/seshu/{method}/split_0/{stem}.geff")  # write in the layout evaluate.py expects
+--- shape
+tracks → `.geff`<br>stems match GT names
+
+--- note
+### Run the official metric
+**[PyTorch/Craft]** Point the scorer at our train folder for GT (`CELLMOT_DATA_DIR`) and run — it
+prints the exact competition score (adjusted edge-Jaccard + 0.1·division).
+--- code
+# CELLMOT_DATA_DIR=<train dir>  USER=seshu  PYTHONPATH=research/official_repo/src \
+#   python research/official_repo/scripts/evaluate.py --method <method>
+# -> score=0.8700  adj_edge_jaccard=0.8700  division_jaccard=0.0000 (TP=0 FP=30 FN=8)
+--- output
+| method | golden-12 (official) |
+|---|---|
+| pilkwang base | 0.8700 |
+| oracle +4 divisions | 0.9189 |
+
+--- note
+### Why golden-12, specifically
+**[Data]** It's pilkwang's **split_0 test fold** — the 12 datasets his weights never trained on. So
+it's **leak-free** for evaluating his (and our warm-started) models, and it's the same fold his LB
+number generalises from. Relative gains here are trustworthy; density changes still need the LB
+(rs02).
+--- shape
+golden-12 = leak-free fold<br>relative gains: trusted<br>density: confirm on LB
+
+--- note
+You now have the complete picture: the data, the model, the training, the metric, and the exact
+harness + code of our own attempts. That's everything needed to build the next model.
+--- image
+learning/assets/metric_match.png
+The metric this harness computes: nodes match within 7 µm, an edge is a TP only if both endpoints match — run on the golden-12 fold for every experiment.

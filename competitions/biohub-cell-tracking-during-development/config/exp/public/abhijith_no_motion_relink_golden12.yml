@@ -1,0 +1,10 @@
+# PUBLIC notebook config — scratchpad/ablate_abhijith.py
+name: pub_abhijith_no_motion_relink_golden12
+source: scratchpad/ablate_abhijith.py
+family: other
+base: unknown
+lb: None
+golden_cv: 0.9424
+mined_params: ""
+run: manual
+score: golden-12 (adj_edge_J + 0.1*div_J), by_embryo

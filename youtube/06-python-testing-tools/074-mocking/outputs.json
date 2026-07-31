@@ -1,0 +1,16 @@
+[
+  {
+    "after_line": 9,
+    "text": ">>> {'name': 'Alice'}\\n>>> True\\n>>> 1",
+    "caption": "Mock fakes objects + records calls"
+  },
+  {
+    "after_line": 16,
+    "text": ">>> 42.0",
+    "caption": "patch replaces real functions"
+  },
+  {
+    "after_line": 17,
+    "image": "artifacts/terminal.png"
+  }
+]

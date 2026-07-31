@@ -1,0 +1,12 @@
+@ id: gm19
+@ order: 2380
+@ title: I Text Compression with GradMem on Larger Pretrained Models
+@ subtitle: GradMem: Learning to Write Context into Memory §I
+@ source: docs/papers/gradmem/gradmem.md
+
+--- note
+## I Text Compression with GradMem on Larger Pretrained Models
+**Paper:** GradMem: Learning to Write Context into Memory · §I · pages 22–22 · equations (none) · 0 figures.
+
+> TODO(author): the *why* of §I in 3–5 lines.
+

@@ -1,0 +1,147 @@
+@ id: nlb4
+@ order: 1230
+@ title: Basics 4 — reading an update rule backwards into an objective
+@ subtitle: The dictionary: dot-product objective → Hebbian, L2 objective → delta rule
+@ source: docs/papers/nested-learning/nested-learning.md
+
+--- note
+## The dictionary you will use for the rest of the paper
+Given an internal objective `L̃(M; k, v)`, one gradient-descent step gives an update rule. The paper's
+two workhorses:
+
+| internal objective | its gradient | resulting update | known as |
+|---|---|---|---|
+| $-\langle Mk, v\rangle$ | $-vk^\top$ | $M \leftarrow M + \eta vk^\top$ | Hebbian / linear attention (eq. 64) |
+| $\tfrac12\lVert Mk-v\rVert^2$ | $(Mk-v)k^\top$ | $M \leftarrow (I-\eta kk^\top)M + \eta vk^\top$ | delta rule / DeltaNet (eq. 65) |
+
+The right column is an *architecture*; the left column is an *objective*. Same object, two views. Prove
+both directions once, and every architecture in §5 becomes a one-line reading.
+
+--- note
+### Both rules, derived by autograd rather than by hand
+We let autograd differentiate each objective and check the resulting step matches the closed-form
+recurrence the paper prints.
+
+--- code
+import torch, torch.nn as nn, torch.nn.functional as F      # the whole paper is linear algebra + autograd
+
+import sys; sys.path.insert(0, "learning")
+import vizkit as vz                                            # the shared visual + explainability layer
+
+DEV = torch.device("cuda" if torch.cuda.is_available() else "cpu")   # every proof runs on the GPU
+torch.set_default_device(DEV)                                  # so EVERY tensor/module below is on DEV
+# These cells PROVE matrix identities, so they need full fp32: TF32 truncates the mantissa to 10 bits
+# and an identity that holds to 1e-6 in fp32 only holds to ~1e-3 in TF32. Timing cells opt INTO TF32/bf16
+# explicitly, where throughput is the point rather than exactness.
+torch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False
+torch.manual_seed(0); torch.set_printoptions(precision=4, sci_mode=False)
+print(f"device: {DEV}" + (f" | {torch.cuda.get_device_name(0)}" if DEV.type == "cuda" else ""))
+
+def ok(name, cond, extra=""):                                  # a lesson's PROOF prints PASS/FAIL, never prose
+    print(("PASS  " if cond else "FAIL  ") + name + (f"   | {extra}" if extra else ""))
+
+def close(a, b, tol=1e-5):                                     # float-safe equality for matrix identities
+    return torch.allclose(a, b, atol=tol, rtol=tol)
+
+def newton_schulz(G, steps=5, eps=1e-7):                       # the orthogonalisation used by Muon/M3
+    a, b, c = 3.4445, -4.7750, 2.0315                          # the standard quintic coefficients
+    X = G / (G.norm() + eps)
+    tall = X.shape[0] > X.shape[1]
+    if tall: X = X.T
+    for _ in range(steps):
+        A = X @ X.T; X = a * X + (b * A + c * A @ A) @ X
+    return X.T if tall else X
+
+d_k = d_v = 4
+M0 = torch.randn(d_v, d_k)
+k  = F.normalize(torch.randn(d_k), dim=0)                      # a unit key (the paper L2-normalises k, q)
+v  = torch.randn(d_v)
+eta = 0.3
+
+M = M0.clone().requires_grad_(True)                            # --- objective 1: dot-product similarity
+(-(M @ k) @ v).backward()                                      # L = -<M k, v>
+hebb_auto = (M - eta * M.grad).detach()
+hebb_form = M0 + eta * torch.outer(v, k)                       # closed form: + eta v k^T
+ok("dot-product objective -> Hebbian write", close(hebb_auto, hebb_form))
+
+M = M0.clone().requires_grad_(True)                            # --- objective 2: L2 regression
+(0.5 * (M @ k - v).pow(2).sum()).backward()                    # L = 1/2 ||M k - v||^2
+delta_auto = (M - eta * M.grad).detach()
+delta_form = (torch.eye(d_v) - eta * torch.outer(k, k) if d_v == d_k else None)
+delta_form = M0 @ (torch.eye(d_k) - eta * torch.outer(k, k)) + eta * torch.outer(v, k)
+ok("L2 objective -> delta rule", close(delta_auto, delta_form))
+print("the delta rule ERASES the old value at this key before writing:",
+      f"forget factor along k = {1 - eta:.2f}")
+
+--- output
+```
+device: cuda | NVIDIA GeForce RTX 5090
+PASS  dot-product objective -> Hebbian write
+PASS  L2 objective -> delta rule
+the delta rule ERASES the old value at this key before writing: forget factor along k = 0.70
+```
+
+--- note
+### Why the delta rule has more capacity
+Write the *same key twice with different values*. Hebbian adds both (the read is their sum — corrupted);
+the delta rule overwrites (the read is the newest value). Capacity is a property of the **objective**.
+
+--- code
+kk = F.normalize(torch.randn(d_k), dim=0)
+va, vb = torch.randn(d_v), torch.randn(d_v)
+H = torch.zeros(d_v, d_k); D = torch.zeros(d_v, d_k)
+for val in (va, vb):                                           # same key, two conflicting values
+    H = H + torch.outer(val, kk)                                            # Hebbian
+    D = D @ (torch.eye(d_k) - torch.outer(kk, kk)) + torch.outer(val, kk)   # delta (eta = 1)
+ok("Hebbian read is the SUM (corrupted)", close(H @ kk, va + vb))
+ok("delta read is the LATEST value (clean)", close(D @ kk, vb))
+
+--- output
+```
+PASS  Hebbian read is the SUM (corrupted)
+PASS  delta read is the LATEST value (clean)
+```
+
+--- note
+**[Recap]** objective → gradient → update rule is a dictionary you can read in
+both directions; capacity and forgetting live in the *objective*, not in the code.
+**Next → nlb5: attention as a non-parametric solution.**
+
+--- note
+### Look INSIDE the memory, don't plot a summary
+The dictionary above says the delta rule *erases the key direction before writing*. That is a claim about
+a matrix, so render the matrix. Below: the memory before the write, after the write, and the **difference**
+— the erase shows up as a rank-one stripe along `k`, exactly as `−ηkkᵀ` predicts. The first view is
+interactive (fold it open, hover a cell); the heatmaps are the same data as images.
+
+--- code
+d = 12
+k = F.normalize(torch.randn(d), dim=0); v = torch.randn(d)
+M0 = torch.randn(d, d) * 0.25
+eta = 1.0                                                       # eta = 1 -> a full overwrite at this key
+M1 = M0 @ (torch.eye(d) - eta * torch.outer(k, k)) + eta * torch.outer(v, k)   # the delta-rule write
+
+vz.heat(M0, "learning/assets/nested-learning/xai_M_before.png", "M before the write")
+vz.heat(M1, "learning/assets/nested-learning/xai_M_after.png", "M after writing (k, v)")
+vz.heat(M1 - M0, "learning/assets/nested-learning/xai_M_delta.png", "the change: a rank-1 stripe along k")
+
+change = M1 - M0
+proj = torch.outer(k, k)                                        # the subspace the rule is allowed to touch
+in_k = float((change @ proj).norm()); out_k = float((change - change @ proj).norm())
+ok("the write only touches the k-direction (that is what 'rank-1 erase' means)",
+   in_k > 20 * out_k, f"||change along k|| {in_k:.3f} vs orthogonal {out_k:.2e}")
+ok("and the memory now returns v at that key", close(M1 @ k, v, 1e-4),
+   f"read error {(M1 @ k - v).norm():.2e}")
+vz.tensor_view(change, "the write, as a tensor you can fold open and hover")
+
+--- output
+```
+PASS  the write only touches the k-direction (that is what 'rank-1 erase' means)   | ||change along k|| 3.126 vs orthogonal 3.60e-07
+PASS  and the memory now returns v at that key   | read error 2.48e-07
+```
+<div style="font:600 12px system-ui;color:#8a8f98;margin:2px 0 6px">the write, as a tensor you can fold open and hover</div><script> (()=>{ if (customElements.get('treescope-container') === undefined) { class TreescopeContainer extends HTMLElement { constructor() { super(); this.attachShadow({mode: "open"}); this.defns = {}; this.state = {}; } } customElements.define("treescope-container", TreescopeContainer); } if (customElements.get('treescope-run-here') === undefined) { class RunHere extends HTMLElement { constructor() { super() } connectedCallback() { const run = child => { const fn = new Function(child.textContent); child.textContent = ""; fn.call(this); this.remove(); }; const child = this.querySelector("script"); if (child) { run(child); } else { new MutationObserver(()=>{ run(this.querySelector("script")); }).observe(this, {childList: true}); } } } customElements.define("treescope-run-here", RunHere); } })(); </script> <treescope-container class="treescope_out_25d3f3c97f154d3bb6d83878149e7fd6" style="display:block"></treescope-container> <treescope-run-here><script type="application/octet-stream"> const root = ( Array.from(document.getElementsByClassName( "treescope_out_25d3f3c97f154d3bb6d83878149e7fd6")) .filter((elt) => !elt.dataset.setup) )[0]; root.dataset.setup = 1; const msg = document.createElement("span"); msg.style = "color: #cccccc; font-family: monospace;"; msg.textContent = "(Loading...)"; root.state.loadingMsg = msg; root.shadowRoot.appendChild(msg); root.state.chain = new Promise((resolve, reject) => { const observer = new IntersectionObserver((entries) => { for (const entry of entries) { if (entry.isIntersecting) { resolve(); observer.disconnect(); return; } } }, {rootMargin: "1000px"}); window.setTimeout(() => { observer.observe(root); }, 0); }); root.state.deferring = false; const _insertNode = (node) => { for (let oldScript of node.querySelectorAll("script")) { let newScript = document.createElement("script"); newScript.type = oldScript.type; newScript.textContent = oldScript.textContent; oldScript.parentNode.replaceChild(newScript, oldScript); } if (root.state.loadingMsg) { root.state.loadingMsg.remove(); root.state.loadingMsg = null; } root.shadowRoot.appendChild(node); }; root.defns.insertContent = ((contentNode, compressed) => { if (compressed) { root.state.deferring = true; } if (root.state.deferring) { root.state.chain = (async () => { await root.state.chain; if (compressed) { const encoded = contentNode.textContent; const blob = new Blob([ Uint8Array.from(atob(encoded), (m) => m.codePointAt(0)) ]); const reader = blob.stream().pipeThrough( new DecompressionStream("deflate") ).pipeThrough( new TextDecoderStream("utf-8") ).getReader(); const parts = []; while (true) { const step = await reader.read(); if (step.done) { break; } parts.push(step.value); } const tpl = document.createElement('template'); tpl.innerHTML = parts.join(""); _insertNode(tpl.content); } else { _insertNode(contentNode.content); } })(); } else { _insertNode(contentNode.content); } }); </script></treescope-run-here><div style="display:none"> <script type="application/octet-stream" >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</script> <treescope-run-here><script type="application/octet-stream"> const root = ( Array.from(document.getElementsByClassName( "treescope_out_25d3f3c97f154d3bb6d83878149e7fd6")) .filter((elt) => !elt.dataset['step0']) )[0]; root.dataset['step0'] = 1; root.defns.insertContent( this.parentNode.querySelector('script[type="application/octet-stream"]'), true ); this.parentNode.remove(); </script></treescope-run-here> </div>
+
+--- image
+learning/assets/nested-learning/xai_M_delta.png
+What one delta-rule write changes: a rank-one stripe along the key direction
+

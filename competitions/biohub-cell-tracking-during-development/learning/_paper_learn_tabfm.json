@@ -1,0 +1,40 @@
+{
+  "slug": "tabfm",
+  "lessons": 9,
+  "ids": [
+    "tfmb1",
+    "tfm01",
+    "tfm02",
+    "tfm03",
+    "tfm04",
+    "tfm05",
+    "tfm06",
+    "tfm07",
+    "tfmz1"
+  ],
+  "coverage": {
+    "total": 30,
+    "placed": 30,
+    "missing": [],
+    "taught": 30,
+    "untaught": [],
+    "proven": 30,
+    "unproven": [],
+    "cropped": 30,
+    "figures": 0,
+    "figures_placed": 0,
+    "lessons": 7
+  },
+  "curriculum": {
+    "updated": true,
+    "section": "TabFM (google-research) \u2014 a tabular foundation model, read as invariants",
+    "lessons": 9
+  },
+  "pruned": [],
+  "code_cells": 35,
+  "cells_with_output": 35,
+  "silent_lessons": [],
+  "out_dir": "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated",
+  "assets": "learning/assets/tabfm",
+  "python": "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/research/cellmot_venv/bin/python"
+}

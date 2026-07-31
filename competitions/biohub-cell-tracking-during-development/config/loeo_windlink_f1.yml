@@ -1,0 +1,71 @@
+# =====================================================================
+# PLAN-B WINDOWED TEMPORAL LINKER — fold0 (train 44b6 -> test UNSEEN 6bba)
+# The honest lever: edge_J is the binding constraint (+0.16 headroom, perfect-linker ~0.889 ==
+# public target; count-penalty NOT binding at alpha=0.1). Our SimpleNodeTransformer is PAIRWISE
+# (each t->t+1 edge sees only 2 frames). This adds an OPT-IN temporal-context stage: each frame's
+# nodes attend to ADJACENT frames within a 4-frame window (motion/trajectory context) BEFORE the
+# pairwise scorer -> rejects velocity-discontinuous FP links off over-detected nodes + disambiguates
+# crossings. ONE variable vs the 150it floor 0.7152: window_size 2->4 + edge_temporal ON.
+# Design: docs/plan_b_windowed_linker_design.md.  Run: bash start_train.sh config/loeo_windlink_f1.yml
+# Success = canonical LOEO fold0 > 0.7152 (edge_J lift); then confirm full 2-fold vs floor 0.7237.
+# =====================================================================
+name: loeo_windlink_f1
+
+purpose: >
+  Plan-B windowed temporal linker. edge_J (0.72-0.74) is the honest bottleneck with +0.16 headroom
+  to a perfect linker (~0.889 == public LB target); the count-penalty is negligible (~1%, alpha=0.1).
+  Our edge-transformer is strictly pairwise (2-frame). This enriches each frame's node features with
+  adjacent-frame (t-1,t+1) temporal context over a 4-frame window before the pairwise scorer, so the
+  linker gets a constant-velocity prior to reject FP links off the ~13% over-detected nodes and
+  disambiguate crossings. Clean one-variable A/B vs the 150it baseline (window_size=2, temporal OFF).
+
+paths:
+  python:  research/cellmot_venv/bin/python
+  trainer: research/official_repo/scripts/train_unet_transformer.py
+  pythonpath:
+    - research/official_repo/src
+    - research/official_repo/scripts
+    - .
+  data_dir: input/biohub-cell-tracking-during-development/train
+  splits:   research/student/loeo_valheldout_f1.json    # embryo-disjoint, val-holdout (leak-clean)
+  cache_dir: research/cache/ds1x4x4
+
+mlflow:
+  tracking_uri: http://localhost:5000
+  experiment:   kaggle-biohub-loeo
+  run_name:     loeo_windlink_f1_train44b6_test6bba
+  log_artifacts: false
+
+gpu:
+  power_limit_w: 400
+
+train:
+  method:          loeo_windlink_f1
+  split:           0              # fold 0: train 44b6 -> test UNSEEN 6bba
+  downsample:      "1,4,4"
+  epochs:          12             # 150it FAST-SCREEN
+  lr:              1e-4
+  batch_size:      8
+  num_workers:     0
+  det_loss_weight: 10.0
+  det_neg_weight:  0.01
+  early_stop_patience: 4
+  window_size:     4              # PLAN-B: 4-frame temporal window (was 2 = pairwise-only)
+  edge_temporal:   true           # PLAN-B LEVER: opt-in windowed temporal-attention head (default OFF)
+  pool_kernel_um:  5.0
+  max_iters:       150
+
+# Domain-invariant augmentation — IDENTICAL to the baseline (E50-grounded); the ONLY change vs the
+# 150it floor is the temporal linker (window_size 2->4 + edge_temporal).
+augment:
+  - {name: flip,       pz: 0.0, py: 0.5, px: 0.5}
+  - {name: rot90_xy}
+  - {name: scale,      p: 0.3, range: 0.12}
+  - {name: crop,       p: 0.2, min_frac: 0.65}
+  - {name: cutout,     p: 0.2, n: 1, max_frac: 0.2}
+  - {name: brightness, p: 0.5, shift_range: 0.08}
+  - {name: contrast,   p: 0.5, range: 0.15}
+  - {name: gamma,      p: 0.3, range: 0.25}
+  - {name: bias_field, p: 0.3, strength: 0.2}
+  - {name: blur,       p: 0.2, sigma: 0.6}
+  - {name: noise,      p: 0.2, sigma: 0.02}

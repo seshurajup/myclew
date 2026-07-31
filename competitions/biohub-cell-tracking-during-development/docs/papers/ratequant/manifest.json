@@ -1,0 +1,336 @@
+{
+  "slug": "ratequant",
+  "source": "https://arxiv.org/pdf/2605.06675",
+  "pdf": "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/docs/papers/ratequant/source.pdf",
+  "title": "RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory",
+  "backend": "docling+pymupdf-assets",
+  "pages": 36,
+  "figures": [
+    {
+      "page": 2,
+      "path": "assets/fig/p02_0.png",
+      "y0": 72.00151062011719,
+      "y1": 201.20697021484375,
+      "caption": "Figure 2: RATEQUANT pipeline. Phases 1\u20133 are one-time offline costs (<2 s for 8B); Phase 4 adds zero runtime overhead.",
+      "label": "Figure 2",
+      "w": 2936,
+      "h": 958
+    },
+    {
+      "page": 8,
+      "path": "assets/fig/p08_0.png",
+      "y0": 83.96885681152344,
+      "y1": 162.78196716308594,
+      "caption": "Figure 4: Per-head sensitivity for Qwen3-8B (36 layers \u00d7 8 KV heads, log scale). Left: Gradient-based shows a U-shaped pattern (early + late layers sensitive). Right: Activation-based is monotonically increasing.",
+      "label": "Figure 4",
+      "w": 780,
+      "h": 407
+    },
+    {
+      "page": 8,
+      "path": "assets/fig/p08_1.png",
+      "y0": 83.96885681152344,
+      "y1": 162.78196716308594,
+      "caption": "Figure 5: PPL vs. bits (Qwen3-8B). Gap is largest at 2.5\u20133.5 bits.",
+      "label": "Figure 5",
+      "w": 780,
+      "h": 407
+    },
+    {
+      "page": 17,
+      "path": "assets/fig/p17_0.png",
+      "y0": 529.2928466796875,
+      "y1": 686.4169921875,
+      "caption": "Figure 6: KIVI per-layer MSE at different bit-widths. Left: Key cache has high distortion with strong per-layer variation. Right: Value cache has \u223c4\u00d7 lower MSE, driving the optimal K/V split (2.85/2.15 at 2.5 bits).",
+      "label": "Figure 6",
+      "w": 983,
+      "h": 600
+    },
+    {
+      "page": 22,
+      "path": "assets/fig/p22_0.png",
+      "y0": 83.70850372314453,
+      "y1": 160.8073272705078,
+      "caption": "Figure 8: Per-head gradient sensitivity for Qwen3-8B (left: Key, right: Value). Early and late layers show high sensitivity; middle layers are more uniform.",
+      "label": "Figure 8",
+      "w": 780,
+      "h": 407
+    },
+    {
+      "page": 22,
+      "path": "assets/fig/p22_1.png",
+      "y0": 83.70850372314453,
+      "y1": 160.8073272705078,
+      "caption": "Table 19: Head sensitivity heterogeneity across models (gradient proxy).",
+      "label": "Table 19",
+      "w": 780,
+      "h": 407
+    }
+  ],
+  "tables": [
+    {
+      "page": 1,
+      "rows": 6,
+      "cols": 8,
+      "image": "assets/tab/p01_0.png"
+    },
+    {
+      "page": 17,
+      "rows": 6,
+      "cols": 13,
+      "image": "assets/tab/p17_0.png"
+    }
+  ],
+  "sections": [
+    {
+      "level": 1,
+      "page": 1,
+      "num": "",
+      "title": "Abstract",
+      "heading": "Abstract"
+    },
+    {
+      "level": 1,
+      "page": 1,
+      "num": "1",
+      "title": "Introduction",
+      "heading": "1 Introduction"
+    },
+    {
+      "level": 1,
+      "page": 2,
+      "num": "2",
+      "title": "Related Work",
+      "heading": "2 Related Work"
+    },
+    {
+      "level": 1,
+      "page": 3,
+      "num": "3",
+      "title": "R Q",
+      "heading": "3 R Q"
+    },
+    {
+      "level": 1,
+      "page": 6,
+      "num": "4",
+      "title": "Experiments",
+      "heading": "4 Experiments"
+    },
+    {
+      "level": 1,
+      "page": 9,
+      "num": "5",
+      "title": "Discussion and Future Work",
+      "heading": "5 Discussion and Future Work"
+    },
+    {
+      "level": 1,
+      "page": 9,
+      "num": "6",
+      "title": "Conclusion",
+      "heading": "6 Conclusion"
+    },
+    {
+      "level": 1,
+      "page": 10,
+      "num": "",
+      "title": "References",
+      "heading": "References"
+    },
+    {
+      "level": 1,
+      "page": 13,
+      "num": "",
+      "title": "Appendix Overview",
+      "heading": "Appendix Overview"
+    },
+    {
+      "level": 1,
+      "page": 13,
+      "num": "A",
+      "title": "Related Work Comparison Table",
+      "heading": "A Related Work Comparison Table"
+    },
+    {
+      "level": 1,
+      "page": 14,
+      "num": "B",
+      "title": "Proofs",
+      "heading": "B Proofs"
+    },
+    {
+      "level": 1,
+      "page": 15,
+      "num": "C",
+      "title": "Distortion Model Parameters",
+      "heading": "C Distortion Model Parameters"
+    },
+    {
+      "level": 1,
+      "page": 15,
+      "num": "D",
+      "title": "Component Ablation Waterfall",
+      "heading": "D Component Ablation Waterfall"
+    },
+    {
+      "level": 1,
+      "page": 15,
+      "num": "E",
+      "title": "Mixed-Precision Baseline Comparison",
+      "heading": "E Mixed-Precision Baseline Comparison"
+    },
+    {
+      "level": 1,
+      "page": 15,
+      "num": "F",
+      "title": "Distortion Model Validation",
+      "heading": "F Distortion Model Validation"
+    },
+    {
+      "level": 1,
+      "page": 16,
+      "num": "G",
+      "title": "Multi-Seed Reliability",
+      "heading": "G Multi-Seed Reliability"
+    },
+    {
+      "level": 1,
+      "page": 16,
+      "num": "H",
+      "title": "K/V Asymmetry Visualization",
+      "heading": "H K/V Asymmetry Visualization"
+    },
+    {
+      "level": 1,
+      "page": 17,
+      "num": "I",
+      "title": "Bit Allocation Visualization",
+      "heading": "I Bit Allocation Visualization"
+    },
+    {
+      "level": 1,
+      "page": 18,
+      "num": "J",
+      "title": "Calibration Overhead",
+      "heading": "J Calibration Overhead"
+    },
+    {
+      "level": 1,
+      "page": 18,
+      "num": "K",
+      "title": "Calibration Size Ablation",
+      "heading": "K Calibration Size Ablation"
+    },
+    {
+      "level": 1,
+      "page": 18,
+      "num": "L",
+      "title": "Memory Footprint",
+      "heading": "L Memory Footprint"
+    },
+    {
+      "level": 1,
+      "page": 19,
+      "num": "M",
+      "title": "Complete Per-Model Results",
+      "heading": "M Complete Per-Model Results"
+    },
+    {
+      "level": 1,
+      "page": 20,
+      "num": "N",
+      "title": "Sensitivity Proxy Ablation",
+      "heading": "N Sensitivity Proxy Ablation"
+    },
+    {
+      "level": 1,
+      "page": 20,
+      "num": "O",
+      "title": "Scope and Extensions",
+      "heading": "O Scope and Extensions"
+    },
+    {
+      "level": 1,
+      "page": 20,
+      "num": "P",
+      "title": "Implementation Details",
+      "heading": "P Implementation Details"
+    },
+    {
+      "level": 1,
+      "page": 21,
+      "num": "Q",
+      "title": "Downstream Task Details",
+      "heading": "Q Downstream Task Details"
+    },
+    {
+      "level": 1,
+      "page": 21,
+      "num": "R",
+      "title": "Sensitivity Distribution Analysis",
+      "heading": "R Sensitivity Distribution Analysis"
+    },
+    {
+      "level": 1,
+      "page": 22,
+      "num": "S",
+      "title": "Cross-Architecture Comparison",
+      "heading": "S Cross-Architecture Comparison"
+    },
+    {
+      "level": 1,
+      "page": 22,
+      "num": "T",
+      "title": "Distortion Curve Visualization",
+      "heading": "T Distortion Curve Visualization"
+    },
+    {
+      "level": 1,
+      "page": 22,
+      "num": "U",
+      "title": "Algorithm Pseudocode",
+      "heading": "U Algorithm Pseudocode"
+    },
+    {
+      "level": 1,
+      "page": 23,
+      "num": "V",
+      "title": "Hyperparameter Sensitivity",
+      "heading": "V Hyperparameter Sensitivity"
+    },
+    {
+      "level": 1,
+      "page": 23,
+      "num": "W",
+      "title": "Additional Visualizations",
+      "heading": "W Additional Visualizations"
+    },
+    {
+      "level": 1,
+      "page": 30,
+      "num": "",
+      "title": "NeurIPS Paper Checklist",
+      "heading": "NeurIPS Paper Checklist"
+    }
+  ],
+  "equations": 150,
+  "numbered": 13,
+  "md": "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/docs/papers/ratequant/ratequant.md",
+  "equations_json": "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/docs/papers/ratequant/equations.json",
+  "available": {
+    "pymupdf": true,
+    "marker": true,
+    "docling": true
+  },
+  "score": {
+    "chars": 136268,
+    "headings": 86,
+    "equations": 21,
+    "eq_tags": 1,
+    "images": 19,
+    "tables": 303,
+    "latex_cmds": 1188,
+    "mojibake": 0
+  }
+}

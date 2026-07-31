@@ -1,0 +1,26 @@
+[
+  {
+    "after_line": 6,
+    "text": ">>> [0, 1, 2]\n>>> [2, 3, 4, 5]\n>>> [0, 1, 2, 3, 4]\n>>> [5, 6, 7, 8, 9]\n>>> [0, 2, 4, 6, 8]",
+    "caption": "start:end:step slicing"
+  },
+  {
+    "after_line": 8,
+    "text": ">>> [9, 8, 7, 6, 5, 4, 3, 2, 1, 0]",
+    "caption": "[::-1] reverses instantly"
+  },
+  {
+    "after_line": 12,
+    "text": ">>> python\n>>> programming",
+    "caption": "string slicing works the same"
+  },
+  {
+    "after_line": 15,
+    "text": ">>> [100, 200, 2, 3, 4, 5, 6, 7, 8, 9]",
+    "caption": "slice assignment replaces a chunk"
+  },
+  {
+    "after_line": 19,
+    "image": "artifacts/terminal.png"
+  }
+]

@@ -1,0 +1,105 @@
+@ id: tr04
+@ order: 164
+@ title: train_unet_transformer.py — detection loss + detect→match→edge-targets
+@ subtitle: lines 528–775: recall-tilted BCE, GPU peak detection, greedy matching
+@ source: research/pilkwang_support_pack/repo/scripts/train_unet_transformer.py
+
+--- note
+## `compute_detection_loss` (528–586) — class-balanced, recall-tilted BCE
+This is pilkwang's detector recipe (the one our `exp_det_v2_recall` adopts). Each GT node marks a
+**single positive voxel**; every other voxel is a negative. The trick is per-sample normalisation:
+positives are scaled by `1/n_pos`, negatives by `neg_weight/n_neg`. With `neg_weight ≈ 0.01–0.1` the
+loss **rewards finding every nucleus** (recall) and only lightly penalises background:
+```python
+target[b, zi, yi, xi] = 1.0                                   # GT voxels → positive (single voxel each)
+n_pos = target.reshape(B,-1).sum(1).clamp(min=1)             # positives per sample
+n_neg = (target.numel()//B - n_pos).clamp(min=1)            # negatives per sample
+w_pos = (1.0     / n_pos).reshape(shape)                     # each positive weighted 1/n_pos
+w_neg = (neg_weight / n_neg).reshape(shape)                  # each negative weighted neg_w/n_neg
+weight = torch.where(target == 1.0, w_pos, w_neg)           # per-voxel weight map
+return F.binary_cross_entropy_with_logits(logits, target, weight=weight, reduction="sum") / B
+```
+It also **warns** when two GT nodes collapse to the same voxel after downsampling (they become
+undetectable) — an honest data-loss check. Below we run the exact loss on a **real** frame's GT
+voxels and show that pushing logits up at those voxels lowers it.
+
+--- code
+import torch, torch.nn.functional as F                        # torch loss
+import numpy as np, zarr                                       # real coords
+ROOT = "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development"  # root
+TRAIN = f"{ROOT}/input/biohub-cell-tracking-during-development/train"     # embryos
+G = f"{TRAIN}/6bba_062c8d37.geff"                             # one embryo
+nt_ = np.asarray(zarr.open(f"{G}/nodes/props/t/values")[:])  # frame per node
+zc = np.asarray(zarr.open(f"{G}/nodes/props/z/values")[:]); yc = np.asarray(zarr.open(f"{G}/nodes/props/y/values")[:]); xc = np.asarray(zarr.open(f"{G}/nodes/props/x/values")[:])
+m0 = nt_ == 0                                                 # frame-0 nodes
+Zs, Ys, Xs = 32, 64, 64                                       # small grid
+zi = torch.tensor(np.clip(zc[m0]/6, 0, Zs-1).astype(int))    # GT voxel z
+yi = torch.tensor(np.clip(yc[m0]/32, 0, Ys-1).astype(int))   # GT voxel y
+xi = torch.tensor(np.clip(xc[m0]/32, 0, Xs-1).astype(int))   # GT voxel x
+target = torch.zeros(1, Zs, Ys, Xs); target[0, zi, yi, xi] = 1.0  # (1,Z,Y,X) single-voxel positives
+n_pos = target.sum().clamp(min=1); n_neg = (target.numel()-n_pos).clamp(min=1)  # counts
+w = torch.where(target==1.0, 1.0/n_pos, 0.01/n_neg)          # recall-tilted weight map (neg_w=0.01)
+def dloss(logits): return F.binary_cross_entropy_with_logits(logits, target, weight=w, reduction="sum")
+flat  = torch.zeros(1, Zs, Ys, Xs)                            # predicts nothing
+peaked = target * 6.0 - 3.0                                   # logits high at GT voxels
+{"n_positive_voxels": int(n_pos), "loss_flat": round(float(dloss(flat)),4),
+ "loss_peaked_at_gt": round(float(dloss(peaked)),4)}          # peaked ≪ flat → recall reward works
+
+--- output
+```
+{'n_positive_voxels': 5, 'loss_flat': 0.7001, 'loss_peaked_at_gt': 0.0491}
+```
+
+--- note
+### `_pos_embed_torch` (594–617) — the same sinusoidal code, on-device
+A pure-torch twin of `extract_pos_features` (tr02) so positional codes for **detected** nodes can be
+built on the GPU without a CPU round-trip. Note the comment at line 738: it uses **window-relative
+time** (0…W-1 normalised by W), not the absolute frame index — so the time channel is consistent
+across the movie.
+
+--- note
+### `detect_and_match` (620–744) — peaks, then greedy nearest matching
+Step 1 finds local maxima on the GPU with a `max_pool3d` trick — a voxel is a peak iff it equals its
+pooled neighbourhood **and** exceeds `det_threshold`. The pooling kernel is derived from a physical
+suppression radius (`pool_kernel_um`) divided by the voxel size:
+```python
+pooled = F.max_pool3d(det_logits, pool_kernel, stride=1, padding=pad)  # neighbourhood max
+is_peak = (det_logits == pooled) & (det_logits > det_threshold)        # local-max AND above threshold
+peak_idx = torch.nonzero(is_peak[:, 0])                                # (N,4): [b, z, y, x]
+```
+Step 2 greedily matches each detection to its nearest **unused** GT node within `max_match_distance`
+(physical microns via `cdist(det*vs, gt*vs)`), closest-first — so the edge loss is only computed on
+detections that correspond to a real cell. Below we reproduce the peak-detection trick on a real
+frame's GT voxel map (peaks = the planted nuclei).
+
+--- code
+import torch, torch.nn.functional as F                        # torch ops
+logits = target * 6.0 - 3.0                                   # reuse: high at the real GT voxels
+det_logits = logits[None]                                     # (B=1,1,Z,Y,X)
+k = (3, 5, 5)                                                 # anisotropic suppression kernel
+pad = tuple(kk//2 for kk in k)                                # same-size padding
+pooled = F.max_pool3d(det_logits, k, stride=1, padding=pad)   # neighbourhood max
+is_peak = (det_logits == pooled) & (det_logits > 0.3)        # local-max AND above threshold
+peaks = torch.nonzero(is_peak[:, 0])                         # detected peak coords (N,4)
+{"planted_gt_voxels": int(target.sum()), "peaks_found": int(peaks.shape[0])}  # recovers the nuclei
+
+--- output
+```
+{'planted_gt_voxels': 5, 'peaks_found': 5}
+```
+
+--- note
+### `build_matched_edge_targets` (747–775) — relabel GT links onto detections
+Once both frames' detections are matched to GT indices, the GT transition matrix is **re-indexed**
+from GT-space into detection-space: `block = gt_trans[safe_t][:, safe_t1] * valid_mask`, with
+unmatched detections masked to zero. That `(B, max_det_t, max_det_t1)` tensor is the target
+`compute_batch_loss` (tr01) scores the transformer's edge logits against — closing the loop between
+the **detector's** output and the **linker's** supervision. **Next → tr05: the training loop.**
+
+--- shape
+det loss: single-voxel positives<br>
+w_pos=1/n_pos, w_neg=neg_w/n_neg<br>
+peak = (logit==maxpool) & >thr<br>
+match: greedy nearest ≤ dist (µm)<br>
+edge target (B, max_det_t, max_det_t1)
+

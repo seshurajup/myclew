@@ -1,0 +1,31 @@
+[
+  {
+    "after_line": 4,
+    "text": ">>> [2, 4, 6, 8, 10, 12]",
+    "caption": "[expr for x in seq]"
+  },
+  {
+    "after_line": 7,
+    "text": ">>> [2, 4, 6]",
+    "caption": "add if to filter"
+  },
+  {
+    "after_line": 10,
+    "text": ">>> [4, 16, 36]",
+    "caption": "transform + filter together"
+  },
+  {
+    "after_line": 15,
+    "text": ">>> ['HELLO', 'WORLD']",
+    "caption": "works on any sequence"
+  },
+  {
+    "after_line": 19,
+    "text": ">>> [[1, 2, 3], [2, 4, 6], [3, 6, 9]]",
+    "caption": "nested = a grid"
+  },
+  {
+    "after_line": 19,
+    "image": "artifacts/terminal.png"
+  }
+]

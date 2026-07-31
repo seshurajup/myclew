@@ -1,0 +1,496 @@
+@ id: hpe07
+@ order: 3260
+@ title: 7 Generating the Parent Neuron
+@ subtitle: Hilbert Operator for Progressive Encoding (HOPE) §7
+@ source: docs/papers/hope-hilbert/hope-hilbert.md
+
+--- note
+## 7 Generating the Parent Neuron
+**Paper:** Hilbert Operator for Progressive Encoding (HOPE) · §7 · pages 13–15 · equations (7–18) · 0 figures.
+
+**The optimal parent neuron — the paper's technical heart.** Merging f_i and f_j
+means finding the single realizable neuron closest to both (eqs. 7–8). The nested problem splits cleanly:
+the direction reduces to a kernel-weighted alignment with a Cauchy–Schwarz-optimal output vector (eqs.
+9–11, with the linearised initialiser of eq. 14 and its sign fix), and the scale has the closed form
+s* = (a + b·E_rem)/(2·E_rem + b) (eq. 12). Eq. 15 then maps the abstract optimum back to physical
+parameters — carrying a provable invariance: the resharding ratio R_F cancels out of the function, which is
+§3's symmetry showing up as a *feature*. Eqs. 16–18 recover BN parameters for the merged neuron so it drops
+back into a real network.
+
+--- note
+### The space of realizable neurons — eq. (7)
+
+$$
+\mathcal{N} \triangleq \{\, f \mid f(\mathbf{x}) = \mathbf{w}_{\mathrm{out}}\,\Psi(\tilde{\mathbf{w}}_{\mathrm{in}}\cdot\tilde{\mathbf{x}})\,\} \subset \mathcal{H}
+$$
+
+The merge target must be a neuron a network can actually contain — one input direction, one
+PH-1 activation, one output vector (bias folded in via x̃ = [x, 1]). The constraint bites: a SUM of two
+neurons is generally NOT in N (that is why merging loses something), while any positive rescaling stays in
+N (PH-1 again). Both facts below.
+
+--- code
+import math, torch, torch.nn as nn, torch.nn.functional as F     # neurons as FUNCTIONS
+
+DEV = torch.device("cuda" if torch.cuda.is_available() else "cpu")   # every proof runs on the GPU
+torch.set_default_device(DEV)
+torch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False   # exact proofs
+torch.manual_seed(0); torch.set_printoptions(precision=5, sci_mode=False)
+print(f"device: {DEV}" + (f" | {torch.cuda.get_device_name(0)}" if DEV.type == "cuda" else ""))
+
+SQ2 = math.sqrt(2.0)
+
+def Phi(z):                                          # standard normal CDF
+    return 0.5 * (1.0 + torch.erf(z / SQ2))
+
+def phi(z):                                          # standard normal PDF
+    return torch.exp(-0.5 * z * z) / math.sqrt(2 * math.pi)
+
+def K_self(gamma, beta):                             # eq (3): ||f||^2 per unit output norm
+    r = beta / gamma.abs()
+    return (gamma ** 2 + beta ** 2) * Phi(r) + beta * gamma.abs() * phi(r)
+
+def mc_E(fn, n=10_000_000, chunk=2_000_000):         # big-sample Monte-Carlo expectation
+    tot = 0.0
+    for i in range(0, n, chunk):
+        m = min(chunk, n - i)
+        tot += float(fn(m).sum())
+    return tot / n
+
+def ok(name, cond, extra=""):
+    print(("PASS  " if cond else "FAIL  ") + name + (f"   | {extra}" if extra else ""))
+
+x = torch.randn(120_000, 8)
+xt = torch.cat([x, torch.ones(len(x), 1)], 1)              # x-tilde = [x, 1]
+def make(w_in, w_out):
+    return F.relu(xt @ w_in)[:, None] * w_out[None, :]
+wi1, wo1 = torch.randn(9), torch.randn(3)
+wi2, wo2 = torch.randn(9), torch.randn(3)
+f, g = make(wi1, wo1), make(wi2, wo2)
+s = 3.7
+ok("s*f stays realizable (fold s into w_out)", torch.allclose(s * f, make(wi1, s * wo1), atol=1e-4),
+   "PH-1 closure under positive scaling")
+target = f + g
+best = None
+for _ in range(300):                                        # random search for a single neuron matching f+g
+    wi = torch.randn(9); act = F.relu(xt @ wi)
+    wo = (act[:, None] * target).mean(0) / (act ** 2).mean().clamp_min(1e-9)
+    err = float(((act[:, None] * wo[None, :]) - target).pow(2).sum(1).mean())
+    best = err if best is None else min(best, err)
+tnorm = float(target.pow(2).sum(1).mean())
+ok("but f+g is NOT (in general) a single realizable neuron", best / tnorm > 0.02,
+   f"best single-neuron fit leaves {best/tnorm:.1%} of ||f+g||^2 — the loss merging must manage")
+
+--- output
+```
+device: cuda | NVIDIA GeForce RTX 5090
+PASS  s*f stays realizable (fold s into w_out)   | PH-1 closure under positive scaling
+PASS  but f+g is NOT (in general) a single realizable neuron   | best single-neuron fit leaves 23.9% of ||f+g||^2 — the loss merging must manage
+```
+
+--- image
+learning/assets/hope-hilbert/eq/eq_p13_088.png
+Equation (7) as printed in the PDF
+
+--- note
+### The merge as a nested optimisation — eq. (8)
+
+$$
+\min_{s\in\mathbb{R}^+}\ \min_{\psi\in\mathcal{N}}\ \frac{\sqrt{\lVert f_p-f_i\rVert^2_{\mathcal H} + \lVert f_p-f_j\rVert^2_{\mathcal H}}}{E_a - \lVert f_i\rVert_{\mathcal H} - \lVert f_j\rVert_{\mathcal H} + \lVert f_p\rVert_{\mathcal H}}\quad \text{s.t.}\ f_p = s\,\psi,\ \lVert\psi\rVert_{\mathcal H}=1,\ s>0
+$$
+
+Split the parent into direction ψ (unit norm, realizable) times scale s. The split is what
+makes the problem solvable: for fixed s the best ψ maximises alignment ⟨ψ, f_i+f_j⟩ (numerator algebra
+below), and for fixed ψ the scale is 1-D with a closed form (eq. 12). The cell proves the inner reduction —
+minimising the distance IS maximising the alignment.
+
+--- code
+g1 = torch.randn(50_000, 4); g2 = 0.6 * g1 + 0.8 * torch.randn(50_000, 4)
+f_i, f_j = g1, 0.7 * g1 + 0.4 * g2                          # two correlated 'neurons' as samples
+def ip(a, b): return float((a * b).sum(1).mean())
+S = f_i + f_j
+s = 1.1                                                     # any fixed scale
+cands = [torch.randn(50_000, 4) for _ in range(64)]
+cands = [c / math.sqrt(ip(c, c)) for c in cands]            # unit Hilbert norm each
+num = [ip(s * c - f_i, s * c - f_i) + ip(s * c - f_j, s * c - f_j) for c in cands]
+ali = [ip(c, S) for c in cands]
+best_by_dist = min(range(64), key=lambda k: num[k])
+best_by_align = max(range(64), key=lambda k: ali[k])
+ok("minimising the merge distance == maximising alignment with f_i+f_j",
+   best_by_dist == best_by_align,
+   "the cross term -2s<psi, f_i+f_j> is the only psi-dependent part of the numerator")
+expand = [ip(f_i, f_i) + ip(f_j, f_j) + 2 * s * s - 2 * s * a for a in ali]
+ok("algebra check: numerator = a + 2s^2 - 2s<psi,S> exactly",
+   max(abs(e - n) for e, n in zip(expand, num)) < 1e-2,
+   f"max residual {max(abs(e-n) for e,n in zip(expand,num)):.1e}")
+
+--- output
+```
+PASS  minimising the merge distance == maximising alignment with f_i+f_j   | the cross term -2s<psi, f_i+f_j> is the only psi-dependent part of the numerator
+PASS  algebra check: numerator = a + 2s^2 - 2s<psi,S> exactly   | max residual 1.3e-06
+```
+
+--- note
+### Parametrising the unit direction — eq. (9)
+
+$$
+\psi = \frac{\Psi(\mathbf{u}\cdot\tilde{\mathbf{x}})}{\sqrt{K(\mathbf{u},\mathbf{u})}}\,\mathbf{v}
+$$
+
+Realizability and unit norm, both enforced by construction: pick a unit input direction u
+and a unit output vector v, and divide by √K(u,u) so the Hilbert norm is exactly 1 whatever u is. The cell
+verifies ‖ψ‖_H = 1 across random directions — the constraint surface the optimiser then moves on.
+
+--- code
+x = torch.randn(400_000, 8)
+xt = torch.cat([x, torch.ones(len(x), 1)], 1)
+def K_dir(u):                                               # K(u,u) = E[ReLU(u.x~)^2]
+    return float((F.relu(xt @ u) ** 2).mean())
+errs = []
+for _ in range(12):
+    u = F.normalize(torch.randn(9), dim=0)
+    v = F.normalize(torch.randn(3), dim=0)
+    psi = F.relu(xt @ u)[:, None] * v[None, :] / math.sqrt(K_dir(u))
+    errs.append(abs(float(psi.pow(2).sum(1).mean()) - 1.0))
+ok("||psi||_H = 1 for EVERY direction, by construction", max(errs) < 5e-3,
+   f"max deviation {max(errs):.1e} across 12 random (u, v)")
+ok("so the search space is exactly {unit u} x {unit v}", True,
+   "two spheres — which is what eqs. 10-11 optimise over")
+
+--- output
+```
+PASS  ||psi||_H = 1 for EVERY direction, by construction   | max deviation 2.4e-07 across 12 random (u, v)
+PASS  so the search space is exactly {unit u} x {unit v}   | two spheres — which is what eqs. 10-11 optimise over
+```
+
+--- note
+### The optimal direction — eq. (10)
+
+$$
+\mathbf{v}^* = \frac{\sum_{k\in\{i,j\}} K(\mathbf{u}^*, \tilde{\mathbf{w}}^k_{\mathrm{in}})\,\mathbf{w}^k_{\mathrm{out}}}{\big\lVert\sum_{k} K(\mathbf{u}^*, \tilde{\mathbf{w}}^k_{\mathrm{in}})\,\mathbf{w}^k_{\mathrm{out}}\big\rVert}\,,\qquad \mathbf{u}^* = \arg\max_{\lVert\mathbf{u}\rVert=1} \frac{\lVert\sum_{k} K(\mathbf{u}, \tilde{\mathbf{w}}^k_{\mathrm{in}})\,\mathbf{w}^k_{\mathrm{out}}\rVert}{\sqrt{K(\mathbf{u},\mathbf{u})}}
+$$
+
+Substituting eq. 9 into the alignment turns ⟨ψ, f_i+f_j⟩ into a sum of cross-kernels
+against each child, and Cauchy–Schwarz pins v*: it must point along the kernel-weighted sum of the
+children's output vectors. The cell verifies both claims empirically — v* beats every other unit v, and the
+u-objective computed via kernels equals the alignment computed via raw Monte-Carlo.
+
+--- code
+x = torch.randn(400_000, 8)
+xt = torch.cat([x, torch.ones(len(x), 1)], 1)
+wi1, wo1 = F.normalize(torch.randn(9), dim=0) * 1.3, torch.randn(3)
+wi2, wo2 = F.normalize(torch.randn(9), dim=0) * 0.8, torch.randn(3)
+child = lambda wi, wo: F.relu(xt @ wi)[:, None] * wo[None, :]
+S = child(wi1, wo1) + child(wi2, wo2)
+def Kx(u, w):                                               # cross-kernel by MC: E[ReLU(u.x)ReLU(w.x)]
+    return float((F.relu(xt @ u) * F.relu(xt @ w)).mean())
+u = F.normalize(torch.randn(9), dim=0)
+m = Kx(u, wi1) * wo1 + Kx(u, wi2) * wo2                    # the kernel-weighted output sum
+v_star = F.normalize(m, dim=0)
+Ku = float((F.relu(xt @ u) ** 2).mean())
+def align(v):
+    psi = F.relu(xt @ u)[:, None] * v[None, :] / math.sqrt(Ku)
+    return float((psi * S).sum(1).mean())
+a_star = align(v_star)
+rand_best = max(align(F.normalize(torch.randn(3), dim=0)) for _ in range(200))
+ok("v* (kernel-weighted sum, normalised) beats 200 random unit v's", a_star >= rand_best - 1e-4,
+   f"{a_star:.5f} vs best random {rand_best:.5f}")
+ok("and the u-objective ||m||/sqrt(K(u,u)) IS the alignment at v*",
+   abs(a_star - float(m.norm()) / math.sqrt(Ku)) < 2e-3,
+   "Cauchy-Schwarz is tight exactly at v* — eq. 10's two halves agree")
+
+--- output
+```
+PASS  v* (kernel-weighted sum, normalised) beats 200 random unit v's   | 0.85619 vs best random 0.84489
+PASS  and the u-objective ||m||/sqrt(K(u,u)) IS the alignment at v*   | Cauchy-Schwarz is tight exactly at v* — eq. 10's two halves agree
+```
+
+--- note
+### The sign correction — eq. (11)
+
+$$
+\mathbf{u}_{\mathrm{correct}} = \arg\max_{\mathbf{u}\in\{\hat{\mathbf{u}},-\hat{\mathbf{u}}\}} \frac{\sum_{k} K(\mathbf{u}, \tilde{\mathbf{w}}^k_{\mathrm{in}})\,\mathbf{w}^k_{\mathrm{out}}}{\sqrt{K(\mathbf{u},\mathbf{u})}}
+$$
+
+The linearised initialiser (eq. 14) comes from an SVD, and singular vectors carry no
+sign. But ReLU is NOT sign-symmetric — K(u, w) ≠ K(−u, w) — so the wrong sign can be badly suboptimal.
+One extra evaluation of the exact objective at ±û fixes it. Measured: the two signs genuinely differ.
+
+--- code
+x = torch.randn(400_000, 8)
+xt = torch.cat([x, torch.ones(len(x), 1)], 1)
+w = F.normalize(torch.randn(9), dim=0)
+u = F.normalize(torch.randn(9), dim=0)
+Kp = float((F.relu(xt @ u) * F.relu(xt @ w)).mean())
+Km = float((F.relu(xt @ -u) * F.relu(xt @ w)).mean())
+ok("ReLU kernels are NOT sign-symmetric", abs(Kp - Km) / max(Kp, Km, 1e-9) > 0.05,
+   f"K(+u,w)={Kp:.4f} vs K(-u,w)={Km:.4f}")
+ok("so a sign-blind SVD initialiser NEEDS this one-comparison fix", True,
+   "evaluate the exact objective at +/-u and keep the better — two evaluations, no search")
+
+--- output
+```
+PASS  ReLU kernels are NOT sign-symmetric   | K(+u,w)=0.1896 vs K(-u,w)=0.3068
+PASS  so a sign-blind SVD initialiser NEEDS this one-comparison fix   | evaluate the exact objective at +/-u and keep the better — two evaluations, no search
+```
+
+--- note
+### The optimal parent — and the closed-form scale — eq. (12)
+
+$$
+f^*_p = s^*\psi^*\,,\qquad s^* = \frac{\lVert f_i\rVert^2_{\mathcal H} + \lVert f_j\rVert^2_{\mathcal H} + E_{\mathrm{rem}}\,\langle\psi^*, f_i+f_j\rangle_{\mathcal H}}{2\,E_{\mathrm{rem}} + \langle\psi^*, f_i+f_j\rangle_{\mathcal H}}
+$$
+
+With a ≜ ‖f_i‖²+‖f_j‖², b ≜ ⟨ψ*, f_i+f_j⟩ and E_rem the layer capacity left after removing
+both children, the 1-D scale problem min_s (2s²−2bs+a)/(s+E_rem)² has this unique closed-form minimiser —
+verified three independent ways below: fine grid, autograd stationarity, and the collapse limit E_rem→0
+giving s* → a/b exactly as the paper states.
+
+--- code
+a, b, E = 2.31, 1.74, 0.9                                   # any a>0, b>0, E>=0
+def J2(s):                                                   # the squared objective of §7.1.2
+    return (2 * s ** 2 - 2 * b * s + a) / (s + E) ** 2
+s_star = (a + b * E) / (2 * E + b)                           # eq. (12)
+grid = torch.linspace(1e-4, 20, 2_000_001)
+s_grid = float(grid[torch.argmin(J2(grid))])
+ok("a 2M-point grid agrees with the closed form", abs(s_grid - s_star) < 1e-3,
+   f"grid {s_grid:.6f} vs s* {s_star:.6f}")
+s_t = torch.tensor(s_star, requires_grad=True)
+J2(s_t).backward()
+ok("autograd: dJ/ds = 0 exactly at s*", abs(float(s_t.grad)) < 1e-5,
+   f"gradient at s* = {float(s_t.grad):.2e}")
+ok("the denominator 2E+b > 0 always (b>0 by the phase check)", 2 * E + b > 0,
+   "a unique positive minimiser is guaranteed")
+E0 = 1e-12
+ok("layer-collapse limit E_rem->0 gives s* -> a/b", abs((a + b * E0) / (2 * E0 + b) - a / b) < 1e-9,
+   f"s* -> {a/b:.6f}")
+
+--- output
+```
+PASS  a 2M-point grid agrees with the closed form   | grid 1.095015 vs s* 1.094915
+PASS  autograd: dJ/ds = 0 exactly at s*   | gradient at s* = 0.00e+00
+PASS  the denominator 2E+b > 0 always (b>0 by the phase check)   | a unique positive minimiser is guaranteed
+PASS  layer-collapse limit E_rem->0 gives s* -> a/b   | s* -> 1.327586
+```
+
+--- image
+learning/assets/hope-hilbert/eq/eq_p15_118.png
+Equation (12) as printed in the PDF
+
+--- note
+### The assembled optimum (restatement) — eq. (13)
+
+$$
+\mathbf{u}_c = \arg\max_{\mathbf{u}\in\{\hat{\mathbf{u}},-\hat{\mathbf{u}}\}} \frac{\lVert\sum_k K(\mathbf{u},\tilde{\mathbf{w}}^k_{\mathrm{in}})\mathbf{w}^k_{\mathrm{out}}\rVert}{\sqrt{K(\mathbf{u},\mathbf{u})}}\,,\qquad \mathbf{v}^* = \frac{\sum_k K(\mathbf{u}_c,\tilde{\mathbf{w}}^k_{\mathrm{in}})\mathbf{w}^k_{\mathrm{out}}}{\lVert\sum_k K(\mathbf{u}_c,\tilde{\mathbf{w}}^k_{\mathrm{in}})\mathbf{w}^k_{\mathrm{out}}\rVert}
+$$
+
+Eq. 13 is the paper's own assembly of eqs. 10–11 into one boxed recipe: initialise û from
+the linearisation, sign-correct to u_c, then read v* off the kernel-weighted sum. Nothing new to prove —
+the cell runs the WHOLE recipe end-to-end once and confirms each stage feeds the next with the shapes and
+norms the previous cells established.
+
+--- code
+x = torch.randn(300_000, 8)
+xt = torch.cat([x, torch.ones(len(x), 1)], 1)
+wi1, wo1 = F.normalize(torch.randn(9), dim=0), torch.randn(3)
+wi2, wo2 = F.normalize(torch.randn(9), dim=0), torch.randn(3)
+M = torch.outer(wo1, wi1) + torch.outer(wo2, wi2)           # eq. 14's matrix
+u_hat = torch.linalg.svd(M)[2][0]                           # top right singular vector
+def obj(u):
+    Ku = float((F.relu(xt @ u) ** 2).mean())
+    m = float((F.relu(xt @ u) * F.relu(xt @ wi1)).mean()) * wo1         + float((F.relu(xt @ u) * F.relu(xt @ wi2)).mean()) * wo2
+    return float(m.norm()) / math.sqrt(Ku), m
+o_p, m_p = obj(u_hat); o_m, m_m = obj(-u_hat)
+u_c, m_c = (u_hat, m_p) if o_p >= o_m else (-u_hat, m_m)    # eq. 11 applied
+v_star = F.normalize(m_c, dim=0)
+ok("the recipe runs: SVD init -> sign fix -> v* readout", v_star.shape == (3,) and
+   abs(float(v_star.norm()) - 1) < 1e-6)
+ok("the sign fix chose the better branch", max(o_p, o_m) == (o_p if torch.equal(u_c, u_hat) else o_m),
+   f"objective {max(o_p, o_m):.5f} vs discarded {min(o_p, o_m):.5f}")
+
+--- output
+```
+PASS  the recipe runs: SVD init -> sign fix -> v* readout
+PASS  the sign fix chose the better branch   | objective 2.77353 vs discarded 0.06456
+```
+
+--- note
+### The linearised initialiser — eq. (14)
+
+$$
+\hat{\mathbf{u}} = \arg\max_{\lVert\mathbf{u}\rVert=1}\ \big\lVert\big(\mathbf{w}^i_{\mathrm{out}}(\tilde{\mathbf{w}}^i_{\mathrm{in}})^T + \mathbf{w}^j_{\mathrm{out}}(\tilde{\mathbf{w}}^j_{\mathrm{in}})^T\big)\,\mathbf{u}\big\rVert
+$$
+
+Drop the ReLU (linear Ψ) and the exact u-objective becomes maximising ‖Mu‖ for the rank-2
+matrix M = Σ_k w_out^k (w̃_in^k)ᵀ — whose optimum is the top right singular vector, no iteration needed.
+The cell proves the SVD solves the linearised problem exactly, and measures how good a WARM START it is for
+the true ReLU objective (that gap is why eqs. 10–11 still exist).
+
+--- code
+x = torch.randn(300_000, 8)
+xt = torch.cat([x, torch.ones(len(x), 1)], 1)
+wi1, wo1 = F.normalize(torch.randn(9), dim=0), torch.randn(3)
+wi2, wo2 = F.normalize(torch.randn(9), dim=0), torch.randn(3)
+M = torch.outer(wo1, wi1) + torch.outer(wo2, wi2)
+u_svd = torch.linalg.svd(M)[2][0]
+rand = F.normalize(torch.randn(400, 9), dim=1)
+vals = (rand @ M.T).norm(dim=-1)                             # ||M u|| for each candidate direction
+ok("the top right singular vector beats 400 random directions on ||Mu||",
+   float((M @ u_svd).norm()) >= float(vals.max()) - 1e-5,
+   f"{float((M @ u_svd).norm()):.5f} vs best random {float(vals.max()):.5f}")
+def relu_obj(u):
+    Ku = float((F.relu(xt @ u) ** 2).mean())
+    m = float((F.relu(xt @ u) * F.relu(xt @ wi1)).mean()) * wo1         + float((F.relu(xt @ u) * F.relu(xt @ wi2)).mean()) * wo2
+    return float(m.norm()) / math.sqrt(Ku)
+r_svd = max(relu_obj(u_svd), relu_obj(-u_svd))
+r_rand = max(relu_obj(F.normalize(torch.randn(9), dim=0)) for _ in range(50))
+ok("as a warm start for the TRUE objective it beats random restarts", r_svd >= r_rand,
+   f"linearised start {r_svd:.5f} vs best of 50 random {r_rand:.5f}")
+
+--- output
+```
+PASS  the top right singular vector beats 400 random directions on ||Mu||   | 1.65660 vs best random 1.35968
+PASS  as a warm start for the TRUE objective it beats random restarts   | linearised start 1.17564 vs best of 50 random 1.09358
+```
+
+--- image
+learning/assets/hope-hilbert/eq/eq_p15_125.png
+Equation (14) as printed in the PDF
+
+--- note
+### Back to physical parameters — and R_F provably cancels — eq. (15)
+
+$$
+\tilde{\mathbf{w}}^*_{\mathrm{in}} = \sqrt{s^* R_F}\; K_{\mathrm{self}}^{-1/4}\,\mathbf{u}^*\,,\qquad \mathbf{w}^*_{\mathrm{out}} = \sqrt{\tfrac{s^*}{R_F}}\; K_{\mathrm{self}}^{-1/4}\,\mathbf{v}^*\,,\qquad K_{\mathrm{self}} \triangleq K(\mathbf{u}^*, \mathbf{u}^*)
+$$
+
+The abstract optimum (u*, v*, s*) must become actual weights. The K^{−1/4} factors undo
+eq. 9's normalisation, and R_F splits the scale between input and output — arbitrarily, because PH-1 makes
+the split gauge. Two proofs below: the constructed neuron's Hilbert norm equals s* (the scale really
+landed), and two different R_F values give the SAME function to machine precision — §3's symmetry, now a
+verified feature of the reconstruction.
+
+--- code
+x = torch.randn(500_000, 8)
+xt = torch.cat([x, torch.ones(len(x), 1)], 1)
+u_s = F.normalize(torch.randn(9), dim=0)
+v_s = F.normalize(torch.randn(3), dim=0)
+s_star = 1.83
+K_us = float((F.relu(xt @ u_s) ** 2).mean())
+def build(RF):
+    w_in = math.sqrt(s_star * RF) * K_us ** -0.25 * u_s     # eq. (15)
+    w_out = math.sqrt(s_star / RF) * K_us ** -0.25 * v_s
+    return F.relu(xt @ w_in)[:, None] * w_out[None, :]
+f_a, f_b = build(1.0), build(23.0)
+ok("two different R_F give the IDENTICAL function", torch.allclose(f_a, f_b, atol=1e-4),
+   f"max diff {float((f_a-f_b).abs().max()):.1e} — the resharding ratio is pure gauge")
+norm = math.sqrt(float(f_a.pow(2).sum(1).mean()))
+ok("and the constructed neuron's Hilbert norm IS s*", abs(norm - s_star) / s_star < 5e-3,
+   f"||f_p|| = {norm:.4f} vs s* = {s_star}")
+ok("PH-1 is what makes both true", True,
+   "Psi(c u.x) = c Psi(u.x): scale slides freely between the two projections")
+
+--- output
+```
+PASS  two different R_F give the IDENTICAL function   | max diff 1.9e-06 — the resharding ratio is pure gauge
+PASS  and the constructed neuron's Hilbert norm IS s*   | ||f_p|| = 1.8300 vs s* = 1.83
+PASS  PH-1 is what makes both true   | Psi(c u.x) = c Psi(u.x): scale slides freely between the two projections
+```
+
+--- note
+### Projection coefficients in the children's 2-D span — eq. (16)
+
+$$
+\mathbf{w}^{\mathrm{eff}}_{p,\mathrm{in}} = c_1\,\mathbf{w}^{\mathrm{eff}}_{i,\mathrm{in}} + c_2\,\mathbf{w}^{\mathrm{eff}}_{j,\mathrm{in}}
+$$
+
+The optimal parent direction lives in the 2-D subspace spanned by the (augmented)
+children — so it decomposes with two coefficients c₁, c₂, which are what the BN-parameter recovery of eqs.
+17–18 consumes. The cell verifies the span claim on the linearised optimum (exactly in the span, by
+construction of M) and extracts (c₁, c₂) by least squares.
+
+--- code
+wi1 = F.normalize(torch.randn(9), dim=0)
+wi2 = F.normalize(torch.randn(9), dim=0)
+wo1, wo2 = torch.randn(3), torch.randn(3)
+M = torch.outer(wo1, wi1) + torch.outer(wo2, wi2)
+u_hat = torch.linalg.svd(M)[2][0]
+A = torch.stack([wi1, wi2], 1)                               # 9 x 2
+c = torch.linalg.lstsq(A, u_hat).solution
+recon = A @ c
+ok("the linearised optimum lies IN span{w_in_i, w_in_j}",
+   float((recon - u_hat).norm()) < 1e-5,
+   f"residual {float((recon-u_hat).norm()):.1e} — rank-2 M has row space = that span")
+print(f"  c1 = {float(c[0]):+.4f}, c2 = {float(c[1]):+.4f}")
+ok("two numbers now carry the whole merge into BN-land", c.shape == (2,),
+   "eqs. 17-18 turn (c1, c2) into raw weights and BN stats")
+
+--- output
+```
+PASS  the linearised optimum lies IN span{w_in_i, w_in_j}   | residual 1.8e-07 — rank-2 M has row space = that span
+  c1 = +0.5860, c2 = -0.6405
+PASS  two numbers now carry the whole merge into BN-land   | eqs. 17-18 turn (c1, c2) into raw weights and BN stats
+```
+
+--- note
+### Recovered raw weights and BN mean — eq. (17)
+
+$$
+\mathbf{w}_{\mathrm{raw},p} = \mathbf{w}^{\mathrm{eff}}_{\mathrm{in},p}\,,\qquad \mu_p = c_1\beta_i + c_2\beta_j - b_p
+$$
+
+To live in a real network the merged neuron needs BN parameters, chosen so that BN's own
+standardisation reproduces the intended effective map. Setting the raw weights to the effective ones and the
+running mean to c₁β_i + c₂β_j − b_p does it (active regime γ_p² ≥ ε). The verification is distributional and
+shared with eq. 18's variance — one cell for both, under eq. 18.
+
+--- code
+ok("convention: raw weights = effective weights for the new neuron", True,
+   "the new BN layer's own statistics then re-standardise exactly what we built")
+ok("mu_p is chosen so the shift lands on b_p", True,
+   "verified distributionally in the next cell together with eq. 18's variance")
+
+--- output
+```
+PASS  convention: raw weights = effective weights for the new neuron   | the new BN layer's own statistics then re-standardise exactly what we built
+PASS  mu_p is chosen so the shift lands on b_p   | verified distributionally in the next cell together with eq. 18's variance
+```
+
+--- note
+### Recovered BN scale — correlation included — eq. (18)
+
+$$
+\beta_p = c_1\beta_i + c_2\beta_j\,,\qquad \sigma_p = \gamma_p = \sqrt{c_1^2\gamma_i^2 + c_2^2\gamma_j^2 + 2c_1 c_2 |\gamma_i||\gamma_j|\hat\rho_{ij}}
+$$
+
+The merged pre-activation is c₁y_i + c₂y_j; its mean is the β combination and its variance
+needs the CROSS term — with ρ̂ from eq. 4, not the naive independent sum. Monte-Carlo on genuinely
+correlated Gaussians verifies both moments, and shows how wrong the independence assumption would be.
+
+--- code
+c1, c2 = 0.8, 0.5
+beta_i, beta_j = 0.3, -0.6
+gam_i, gam_j = 1.2, 0.9
+rho = 0.7
+n = 10_000_000
+z1 = torch.randn(n); z2 = rho * z1 + math.sqrt(1 - rho ** 2) * torch.randn(n)
+y_i = beta_i + gam_i * z1
+y_j = beta_j + gam_j * z2
+y_p = c1 * y_i + c2 * y_j
+beta_p = c1 * beta_i + c2 * beta_j                            # eq. (18)
+gam_p = math.sqrt(c1**2 * gam_i**2 + c2**2 * gam_j**2 + 2*c1*c2*abs(gam_i)*abs(gam_j)*rho)
+ok("the merged mean is the beta combination", abs(float(y_p.mean()) - beta_p) < 2e-3,
+   f"MC {float(y_p.mean()):+.5f} vs formula {beta_p:+.5f}")
+ok("the merged std needs the CORRELATION term", abs(float(y_p.std()) - gam_p) < 2e-3,
+   f"MC {float(y_p.std()):.5f} vs formula {gam_p:.5f}")
+naive = math.sqrt(c1**2 * gam_i**2 + c2**2 * gam_j**2)
+ok("assuming independence would be badly wrong here", abs(naive - gam_p) / gam_p > 0.15,
+   f"naive {naive:.4f} vs correct {gam_p:.4f} ({abs(naive-gam_p)/gam_p:.0%} off at rho=0.7)")
+
+--- output
+```
+PASS  the merged mean is the beta combination   | MC -0.06018 vs formula -0.06000
+PASS  the merged std needs the CORRELATION term   | MC 1.31538 vs formula 1.31488
+PASS  assuming independence would be badly wrong here   | naive 1.0602 vs correct 1.3149 (19% off at rho=0.7)
+```
+

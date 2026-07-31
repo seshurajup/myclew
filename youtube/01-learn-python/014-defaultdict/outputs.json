@@ -1,0 +1,3 @@
+[
+  {"after_line": 10, "text": ">>> ['apple', 'pear']\n>>> ['kale']\n>>> {'fruit': ['apple', 'pear'], 'veg': ['kale']}", "caption": "missing keys auto-create a list"}
+]

@@ -1,0 +1,46 @@
+[
+  {
+    "text": "Recursion is when a function calls itself to solve a smaller piece of the same problem.",
+    "until_line": 3
+  },
+  {
+    "text": "Every recursion needs a base case — a stopping point. For factorial, that's when n reaches one.",
+    "until_line": 3
+  },
+  {
+    "text": "Otherwise it multiplies n by the factorial of n minus one, shrinking the problem each step.",
+    "until_line": 4
+  },
+  {
+    "text": "[chuckle] So factorial of five quietly becomes five times four times three times two times one.",
+    "until_line": 6
+  },
+  {
+    "text": "The classic fibonacci is recursive too — each number is the sum of the two before it.",
+    "until_line": 11
+  },
+  {
+    "text": "Its base case returns n directly when n is zero or one, stopping the chain.",
+    "until_line": 11
+  },
+  {
+    "text": "[sniff] Where recursion truly shines is walking nested structures, like a list inside a list inside a list.",
+    "until_line": 24
+  },
+  {
+    "text": "deep_sum checks each item — if it's a list, it recurses into it; otherwise it just adds the number.",
+    "until_line": 24
+  },
+  {
+    "text": "So it flattens and totals any depth of nesting without you knowing the shape in advance.",
+    "until_line": 25
+  },
+  {
+    "text": "[groan] Just always give recursion a base case — without one, it calls itself forever and crashes.",
+    "until_line": 25
+  },
+  {
+    "text": "Video 26 tackles variable scope. Comment the topic you want after that.",
+    "until_line": 25
+  }
+]

@@ -1,0 +1,21 @@
+[
+  {
+    "after_line": 6,
+    "text": "",
+    "caption": "dumps: Python to JSON"
+  },
+  {
+    "after_line": 11,
+    "text": ">>> [2, 3]",
+    "caption": "loads: JSON → Python"
+  },
+  {
+    "after_line": 14,
+    "text": ">>> True",
+    "caption": "round-trip preserves data"
+  },
+  {
+    "after_line": 14,
+    "image": "artifacts/terminal.png"
+  }
+]

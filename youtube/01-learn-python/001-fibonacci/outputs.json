@@ -1,0 +1,5 @@
+[
+ {"after_line": 8, "text": "[0, 1, 1, 2, 3, 5, 8, 13, 21, 34]"},
+ {"at": 47.0, "image": "artifacts/growth.png", "caption": "each value is the sum of the previous two",
+  "marks": [{"x": 0.78, "y": 0.12, "w": 0.18, "h": 0.30}]}
+]

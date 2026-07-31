@@ -1,0 +1,50 @@
+{
+  "slug": "kimi-k3",
+  "lessons": 16,
+  "ids": [
+    "k3b1",
+    "k301",
+    "k302",
+    "k303",
+    "k304",
+    "k305",
+    "k306",
+    "k307",
+    "k308",
+    "k311",
+    "k312",
+    "k313",
+    "k314",
+    "k315",
+    "k3cfg",
+    "k3z1"
+  ],
+  "coverage": {
+    "total": 26,
+    "placed": 26,
+    "missing": [],
+    "taught": 26,
+    "untaught": [],
+    "proven": 26,
+    "unproven": [],
+    "cropped": 12,
+    "figures": 9,
+    "figures_placed": 0,
+    "lessons": 13
+  },
+  "curriculum": {
+    "updated": true,
+    "section": "Kimi K3 (Kimi Team, 2026) \u2014 architecture and maths, proved in PyTorch",
+    "lessons": 16
+  },
+  "pruned": [
+    "k309",
+    "k316"
+  ],
+  "code_cells": 39,
+  "cells_with_output": 39,
+  "silent_lessons": [],
+  "out_dir": "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated",
+  "assets": "learning/assets/kimi-k3",
+  "python": "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/research/cellmot_venv/bin/python"
+}

@@ -1,0 +1,42 @@
+[
+  {
+    "text": "Slicing pulls out a whole range of items at once, using start colon end inside the square brackets.",
+    "until_line": 3
+  },
+  {
+    "text": "[clear throat] Zero to three gives you the first three elements — indices zero, one, and two.",
+    "until_line": 3
+  },
+  {
+    "text": "Here's the key rule: the start is included, but the end is not — it stops just before that index.",
+    "until_line": 4
+  },
+  {
+    "text": "Omit the start and the slice runs from the very beginning of the list.",
+    "until_line": 5
+  },
+  {
+    "text": "Omit the end and it runs all the way to the finish — a handy shortcut.",
+    "until_line": 6
+  },
+  {
+    "text": "Add a second colon and a step value to skip items, [sniff] every second element here.",
+    "until_line": 7
+  },
+  {
+    "text": "Here's a favorite trick: a step of negative one reverses the entire list, no special function needed.",
+    "until_line": 8
+  },
+  {
+    "text": "Just like indexing, slicing works identically on strings, carving out substrings by position.",
+    "until_line": 12
+  },
+  {
+    "text": "[groan] And you can even assign to a slice, replacing a whole chunk of the list in one clean move.",
+    "until_line": 19
+  },
+  {
+    "text": "Up next, dictionaries. Comment the topic you want after that.",
+    "until_line": 19
+  }
+]

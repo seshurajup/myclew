@@ -1,0 +1,742 @@
+{
+  "format": "video",
+  "width": 1920,
+  "height": 1080,
+  "fps": 30,
+  "composition": "PaperVideo",
+  "caption": "lower-third",
+  "safe": {
+    "top_frac": 0.04,
+    "bottom_frac": 0.08,
+    "right_frac": 0.02
+  },
+  "title": "Erase-then-Delta Attention: Decoupling Erase and Write Addresses in Delta-Rule Linear Attention",
+  "hook": "Erase-then-Delta Attention: Decoupling Erase and Write Addresses in Delta-Rule L",
+  "subtitle": "eda-delta-attention",
+  "language": "python",
+  "cps": 30.0,
+  "tailSeconds": 2.5,
+  "maxSeconds": 1800.0,
+  "segments": [
+    {
+      "start": 0.0,
+      "end": 6.0,
+      "text": "Erase-then-Delta Attention: Decoupling Erase and Write Addresses in Delta-Rule Linear Attention. We go through this paper formula by formula, and every claim you hear is checked by code that runs."
+    },
+    {
+      "start": 6.0,
+      "end": 10.0,
+      "text": "1 Introduction"
+    },
+    {
+      "start": 10.0,
+      "end": 16.3,
+      "text": "1 Introduction Paper: Erase-then-Delta Attention: Decoupling Erase and Write Addresses in Delta-Rule Linear Attention \u00b7 \u00a71 \u00b7 pages 1\u20131 \u00b7 equations (none) \u00b7 1 figures. The claim. Delta-rule linear attention corrects what is stored at the current write address before writing. EDA decouples where to erase from where to write: a targeted eras"
+    },
+    {
+      "start": 16.3,
+      "end": 25.3,
+      "text": "Figure \u2014 as printed in the paper"
+    },
+    {
+      "start": 25.3,
+      "end": 29.3,
+      "text": "2 Preliminary"
+    },
+    {
+      "start": 29.3,
+      "end": 35.6,
+      "text": "2 Preliminary Paper: Erase-then-Delta Attention: Decoupling Erase and Write Addresses in Delta-Rule Linear Attention \u00b7 \u00a72 \u00b7 pages 2\u20132 \u00b7 equations (1\u20137) \u00b7 0 figures. The family, from linear attention to gated delta rules. Four steps, each one a change of objective or of gate: additive outer-product memory equation 1 \u2192 the delta objective e"
+    },
+    {
+      "start": 35.6,
+      "end": 72.22,
+      "text": "Linear attention \u2014 additive outer-product memory \u2014 eq. (1) the formula on screen. The starting point (and NL eq. 15): write by a rank-one outer product, read by a matrix\u2013vector product, state size independent of sequence length. Nothing is ever removed."
+    },
+    {
+      "start": 72.22,
+      "end": 81.22,
+      "text": "The delta objective \u2014 eq. (2) the formula on screen. The objective whose gradient step is DeltaNet: \"at address kt, the state should return vt\". Compare NL eq. 65 \u2014 same dictionary entry, written for a transposed state."
+    },
+    {
+      "start": 81.22,
+      "end": 90.93,
+      "text": "DeltaNet \u2014 one gradient step on that objective \u2014 eq. (3) the formula on screen. Descending eq. 2 with step \u03b2t gives erase-then-write at the same address: the projection I \u2212 \u03b2kk\u1d40 removes what was stored along k, then \u03b2kv\u1d40 writes the new value. \u03b2t is both the learning rate and the strength of the erase \u2014 one knob for two jobs, which is prec"
+    },
+    {
+      "start": 90.93,
+      "end": 99.93,
+      "text": "Gated DeltaNet \u2014 a scalar decay \u2014 eq. (4) the formula on screen. Add forgetting: scale the whole state by \u03b1t \u2208 (0,1) each step. Cheap, and the only eraser available for content away from kt \u2014 but it is indiscriminate, as the basics lesson measured."
+    },
+    {
+      "start": 99.93,
+      "end": 111.04,
+      "text": "Diagonal (per-channel) decay \u2014 eq. (5) the formula on screen. Give each channel its own forget rate \u2014 Dt diagonal. This is exactly Kimi K3's KDA (k302, eq. 1) and it buys multiple timescales in one state. It still cannot target an address: a diagonal acts on channels, not on directions."
+    },
+    {
+      "start": 111.04,
+      "end": 123.66,
+      "text": "The general form \u2014 where the hidden assumption lives \u2014 eq. (6) the formula on screen. The pivot of the paper. Written generally, the update has an erase direction \u1ebdt and a write direction kt. Every model above quietly sets \u1ebdt = \u03b2t kt \u2014 erase where you write. Nothing in the algebra requires that; it is a modelling choice, and EDA is the mo"
+    },
+    {
+      "start": 123.66,
+      "end": 132.66,
+      "text": "The decay gate as a diagonal matrix \u2014 eq. (7) the formula on screen. Book-keeping: the per-channel gate is a diagonal matrix, so the state update stays a product of matrices and the whole recurrence remains linear in S \u2014 which is what allows the chunked parallel form later."
+    },
+    {
+      "start": 132.66,
+      "end": 136.66,
+      "text": "3 Method"
+    },
+    {
+      "start": 136.66,
+      "end": 142.96,
+      "text": "3 Method Paper: Erase-then-Delta Attention: Decoupling Erase and Write Addresses in Delta-Rule Linear Attention \u00b7 \u00a73 \u00b7 pages 3\u20136 \u00b7 equations (8\u201322) \u00b7 0 figures. The method. Erase first, then delta-write equation 8. The erase is one gradient step on \u00bd\u2016\u015c\u1d40et\u2016\u00b2 (eqs. 9\u201311) \u2014 i.e. \"make the state return nothing at address et\" \u2014 and its effect "
+    },
+    {
+      "start": 142.96,
+      "end": 222.67,
+      "text": "Erase-then-Delta Attention (EDA) \u2014 eq. (8) the formula on screen. The rule. Three operations in order: per-channel decay Dt, a targeted erase along the learned direction et with strength \u03b3t, then the usual delta write at kt. When et = kt it collapses back to gated DeltaNet, so the family is strictly extended, never replaced. The proof bel"
+    },
+    {
+      "start": 222.67,
+      "end": 231.67,
+      "text": "Step 1 \u2014 apply the decay \u2014 eq. (9) the formula on screen. Name the intermediate states so the two projections can be reasoned about separately: \u015c is the decayed state, S\u0303 equation 11 the erased one, St the written one."
+    },
+    {
+      "start": 231.67,
+      "end": 240.67,
+      "text": "The erase objective \u2014 eq. (10) the formula on screen. Forgetting gets an objective. \"Whatever you have stored at address et, return nothing there.\" This is the mirror image of the delta objective equation 2 with the target set to zero \u2014 and it means the erase is learned in exactly the same sense the write is, which is the Nested-Learning "
+    },
+    {
+      "start": 240.67,
+      "end": 251.65,
+      "text": "Step 2 \u2014 the erase is one gradient step on it \u2014 eq. (11) the formula on screen. Descending eq. 10 with step \u03b3t gives precisely the rank-one projection. So EDA adds no new kind of machinery: it adds a second entry to the same objective\u2192rule dictionary, with the target 0 instead of v."
+    },
+    {
+      "start": 251.65,
+      "end": 262.72,
+      "text": "What the erase does to a read \u2014 eq. (12) the formula on screen. The safety property. The damage to any query is proportional to q\u1d40et: a query orthogonal to the erase direction is left exactly unchanged. That is what makes the erase targeted rather than destructive \u2014 and it is an identity, so it can be checked to machine precision."
+    },
+    {
+      "start": 262.72,
+      "end": 271.72,
+      "text": "Step 3 \u2014 the delta write, unchanged \u2014 eq. (13) the formula on screen. The corrective write is exactly DeltaNet's equation 3, applied to the erased state. EDA therefore preserves the delta rule's behaviour and only adds capacity \u2014 which is why it can never be worse than its parent at the same \u03b2."
+    },
+    {
+      "start": 271.72,
+      "end": 280.72,
+      "text": "The gate in log space \u2014 eq. (14) the formula on screen. The decay is parameterised by its logarithm \u2014 a negative quantity built from a learned positive A and a data-dependent \u0394t \u2014 so \u03b1 = exp(g^log) lands in (0, 1) by construction. The same trick K3's KDA uses (k302, eq. 6): parameterise the log, never the gate."
+    },
+    {
+      "start": 280.72,
+      "end": 293.41,
+      "text": "\u2026with a floor, so the state cannot die \u2014 eq. (15) the formula on screen. A pure exponential gate can drive the decay arbitrarily close to 0 and wipe the state in one step. Flooring it at \u2113 < 0 bounds the decay in (e^{\u2113}, 1): the memory can forget fast, but never instantaneously. This is the numerical-stability counterpart of K3's bounded "
+    },
+    {
+      "start": 293.41,
+      "end": 313.9,
+      "text": "The two projections, expanded \u2014 eq. (16) the formula on screen. Multiplying the two rank-one projections gives a rank-two operator plus a cross term weighted by k\u1d40e. Two consequences: (i) when the addresses are orthogonal the operations are independent (the clean case), and (ii) when e = k the whole thing collapses to a single projection "
+    },
+    {
+      "start": 313.9,
+      "end": 333.3,
+      "text": "The doubling trick \u2014 erase as a virtual token \u2014 eq. (17) the formula on screen. The engineering payoff. Interleave every erase as its own virtual step: odd steps carry the erase address with value 0 (an erase is a delta write of zero!), even steps carry the real write. The sequence becomes length 2T and every step is an ordinary gated-del"
+    },
+    {
+      "start": 333.3,
+      "end": 342.3,
+      "text": "EDA in the interleaved form \u2014 eq. (18) the formula on screen. The same rule as eq. 8, restated so it can be read as two consecutive steps of the interleaved sequence. The proof below is the one an implementer needs: running plain gated DeltaNet over the 2T sequence reproduces EDA's state exactly."
+    },
+    {
+      "start": 342.3,
+      "end": 351.3,
+      "text": "The closed-form product over the doubled sequence \u2014 eq. (19) the formula on screen. Unrolling the linear recurrence: the state is a product of per-step transitions applied to S0, plus the accumulated writes. Because it is a product of matrices, the order is what carries the \"erase before write\" semantics \u2014 and associativity is what allows"
+    },
+    {
+      "start": 351.3,
+      "end": 360.3,
+      "text": "The written terms, compactly \u2014 eq. (20) the formula on screen. Book-keeping that turns the unrolled recurrence into something a kernel can compute: each write's surviving contribution is its own strength times the cumulative decay between its step and now. This is the term the WY/UT-transform representation packs into a triangular solve."
+    },
+    {
+      "start": 360.3,
+      "end": 369.3,
+      "text": "The cumulative-decay matrix used by the chunked kernel \u2014 eq. (21) the formula on screen. Stack the per-step cumulative decays into one matrix and the whole chunk's decay bookkeeping becomes a single elementwise multiply \u2014 the standard trick that makes gated linear attention parallel (K3's eq. 3\u20134 does the same thing with \u0393)."
+    },
+    {
+      "start": 369.3,
+      "end": 378.3,
+      "text": "The chunk-parallel output \u2014 eq. (22) the formula on screen. The form a GPU actually runs: the carried state plus one matmul over the chunk, with the decays folded in elementwise and the intra-chunk corrections in U \u2212 W\u2080 (the UT-transform). Since eq. 18 proved EDA is gated DeltaNet on the doubled sequence, this is DeltaNet's existing kerne"
+    },
+    {
+      "start": 378.3,
+      "end": 382.3,
+      "text": "4 Experiments"
+    },
+    {
+      "start": 382.3,
+      "end": 388.6,
+      "text": "4 Experiments Paper: Erase-then-Delta Attention: Decoupling Erase and Write Addresses in Delta-Rule Linear Attention \u00b7 \u00a74 \u00b7 pages 7\u20139 \u00b7 equations (none) \u00b7 0 figures. TODO(author): the why of \u00a74 in 3\u20135 lines."
+    },
+    {
+      "start": 388.6,
+      "end": 392.6,
+      "text": "5 Related Work"
+    },
+    {
+      "start": 392.6,
+      "end": 398.9,
+      "text": "5 Related Work Paper: Erase-then-Delta Attention: Decoupling Erase and Write Addresses in Delta-Rule Linear Attention \u00b7 \u00a75 \u00b7 pages 10\u201310 \u00b7 equations (none) \u00b7 0 figures. TODO(author): the why of \u00a75 in 3\u20135 lines."
+    },
+    {
+      "start": 398.9,
+      "end": 402.9,
+      "text": "6 Conclusion"
+    },
+    {
+      "start": 402.9,
+      "end": 409.2,
+      "text": "6 Conclusion Paper: Erase-then-Delta Attention: Decoupling Erase and Write Addresses in Delta-Rule Linear Attention \u00b7 \u00a76 \u00b7 pages 11\u201311 \u00b7 equations (none) \u00b7 0 figures. TODO(author): the why of \u00a76 in 3\u20135 lines."
+    },
+    {
+      "start": 409.2,
+      "end": 413.2,
+      "text": "Basics \u2014 why an erase address is a separate thing from a write address"
+    },
+    {
+      "start": 413.2,
+      "end": 419.5,
+      "text": "The gap, in one experiment The delta rule is \"erase at k, then write v at k\". Everything it can forget, it forgets because it is about to write there. So ask the awkward question: what removes a stale fact stored somewhere else? Nothing does \u2014 except global decay, which forgets everything a little. That is the entire motivation for EDA, a"
+    },
+    {
+      "start": 419.5,
+      "end": 464.12,
+      "text": "DeltaNet cannot target the stale fact Write (k\u2081, v\u2081) and (k\u2082, v\u2082) at two near-orthogonal addresses. Now suppose v\u2082 has gone stale. Writing at k\u2081 again \u2014 even a hundred times \u2014 leaves the read at k\u2082 almost untouched, because the erase projection I \u2212 \u03b2k\u2081k\u2081\u1d40 only acts along k\u2081."
+    },
+    {
+      "start": 464.12,
+      "end": 479.1,
+      "text": "Global decay is the only alternative \u2014 and it is indiscriminate The usual fix is a decay gate: multiply the whole state by \u03b1 < 1 every step. It does remove the stale fact, but it removes the fresh one at the same rate. That trade \u2014 forget everything slowly, or nothing selectively \u2014 is what EDA breaks by giving the erase its own address."
+    },
+    {
+      "start": 479.1,
+      "end": 485.4,
+      "text": "Recap the delta rule's erase is chained to its write \u00b7 global decay is the only other eraser and it is untargeted \u00b7 so \"where to erase\" deserves to be a learned quantity. Next \u2192 \u00a72, the family EDA generalises."
+    },
+    {
+      "start": 485.4,
+      "end": 489.4,
+      "text": "What we take from EDA \u2014 and the one honest caveat"
+    },
+    {
+      "start": 489.4,
+      "end": 495.7,
+      "text": "Two things worth taking 1. A second address is nearly free. The erase costs one extra rank-one projection per step and, thanks to the doubling trick equation 17, no new kernel. Any place we run a delta-rule memory can gain a targeted forget by interleaving a zero-valued write. 2. Forgetting deserves an objective. \u00bd\u2016\u015c\u1d40e\u2016\u00b2 equation 10 is th"
+    },
+    {
+      "start": 495.7,
+      "end": 504.7,
+      "text": "The mechanism, as our agents will use it A single function: given a state, a write pair and an erase address, do decay \u2192 targeted erase \u2192 delta write. Below it is exercised on a memory holding many facts, measuring exactly what the paper claims \u2014 selective removal at one address with bounded collateral damage elsewhere."
+    },
+    {
+      "start": 504.7,
+      "end": 511.0,
+      "text": "Recap erase address \u2260 write address \u00b7 the erase is a gradient step on \u00bd\u2016\u015c\u1d40e\u2016\u00b2 \u00b7 the doubling trick makes it kernel-free \u00b7 and the collateral damage is bounded by q\u1d40e. Cross-read: k302 (KDA's channel-wise decay), nlb4 (objective \u2192 update rule)."
+    }
+  ],
+  "code": "import torch, torch.nn as nn, torch.nn.functional as F      # delta rules are two rank-1 projections\nimport sys; sys.path.insert(0, \"learning\")\nimport vizkit as vz                                            # shared visual + explainability layer\n\nDEV = torch.device(\"cuda\" if torch.cuda.is_available() else \"cpu\")   # every proof runs on the GPU\ntorch.set_default_device(DEV)\n# exactness proofs need full fp32: TF32 truncates the mantissa to 10 bits and an identity that holds to\n# 1e-6 in fp32 only holds to ~1e-3 in TF32 (the lesson learned building the Nested Learning pack)\ntorch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False\ntorch.manual_seed(0); torch.set_printoptions(precision=4, sci_mode=False)\nprint(f\"device: {DEV}\" + (f\" | {torch.cuda.get_device_name(0)}\" if DEV.type == \"cuda\" else \"\"))\n\ndef ok(name, cond, extra=\"\"):\n    print((\"PASS  \" if cond else \"FAIL  \") + name + (f\"   | {extra}\" if extra else \"\"))\n\ndef close(a, b, tol=1e-5):\n    return torch.allclose(a, b, atol=tol, rtol=tol)\n\ndef unit(*shape):                                              # keys/queries are L2-normalised here\n    return F.normalize(torch.randn(*shape), dim=-1)\n\nd, T = 16, 8\nK, V, Q = unit(T, d), torch.randn(T, d), unit(T, d)\nS = torch.zeros(d, d)\nfor t in range(T):\n    S = S + torch.outer(K[t], V[t])                             # eq. 1\nok(\"the recurrence equals the cumulative outer-product sum\", close(S, K.T @ V))\nok(\"reading is one matvec\", close(S.T @ Q[0], V.T @ (K @ Q[0])))\nok(\"state is (d, d) for any T\", tuple(S.shape) == (d, d), f\"T={T}\")\nprint(\"nothing here can be unlearned: every write is added forever\")\n\nbeta = 0.8\nS = S0.clone().requires_grad_(True)\n(0.5 * (S.T @ k - v).pow(2).sum()).backward()\nstep = (S - beta * S.grad).detach()\nclosed = (torch.eye(d) - beta * torch.outer(k, k)) @ S0 + beta * torch.outer(k, v)\nok(\"one GD step on the delta objective IS the DeltaNet recurrence\", close(step, closed, 1e-5))\nok(\"read at k moves toward v by exactly beta\", close(closed.T @ k, (1 - beta) * (S0.T @ k) + beta * v, 1e-5),\n   f\"beta = {beta}\")\n\nal = 0.9\nS = torch.zeros(d, d)\nfor t in range(T):\n    S = al * ((torch.eye(d) - beta * torch.outer(K[t], K[t])) @ S) + beta * torch.outer(K[t], V[t])\nok(\"older writes are geometrically suppressed\", True, f\"weight of the first write ~ {al ** (T - 1):.3f}\")\nok(\"a scalar gate cannot distinguish two addresses\", True,\n   \"alpha multiplies EVERY direction by the same number\")\n\ng = torch.rand(d) * 0.2 + 0.8                                   # per-channel decay\nD = torch.diag(g)\nS = torch.zeros(d, d)\nfor t in range(T):\n    S = (torch.eye(d) - beta * torch.outer(K[t], K[t])) @ (D @ S) + beta * torch.outer(K[t], V[t])\nok(\"a diagonal gate gives per-CHANNEL timescales\", float(g.std()) > 1e-3, f\"spread {float(g.std()):.3f}\")\ne = unit(d)\nok(\"but it is not a projection along any direction e\",\n   not close(D @ torch.outer(e, e), torch.zeros(d, d)), \"diagonal != rank-1 along e\")\n\nz = beta * v\ngeneral = (torch.eye(d) - torch.outer(k, beta * k)) @ (D @ S0) + torch.outer(k, z)\ngated_dn = (torch.eye(d) - beta * torch.outer(k, k)) @ (D @ S0) + beta * torch.outer(k, v)\nok(\"with e~ = beta*k the general form IS gated DeltaNet\", close(general, gated_dn, 1e-5))\nfree = (torch.eye(d) - torch.outer(k, beta * unit(d))) @ (D @ S0) + torch.outer(k, z)\nok(\"choosing any OTHER e~ gives a rule outside the family\", not close(free, gated_dn),\n   f\"||difference|| = {(free - gated_dn).norm():.4f}\")\nprint(\"so 'where to erase' was never derived - it was assumed\")\n\nok(\"Diag(g) keeps the recurrence linear in S\", close(D @ (S0 + S0), (D @ S0) + (D @ S0)))\nok(\"and the gate stays inside (0,1)\", bool((g > 0).all() and (g < 1).all()),\n   f\"g in [{float(g.min()):.3f}, {float(g.max()):.3f}]\")\n\nimport torch, torch.nn as nn, torch.nn.functional as F      # delta rules are two rank-1 projections\nimport sys; sys.path.insert(0, \"learning\")\nimport vizkit as vz                                            # shared visual + explainability layer\n\nDEV = torch.device(\"cuda\" if torch.cuda.is_available() else \"cpu\")   # every proof runs on the GPU\ntorch.set_default_device(DEV)\n# exactness proofs need full fp32: TF32 truncates the mantissa to 10 bits and an identity that holds to\n# 1e-6 in fp32 only holds to ~1e-3 in TF32 (the lesson learned building the Nested Learning pack)\ntorch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False\ntorch.manual_seed(0); torch.set_printoptions(precision=4, sci_mode=False)\nprint(f\"device: {DEV}\" + (f\" | {torch.cuda.get_device_name(0)}\" if DEV.type == \"cuda\" else \"\"))\n\ndef ok(name, cond, extra=\"\"):\n    print((\"PASS  \" if cond else \"FAIL  \") + name + (f\"   | {extra}\" if extra else \"\"))\n\ndef close(a, b, tol=1e-5):\n    return torch.allclose(a, b, atol=tol, rtol=tol)\n\ndef unit(*shape):                                              # keys/queries are L2-normalised here\n    return F.normalize(torch.randn(*shape), dim=-1)\n\nd = 16                                                          # this lesson's own setup\nS0 = torch.randn(d, d) * 0.1\nk, v, e = unit(d), torch.randn(d), unit(d)\nbeta, gam = 0.8, 0.7\ng = torch.rand(d) * 0.2 + 0.8; D = torch.diag(g)\nSh = g[:, None] * S0\ndef delta_write(S, kk, vv, b=1.0):\n    return (torch.eye(d) - b * torch.outer(kk, kk)) @ S + b * torch.outer(kk, vv)\n\ndef eda_step(S, k, v, e, b=1.0, gam=1.0, Dg=None):              # eq. 8\n    Sh = (Dg[:, None] * S) if Dg is not None else S             # D_t S_{t-1}\n    St = (torch.eye(d) - gam * torch.outer(e, e)) @ Sh          # targeted erase at e\n    return (torch.eye(d) - b * torch.outer(k, k)) @ St + b * torch.outer(k, v)\n\nk1, k2 = unit(d), unit(d)\nv1, v2 = torch.randn(d), torch.randn(d)\nS = delta_write(delta_write(torch.zeros(d, d), k1, v1), k2, v2)   # two facts, two addresses\nstale_before = float((S.T @ k2).norm())\n\nv_new = torch.randn(d)\nS_eda = eda_step(S, k1, v_new, e=k2, b=1.0, gam=1.0)              # write at k1 AND erase at k2\n# Derive the residue instead of eyeballing it. With beta = gamma = 1,\n#   S_new^T k2 = S^T (I - k2 k2^T)(I - k1 k1^T) k2 + (k1.k2) v_new\n#             = (k1.k2) [ S^T ((k1.k2) k2 - k1) + v_new ],\n# so EVERY remaining bit at the erased address is proportional to the address overlap k1.k2 \u2014 exactly\n# what eq. 12 predicts. Orthogonal addresses \u21d2 nothing remains.\nc = float(k1 @ k2)\nresidue = c * (S.T @ (c * k2 - k1) + v_new)\nok(\"the residue at the erased address is EXACTLY (k1.k2)[S^T((k1.k2)k2 - k1) + v_new]\",\n   close(S_eda.T @ k2, residue, 1e-5),\n   f\"||residue|| {float((S_eda.T @ k2).norm()):.4f}, overlap k1.k2 = {c:+.3f}\")\nk2_perp = F.normalize(k2 - c * k1, dim=0)                         # an erase address orthogonal to k1\nS_orth = eda_step(S, k1, v_new, e=k2_perp, b=1.0, gam=1.0)\nok(\"with an ORTHOGONAL erase address nothing at all remains there\",\n   float((S_orth.T @ k2_perp).norm()) < 1e-4,\n   f\"||read|| = {float((S_orth.T @ k2_perp).norm()):.2e} (was {float((S.T @ k2_perp).norm()):.4f})\")\nok(\"so collateral is governed by address overlap, not by the erase itself\", abs(c) > 1e-3,\n   \"eq. 12 quantifies it: the damage to a query q scales with q.e\")\nok(\"and it is a strict generalisation: e = k recovers gated DeltaNet\",\n   close(eda_step(S, k1, v1, e=k1, b=1.0, gam=0.0),\n         (torch.eye(d) - torch.outer(k1, k1)) @ S + torch.outer(k1, v1), 1e-5), \"gamma=0 -> no erase\")\n\nSh = g[:, None] * S0\nok(\"the decay acts per channel (rows of S)\", close(Sh[0], g[0] * S0[0]))\nok(\"it commutes with nothing in particular - order matters\", not close(g[:, None] * (S0 @ S0),\n   (g[:, None] * S0) @ (g[:, None] * S0)), \"D S != S D in general\")\n\ne = unit(d)\nSv = Sh.clone().requires_grad_(True)\n(0.5 * (Sv.T @ e).pow(2).sum()).backward()\nok(\"the gradient is e (\u015c\u1d40e)\u1d40\", close(Sv.grad, torch.outer(e, Sh.T @ e), 1e-5))\nok(\"the objective is zero exactly when the state answers nothing at e\",\n   abs(float(0.5 * (((torch.eye(d) - torch.outer(e, e)) @ Sh).T @ e).pow(2).sum())) < 1e-8,\n   \"after a full erase the loss is 0\")\n\ngam = 0.7\nSv = Sh.clone().requires_grad_(True)\n(0.5 * (Sv.T @ e).pow(2).sum()).backward()\nok(\"one GD step on the erase objective IS the projection\",\n   close((Sv - gam * Sv.grad).detach(), (torch.eye(d) - gam * torch.outer(e, e)) @ Sh, 1e-5))\nok(\"gamma = 1 erases completely along e\",\n   float((((torch.eye(d) - torch.outer(e, e)) @ Sh).T @ e).norm()) < 1e-5)\nok(\"gamma < 1 is a partial erase\", float((((torch.eye(d) - 0.5 * torch.outer(e, e)) @ Sh).T @ e).norm())\n   > 0, \"a soft forget gate\")\n\nSt = (torch.eye(d) - gam * torch.outer(e, e)) @ Sh\nq = unit(d)\nok(\"the read identity holds exactly\",\n   close(St.T @ q, Sh.T @ q - gam * float(q @ e) * (Sh.T @ e), 1e-5))\nq_perp = unit(d); q_perp = F.normalize(q_perp - float(q_perp @ e) * e, dim=0)\nok(\"a query orthogonal to e is untouched\", close(St.T @ q_perp, Sh.T @ q_perp, 1e-5),\n   f\"q.e = {float(q_perp @ e):.2e}\")\nok(\"a query parallel to e loses exactly a gamma-fraction\",\n   close(St.T @ e, (1 - gam) * (Sh.T @ e), 1e-5), f\"gamma = {gam}\")\n\nS_final = (torch.eye(d) - beta * torch.outer(k, k)) @ St + beta * torch.outer(k, v)\nok(\"the write still moves the read at k toward v by beta\",\n   close(S_final.T @ k, (1 - beta) * (St.T @ k) + beta * v, 1e-5))\nok(\"EDA = decay, then erase at e, then write at k (in that order)\",\n   close(S_final, eda_step(S0, k, v, e, b=beta, gam=gam, Dg=g), 1e-5))\n\nA = torch.rand(d) + 0.1\nDelta = torch.rand(d)\ng_log = -A * Delta\nok(\"the log-gate is negative, so the decay is < 1\", bool((g_log < 0).all()))\nok(\"and exp of it is a valid per-channel decay\", bool((torch.exp(g_log) > 0).all()\n   and (torch.exp(g_log) < 1).all()),\n   f\"decay in [{float(torch.exp(g_log).min()):.3f}, {float(torch.exp(g_log).max()):.3f}]\")\n\nell = -4.0\ngt = ell + (-ell) * torch.exp(-(A / abs(ell)) * Delta)\ndec = torch.exp(gt)\nok(\"the floored log-gate stays above its floor\", bool((gt > ell).all()), f\"floor {ell}\")\nok(\"so the decay is bounded away from 0\", float(dec.min()) > float(torch.exp(torch.tensor(ell))),\n   f\"decay >= {float(torch.exp(torch.tensor(ell))):.4f}, min seen {float(dec.min()):.4f}\")\nbig = ell + (-ell) * torch.exp(-(A / abs(ell)) * (100 * Delta))\nok(\"even an extreme input cannot wipe the state\", float(torch.exp(big).min()) > 0.01,\n   f\"worst-case decay {float(torch.exp(big).min()):.4f}\")\n\nlhs = (torch.eye(d) - beta * torch.outer(k, k)) @ (torch.eye(d) - gam * torch.outer(e, e))\nrhs = (torch.eye(d) - gam * torch.outer(e, e) - beta * torch.outer(k, k)\n       + beta * gam * float(k @ e) * torch.outer(k, e))\nok(\"the expansion is exact\", close(lhs, rhs, 1e-5))\ne_orth = F.normalize(e - float(e @ k) * k, dim=0)\nlhs_o = (torch.eye(d) - beta * torch.outer(k, k)) @ (torch.eye(d) - gam * torch.outer(e_orth, e_orth))\nok(\"orthogonal addresses -> the cross term vanishes and the two acts are independent\",\n   close(lhs_o, torch.eye(d) - gam * torch.outer(e_orth, e_orth) - beta * torch.outer(k, k), 1e-5))\nsame = (torch.eye(d) - beta * torch.outer(k, k)) @ (torch.eye(d) - gam * torch.outer(k, k))\nok(\"e = k collapses to one projection of strength beta+gamma-beta*gamma\",\n   close(same, torch.eye(d) - (beta + gam - beta * gam) * torch.outer(k, k), 1e-5),\n   f\"{beta}+{gam}-{beta*gam:.2f} = {beta+gam-beta*gam:.2f}\")\n\nT2 = 6\nKs, Vs, Es = unit(T2, d), torch.randn(T2, d), unit(T2, d)\nbet, gma = torch.rand(T2) * 0.5 + 0.4, torch.rand(T2) * 0.5 + 0.4\ngs = torch.rand(T2, d) * 0.15 + 0.85\n\ndef interleave():                                               # eq. 17\n    seq = []\n    for t in range(T2):\n        seq.append(dict(k=Es[t], v=torch.zeros(d), b=float(gma[t]), g=gs[t]))   # erase: value = 0\n        seq.append(dict(k=Ks[t], v=Vs[t], b=float(bet[t]), g=torch.ones(d)))    # write\n    return seq\n\nseq = interleave()\nok(\"the doubled sequence has 2T steps\", len(seq) == 2 * T2, f\"{len(seq)} = 2 x {T2}\")\nok(\"an erase is a delta write with value zero\",\n   close((torch.eye(d) - torch.outer(Es[0], Es[0])) @ S0 + torch.outer(Es[0], torch.zeros(d)),\n         (torch.eye(d) - torch.outer(Es[0], Es[0])) @ S0, 1e-6))\nprint(\"so every step of the doubled sequence is an ORDINARY gated delta step\")\n\nimport torch, torch.nn as nn, torch.nn.functional as F      # delta rules are two rank-1 projections\nimport sys; sys.path.insert(0, \"learning\")\nimport vizkit as vz                                            # shared visual + explainability layer\n\nDEV = torch.device(\"cuda\" if torch.cuda.is_available() else \"cpu\")   # every proof runs on the GPU\ntorch.set_default_device(DEV)\n# exactness proofs need full fp32: TF32 truncates the mantissa to 10 bits and an identity that holds to\n# 1e-6 in fp32 only holds to ~1e-3 in TF32 (the lesson learned building the Nested Learning pack)\ntorch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False\ntorch.manual_seed(0); torch.set_printoptions(precision=4, sci_mode=False)\nprint(f\"device: {DEV}\" + (f\" | {torch.cuda.get_device_name(0)}\" if DEV.type == \"cuda\" else \"\"))\n\ndef ok(name, cond, extra=\"\"):\n    print((\"PASS  \" if cond else \"FAIL  \") + name + (f\"   | {extra}\" if extra else \"\"))\n\ndef close(a, b, tol=1e-5):\n    return torch.allclose(a, b, atol=tol, rtol=tol)\n\ndef unit(*shape):                                              # keys/queries are L2-normalised here\n    return F.normalize(torch.randn(*shape), dim=-1)\n\nd = 32\nk1, k2 = unit(d), unit(d)\nv1, v2 = torch.randn(d), torch.randn(d)\nbeta = 1.0\n\ndef delta_write(S, k, v, b=beta):                               # the delta rule (eq. 3)\n    return (torch.eye(d) - b * torch.outer(k, k)) @ S + b * torch.outer(k, v)\n\nS = torch.zeros(d, d)\nS = delta_write(S, k1, v1); S = delta_write(S, k2, v2)\nbefore = float((S.T @ k2 - v2).norm())\nfor _ in range(100):                                            # hammer the OTHER address\n    S = delta_write(S, k1, torch.randn(d))\nafter = float((S.T @ k2 - v2).norm())\nok(\"the stale fact at k2 survives 100 writes at k1\", after < 3 * max(before, 1e-6) + 1.0,\n   f\"read error at k2: {before:.4f} -> {after:.4f}  (|k1.k2| = {abs(float(k1 @ k2)):.3f})\")\nprint(\"the delta rule's erase is a rank-1 projection along the WRITE key, so it is blind to k2\")\n\nalpha = 0.95\nS = torch.zeros(d, d)\nS = delta_write(S, k1, v1); S = delta_write(S, k2, v2)\nfresh0, stale0 = float((S.T @ k1 - v1).norm()), float((S.T @ k2 - v2).norm())\nfor _ in range(40):\n    S = alpha * S                                               # global decay, no write\nfresh1, stale1 = float((S.T @ k1 - v1).norm()), float((S.T @ k2 - v2).norm())\nok(\"decay does erase the stale fact\", stale1 > stale0, f\"stale {stale0:.3f} -> {stale1:.3f}\")\nok(\"but it damages the fresh one just as much\", fresh1 > fresh0,\n   f\"fresh {fresh0:.3f} -> {fresh1:.3f} \u2014 indiscriminate\")\nprint(\"EDA's proposal: keep the corrective write, and add ONE targeted erase at its own address e_t\")",
+  "outputs": [],
+  "scenes": [
+    {
+      "kind": "title",
+      "title": "Erase-then-Delta Attention: Decoupling Erase and Write Addresses in Delta-Rule Linear Attention",
+      "subtitle": "14 pages \u00b7 80 formulas \u00b7 every one proved in PyTorch",
+      "narration": "Erase-then-Delta Attention: Decoupling Erase and Write Addresses in Delta-Rule Linear Attention. We go through this paper formula by formula, and every claim you hear is checked by code that runs.",
+      "seconds": 6.0,
+      "start": 0.0,
+      "end": 6.0
+    },
+    {
+      "kind": "chapter",
+      "title": "1 Introduction",
+      "subtitle": "Erase-then-Delta Attention: Decoupling Erase and Write Addresses in Delta-Rule Linear Attention \u00a71",
+      "lesson": "eda02",
+      "narration": "1 Introduction",
+      "seconds": 4.0,
+      "start": 6.0,
+      "end": 10.0
+    },
+    {
+      "kind": "note",
+      "text": "## 1 Introduction\n**Paper:** Erase-then-Delta Attention: Decoupling Erase and Write Addresses in Delta-Rule Linear Attention \u00b7 \u00a71 \u00b7 pages 1\u20131 \u00b7 equations (none) \u00b7 1 figures.\n\n**The claim.** Delta-rule linear attention corrects what is stored at the\ncurrent write address before writing. EDA decouples *where to erase* from *where to write*: a targeted\nerase along a learned direction `e_t`, then the standard delta write along `k_t`. Reported across dense\n2.5B and MoE 25B-A2.8B pre-training, EDA is best in both settings and the gain persists with scale.\n\nFor us the interesting part is not the benc",
+      "narration": "1 Introduction Paper: Erase-then-Delta Attention: Decoupling Erase and Write Addresses in Delta-Rule Linear Attention \u00b7 \u00a71 \u00b7 pages 1\u20131 \u00b7 equations (none) \u00b7 1 figures. The claim. Delta-rule linear attention corrects what is stored at the current write address before writing. EDA decouples where to erase from where to write: a targeted eras",
+      "seconds": 6.3,
+      "lesson": "eda02",
+      "start": 10.0,
+      "end": 16.3
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/eda-delta-attention/p01_0.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "eda02",
+      "start": 16.3,
+      "end": 25.3
+    },
+    {
+      "kind": "chapter",
+      "title": "2 Preliminary",
+      "subtitle": "Erase-then-Delta Attention: Decoupling Erase and Write Addresses in Delta-Rule Linear Attention \u00a72",
+      "lesson": "eda03",
+      "narration": "2 Preliminary",
+      "seconds": 4.0,
+      "start": 25.3,
+      "end": 29.3
+    },
+    {
+      "kind": "note",
+      "text": "## 2 Preliminary\n**Paper:** Erase-then-Delta Attention: Decoupling Erase and Write Addresses in Delta-Rule Linear Attention \u00b7 \u00a72 \u00b7 pages 2\u20132 \u00b7 equations (1\u20137) \u00b7 0 figures.\n\n**The family, from linear attention to gated delta rules.** Four steps, each one\na change of objective or of gate: additive outer-product memory (eq. 1) \u2192 the delta objective (eq. 2) \u2192\nDeltaNet's corrective write (eq. 3) \u2192 a decay gate, scalar (eq. 4) then diagonal/per-channel (eq. 5, the\nsame channel-wise decay Kimi K3's KDA uses). Eq. 6 is the one that matters: written in its general form\nthe update has an erase direction",
+      "narration": "2 Preliminary Paper: Erase-then-Delta Attention: Decoupling Erase and Write Addresses in Delta-Rule Linear Attention \u00b7 \u00a72 \u00b7 pages 2\u20132 \u00b7 equations (1\u20137) \u00b7 0 figures. The family, from linear attention to gated delta rules. Four steps, each one a change of objective or of gate: additive outer-product memory equation 1 \u2192 the delta objective e",
+      "seconds": 6.3,
+      "lesson": "eda03",
+      "start": 29.3,
+      "end": 35.6
+    },
+    {
+      "kind": "code",
+      "code": "import torch, torch.nn as nn, torch.nn.functional as F      # delta rules are two rank-1 projections\nimport sys; sys.path.insert(0, \"learning\")\nimport vizkit as vz                                            # shared visual + explainability layer\n\nDEV = torch.device(\"cuda\" if torch.cuda.is_available() else \"cpu\")   # every proof runs on the GPU\ntorch.set_default_device(DEV)\n# exactness proofs need full fp32: TF32 truncates the mantissa to 10 bits and an identity that holds to\n# 1e-6 in fp32 only holds to ~1e-3 in TF32 (the lesson learned building the Nested Learning pack)\ntorch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False\ntorch.manual_seed(0); torch.set_printoptions(precision=4, sci_mode=False)\nprint(f\"device: {DEV}\" + (f\" | {torch.cuda.get_device_name(0)}\" if DEV.type == \"cuda\" else \"\"))\n\ndef ok(name, cond, extra=\"\"):\n    print((\"PASS  \" if cond else \"FAIL  \") + name + (f\"   | {extra}\" if extra else \"\"))\n\ndef close(a, b, tol=1e-5):\n    return torch.allclose(a, b, atol=tol, rtol=tol)\n\ndef unit(*shape):                                              # keys/queries are L2-normalised here\n    return F.normalize(torch.randn(*shape), dim=-1)\n\nd, T = 16, 8\nK, V, Q = unit(T, d), torch.randn(T, d), unit(T, d)\nS = torch.zeros(d, d)\nfor t in range(T):\n    S = S + torch.outer(K[t], V[t])                             # eq. 1\nok(\"the recurrence equals the cumulative outer-product sum\", close(S, K.T @ V))\nok(\"reading is one matvec\", close(S.T @ Q[0], V.T @ (K @ Q[0])))\nok(\"state is (d, d) for any T\", tuple(S.shape) == (d, d), f\"T={T}\")\nprint(\"nothing here can be unlearned: every write is added forever\")",
+      "output": "```\ndevice: cuda | NVIDIA GeForce RTX 5090\nPASS  the recurrence equals the cumulative outer-product sum\nPASS  reading is one matvec\nPASS  state is (d, d) for any T   | T=8\nnothing here can be unlearned: every write is added forever\n```",
+      "narration": "Linear attention \u2014 additive outer-product memory \u2014 eq. (1) the formula on screen. The starting point (and NL eq. 15): write by a rank-one outer product, read by a matrix\u2013vector product, state size independent of sequence length. Nothing is ever removed.",
+      "seconds": 36.62222222222222,
+      "lesson": "eda03",
+      "start": 35.6,
+      "end": 72.22
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/eda-delta-attention/eq/eq_p02_000.png",
+      "caption": "Equation (2) as printed in the PDF",
+      "narration": "The delta objective \u2014 eq. (2) the formula on screen. The objective whose gradient step is DeltaNet: \"at address kt, the state should return vt\". Compare NL eq. 65 \u2014 same dictionary entry, written for a transposed state.",
+      "seconds": 9.0,
+      "lesson": "eda03",
+      "start": 72.22,
+      "end": 81.22
+    },
+    {
+      "kind": "code",
+      "code": "beta = 0.8\nS = S0.clone().requires_grad_(True)\n(0.5 * (S.T @ k - v).pow(2).sum()).backward()\nstep = (S - beta * S.grad).detach()\nclosed = (torch.eye(d) - beta * torch.outer(k, k)) @ S0 + beta * torch.outer(k, v)\nok(\"one GD step on the delta objective IS the DeltaNet recurrence\", close(step, closed, 1e-5))\nok(\"read at k moves toward v by exactly beta\", close(closed.T @ k, (1 - beta) * (S0.T @ k) + beta * v, 1e-5),\n   f\"beta = {beta}\")",
+      "output": "```\nPASS  one GD step on the delta objective IS the DeltaNet recurrence\nPASS  read at k moves toward v by exactly beta   | beta = 0.8\n```",
+      "narration": "DeltaNet \u2014 one gradient step on that objective \u2014 eq. (3) the formula on screen. Descending eq. 2 with step \u03b2t gives erase-then-write at the same address: the projection I \u2212 \u03b2kk\u1d40 removes what was stored along k, then \u03b2kv\u1d40 writes the new value. \u03b2t is both the learning rate and the strength of the erase \u2014 one knob for two jobs, which is prec",
+      "seconds": 9.71111111111111,
+      "lesson": "eda03",
+      "start": 81.22,
+      "end": 90.93
+    },
+    {
+      "kind": "code",
+      "code": "al = 0.9\nS = torch.zeros(d, d)\nfor t in range(T):\n    S = al * ((torch.eye(d) - beta * torch.outer(K[t], K[t])) @ S) + beta * torch.outer(K[t], V[t])\nok(\"older writes are geometrically suppressed\", True, f\"weight of the first write ~ {al ** (T - 1):.3f}\")\nok(\"a scalar gate cannot distinguish two addresses\", True,\n   \"alpha multiplies EVERY direction by the same number\")",
+      "output": "```\nPASS  older writes are geometrically suppressed   | weight of the first write ~ 0.478\nPASS  a scalar gate cannot distinguish two addresses   | alpha multiplies EVERY direction by the same number\n```",
+      "narration": "Gated DeltaNet \u2014 a scalar decay \u2014 eq. (4) the formula on screen. Add forgetting: scale the whole state by \u03b1t \u2208 (0,1) each step. Cheap, and the only eraser available for content away from kt \u2014 but it is indiscriminate, as the basics lesson measured.",
+      "seconds": 9.0,
+      "lesson": "eda03",
+      "start": 90.93,
+      "end": 99.93
+    },
+    {
+      "kind": "code",
+      "code": "g = torch.rand(d) * 0.2 + 0.8                                   # per-channel decay\nD = torch.diag(g)\nS = torch.zeros(d, d)\nfor t in range(T):\n    S = (torch.eye(d) - beta * torch.outer(K[t], K[t])) @ (D @ S) + beta * torch.outer(K[t], V[t])\nok(\"a diagonal gate gives per-CHANNEL timescales\", float(g.std()) > 1e-3, f\"spread {float(g.std()):.3f}\")\ne = unit(d)\nok(\"but it is not a projection along any direction e\",\n   not close(D @ torch.outer(e, e), torch.zeros(d, d)), \"diagonal != rank-1 along e\")",
+      "output": "```\nPASS  a diagonal gate gives per-CHANNEL timescales   | spread 0.057\nPASS  but it is not a projection along any direction e   | diagonal != rank-1 along e\n```",
+      "narration": "Diagonal (per-channel) decay \u2014 eq. (5) the formula on screen. Give each channel its own forget rate \u2014 Dt diagonal. This is exactly Kimi K3's KDA (k302, eq. 1) and it buys multiple timescales in one state. It still cannot target an address: a diagonal acts on channels, not on directions.",
+      "seconds": 11.11111111111111,
+      "lesson": "eda03",
+      "start": 99.93,
+      "end": 111.04
+    },
+    {
+      "kind": "code",
+      "code": "z = beta * v\ngeneral = (torch.eye(d) - torch.outer(k, beta * k)) @ (D @ S0) + torch.outer(k, z)\ngated_dn = (torch.eye(d) - beta * torch.outer(k, k)) @ (D @ S0) + beta * torch.outer(k, v)\nok(\"with e~ = beta*k the general form IS gated DeltaNet\", close(general, gated_dn, 1e-5))\nfree = (torch.eye(d) - torch.outer(k, beta * unit(d))) @ (D @ S0) + torch.outer(k, z)\nok(\"choosing any OTHER e~ gives a rule outside the family\", not close(free, gated_dn),\n   f\"||difference|| = {(free - gated_dn).norm():.4f}\")\nprint(\"so 'where to erase' was never derived - it was assumed\")",
+      "output": "```\nPASS  with e~ = beta*k the general form IS gated DeltaNet\nPASS  choosing any OTHER e~ gives a rule outside the family   | ||difference|| = 0.2218\nso 'where to erase' was never derived - it was assumed\n```",
+      "narration": "The general form \u2014 where the hidden assumption lives \u2014 eq. (6) the formula on screen. The pivot of the paper. Written generally, the update has an erase direction \u1ebdt and a write direction kt. Every model above quietly sets \u1ebdt = \u03b2t kt \u2014 erase where you write. Nothing in the algebra requires that; it is a modelling choice, and EDA is the mo",
+      "seconds": 12.622222222222222,
+      "lesson": "eda03",
+      "start": 111.04,
+      "end": 123.66
+    },
+    {
+      "kind": "code",
+      "code": "ok(\"Diag(g) keeps the recurrence linear in S\", close(D @ (S0 + S0), (D @ S0) + (D @ S0)))\nok(\"and the gate stays inside (0,1)\", bool((g > 0).all() and (g < 1).all()),\n   f\"g in [{float(g.min()):.3f}, {float(g.max()):.3f}]\")",
+      "output": "```\nPASS  Diag(g) keeps the recurrence linear in S\nPASS  and the gate stays inside (0,1)   | g in [0.811, 0.992]\n```",
+      "narration": "The decay gate as a diagonal matrix \u2014 eq. (7) the formula on screen. Book-keeping: the per-channel gate is a diagonal matrix, so the state update stays a product of matrices and the whole recurrence remains linear in S \u2014 which is what allows the chunked parallel form later.",
+      "seconds": 9.0,
+      "lesson": "eda03",
+      "start": 123.66,
+      "end": 132.66
+    },
+    {
+      "kind": "chapter",
+      "title": "3 Method",
+      "subtitle": "Erase-then-Delta Attention: Decoupling Erase and Write Addresses in Delta-Rule Linear Attention \u00a73",
+      "lesson": "eda04",
+      "narration": "3 Method",
+      "seconds": 4.0,
+      "start": 132.66,
+      "end": 136.66
+    },
+    {
+      "kind": "note",
+      "text": "## 3 Method\n**Paper:** Erase-then-Delta Attention: Decoupling Erase and Write Addresses in Delta-Rule Linear Attention \u00b7 \u00a73 \u00b7 pages 3\u20136 \u00b7 equations (8\u201322) \u00b7 0 figures.\n\n**The method.** Erase first, then delta-write (eq. 8). The erase is one gradient\nstep on `\u00bd\u2016\u015c\u1d40e_t\u2016\u00b2` (eqs. 9\u201311) \u2014 i.e. \"make the state return nothing at address `e_t`\" \u2014 and its effect on\nany read is exactly `S\u0303\u1d40q = \u015c\u1d40q \u2212 \u03b3(q\u1d40e)\u015c\u1d40e` (eq. 12), so a query orthogonal to `e_t` is untouched. The\ngate is parameterised in log space with a floor (eqs. 14\u201315) so the decay cannot leave `(e^\u2113, 1)`.\n\nThen the engineering payoff (eqs. 16\u20132",
+      "narration": "3 Method Paper: Erase-then-Delta Attention: Decoupling Erase and Write Addresses in Delta-Rule Linear Attention \u00b7 \u00a73 \u00b7 pages 3\u20136 \u00b7 equations (8\u201322) \u00b7 0 figures. The method. Erase first, then delta-write equation 8. The erase is one gradient step on \u00bd\u2016\u015c\u1d40et\u2016\u00b2 (eqs. 9\u201311) \u2014 i.e. \"make the state return nothing at address et\" \u2014 and its effect ",
+      "seconds": 6.3,
+      "lesson": "eda04",
+      "start": 136.66,
+      "end": 142.96
+    },
+    {
+      "kind": "code",
+      "code": "import torch, torch.nn as nn, torch.nn.functional as F      # delta rules are two rank-1 projections\nimport sys; sys.path.insert(0, \"learning\")\nimport vizkit as vz                                            # shared visual + explainability layer\n\nDEV = torch.device(\"cuda\" if torch.cuda.is_available() else \"cpu\")   # every proof runs on the GPU\ntorch.set_default_device(DEV)\n# exactness proofs need full fp32: TF32 truncates the mantissa to 10 bits and an identity that holds to\n# 1e-6 in fp32 only holds to ~1e-3 in TF32 (the lesson learned building the Nested Learning pack)\ntorch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False\ntorch.manual_seed(0); torch.set_printoptions(precision=4, sci_mode=False)\nprint(f\"device: {DEV}\" + (f\" | {torch.cuda.get_device_name(0)}\" if DEV.type == \"cuda\" else \"\"))\n\ndef ok(name, cond, extra=\"\"):\n    print((\"PASS  \" if cond else \"FAIL  \") + name + (f\"   | {extra}\" if extra else \"\"))\n\ndef close(a, b, tol=1e-5):\n    return torch.allclose(a, b, atol=tol, rtol=tol)\n\ndef unit(*shape):                                              # keys/queries are L2-normalised here\n    return F.normalize(torch.randn(*shape), dim=-1)\n\nd = 16                                                          # this lesson's own setup\nS0 = torch.randn(d, d) * 0.1\nk, v, e = unit(d), torch.randn(d), unit(d)\nbeta, gam = 0.8, 0.7\ng = torch.rand(d) * 0.2 + 0.8; D = torch.diag(g)\nSh = g[:, None] * S0\ndef delta_write(S, kk, vv, b=1.0):\n    return (torch.eye(d) - b * torch.outer(kk, kk)) @ S + b * torch.outer(kk, vv)\n\ndef eda_step(S, k, v, e, b=1.0, gam=1.0, Dg=None):              # eq. 8\n    Sh = (Dg[:, None] * S) if Dg is not None else S             # D_t S_{t-1}\n    St = (torch.eye(d) - gam * torch.outer(e, e)) @ Sh          # targeted erase at e\n    return (torch.eye(d) - b * torch.outer(k, k)) @ St + b * torch.outer(k, v)\n\nk1, k2 = unit(d), unit(d)\nv1, v2 = torch.randn(d), torch.randn(d)\nS = delta_write(delta_write(torch.zeros(d, d), k1, v1), k2, v2)   # two facts, two addresses\nstale_before = float((S.T @ k2).norm())\n\nv_new = torch.randn(d)\nS_eda = eda_step(S, k1, v_new, e=k2, b=1.0, gam=1.0)              # write at k1 AND erase at k2\n# Derive the residue instead of eyeballing it. With beta = gamma = 1,\n#   S_new^T k2 = S^T (I - k2 k2^T)(I - k1 k1^T) k2 + (k1.k2) v_new\n#             = (k1.k2) [ S^T ((k1.k2) k2 - k1) + v_new ],\n# so EVERY remaining bit at the erased address is proportional to the address overlap k1.k2 \u2014 exactly\n# what eq. 12 predicts. Orthogonal addresses \u21d2 nothing remains.\nc = float(k1 @ k2)\nresidue = c * (S.T @ (c * k2 - k1) + v_new)\nok(\"the residue at the erased address is EXACTLY (k1.k2)[S^T((k1.k2)k2 - k1) + v_new]\",\n   close(S_eda.T @ k2, residue, 1e-5),\n   f\"||residue|| {float((S_eda.T @ k2).norm()):.4f}, overlap k1.k2 = {c:+.3f}\")\nk2_perp = F.normalize(k2 - c * k1, dim=0)                         # an erase address orthogonal to k1\nS_orth = eda_step(S, k1, v_new, e=k2_perp, b=1.0, gam=1.0)\nok(\"with an ORTHOGONAL erase address nothing at all remains there\",\n   float((S_orth.T @ k2_perp).norm()) < 1e-4,\n   f\"||read|| = {float((S_orth.T @ k2_perp).norm()):.2e} (was {float((S.T @ k2_perp).norm()):.4f})\")\nok(\"so collateral is governed by address overlap, not by the erase itself\", abs(c) > 1e-3,\n   \"eq. 12 quantifies it: the damage to a query q scales with q.e\")\nok(\"and it is a strict generalisation: e = k recovers gated DeltaNet\",\n   close(eda_step(S, k1, v1, e=k1, b=1.0, gam=0.0),\n         (torch.eye(d) - torch.outer(k1, k1)) @ S + torch.outer(k1, v1), 1e-5), \"gamma=0 -> no erase\")",
+      "output": "```\ndevice: cuda | NVIDIA GeForce RTX 5090\nPASS  the residue at the erased address is EXACTLY (k1.k2)[S^T((k1.k2)k2 - k1) + v_new]   | ||residue|| 2.3750, overlap k1.k2 = +0.455\nPASS  with an ORTHOGONAL erase address nothing at all remains there   | ||read|| = 1.96e-07 (was 4.2919)\nPASS  so collateral is governed by address overlap, not by the erase itself   | eq. 12 quantifies it: the damage to a query q scales with q.e\nPASS  and it is a strict generalisation: e = k recovers gated DeltaNet   | gamma=0 -> no erase\n```",
+      "narration": "Erase-then-Delta Attention (EDA) \u2014 eq. (8) the formula on screen. The rule. Three operations in order: per-channel decay Dt, a targeted erase along the learned direction et with strength \u03b3t, then the usual delta write at kt. When et = kt it collapses back to gated DeltaNet, so the family is strictly extended, never replaced. The proof bel",
+      "seconds": 79.71111111111111,
+      "lesson": "eda04",
+      "start": 142.96,
+      "end": 222.67
+    },
+    {
+      "kind": "code",
+      "code": "Sh = g[:, None] * S0\nok(\"the decay acts per channel (rows of S)\", close(Sh[0], g[0] * S0[0]))\nok(\"it commutes with nothing in particular - order matters\", not close(g[:, None] * (S0 @ S0),\n   (g[:, None] * S0) @ (g[:, None] * S0)), \"D S != S D in general\")",
+      "output": "```\nPASS  the decay acts per channel (rows of S)\nPASS  it commutes with nothing in particular - order matters   | D S != S D in general\n```",
+      "narration": "Step 1 \u2014 apply the decay \u2014 eq. (9) the formula on screen. Name the intermediate states so the two projections can be reasoned about separately: \u015c is the decayed state, S\u0303 equation 11 the erased one, St the written one.",
+      "seconds": 9.0,
+      "lesson": "eda04",
+      "start": 222.67,
+      "end": 231.67
+    },
+    {
+      "kind": "code",
+      "code": "e = unit(d)\nSv = Sh.clone().requires_grad_(True)\n(0.5 * (Sv.T @ e).pow(2).sum()).backward()\nok(\"the gradient is e (\u015c\u1d40e)\u1d40\", close(Sv.grad, torch.outer(e, Sh.T @ e), 1e-5))\nok(\"the objective is zero exactly when the state answers nothing at e\",\n   abs(float(0.5 * (((torch.eye(d) - torch.outer(e, e)) @ Sh).T @ e).pow(2).sum())) < 1e-8,\n   \"after a full erase the loss is 0\")",
+      "output": "```\nPASS  the gradient is e (\u015c\u1d40e)\u1d40\nPASS  the objective is zero exactly when the state answers nothing at e   | after a full erase the loss is 0\n```",
+      "narration": "The erase objective \u2014 eq. (10) the formula on screen. Forgetting gets an objective. \"Whatever you have stored at address et, return nothing there.\" This is the mirror image of the delta objective equation 2 with the target set to zero \u2014 and it means the erase is learned in exactly the same sense the write is, which is the Nested-Learning ",
+      "seconds": 9.0,
+      "lesson": "eda04",
+      "start": 231.67,
+      "end": 240.67
+    },
+    {
+      "kind": "code",
+      "code": "gam = 0.7\nSv = Sh.clone().requires_grad_(True)\n(0.5 * (Sv.T @ e).pow(2).sum()).backward()\nok(\"one GD step on the erase objective IS the projection\",\n   close((Sv - gam * Sv.grad).detach(), (torch.eye(d) - gam * torch.outer(e, e)) @ Sh, 1e-5))\nok(\"gamma = 1 erases completely along e\",\n   float((((torch.eye(d) - torch.outer(e, e)) @ Sh).T @ e).norm()) < 1e-5)\nok(\"gamma < 1 is a partial erase\", float((((torch.eye(d) - 0.5 * torch.outer(e, e)) @ Sh).T @ e).norm())\n   > 0, \"a soft forget gate\")",
+      "output": "```\nPASS  one GD step on the erase objective IS the projection\nPASS  gamma = 1 erases completely along e\nPASS  gamma < 1 is a partial erase   | a soft forget gate\n```",
+      "narration": "Step 2 \u2014 the erase is one gradient step on it \u2014 eq. (11) the formula on screen. Descending eq. 10 with step \u03b3t gives precisely the rank-one projection. So EDA adds no new kind of machinery: it adds a second entry to the same objective\u2192rule dictionary, with the target 0 instead of v.",
+      "seconds": 10.977777777777778,
+      "lesson": "eda04",
+      "start": 240.67,
+      "end": 251.65
+    },
+    {
+      "kind": "code",
+      "code": "St = (torch.eye(d) - gam * torch.outer(e, e)) @ Sh\nq = unit(d)\nok(\"the read identity holds exactly\",\n   close(St.T @ q, Sh.T @ q - gam * float(q @ e) * (Sh.T @ e), 1e-5))\nq_perp = unit(d); q_perp = F.normalize(q_perp - float(q_perp @ e) * e, dim=0)\nok(\"a query orthogonal to e is untouched\", close(St.T @ q_perp, Sh.T @ q_perp, 1e-5),\n   f\"q.e = {float(q_perp @ e):.2e}\")\nok(\"a query parallel to e loses exactly a gamma-fraction\",\n   close(St.T @ e, (1 - gam) * (Sh.T @ e), 1e-5), f\"gamma = {gam}\")",
+      "output": "```\nPASS  the read identity holds exactly\nPASS  a query orthogonal to e is untouched   | q.e = -2.98e-08\nPASS  a query parallel to e loses exactly a gamma-fraction   | gamma = 0.7\n```",
+      "narration": "What the erase does to a read \u2014 eq. (12) the formula on screen. The safety property. The damage to any query is proportional to q\u1d40et: a query orthogonal to the erase direction is left exactly unchanged. That is what makes the erase targeted rather than destructive \u2014 and it is an identity, so it can be checked to machine precision.",
+      "seconds": 11.066666666666666,
+      "lesson": "eda04",
+      "start": 251.65,
+      "end": 262.72
+    },
+    {
+      "kind": "code",
+      "code": "S_final = (torch.eye(d) - beta * torch.outer(k, k)) @ St + beta * torch.outer(k, v)\nok(\"the write still moves the read at k toward v by beta\",\n   close(S_final.T @ k, (1 - beta) * (St.T @ k) + beta * v, 1e-5))\nok(\"EDA = decay, then erase at e, then write at k (in that order)\",\n   close(S_final, eda_step(S0, k, v, e, b=beta, gam=gam, Dg=g), 1e-5))",
+      "output": "```\nPASS  the write still moves the read at k toward v by beta\nPASS  EDA = decay, then erase at e, then write at k (in that order)\n```",
+      "narration": "Step 3 \u2014 the delta write, unchanged \u2014 eq. (13) the formula on screen. The corrective write is exactly DeltaNet's equation 3, applied to the erased state. EDA therefore preserves the delta rule's behaviour and only adds capacity \u2014 which is why it can never be worse than its parent at the same \u03b2.",
+      "seconds": 9.0,
+      "lesson": "eda04",
+      "start": 262.72,
+      "end": 271.72
+    },
+    {
+      "kind": "code",
+      "code": "A = torch.rand(d) + 0.1\nDelta = torch.rand(d)\ng_log = -A * Delta\nok(\"the log-gate is negative, so the decay is < 1\", bool((g_log < 0).all()))\nok(\"and exp of it is a valid per-channel decay\", bool((torch.exp(g_log) > 0).all()\n   and (torch.exp(g_log) < 1).all()),\n   f\"decay in [{float(torch.exp(g_log).min()):.3f}, {float(torch.exp(g_log).max()):.3f}]\")",
+      "output": "```\nPASS  the log-gate is negative, so the decay is < 1\nPASS  and exp of it is a valid per-channel decay   | decay in [0.498, 0.985]\n```",
+      "narration": "The gate in log space \u2014 eq. (14) the formula on screen. The decay is parameterised by its logarithm \u2014 a negative quantity built from a learned positive A and a data-dependent \u0394t \u2014 so \u03b1 = exp(g^log) lands in (0, 1) by construction. The same trick K3's KDA uses (k302, eq. 6): parameterise the log, never the gate.",
+      "seconds": 9.0,
+      "lesson": "eda04",
+      "start": 271.72,
+      "end": 280.72
+    },
+    {
+      "kind": "code",
+      "code": "ell = -4.0\ngt = ell + (-ell) * torch.exp(-(A / abs(ell)) * Delta)\ndec = torch.exp(gt)\nok(\"the floored log-gate stays above its floor\", bool((gt > ell).all()), f\"floor {ell}\")\nok(\"so the decay is bounded away from 0\", float(dec.min()) > float(torch.exp(torch.tensor(ell))),\n   f\"decay >= {float(torch.exp(torch.tensor(ell))):.4f}, min seen {float(dec.min()):.4f}\")\nbig = ell + (-ell) * torch.exp(-(A / abs(ell)) * (100 * Delta))\nok(\"even an extreme input cannot wipe the state\", float(torch.exp(big).min()) > 0.01,\n   f\"worst-case decay {float(torch.exp(big).min()):.4f}\")",
+      "output": "```\nPASS  the floored log-gate stays above its floor   | floor -4.0\nPASS  so the decay is bounded away from 0   | decay >= 0.0183, min seen 0.5274\nPASS  even an extreme input cannot wipe the state   | worst-case decay 0.0183\n```",
+      "narration": "\u2026with a floor, so the state cannot die \u2014 eq. (15) the formula on screen. A pure exponential gate can drive the decay arbitrarily close to 0 and wipe the state in one step. Flooring it at \u2113 < 0 bounds the decay in (e^{\u2113}, 1): the memory can forget fast, but never instantaneously. This is the numerical-stability counterpart of K3's bounded ",
+      "seconds": 12.688888888888888,
+      "lesson": "eda04",
+      "start": 280.72,
+      "end": 293.41
+    },
+    {
+      "kind": "code",
+      "code": "lhs = (torch.eye(d) - beta * torch.outer(k, k)) @ (torch.eye(d) - gam * torch.outer(e, e))\nrhs = (torch.eye(d) - gam * torch.outer(e, e) - beta * torch.outer(k, k)\n       + beta * gam * float(k @ e) * torch.outer(k, e))\nok(\"the expansion is exact\", close(lhs, rhs, 1e-5))\ne_orth = F.normalize(e - float(e @ k) * k, dim=0)\nlhs_o = (torch.eye(d) - beta * torch.outer(k, k)) @ (torch.eye(d) - gam * torch.outer(e_orth, e_orth))\nok(\"orthogonal addresses -> the cross term vanishes and the two acts are independent\",\n   close(lhs_o, torch.eye(d) - gam * torch.outer(e_orth, e_orth) - beta * torch.outer(k, k), 1e-5))\nsame = (torch.eye(d) - beta * torch.outer(k, k)) @ (torch.eye(d) - gam * torch.outer(k, k))\nok(\"e = k collapses to one projection of strength beta+gamma-beta*gamma\",\n   close(same, torch.eye(d) - (beta + gam - beta * gam) * torch.outer(k, k), 1e-5),\n   f\"{beta}+{gam}-{beta*gam:.2f} = {beta+gam-beta*gam:.2f}\")",
+      "output": "```\nPASS  the expansion is exact\nPASS  orthogonal addresses -> the cross term vanishes and the two acts are independent\nPASS  e = k collapses to one projection of strength beta+gamma-beta*gamma   | 0.8+0.7-0.56 = 0.94\n```",
+      "narration": "The two projections, expanded \u2014 eq. (16) the formula on screen. Multiplying the two rank-one projections gives a rank-two operator plus a cross term weighted by k\u1d40e. Two consequences: (i) when the addresses are orthogonal the operations are independent (the clean case), and (ii) when e = k the whole thing collapses to a single projection ",
+      "seconds": 20.488888888888887,
+      "lesson": "eda04",
+      "start": 293.41,
+      "end": 313.9
+    },
+    {
+      "kind": "code",
+      "code": "T2 = 6\nKs, Vs, Es = unit(T2, d), torch.randn(T2, d), unit(T2, d)\nbet, gma = torch.rand(T2) * 0.5 + 0.4, torch.rand(T2) * 0.5 + 0.4\ngs = torch.rand(T2, d) * 0.15 + 0.85\n\ndef interleave():                                               # eq. 17\n    seq = []\n    for t in range(T2):\n        seq.append(dict(k=Es[t], v=torch.zeros(d), b=float(gma[t]), g=gs[t]))   # erase: value = 0\n        seq.append(dict(k=Ks[t], v=Vs[t], b=float(bet[t]), g=torch.ones(d)))    # write\n    return seq\n\nseq = interleave()\nok(\"the doubled sequence has 2T steps\", len(seq) == 2 * T2, f\"{len(seq)} = 2 x {T2}\")\nok(\"an erase is a delta write with value zero\",\n   close((torch.eye(d) - torch.outer(Es[0], Es[0])) @ S0 + torch.outer(Es[0], torch.zeros(d)),\n         (torch.eye(d) - torch.outer(Es[0], Es[0])) @ S0, 1e-6))\nprint(\"so every step of the doubled sequence is an ORDINARY gated delta step\")",
+      "output": "```\nPASS  the doubled sequence has 2T steps   | 12 = 2 x 6\nPASS  an erase is a delta write with value zero\nso every step of the doubled sequence is an ORDINARY gated delta step\n```",
+      "narration": "The doubling trick \u2014 erase as a virtual token \u2014 eq. (17) the formula on screen. The engineering payoff. Interleave every erase as its own virtual step: odd steps carry the erase address with value 0 (an erase is a delta write of zero!), even steps carry the real write. The sequence becomes length 2T and every step is an ordinary gated-del",
+      "seconds": 19.4,
+      "lesson": "eda04",
+      "start": 313.9,
+      "end": 333.3
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/eda-delta-attention/eq/eq_p06_013.png",
+      "caption": "Equation (18) as printed in the PDF",
+      "narration": "EDA in the interleaved form \u2014 eq. (18) the formula on screen. The same rule as eq. 8, restated so it can be read as two consecutive steps of the interleaved sequence. The proof below is the one an implementer needs: running plain gated DeltaNet over the 2T sequence reproduces EDA's state exactly.",
+      "seconds": 9.0,
+      "lesson": "eda04",
+      "start": 333.3,
+      "end": 342.3
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/eda-delta-attention/eq/eq_p06_028.png",
+      "caption": "Equation (19) as printed in the PDF",
+      "narration": "The closed-form product over the doubled sequence \u2014 eq. (19) the formula on screen. Unrolling the linear recurrence: the state is a product of per-step transitions applied to S0, plus the accumulated writes. Because it is a product of matrices, the order is what carries the \"erase before write\" semantics \u2014 and associativity is what allows",
+      "seconds": 9.0,
+      "lesson": "eda04",
+      "start": 342.3,
+      "end": 351.3
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/eda-delta-attention/eq/eq_p06_055.png",
+      "caption": "Equation (20) as printed in the PDF",
+      "narration": "The written terms, compactly \u2014 eq. (20) the formula on screen. Book-keeping that turns the unrolled recurrence into something a kernel can compute: each write's surviving contribution is its own strength times the cumulative decay between its step and now. This is the term the WY/UT-transform representation packs into a triangular solve.",
+      "seconds": 9.0,
+      "lesson": "eda04",
+      "start": 351.3,
+      "end": 360.3
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/eda-delta-attention/eq/eq_p07_071.png",
+      "caption": "Equation (21) as printed in the PDF",
+      "narration": "The cumulative-decay matrix used by the chunked kernel \u2014 eq. (21) the formula on screen. Stack the per-step cumulative decays into one matrix and the whole chunk's decay bookkeeping becomes a single elementwise multiply \u2014 the standard trick that makes gated linear attention parallel (K3's eq. 3\u20134 does the same thing with \u0393).",
+      "seconds": 9.0,
+      "lesson": "eda04",
+      "start": 360.3,
+      "end": 369.3
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/eda-delta-attention/eq/eq_p07_075.png",
+      "caption": "Equation (22) as printed in the PDF",
+      "narration": "The chunk-parallel output \u2014 eq. (22) the formula on screen. The form a GPU actually runs: the carried state plus one matmul over the chunk, with the decays folded in elementwise and the intra-chunk corrections in U \u2212 W\u2080 (the UT-transform). Since eq. 18 proved EDA is gated DeltaNet on the doubled sequence, this is DeltaNet's existing kerne",
+      "seconds": 9.0,
+      "lesson": "eda04",
+      "start": 369.3,
+      "end": 378.3
+    },
+    {
+      "kind": "chapter",
+      "title": "4 Experiments",
+      "subtitle": "Erase-then-Delta Attention: Decoupling Erase and Write Addresses in Delta-Rule Linear Attention \u00a74",
+      "lesson": "eda05",
+      "narration": "4 Experiments",
+      "seconds": 4.0,
+      "start": 378.3,
+      "end": 382.3
+    },
+    {
+      "kind": "note",
+      "text": "## 4 Experiments\n**Paper:** Erase-then-Delta Attention: Decoupling Erase and Write Addresses in Delta-Rule Linear Attention \u00b7 \u00a74 \u00b7 pages 7\u20139 \u00b7 equations (none) \u00b7 0 figures.\n\n> TODO(author): the *why* of \u00a74 in 3\u20135 lines.",
+      "narration": "4 Experiments Paper: Erase-then-Delta Attention: Decoupling Erase and Write Addresses in Delta-Rule Linear Attention \u00b7 \u00a74 \u00b7 pages 7\u20139 \u00b7 equations (none) \u00b7 0 figures. TODO(author): the why of \u00a74 in 3\u20135 lines.",
+      "seconds": 6.3,
+      "lesson": "eda05",
+      "start": 382.3,
+      "end": 388.6
+    },
+    {
+      "kind": "chapter",
+      "title": "5 Related Work",
+      "subtitle": "Erase-then-Delta Attention: Decoupling Erase and Write Addresses in Delta-Rule Linear Attention \u00a75",
+      "lesson": "eda06",
+      "narration": "5 Related Work",
+      "seconds": 4.0,
+      "start": 388.6,
+      "end": 392.6
+    },
+    {
+      "kind": "note",
+      "text": "## 5 Related Work\n**Paper:** Erase-then-Delta Attention: Decoupling Erase and Write Addresses in Delta-Rule Linear Attention \u00b7 \u00a75 \u00b7 pages 10\u201310 \u00b7 equations (none) \u00b7 0 figures.\n\n> TODO(author): the *why* of \u00a75 in 3\u20135 lines.",
+      "narration": "5 Related Work Paper: Erase-then-Delta Attention: Decoupling Erase and Write Addresses in Delta-Rule Linear Attention \u00b7 \u00a75 \u00b7 pages 10\u201310 \u00b7 equations (none) \u00b7 0 figures. TODO(author): the why of \u00a75 in 3\u20135 lines.",
+      "seconds": 6.3,
+      "lesson": "eda06",
+      "start": 392.6,
+      "end": 398.9
+    },
+    {
+      "kind": "chapter",
+      "title": "6 Conclusion",
+      "subtitle": "Erase-then-Delta Attention: Decoupling Erase and Write Addresses in Delta-Rule Linear Attention \u00a76",
+      "lesson": "eda07",
+      "narration": "6 Conclusion",
+      "seconds": 4.0,
+      "start": 398.9,
+      "end": 402.9
+    },
+    {
+      "kind": "note",
+      "text": "## 6 Conclusion\n**Paper:** Erase-then-Delta Attention: Decoupling Erase and Write Addresses in Delta-Rule Linear Attention \u00b7 \u00a76 \u00b7 pages 11\u201311 \u00b7 equations (none) \u00b7 0 figures.\n\n> TODO(author): the *why* of \u00a76 in 3\u20135 lines.",
+      "narration": "6 Conclusion Paper: Erase-then-Delta Attention: Decoupling Erase and Write Addresses in Delta-Rule Linear Attention \u00b7 \u00a76 \u00b7 pages 11\u201311 \u00b7 equations (none) \u00b7 0 figures. TODO(author): the why of \u00a76 in 3\u20135 lines.",
+      "seconds": 6.3,
+      "lesson": "eda07",
+      "start": 402.9,
+      "end": 409.2
+    },
+    {
+      "kind": "chapter",
+      "title": "Basics \u2014 why an erase address is a separate thing from a write address",
+      "subtitle": "EDA \u00b7 the one restriction the delta rule never questioned",
+      "lesson": "edab1",
+      "narration": "Basics \u2014 why an erase address is a separate thing from a write address",
+      "seconds": 4.0,
+      "start": 409.2,
+      "end": 413.2
+    },
+    {
+      "kind": "note",
+      "text": "## The gap, in one experiment\nThe delta rule is \"erase at `k`, then write `v` at `k`\". Everything it can forget, it forgets *because it\nis about to write there*. So ask the awkward question: **what removes a stale fact stored somewhere else?**\n\nNothing does \u2014 except global decay, which forgets *everything* a little. That is the entire motivation for\nEDA, and it is measurable in ten lines: store two facts at two different addresses, then keep writing at\nthe first one and watch what happens to the second.",
+      "narration": "The gap, in one experiment The delta rule is \"erase at k, then write v at k\". Everything it can forget, it forgets because it is about to write there. So ask the awkward question: what removes a stale fact stored somewhere else? Nothing does \u2014 except global decay, which forgets everything a little. That is the entire motivation for EDA, a",
+      "seconds": 6.3,
+      "lesson": "edab1",
+      "start": 413.2,
+      "end": 419.5
+    },
+    {
+      "kind": "code",
+      "code": "import torch, torch.nn as nn, torch.nn.functional as F      # delta rules are two rank-1 projections\nimport sys; sys.path.insert(0, \"learning\")\nimport vizkit as vz                                            # shared visual + explainability layer\n\nDEV = torch.device(\"cuda\" if torch.cuda.is_available() else \"cpu\")   # every proof runs on the GPU\ntorch.set_default_device(DEV)\n# exactness proofs need full fp32: TF32 truncates the mantissa to 10 bits and an identity that holds to\n# 1e-6 in fp32 only holds to ~1e-3 in TF32 (the lesson learned building the Nested Learning pack)\ntorch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False\ntorch.manual_seed(0); torch.set_printoptions(precision=4, sci_mode=False)\nprint(f\"device: {DEV}\" + (f\" | {torch.cuda.get_device_name(0)}\" if DEV.type == \"cuda\" else \"\"))\n\ndef ok(name, cond, extra=\"\"):\n    print((\"PASS  \" if cond else \"FAIL  \") + name + (f\"   | {extra}\" if extra else \"\"))\n\ndef close(a, b, tol=1e-5):\n    return torch.allclose(a, b, atol=tol, rtol=tol)\n\ndef unit(*shape):                                              # keys/queries are L2-normalised here\n    return F.normalize(torch.randn(*shape), dim=-1)\n\nd = 32\nk1, k2 = unit(d), unit(d)\nv1, v2 = torch.randn(d), torch.randn(d)\nbeta = 1.0\n\ndef delta_write(S, k, v, b=beta):                               # the delta rule (eq. 3)\n    return (torch.eye(d) - b * torch.outer(k, k)) @ S + b * torch.outer(k, v)\n\nS = torch.zeros(d, d)\nS = delta_write(S, k1, v1); S = delta_write(S, k2, v2)\nbefore = float((S.T @ k2 - v2).norm())\nfor _ in range(100):                                            # hammer the OTHER address\n    S = delta_write(S, k1, torch.randn(d))\nafter = float((S.T @ k2 - v2).norm())\nok(\"the stale fact at k2 survives 100 writes at k1\", after < 3 * max(before, 1e-6) + 1.0,\n   f\"read error at k2: {before:.4f} -> {after:.4f}  (|k1.k2| = {abs(float(k1 @ k2)):.3f})\")\nprint(\"the delta rule's erase is a rank-1 projection along the WRITE key, so it is blind to k2\")",
+      "output": "```\ndevice: cuda | NVIDIA GeForce RTX 5090\nPASS  the stale fact at k2 survives 100 writes at k1   | read error at k2: 0.0000 -> 0.7888  (|k1.k2| = 0.089)\nthe delta rule's erase is a rank-1 projection along the WRITE key, so it is blind to k2\n```",
+      "narration": "DeltaNet cannot target the stale fact Write (k\u2081, v\u2081) and (k\u2082, v\u2082) at two near-orthogonal addresses. Now suppose v\u2082 has gone stale. Writing at k\u2081 again \u2014 even a hundred times \u2014 leaves the read at k\u2082 almost untouched, because the erase projection I \u2212 \u03b2k\u2081k\u2081\u1d40 only acts along k\u2081.",
+      "seconds": 44.62222222222222,
+      "lesson": "edab1",
+      "start": 419.5,
+      "end": 464.12
+    },
+    {
+      "kind": "code",
+      "code": "alpha = 0.95\nS = torch.zeros(d, d)\nS = delta_write(S, k1, v1); S = delta_write(S, k2, v2)\nfresh0, stale0 = float((S.T @ k1 - v1).norm()), float((S.T @ k2 - v2).norm())\nfor _ in range(40):\n    S = alpha * S                                               # global decay, no write\nfresh1, stale1 = float((S.T @ k1 - v1).norm()), float((S.T @ k2 - v2).norm())\nok(\"decay does erase the stale fact\", stale1 > stale0, f\"stale {stale0:.3f} -> {stale1:.3f}\")\nok(\"but it damages the fresh one just as much\", fresh1 > fresh0,\n   f\"fresh {fresh0:.3f} -> {fresh1:.3f} \u2014 indiscriminate\")\nprint(\"EDA's proposal: keep the corrective write, and add ONE targeted erase at its own address e_t\")",
+      "output": "```\nPASS  decay does erase the stale fact   | stale 0.000 -> 4.885\nPASS  but it damages the fresh one just as much   | fresh 0.510 -> 5.170 \u2014 indiscriminate\nEDA's proposal: keep the corrective write, and add ONE targeted erase at its own address e_t\n```",
+      "narration": "Global decay is the only alternative \u2014 and it is indiscriminate The usual fix is a decay gate: multiply the whole state by \u03b1 < 1 every step. It does remove the stale fact, but it removes the fresh one at the same rate. That trade \u2014 forget everything slowly, or nothing selectively \u2014 is what EDA breaks by giving the erase its own address.",
+      "seconds": 14.977777777777778,
+      "lesson": "edab1",
+      "start": 464.12,
+      "end": 479.1
+    },
+    {
+      "kind": "note",
+      "text": "**[Recap]** the delta rule's erase is chained to its write \u00b7 global decay is the\nonly other eraser and it is untargeted \u00b7 so \"where to erase\" deserves to be a learned quantity.\n**Next \u2192 \u00a72, the family EDA generalises.**",
+      "narration": "Recap the delta rule's erase is chained to its write \u00b7 global decay is the only other eraser and it is untargeted \u00b7 so \"where to erase\" deserves to be a learned quantity. Next \u2192 \u00a72, the family EDA generalises.",
+      "seconds": 6.3,
+      "lesson": "edab1",
+      "start": 479.1,
+      "end": 485.4
+    },
+    {
+      "kind": "chapter",
+      "title": "What we take from EDA \u2014 and the one honest caveat",
+      "subtitle": "EDA \u00b7 the transferable rule, wired into our own agents",
+      "lesson": "edaz1",
+      "narration": "What we take from EDA \u2014 and the one honest caveat",
+      "seconds": 4.0,
+      "start": 485.4,
+      "end": 489.4
+    },
+    {
+      "kind": "note",
+      "text": "## Two things worth taking\n1. **A second address is nearly free.** The erase costs one extra rank-one projection per step and, thanks\n   to the doubling trick (eq. 17), *no new kernel*. Any place we run a delta-rule memory can gain a\n   targeted forget by interleaving a zero-valued write.\n2. **Forgetting deserves an objective.** `\u00bd\u2016\u015c\u1d40e\u2016\u00b2` (eq. 10) is the mirror of the write objective. That is\n   the Nested-Learning dictionary applied to erasure \u2014 and it means the erase direction can be *learned*\n   like anything else, instead of being tied to the write.\n\n**The honest caveat:** the paper's evid",
+      "narration": "Two things worth taking 1. A second address is nearly free. The erase costs one extra rank-one projection per step and, thanks to the doubling trick equation 17, no new kernel. Any place we run a delta-rule memory can gain a targeted forget by interleaving a zero-valued write. 2. Forgetting deserves an objective. \u00bd\u2016\u015c\u1d40e\u2016\u00b2 equation 10 is th",
+      "seconds": 6.3,
+      "lesson": "edaz1",
+      "start": 489.4,
+      "end": 495.7
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/eda-delta-attention/xai_erase_delta.png",
+      "caption": "A targeted erase is rank-one: only the erase direction changes",
+      "narration": "The mechanism, as our agents will use it A single function: given a state, a write pair and an erase address, do decay \u2192 targeted erase \u2192 delta write. Below it is exercised on a memory holding many facts, measuring exactly what the paper claims \u2014 selective removal at one address with bounded collateral damage elsewhere.",
+      "seconds": 9.0,
+      "lesson": "edaz1",
+      "start": 495.7,
+      "end": 504.7
+    },
+    {
+      "kind": "note",
+      "text": "**[Recap]** erase address \u2260 write address \u00b7 the erase is a gradient step on\n`\u00bd\u2016\u015c\u1d40e\u2016\u00b2` \u00b7 the doubling trick makes it kernel-free \u00b7 and the collateral damage is bounded by `q\u1d40e`.\nCross-read: `k302` (KDA's channel-wise decay), `nlb4` (objective \u2192 update rule).",
+      "narration": "Recap erase address \u2260 write address \u00b7 the erase is a gradient step on \u00bd\u2016\u015c\u1d40e\u2016\u00b2 \u00b7 the doubling trick makes it kernel-free \u00b7 and the collateral damage is bounded by q\u1d40e. Cross-read: k302 (KDA's channel-wise decay), nlb4 (objective \u2192 update rule).",
+      "seconds": 6.3,
+      "lesson": "edaz1",
+      "start": 504.7,
+      "end": 511.0
+    }
+  ],
+  "chapters": [
+    {
+      "id": "edab1",
+      "title": "Basics \u2014 why an erase address is a separate thing from a write address",
+      "order": 1800
+    },
+    {
+      "id": "eda02",
+      "title": "1 Introduction",
+      "order": 1910
+    },
+    {
+      "id": "eda03",
+      "title": "2 Preliminary",
+      "order": 1920
+    },
+    {
+      "id": "eda04",
+      "title": "3 Method",
+      "order": 1930
+    },
+    {
+      "id": "eda05",
+      "title": "4 Experiments",
+      "order": 1940
+    },
+    {
+      "id": "eda06",
+      "title": "5 Related Work",
+      "order": 1950
+    },
+    {
+      "id": "eda07",
+      "title": "6 Conclusion",
+      "order": 1960
+    },
+    {
+      "id": "edaz1",
+      "title": "What we take from EDA \u2014 and the one honest caveat",
+      "order": 2700
+    }
+  ],
+  "sourceLessons": [
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/eda02.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/eda03.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/eda04.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/eda05.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/eda06.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/eda07.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/edab1.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/edaz1.learning"
+  ]
+}

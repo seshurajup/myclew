@@ -1,0 +1,330 @@
+{
+  "task": "char-level Transformer LM TinyGPT(d96,h6,L2,ctx64)",
+  "device": "cuda",
+  "gpu": "NVIDIA GeForce RTX 5090",
+  "amp_dtype_used": "bf16",
+  "hardware_config_applied": {
+    "amp": "bf16",
+    "tf32": true,
+    "matmul_precision": "high",
+    "torch_compile": true,
+    "compiled_fp": true,
+    "compiled_ternary": true,
+    "optimizer": "fused AdamW (muon unavailable)",
+    "batch": 2048,
+    "steps": 900
+  },
+  "live_gpu_during_ternary_train": {
+    "bottleneck": "mixed",
+    "mean_util": 47.6,
+    "max_util": 97.0,
+    "mean_mem_frac": 0.083,
+    "cpu_load_frac": 0.03,
+    "recommendation": {
+      "num_workers": 19,
+      "cache_decoded_audio": true,
+      "note": "partial starvation \u2192 add workers + cache decode"
+    }
+  },
+  "throughput_it_s": {
+    "fp": 76.8,
+    "ternary": 77.1,
+    "int4": 45.6
+  },
+  "vocab": 40,
+  "uniform_baseline_ppl": 40.0,
+  "params_total": 237696,
+  "linears_ternarized": 8,
+  "target_linear_weights": 221184,
+  "fp_curve": [
+    {
+      "step": 0,
+      "train_loss": 3.9016,
+      "train_ppl": 49.481,
+      "val_ppl": 31.024,
+      "lambda": 1.0
+    },
+    {
+      "step": 50,
+      "train_loss": 2.2751,
+      "train_ppl": 9.729,
+      "val_ppl": 9.497,
+      "lambda": 1.0
+    },
+    {
+      "step": 100,
+      "train_loss": 1.9334,
+      "train_ppl": 6.913,
+      "val_ppl": 6.734,
+      "lambda": 1.0
+    },
+    {
+      "step": 150,
+      "train_loss": 1.6824,
+      "train_ppl": 5.378,
+      "val_ppl": 5.322,
+      "lambda": 1.0
+    },
+    {
+      "step": 200,
+      "train_loss": 1.614,
+      "train_ppl": 5.023,
+      "val_ppl": 4.999,
+      "lambda": 1.0
+    },
+    {
+      "step": 250,
+      "train_loss": 1.5915,
+      "train_ppl": 4.911,
+      "val_ppl": 4.904,
+      "lambda": 1.0
+    },
+    {
+      "step": 300,
+      "train_loss": 1.5843,
+      "train_ppl": 4.876,
+      "val_ppl": 4.863,
+      "lambda": 1.0
+    },
+    {
+      "step": 350,
+      "train_loss": 1.5779,
+      "train_ppl": 4.845,
+      "val_ppl": 4.853,
+      "lambda": 1.0
+    },
+    {
+      "step": 400,
+      "train_loss": 1.568,
+      "train_ppl": 4.797,
+      "val_ppl": 4.843,
+      "lambda": 1.0
+    },
+    {
+      "step": 450,
+      "train_loss": 1.5685,
+      "train_ppl": 4.799,
+      "val_ppl": 4.832,
+      "lambda": 1.0
+    },
+    {
+      "step": 500,
+      "train_loss": 1.5585,
+      "train_ppl": 4.752,
+      "val_ppl": 4.835,
+      "lambda": 1.0
+    },
+    {
+      "step": 550,
+      "train_loss": 1.5591,
+      "train_ppl": 4.755,
+      "val_ppl": 4.836,
+      "lambda": 1.0
+    },
+    {
+      "step": 600,
+      "train_loss": 1.5549,
+      "train_ppl": 4.735,
+      "val_ppl": 4.834,
+      "lambda": 1.0
+    },
+    {
+      "step": 650,
+      "train_loss": 1.5512,
+      "train_ppl": 4.717,
+      "val_ppl": 4.839,
+      "lambda": 1.0
+    },
+    {
+      "step": 700,
+      "train_loss": 1.552,
+      "train_ppl": 4.721,
+      "val_ppl": 4.839,
+      "lambda": 1.0
+    },
+    {
+      "step": 750,
+      "train_loss": 1.5489,
+      "train_ppl": 4.706,
+      "val_ppl": 4.838,
+      "lambda": 1.0
+    },
+    {
+      "step": 800,
+      "train_loss": 1.5497,
+      "train_ppl": 4.71,
+      "val_ppl": 4.839,
+      "lambda": 1.0
+    },
+    {
+      "step": 850,
+      "train_loss": 1.5473,
+      "train_ppl": 4.699,
+      "val_ppl": 4.839,
+      "lambda": 1.0
+    },
+    {
+      "step": 899,
+      "train_loss": 1.5498,
+      "train_ppl": 4.71,
+      "val_ppl": 4.839,
+      "lambda": 1.0
+    }
+  ],
+  "ternary_curve": [
+    {
+      "step": 0,
+      "train_loss": 3.9016,
+      "train_ppl": 49.481,
+      "val_ppl": 31.027,
+      "lambda": 0.0
+    },
+    {
+      "step": 50,
+      "train_loss": 2.2809,
+      "train_ppl": 9.786,
+      "val_ppl": 9.558,
+      "lambda": 0.185
+    },
+    {
+      "step": 100,
+      "train_loss": 1.982,
+      "train_ppl": 7.257,
+      "val_ppl": 7.046,
+      "lambda": 0.37
+    },
+    {
+      "step": 150,
+      "train_loss": 1.7403,
+      "train_ppl": 5.699,
+      "val_ppl": 5.624,
+      "lambda": 0.556
+    },
+    {
+      "step": 200,
+      "train_loss": 1.6514,
+      "train_ppl": 5.214,
+      "val_ppl": 5.179,
+      "lambda": 0.741
+    },
+    {
+      "step": 250,
+      "train_loss": 1.64,
+      "train_ppl": 5.155,
+      "val_ppl": 5.115,
+      "lambda": 0.926
+    },
+    {
+      "step": 300,
+      "train_loss": 1.6343,
+      "train_ppl": 5.126,
+      "val_ppl": 5.079,
+      "lambda": 1.0
+    },
+    {
+      "step": 350,
+      "train_loss": 1.6218,
+      "train_ppl": 5.062,
+      "val_ppl": 5.026,
+      "lambda": 1.0
+    },
+    {
+      "step": 400,
+      "train_loss": 1.6122,
+      "train_ppl": 5.014,
+      "val_ppl": 5.013,
+      "lambda": 1.0
+    },
+    {
+      "step": 450,
+      "train_loss": 1.6082,
+      "train_ppl": 4.994,
+      "val_ppl": 4.992,
+      "lambda": 1.0
+    },
+    {
+      "step": 500,
+      "train_loss": 1.6033,
+      "train_ppl": 4.97,
+      "val_ppl": 4.979,
+      "lambda": 1.0
+    },
+    {
+      "step": 550,
+      "train_loss": 1.598,
+      "train_ppl": 4.943,
+      "val_ppl": 4.945,
+      "lambda": 1.0
+    },
+    {
+      "step": 600,
+      "train_loss": 1.5983,
+      "train_ppl": 4.945,
+      "val_ppl": 4.929,
+      "lambda": 1.0
+    },
+    {
+      "step": 650,
+      "train_loss": 1.5923,
+      "train_ppl": 4.915,
+      "val_ppl": 4.929,
+      "lambda": 1.0
+    },
+    {
+      "step": 700,
+      "train_loss": 1.5926,
+      "train_ppl": 4.917,
+      "val_ppl": 4.907,
+      "lambda": 1.0
+    },
+    {
+      "step": 750,
+      "train_loss": 1.5871,
+      "train_ppl": 4.89,
+      "val_ppl": 4.915,
+      "lambda": 1.0
+    },
+    {
+      "step": 800,
+      "train_loss": 1.5896,
+      "train_ppl": 4.902,
+      "val_ppl": 4.9,
+      "lambda": 1.0
+    },
+    {
+      "step": 850,
+      "train_loss": 1.5824,
+      "train_ppl": 4.867,
+      "val_ppl": 4.875,
+      "lambda": 1.0
+    },
+    {
+      "step": 899,
+      "train_loss": 1.582,
+      "train_ppl": 4.865,
+      "val_ppl": 4.858,
+      "lambda": 1.0
+    }
+  ],
+  "fp_final_val_ppl": 4.841,
+  "ternary_final_val_ppl": 4.867,
+  "fp_learned": true,
+  "ternary_learned": true,
+  "quality_gap_val_ppl": 0.026,
+  "quality_gap_pct": 0.54,
+  "effective_bits_per_weight": 1.71,
+  "packed_size": {
+    "elements": 225024,
+    "packed_bytes": 45005,
+    "scale_bytes": 3516,
+    "total_bytes": 48521,
+    "fp16_bytes": 450048,
+    "fp32_bytes": 900096,
+    "ratio_vs_fp16": 9.28,
+    "ratio_vs_fp32": 18.55,
+    "scheme": "ternary",
+    "group_size": 128,
+    "pack_roundtrip_exact": true
+  },
+  "verdict": "LOW-BIT TRAINING WORKS: ternary STE (BitNet b1.58, our lowbit-qat agent) trained a real char-LM from ppl~40 (random) to 4.87 val ppl vs FP 4.84 (gap +0.5%), at 1.71 bits/weight -> 9.28x smaller weights vs fp16; pack round-trip exact=True."
+}

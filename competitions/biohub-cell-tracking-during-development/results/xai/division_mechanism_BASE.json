@@ -1,0 +1,18 @@
+{
+  "tag": "BASE",
+  "both_det": 63,
+  "n_div": 63,
+  "det_rate": 1.0,
+  "weaker_bands": {
+    "gt05": 26,
+    "b0205": 20,
+    "marg": 12,
+    "blind": 5,
+    "n": 63,
+    "med": 0.377
+  },
+  "spurious_median": 0.066,
+  "sep_adv_auc": 0.8348284018387111,
+  "concept_linear_bal_acc": 0.775,
+  "verdict": "DECODE-SUPPRESSED (sisters seen, weaker-edge median 0.377; 26 ILP-suppressed + 20 threshold-recoverable) \u2014 but check separability"
+}

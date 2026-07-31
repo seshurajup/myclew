@@ -1,0 +1,33 @@
+# Baseline config — reproduces the best public classical pipeline (pilkwang/V2/V3 merged).
+run_name: baseline_v1
+
+# data contract
+SCALE: [1.625, 0.40625, 0.40625]   # z,y,x µm/voxel
+MATCH_GATE_UM: 7.0
+
+# detection
+XY_DS: 4
+SMOOTH_SIGMA: 1.0
+MIN_PEAK_DIST: 2
+THRESH_REL: 0.20
+USE_SUBVOXEL: true
+REFINE_RZ: 2
+REFINE_RYX: 5
+USE_BORDER_FILTER: true
+BORDER_KEEP_QUANTILE: 0.0
+NMS_RADIUS_UM: 0.0
+
+# linking
+MAX_LINK_DIST_UM: 11.0
+USE_VELOCITY_PRIOR: true
+VELOCITY_INERTIA: 1.0
+USE_GAP_CLOSING: true
+GAP_CLOSE_DIST_UM: 11.0
+
+# divisions
+DETECT_DIVISIONS: true
+DIV_PARENT_DIST_UM: 8.75
+DIV_SISTER_DIST_UM: 6.25
+
+# post
+PRUNE_ISOLATED_NODES: true

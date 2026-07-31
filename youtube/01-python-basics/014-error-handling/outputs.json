@@ -1,0 +1,31 @@
+[
+  {
+    "after_line": 4,
+    "text": ">>> Cannot divide by zero",
+    "caption": "except catches ZeroDivisionError"
+  },
+  {
+    "after_line": 10,
+    "text": ">>> Index out of range",
+    "caption": "except catches IndexError"
+  },
+  {
+    "after_line": 16,
+    "text": ">>> Conversion failed: invalid literal...",
+    "caption": "except (A, B) catches multiple types"
+  },
+  {
+    "after_line": 26,
+    "text": ">>> Success: 5.0\n>>> Cleanup runs no matter what",
+    "caption": "else + finally"
+  },
+  {
+    "after_line": 35,
+    "text": ">>> Caught: Age cannot be negative",
+    "caption": "raise triggers a custom error"
+  },
+  {
+    "after_line": 37,
+    "image": "artifacts/terminal.png"
+  }
+]

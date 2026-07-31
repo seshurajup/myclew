@@ -1,0 +1,137 @@
+{
+  "slug": "eda-delta-attention",
+  "source": "https://arxiv.org/pdf/2606.26560",
+  "pdf": "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/docs/papers/eda-delta-attention/source.pdf",
+  "title": "Erase-then-Delta Attention: Decoupling Erase and Write Addresses in Delta-Rule Linear Attention",
+  "backend": "docling+pymupdf-assets",
+  "pages": 14,
+  "figures": [
+    {
+      "page": 1,
+      "path": "assets/fig/p01_0.png",
+      "y0": 17.755653381347656,
+      "y1": 46.22705078125,
+      "caption": "",
+      "label": "",
+      "w": 2000,
+      "h": 1027
+    }
+  ],
+  "tables": [
+    {
+      "page": 5,
+      "rows": 2,
+      "cols": 2,
+      "image": "assets/tab/p05_0.png"
+    },
+    {
+      "page": 10,
+      "rows": 11,
+      "cols": 13,
+      "image": "assets/tab/p10_0.png"
+    },
+    {
+      "page": 10,
+      "rows": 5,
+      "cols": 9,
+      "image": "assets/tab/p10_1.png"
+    },
+    {
+      "page": 10,
+      "rows": 4,
+      "cols": 3,
+      "image": "assets/tab/p10_2.png"
+    }
+  ],
+  "sections": [
+    {
+      "level": 1,
+      "page": 1,
+      "num": "",
+      "title": "Abstract",
+      "heading": "Abstract"
+    },
+    {
+      "level": 1,
+      "page": 1,
+      "num": "1",
+      "title": "Introduction",
+      "heading": "1 Introduction"
+    },
+    {
+      "level": 1,
+      "page": 2,
+      "num": "2",
+      "title": "Preliminary",
+      "heading": "2 Preliminary"
+    },
+    {
+      "level": 1,
+      "page": 3,
+      "num": "3",
+      "title": "Method",
+      "heading": "3 Method"
+    },
+    {
+      "level": 1,
+      "page": 7,
+      "num": "4",
+      "title": "Experiments",
+      "heading": "4 Experiments"
+    },
+    {
+      "level": 1,
+      "page": 10,
+      "num": "5",
+      "title": "Related Work",
+      "heading": "5 Related Work"
+    },
+    {
+      "level": 1,
+      "page": 11,
+      "num": "6",
+      "title": "Conclusion",
+      "heading": "6 Conclusion"
+    },
+    {
+      "level": 1,
+      "page": 11,
+      "num": "",
+      "title": "References",
+      "heading": "References"
+    },
+    {
+      "level": 1,
+      "page": 13,
+      "num": "A",
+      "title": "Model Configurations",
+      "heading": "A Model Configurations"
+    },
+    {
+      "level": 1,
+      "page": 14,
+      "num": "B",
+      "title": "Evaluation Benchmarks",
+      "heading": "B Evaluation Benchmarks"
+    }
+  ],
+  "equations": 80,
+  "numbered": 6,
+  "md": "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/docs/papers/eda-delta-attention/eda-delta-attention.md",
+  "equations_json": "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/docs/papers/eda-delta-attention/equations.json",
+  "available": {
+    "pymupdf": true,
+    "marker": true,
+    "docling": true
+  },
+  "score": {
+    "chars": 60437,
+    "headings": 27,
+    "equations": 24,
+    "eq_tags": 0,
+    "images": 7,
+    "tables": 36,
+    "latex_cmds": 323,
+    "mojibake": 0
+  }
+}

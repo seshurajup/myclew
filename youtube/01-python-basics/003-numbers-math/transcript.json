@@ -1,0 +1,50 @@
+[
+  {
+    "text": "Python handles everyday arithmetic with the operators you already know, plus a couple you might not expect from a calculator.",
+    "until_line": 3
+  },
+  {
+    "text": "[chuckle] Plus adds, minus subtracts, the star means multiply, and the forward slash divides — nothing surprising yet.",
+    "until_line": 7
+  },
+  {
+    "text": "But here's the first twist: a double slash gives you integer division, dividing and then throwing away everything after the decimal point.",
+    "until_line": 8
+  },
+  {
+    "text": "The percent sign is modulo, [sniff] which hands you the remainder left over after that division — incredibly useful for checking even or odd numbers.",
+    "until_line": 9
+  },
+  {
+    "text": "And a double star raises a number to a power, so ten double-star three is ten cubed, one thousand.",
+    "until_line": 10
+  },
+  {
+    "text": "Watch all seven of those operations run on the very same two numbers, and you get seven completely different results.",
+    "until_line": 10
+  },
+  {
+    "text": "[groan] Python also ships a set of built-in math functions, so you rarely need to write the basics yourself.",
+    "until_line": 13
+  },
+  {
+    "text": "Abs gives the absolute value, stripping away any negative sign, and round lets you control exactly how many decimal places you keep.",
+    "until_line": 14
+  },
+  {
+    "text": "Max and min instantly pick out the larger or the smaller of a group of numbers, no comparison code needed.",
+    "until_line": 15
+  },
+  {
+    "text": "And just like in math class, Python respects operator precedence — multiplication and division happen before addition and subtraction, unless you add parentheses to force your own order.",
+    "until_line": 15
+  },
+  {
+    "text": "And one final gotcha worth remembering: dividing two whole numbers with a single slash always gives you back a float, [laugh] even when the numbers divide perfectly evenly.",
+    "until_line": 19
+  },
+  {
+    "text": "In the next one we take on string basics. Save this one for when you need it.",
+    "until_line": 19
+  }
+]

@@ -1,0 +1,54 @@
+[
+  {
+    "text": "Counter tallies anything countable, and it does it in one line.",
+    "until_line": 1
+  },
+  {
+    "text": "It lives in collections, alongside the other specialised containers.",
+    "until_line": 1
+  },
+  {
+    "text": "It's the one-line answer to counting words, votes, or anything else that repeats.",
+    "until_line": 1
+  },
+  {
+    "text": "We split a sentence into words, giving us a list with repeats.",
+    "until_line": 3
+  },
+  {
+    "text": "Passing that list to Counter counts every element as it goes.",
+    "until_line": 4
+  },
+  {
+    "text": "Printing it shows each word with its tally, ordered most common first.",
+    "until_line": 6
+  },
+  {
+    "text": "You index it like a dictionary, because a Counter is a dictionary underneath.",
+    "until_line": 7
+  },
+  {
+    "text": "Red appears three times, so counts of red gives three.",
+    "until_line": 7
+  },
+  {
+    "text": "Most common one gives you the single biggest entry, as a list of pairs.",
+    "until_line": 8
+  },
+  {
+    "text": "Pass a bigger number and you get that many of the top entries back.",
+    "until_line": 8
+  },
+  {
+    "text": "Update adds more items to the existing tally rather than replacing it.",
+    "until_line": 10
+  },
+  {
+    "text": "Blue was two, we added two more, and now it's four.",
+    "until_line": 11
+  },
+  {
+    "text": "In the next one we take on defaultdict. Comment the topic you want after that.",
+    "until_line": 11
+  }
+]

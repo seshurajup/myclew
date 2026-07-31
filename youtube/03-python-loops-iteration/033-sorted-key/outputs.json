@@ -1,0 +1,26 @@
+[
+  {
+    "after_line": 3,
+    "text": ">>> [1, 1, 2, 3, 4, 5, 9]\\n>>> [9, 5, 4, 3, 2, 1, 1]",
+    "caption": "sorted() + reverse"
+  },
+  {
+    "after_line": 7,
+    "text": ">>> ['apple', 'banana', 'cherry']",
+    "caption": "key=len sorts by length"
+  },
+  {
+    "after_line": 11,
+    "text": ">>> [('Bob', 25), ('Alice', 30), ('Carol', 35)]",
+    "caption": "key=lambda sorts by a field"
+  },
+  {
+    "after_line": 15,
+    "text": ">>> [1, 1, 2, 3, 4, 5, 9]",
+    "caption": ".sort() changes in place"
+  },
+  {
+    "after_line": 15,
+    "image": "artifacts/terminal.png"
+  }
+]

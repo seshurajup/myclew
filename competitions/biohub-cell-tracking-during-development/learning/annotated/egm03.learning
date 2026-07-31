@@ -1,0 +1,16 @@
+@ id: egm03
+@ order: 3020
+@ title: 3 Ablation Studies
+@ subtitle: EmbeddingGemma: Powerful and Lightweight Text Representations §3
+@ source: docs/papers/embeddinggemma/embeddinggemma.md
+
+--- note
+## 3 Ablation Studies
+**Paper:** EmbeddingGemma: Powerful and Lightweight Text Representations · §3 · pages 6–6 · equations (none) · 0 figures.
+
+**The ablations, and what we verify of them.** The paper ablates encoder
+initialization (decoder-init wins), pooling (mean beats attention pooling at this scale), and the loss
+components. We do not have the pretraining compute to replay those; what the advanced lesson DOES verify
+is the two ablations that run at our scale — MRL truncation (toy training + live truncation behaviour of
+the shipped model) and the spread-out loss's quantization robustness (eq. 4's cell).
+

@@ -1,0 +1,62 @@
+[
+  {
+    "n": 1,
+    "name": "search_capabilities \u2014 read-only, idempotent discovery"
+  },
+  {
+    "n": 2,
+    "name": "execute_capability \u2014 destructive, non-idempotent execution"
+  },
+  {
+    "n": 3,
+    "name": "schema_digest \u2014 proof the arguments came from a real search"
+  },
+  {
+    "n": 4,
+    "name": "retry.action \u2014 correct_arguments vs search_capabilities"
+  },
+  {
+    "n": 5,
+    "name": "same_arguments_retryable=False \u2014 the anti-loop rule"
+  },
+  {
+    "n": 6,
+    "name": "unknown_capability -> search again before retrying"
+  },
+  {
+    "n": 7,
+    "name": "invalid_capability_arguments -> the offending paths, named"
+  },
+  {
+    "n": 8,
+    "name": "capability_failed -> an agent crash is a RESULT"
+  },
+  {
+    "n": 9,
+    "name": "2-4 keyword variants before concluding 'unsupported'"
+  },
+  {
+    "n": 10,
+    "name": "tool annotations: read-only / destructive / idempotent"
+  },
+  {
+    "n": 11,
+    "name": "provider-shaped tool schemas (anthropic / openai / plain)"
+  },
+  {
+    "n": 12,
+    "name": "TEXT_PROTOCOL \u2014 for models with no native tool calling"
+  },
+  {
+    "n": 13,
+    "name": "capability_index \u2014 the 320-agent registry as descriptors"
+  },
+  {
+    "n": 14,
+    "name": "capability_loop \u2014 the driver, provider-agnostic"
+  },
+  {
+    "n": 15,
+    "name": "execute=False by default \u2014 unattended, so running is opt-in"
+  }
+]

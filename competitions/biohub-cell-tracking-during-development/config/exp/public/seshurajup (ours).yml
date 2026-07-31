@@ -1,0 +1,10 @@
+# PUBLIC notebook config — **seshurajup (ours)** / v14
+name: pub_seshurajup (ours)
+source: **seshurajup (ours)** / v14
+family: other
+base: unknown
+lb: 0.857
+golden_cv: None
+mined_params: ""
+run: manual
+score: golden-12 (adj_edge_J + 0.1*div_J), by_embryo

@@ -1,0 +1,13 @@
+{
+  "language": "python",
+  "title": "strings.py",
+  "hook": "Everything you can do to text in Python",
+  "playlist": "Learn Python",
+  "target_seconds": 90,
+  "tts_engine": "chatterbox",
+  "music_prompt": "calm, educational, soft lo-fi",
+  "code_path": "code.py",
+  "transcript_path": "transcript.json",
+  "outputs_path": "outputs.json",
+  "accent": "ocean"
+}

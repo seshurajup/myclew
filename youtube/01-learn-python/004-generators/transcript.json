@@ -1,0 +1,42 @@
+[
+  {
+    "text": "A generator produces values one at a time instead of building a whole list up front.",
+    "until_line": 1
+  },
+  {
+    "text": "Countdown looks like a normal function, right up until you spot the yield.",
+    "until_line": 1
+  },
+  {
+    "text": "While n is greater than zero we yield n — and yield is the key word here.",
+    "until_line": 3
+  },
+  {
+    "text": "Yield hands a value back and pauses the function, keeping every local variable alive.",
+    "until_line": 3
+  },
+  {
+    "text": "The next time you ask for a value it resumes on the very next line and decrements n.",
+    "until_line": 4
+  },
+  {
+    "text": "Once the loop finally ends, we sneak in one last yield, the string liftoff.",
+    "until_line": 5
+  },
+  {
+    "text": "A for loop just keeps pulling values until the generator is exhausted.",
+    "until_line": 8
+  },
+  {
+    "text": "Three, two, one, liftoff — each one arriving only when it's asked for.",
+    "until_line": 9
+  },
+  {
+    "text": "No list is ever built in memory, which is why this scales to millions of items.",
+    "until_line": 9
+  },
+  {
+    "text": "context managers is next, video number 5. Tell me in the comments if this clicked.",
+    "until_line": 9
+  }
+]

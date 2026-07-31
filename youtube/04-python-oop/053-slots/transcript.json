@@ -1,0 +1,42 @@
+[
+  {
+    "text": "By default, every Python object stores its attributes in a hidden dictionary, which is flexible but costly.",
+    "until_line": 2
+  },
+  {
+    "text": "Defining dunder-slots tells Python the exact, fixed set of attributes this class will ever have.",
+    "until_line": 2
+  },
+  {
+    "text": "Here Point promises only x and y, nothing more.",
+    "until_line": 2
+  },
+  {
+    "text": "[chuckle] The object still works normally — you set and read x and y just like any class.",
+    "until_line": 9
+  },
+  {
+    "text": "[sniff] But now try to add a new attribute z, and Python blocks it with an AttributeError.",
+    "until_line": 15
+  },
+  {
+    "text": "That actually catches a common bug — a typo'd attribute name that would otherwise silently create garbage.",
+    "until_line": 15
+  },
+  {
+    "text": "[sigh] The real win is memory — slotted objects skip the per-instance dictionary entirely.",
+    "until_line": 18
+  },
+  {
+    "text": "When you're creating millions of small objects, that saving becomes dramatic, and access is faster too.",
+    "until_line": 18
+  },
+  {
+    "text": "[groan] Use slots for tiny, numerous, fixed-shape objects — you trade a little flexibility for big efficiency gains.",
+    "until_line": 18
+  },
+  {
+    "text": "In the next one we take on context manager classes. Comment PYTHON if you want the cheat sheet.",
+    "until_line": 18
+  }
+]

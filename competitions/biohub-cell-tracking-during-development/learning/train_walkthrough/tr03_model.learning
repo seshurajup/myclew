@@ -1,0 +1,108 @@
+@ id: tr03
+@ order: 163
+@ title: train_unet_transformer.py — the model (UNetNodeTransformer)
+@ subtitle: lines 413–520: encoder, the differentiable integer-index trick, edge predictor
+@ source: research/pilkwang_support_pack/repo/scripts/train_unet_transformer.py
+
+--- note
+## The model that glues detection to linking (lines 413–445)
+`UNetNodeTransformer` wraps two nets: a `TemporalUNet3D` encoder (pt02 lesson) and a
+`SimpleNodeTransformer` edge predictor (pt03/pt05). A `1×1×1` conv is the **detection head**. The
+transformer's input width is `unet_out_channels + pos_feat_dim` — the concatenation of a node's UNet
+feature vector and its 32-dim positional code:
+```python
+self.unet = unet                                              # TemporalUNet3D backbone
+self.detect_head = nn.Conv3d(unet_out_channels, 1, kernel_size=1)  # feature map → nucleus logit
+self.transformer = SimpleNodeTransformer(
+    feat_dim = unet_out_channels + pos_feat_dim,             # UNet feat ⊕ pos code
+    hidden_dim=128, n_heads=4, n_blocks=4, dropout=0.3,      # small cross-attention stack
+)
+```
+
+--- note
+### The key idea — `_index_features` (447–471): gradients through integer indexing
+This is the trick named in the file's docstring. The UNet produces a dense feature map; we read out
+**one feature vector per detected node** by rounding its `(z,y,x)` to integers and indexing. Indexing
+is non-differentiable w.r.t. the *coordinates*, but **fully differentiable w.r.t. the feature
+values** — so the link loss still trains the UNet weights:
+```python
+out = torch.zeros(B, max_nodes, C)                           # padded output (B, max_nodes, C_feat)
+for b in range(B):
+    nt = int(mask[b].sum())                                  # real node count
+    z = coords[b,:nt,0].long().clamp(0, spatial[0]-1)        # round+clamp z into the grid
+    y = coords[b,:nt,1].long().clamp(0, spatial[1]-1)        # round+clamp y
+    x = coords[b,:nt,2].long().clamp(0, spatial[2]-1)        # round+clamp x
+    out[b,:nt] = feat_maps[b, :, z, y, x].T                  # gather C-vectors at node voxels
+return out                                                   # (B, max_nodes, C_feat)
+```
+Below we prove the gradient path: index a small feature map at **real** node coords and check that a
+loss on the gathered vectors produces a **non-zero gradient on the feature map**.
+
+--- code
+import torch                                                  # tensors + autograd
+import numpy as np, zarr                                      # real coords
+ROOT = "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development"  # project root
+TRAIN = f"{ROOT}/input/biohub-cell-tracking-during-development/train"     # embryos
+G = f"{TRAIN}/6bba_062c8d37.geff"                             # one embryo
+nt_ = np.asarray(zarr.open(f"{G}/nodes/props/t/values")[:])  # frame per node
+zc = np.asarray(zarr.open(f"{G}/nodes/props/z/values")[:])   # z
+yc = np.asarray(zarr.open(f"{G}/nodes/props/y/values")[:])   # y
+xc = np.asarray(zarr.open(f"{G}/nodes/props/x/values")[:])   # x
+m0 = nt_ == 0                                                 # frame-0 nodes
+Zs, Ys, Xs = 32, 64, 64                                       # a small downsampled grid
+z = np.clip(zc[m0]/6, 0, Zs-1).astype(int)                   # scale real coords into the grid
+y = np.clip(yc[m0]/32, 0, Ys-1).astype(int)                  # (approx downsample)
+x = np.clip(xc[m0]/32, 0, Xs-1).astype(int)                  # int voxel indices
+C = 8                                                         # feature channels
+feat = torch.randn(C, Zs, Ys, Xs, requires_grad=True)        # a UNet-like feature map (needs grad)
+zt, yt, xt = torch.tensor(z), torch.tensor(y), torch.tensor(x)  # index tensors
+gathered = feat[:, zt, yt, xt].T                             # (N, C) one vector per node
+loss = gathered.pow(2).mean()                                # any scalar loss on the gathered feats
+loss.backward()                                              # backprop into the feature map
+{"n_nodes": int(m0.sum()), "gathered_shape": tuple(gathered.shape),
+ "grad_flows_to_featmap": bool(feat.grad is not None and feat.grad.abs().sum() > 0)}  # True
+
+--- output
+```
+{'n_nodes': 5, 'gathered_shape': (5, 8), 'grad_flows_to_featmap': True}
+```
+
+--- note
+### `detect` (473–488) and `encode` (490–504) — running the UNet
+`detect` duplicates one frame into a fake pair `(1,2,1,*spatial)` so the *temporal* UNet can run on a
+single frame at inference; `encode` runs the UNet on all `W` frames and applies the detect head to
+each, returning `(unet_out, det_logits)`:
+```python
+def detect(self, frame):                                      # single-frame inference
+    pair = torch.stack([frame, frame], 0).unsqueeze(0).unsqueeze(2)  # (1,2,1,*spatial) fake pair
+    unet_out = self.unet(pair)                               # (1,2,C_feat,*spatial)
+    det = self.detect_head(unet_out[0, 0:1])                # (1,1,*spatial)
+    return det[0, 0]                                        # (*spatial) detection logits
+
+def encode(self, imgs):                                      # training: all W frames
+    window = imgs.unsqueeze(2)                              # (B,W,1,*spatial)
+    unet_out = self.unet(window)                           # (B,W,C_feat,*spatial)
+    det_logits = [self.detect_head(unet_out[:, i]) for i in range(W)]  # per-frame nucleus maps
+    return unet_out, det_logits
+```
+
+--- note
+### `predict_edges` (506–520) — concat features, run the transformer
+Finally, each side's UNet feature is concatenated with its positional code and passed to the
+cross-attention transformer, which returns the `(B, N_src, N_tgt)` edge logits that `compute_loss`
+(tr01) supervises:
+```python
+feat_src = torch.cat([unet_feat_src, pos_feat_src], dim=-1)  # (B,N_src, C_feat+32)
+feat_tgt = torch.cat([unet_feat_tgt, pos_feat_tgt], dim=-1)  # (B,N_tgt, C_feat+32)
+return self.transformer(feat_src, feat_tgt, coords_src, coords_tgt, mask_src, mask_tgt)  # edge logits
+```
+So the forward path is **UNet → detect head (loss A) → index features → ⊕ pos → transformer (loss B)**.
+**Next → tr04: the detection loss and the GPU detect→match→edge-target path.**
+
+--- shape
+detect_head: Conv3d(C_feat→1, k=1)<br>
+_index_features: (B,max_nodes,C_feat)<br>
+gather is diff. w.r.t. VALUES not coords<br>
+transformer in = C_feat + 32<br>
+edge logits (B, N_src, N_tgt)
+

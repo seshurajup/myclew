@@ -1,0 +1,42 @@
+[
+  {
+    "text": "The collections module offers specialized containers that solve common problems elegantly.",
+    "until_line": 1
+  },
+  {
+    "text": "Counter tallies how often each item appears, in a single line.",
+    "until_line": 4
+  },
+  {
+    "text": "Ask for the two most common letters in mississippi, and it instantly reports i and s, four each.",
+    "until_line": 5
+  },
+  {
+    "text": "[chuckle] defaultdict is a dictionary that supplies a default value for any missing key automatically.",
+    "until_line": 8
+  },
+  {
+    "text": "Here it defaults to an empty list, so we can group words by their first letter without checking if the key exists.",
+    "until_line": 11
+  },
+  {
+    "text": "[sniff] No more clumsy if-key-not-in-dict boilerplate — the default just appears when needed.",
+    "until_line": 11
+  },
+  {
+    "text": "namedtuple gives you a lightweight record with named fields, far more readable than a plain tuple.",
+    "until_line": 15
+  },
+  {
+    "text": "[sigh] Now you access p dot x and p dot y by name, while it still behaves like a tuple underneath.",
+    "until_line": 16
+  },
+  {
+    "text": "[groan] Counter, defaultdict, and namedtuple replace piles of manual code — they're everyday power tools.",
+    "until_line": 16
+  },
+  {
+    "text": "In the next one we take on regular expressions. Tell me in the comments if this clicked.",
+    "until_line": 16
+  }
+]

@@ -1,0 +1,13 @@
+# rendered video artifacts (regenerable from source)
+gallery/
+*_silent.mp4
+# node / python deps and caches
+remotion_shorts/node_modules/
+**/__pycache__/
+*.pyc
+# test voice samples (keep the real reference refs)
+common/voice/sample_*.wav
+# logs
+*.log
+# third-party vendored checkout (carries its OWN .git — a nested repo breaks the commit)
+vendor/

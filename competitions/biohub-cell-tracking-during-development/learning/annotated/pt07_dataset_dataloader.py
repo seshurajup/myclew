@@ -1,0 +1,57 @@
+"""Working code for pt07 — Dataset & DataLoader, on REAL frames. Builds a FrameWindowDataset-
+style reader over a real embryo and batches it; writes pt07_dataset_dataloader.learning.
+    research/cellmot_venv/bin/python learning/annotated/pt07_dataset_dataloader.py
+"""
+from pathlib import Path
+import sys
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from lessonkit import build_lesson
+
+ROOT = Path("/home/seshu/kaggle/2026/biohub-cell-tracking-during-development")
+TRAIN = ROOT / "input/biohub-cell-tracking-during-development/train"
+
+META = dict(id="pt07", order=16, title="Dataset & DataLoader",
+            subtitle="FrameWindowDataset — feeding real 2-frame windows to the model in batches",
+            source="research/pilkwang_support_pack/repo/scripts/train_unet_transformer.py")
+
+CELLS = [
+    dict(note="""## Feeding the model
+Training needs **batches** of examples. The detector's real `FrameWindowDataset` yields a **window
+of W=2 consecutive frames** (so the temporal attention has `t` and `t+1`), spatially downsampled
+`(1,4,4)` and normalised. We build the same over a real embryo — every shape below is captured on
+our data."""),
+
+    dict(note="""### One sample = a 2-frame window
+**[PyTorch]** a `Dataset` implements `__len__` and `__getitem__(i)` → one example. **[Data]** here
+each item reads 2 real frames, downsamples Y/X by 4 (→ isotropic), and normalises with per-window
+0.1%/99.9% quantiles (robust to bright specks).""",
+         code="""import torch, numpy as np, zarr                                   # tensors, arrays, IO
+from torch.utils.data import Dataset, DataLoader                    # the real PyTorch primitives
+class FrameWindows(Dataset):                                        # a FrameWindowDataset-style reader
+    def __init__(self, stem, W=2):                                  # stem = embryo, W = window
+        self.mov = zarr.open(f"{TRAIN}/{stem}.zarr/0")             # the real movie (T,Z,Y,X)
+        self.W = W                                                  # frames per window
+    def __len__(self):                                             # number of windows
+        return self.mov.shape[0] - self.W + 1                      # sliding window count
+    def __getitem__(self, i):                                      # the i-th window
+        win = np.asarray(self.mov[i:i+self.W]).astype(np.float32)[:, :, ::4, ::4]  # 2 frames, downsampled
+        lo, hi = np.quantile(win, 0.001), np.quantile(win, 0.999)  # robust range
+        win = np.clip((win - lo) / (hi - lo + 1e-6), 0, 1)         # normalise to [0,1]
+        return torch.from_numpy(win)                               # (W, Z, Y, X)
+ds = FrameWindows("6bba_062c8d37")                                 # real dataset over a real embryo
+len(ds), ds[0].shape                                               # #windows, one window's shape"""),
+
+    dict(note="""### Batch them with a DataLoader
+**[PyTorch]** `DataLoader` groups samples into batches (and, in training, shuffles + uses worker
+processes). **[Craft]** batching is what keeps the GPU busy. One batch of 4 real windows:""",
+         code="""loader = DataLoader(ds, batch_size=4, shuffle=False)  # group windows into batches of 4
+batch = next(iter(loader))                            # pull the first real batch
+batch.shape                                           # (B=4, W=2, Z, Y, X) — ready for the model"""),
+
+    dict(note="""**[Craft]** the real trainer also caches decoded frames and uses a
+division-oversampled sampler (feed more windows that contain a real division) — part of our
+fine-tune. **Next → pt08: the training loop that consumes these batches.**"""),
+]
+
+if __name__ == "__main__":
+    build_lesson(META, CELLS, Path(__file__).with_suffix(".learning"), {"TRAIN": TRAIN})

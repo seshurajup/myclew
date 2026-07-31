@@ -1,0 +1,42 @@
+[
+  {
+    "text": "Variables are containers that store data, and assignment uses the equals sign — the name on the left, the value on the right.",
+    "until_line": 4
+  },
+  {
+    "text": "Here we create four variables at once: age holds a whole number, an integer.",
+    "until_line": 4
+  },
+  {
+    "text": "Name holds text, which Python calls a string, always wrapped in quotes.",
+    "until_line": 4
+  },
+  {
+    "text": "Score holds a decimal number, a float, and is_student holds True or False, a boolean.",
+    "until_line": 4
+  },
+  {
+    "text": "Notice you never declare the type — Python looks at the value and figures out the type automatically.",
+    "until_line": 9
+  },
+  {
+    "text": "You can check it yourself with the built-in type function, which reports exactly what kind of value you're holding.",
+    "until_line": 12
+  },
+  {
+    "text": "[chuckle] Python also lets you assign several variables on a single line — x, y, and z all at once, matched up by position.",
+    "until_line": 15
+  },
+  {
+    "text": "And because Python is dynamically typed, a variable isn't locked to one type forever.",
+    "until_line": 18
+  },
+  {
+    "text": "[clear throat] Watch — we reassign age from the number twenty-five to the text twenty-five, and Python accepts it without a single error.",
+    "until_line": 21
+  },
+  {
+    "text": "Up next, numbers and math. Follow so you don't miss it.",
+    "until_line": 21
+  }
+]

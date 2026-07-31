@@ -1,0 +1,170 @@
+@ id: rq02
+@ order: 2110
+@ title: 1 Introduction
+@ subtitle: RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory §1
+@ source: docs/papers/ratequant/ratequant.md
+
+--- note
+## 1 Introduction
+**Paper:** RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory · §1 · pages 1–1 · equations (1–4) · 0 figures.
+
+**The problem, and its answer.** Minimise total weighted distortion subject to a
+bit budget (eq. 1). Because the distortion is exponential in bits, the optimum is *logarithmic in
+importance* (eq. 2): every head starts from the average budget `b̄` and is nudged by how far its
+log-importance sits from the mean log-importance. Eq. 4 is the punchline — uniform allocation costs exactly
+the **AM/GM ratio** of the importances, a number you can compute in advance to decide whether mixed
+precision is worth implementing at all.
+
+--- note
+### The bit-allocation problem — eq. (1)
+
+$$
+\min_{b\in\mathbb{R}^{N}}\;\mathcal{J}(b) \;=\; \sum_{i=1}^{N} w_i\,D(b_i)\qquad \text{s.t.}\quad \sum_{i=1}^{N} b_i = B
+$$
+
+Total distortion is the importance-weighted sum of per-head distortions, under a fixed
+bit budget. Note the shape: this is HOPE's rate–distortion criterion with the roles made explicit —
+`w_i D(b_i)` is the cost and `b_i` is the rate we are spending.
+
+--- code
+import torch, torch.nn as nn, torch.nn.functional as F      # bit allocation is one Lagrange multiplier
+import sys; sys.path.insert(0, "learning")
+import vizkit as vz
+
+DEV = torch.device("cuda" if torch.cuda.is_available() else "cpu")   # every proof runs on the GPU
+torch.set_default_device(DEV)
+torch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False   # exact proofs
+torch.manual_seed(0); torch.set_printoptions(precision=4, sci_mode=False)
+print(f"device: {DEV}" + (f" | {torch.cuda.get_device_name(0)}" if DEV.type == "cuda" else ""))
+
+def ok(name, cond, extra=""):
+    print(("PASS  " if cond else "FAIL  ") + name + (f"   | {extra}" if extra else ""))
+
+def close(a, b, tol=1e-5):
+    return torch.allclose(a, b, atol=tol, rtol=tol)
+
+N = 16
+alpha, beta = 1.0, 4.0                                          # D(b) = alpha * beta^-b (measured in rqb1)
+w = torch.distributions.LogNormal(0.0, 1.2).sample((N,))
+B = 4.0 * N                                                     # average 4 bits per head
+D = lambda b: alpha * beta ** (-b)
+J = lambda b: float((w * D(b)).sum())
+b_uniform = torch.full((N,), B / N)
+ok("the budget constraint is satisfiable", abs(float(b_uniform.sum()) - B) < 1e-6)
+ok("the objective is finite and positive", 0 < J(b_uniform) < float('inf'), f"J(uniform) = {J(b_uniform):.5f}")
+print(f"  {N} heads, budget {B:.0f} bits total ({B/N:.1f} per head on average)")
+
+--- output
+```
+device: cuda | NVIDIA GeForce RTX 5090
+PASS  the budget constraint is satisfiable
+PASS  the objective is finite and positive   | J(uniform) = 0.12484
+  16 heads, budget 64 bits total (4.0 per head on average)
+```
+
+--- image
+learning/assets/ratequant/eq/eq_p03_016.png
+Equation (1) as printed in the PDF
+
+--- note
+### The closed-form optimum — bits are logarithmic in importance — eq. (2)
+
+$$
+b_i^{*} \;=\; \bar{b} \;+\; \frac{\ln w_i - \overline{\ln w}}{\ln\beta}
+$$
+
+**The result.** Start every head at the average budget and shift it by its
+log-importance relative to the mean log-importance, scaled by `1/ln β`. Consequences worth internalising:
+a head that is `β×` more important earns exactly **one** more bit; the allocation is invariant to a global
+rescaling of importances; and it is computable in one pass with no search.
+
+--- code
+bbar = B / N
+logw = torch.log(w)
+b_star = bbar + (logw - logw.mean()) / torch.log(torch.tensor(beta))
+ok("the allocation respects the budget exactly", abs(float(b_star.sum()) - B) < 1e-4,
+   f"sum = {float(b_star.sum()):.4f} vs B = {B}")
+ok("it beats uniform allocation", J(b_star) < J(b_uniform),
+   f"J: uniform {J(b_uniform):.6f} -> optimal {J(b_star):.6f} "
+   f"({J(b_uniform)/J(b_star):.2f}x better)")
+i_hi, i_lo = int(w.argmax()), int(w.argmin())
+ratio = float(w[i_hi] / w[i_lo])
+ok("a beta-times more important head earns exactly one more bit",
+   abs(float(b_star[i_hi] - b_star[i_lo]) -
+       float(torch.log(torch.tensor(ratio)) / torch.log(torch.tensor(beta)))) < 1e-4,
+   f"importance ratio {ratio:.1f}x -> {float(b_star[i_hi]-b_star[i_lo]):.2f} bits apart")
+ok("and the allocation is invariant to rescaling every importance",
+   close(bbar + (torch.log(100 * w) - torch.log(100 * w).mean()) / torch.log(torch.tensor(beta)), b_star,
+         1e-4), "only RELATIVE importance matters")
+
+--- output
+```
+PASS  the allocation respects the budget exactly   | sum = 64.0000 vs B = 64.0
+PASS  it beats uniform allocation   | J: uniform 0.124838 -> optimal 0.047186 (2.65x better)
+PASS  a beta-times more important head earns exactly one more bit   | importance ratio 361.8x -> 4.25 bits apart
+PASS  and the allocation is invariant to rescaling every importance   | only RELATIVE importance matters
+```
+
+--- note
+### …where the two averages are — eq. (3)
+
+$$
+\bar{b} = B/N,\qquad \overline{\ln w} = \frac{1}{N}\sum_j \ln w_j
+$$
+
+Book-keeping, but it makes the invariance visible: the allocation depends on
+`ln w_i − mean ln w`, i.e. only on *relative* log-importance, so the units of `w` are irrelevant.
+
+--- code
+ok("b-bar is the per-head average budget", abs(bbar - B / N) < 1e-12, f"b_bar = {bbar}")
+ok("mean-log-w is the log of the GEOMETRIC mean",
+   abs(float(logw.mean()) - float(torch.log(torch.exp(logw.mean())))) < 1e-6,
+   f"exp(mean log w) = {float(torch.exp(logw.mean())):.4f} = geometric mean")
+
+--- output
+```
+PASS  b-bar is the per-head average budget   | b_bar = 4.0
+PASS  mean-log-w is the log of the GEOMETRIC mean   | exp(mean log w) = 0.7550 = geometric mean
+```
+
+--- image
+learning/assets/ratequant/eq/eq_p04_025.png
+Equation (3) as printed in the PDF
+
+--- note
+### The price of uniform allocation is AM/GM — eq. (4)
+
+$$
+\frac{\mathcal{J}_u}{\mathcal{J}^{*}} \;=\; \frac{\bar{w}}{\widetilde{w}} \;\ge\; 1
+$$
+
+**The number to compute before writing any code.** The ratio of uniform to optimal
+distortion is the *arithmetic mean over the geometric mean* of the importances. Equal importances → ratio 1
+→ mixed precision is pointless. Heavy-tailed importances → the ratio is the exact speed-up available. It is
+≥ 1 by Jensen (eq. 14), so mixed precision can never be worse.
+
+--- code
+am = float(w.mean()); gm = float(torch.exp(torch.log(w).mean()))
+ok("the measured ratio equals AM/GM exactly",
+   abs(J(b_uniform) / J(b_star) - am / gm) < 1e-3,
+   f"measured {J(b_uniform)/J(b_star):.4f} vs AM/GM {am/gm:.4f}")
+ok("the ratio is >= 1 always (Jensen)", am / gm >= 1.0 - 1e-9)
+w_eq = torch.full((N,), 3.0)
+b_eq = B / N + (torch.log(w_eq) - torch.log(w_eq).mean()) / torch.log(torch.tensor(beta))
+ok("equal importances -> uniform IS optimal (no gain to chase)",
+   abs(float(w_eq.mean() / torch.exp(torch.log(w_eq).mean())) - 1.0) < 1e-6
+   and close(b_eq, torch.full((N,), B / N), 1e-5))
+print(f"  so on THIS importance profile mixed precision is worth {am/gm:.2f}x, computable up front")
+
+--- output
+```
+PASS  the measured ratio equals AM/GM exactly   | measured 2.6457 vs AM/GM 2.6457
+PASS  the ratio is >= 1 always (Jensen)
+PASS  equal importances -> uniform IS optimal (no gain to chase)
+  so on THIS importance profile mixed precision is worth 2.65x, computable up front
+```
+
+--- image
+learning/assets/ratequant/eq/eq_p14_072.png
+Equation (4) as printed in the PDF
+

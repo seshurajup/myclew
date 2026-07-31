@@ -1,0 +1,87 @@
+@ id: lbq06
+@ order: 606
+@ title: The lineage — original BitNet, training recipe, ablations & limits
+@ subtitle: the 1-bit predecessor (2310.11453): scaling law, stability, PTQ comparison, and what's left open
+@ source: arxiv 2310.11453
+
+--- note
+## Where b1.58 came from: the original 1-bit BitNet
+BitNet b1.58 is the ternary successor of **BitNet** (Wang et al., 2310.11453, Oct 2023), which the authors
+call "**the first to investigate quantization-aware training for 1-bit large language models**." The
+original is strictly **binary**: weights are ±1 via **W̃ = Sign(W − α)**, where α = (1/nm)ΣW_ij
+**centralizes the weights to zero-mean** before taking the sign (to use the limited numerical range), and
+a scale **β** reduces the ℓ2 error between real and binarized weights. Activations are 8-bit absmax, same
+as b1.58. The **only** change b1.58 makes to this design is the **weight rule**: Sign(binary) → absmean
+RoundClip(ternary), adding the value **0**. Everything else — BitLinear, STE, SubLN, mixed precision — is
+inherited. (The paper even opens with a Bill Gates epigraph: "*All the neurons in the brain … operate in a
+binary fashion.*")
+
+--- note
+## The training recipe (the three practical tricks)
+The original paper spells out how to actually optimize a 1-bit model — the recipe our `lowbit-qat` agent
+follows:
+
+1. **Straight-through estimator (STE).** Bypass the non-differentiable `Sign`/`Clip` in the backward pass
+   so gradients flow (lbq02).
+2. **Mixed-precision training.** Weights/activations are low-bit, but **gradients and optimizer states
+   stay high-precision**, and a **latent high-precision weight** accumulates the updates; it is binarized
+   on the fly each forward pass and **never used at inference**.
+3. **A large learning rate.** A tiny update to the latent weights often **doesn't flip any 1-bit weight**,
+   so the effective gradient is biased/small — worst at the start of training. The fix is simply a
+   **larger learning rate**: BitNet *benefits* from it and converges, whereas the FP16 Transformer
+   **diverges** at the same rate. (Their scaling configs run e.g. 1.3B at lr 8e-4, up to 2.4e-3 for
+   125M.)
+
+--- note
+## It follows a scaling law — like a real Transformer
+A central worry with QAT is whether low-bit models even **scale** predictably. BitNet answers yes: its
+loss fits the same **power law L(N) = a·N^b + c** as full-precision Transformers, and the fitted law
+predicts larger models' loss accurately. The gap to FP16 is small and roughly constant (**ΔL ≈ 0.09** in
+the bottom-right panel of Figure 1, lbq03) and **shrinks as models scale** — the empirical basis for
+b1.58's later claim that the lines fully cross at 3B. They also introduce an **Inference-Optimal Scaling
+Law** (loss vs *inference energy* rather than parameter count), on which BitNet is far more efficient.
+
+--- note
+## Stability enables the large learning rate
+The stability test makes the lr story concrete: trained with the **same** learning rate, the FP16
+Transformer's perplexity **blows up** (diverges) while BitNet's **converges smoothly** — BitNet is simply
+more stable to optimize. That headroom is what *permits* the large lr, which in turn gives **better final
+convergence** (higher lr → lower PPL, up to 8e-4 in their sweep).
+
+--- image
+learning/assets/bitnet/bitnet_fig5_stability.png
+Figure 5 (2310.11453). LEFT (a): with a shared learning rate, the FP16 Transformer (blue) diverges to high PPL early while BitNet (orange) converges. RIGHT (b): BitNet's stability lets it use a larger learning rate — lr = 8e-4 (green) converges to a lower PPL than 4e-4 / 2e-4 — "the training stability enables BitNet a larger learning rate, resulting in better convergence."
+
+--- note
+## Head-to-head vs post-training quantization
+The original BitNet directly beats PTQ baselines at low bit-widths. As a **W1A8** model it reaches
+perplexity **17.07** / avg **55.9**, versus the W16A16 FP16 Transformer's 15.19 / 57.8 — i.e. close to
+full precision at a fraction of the bits — while **every PTQ method collapses** as bits drop (Absmax at
+1-bit → perplexity 3.5×10²³; GPTQ/QuIP weight-only degrade at 2-bit). The takeaway: "**BitNet, as a 1-bit
+model, significantly achieves better results than both the weight-and-activation and the weight-only
+[PTQ] methods**," and the advantage is **consistent from 1.3B to 6.7B**.
+
+--- note
+## Ablations — why absmax + SubLN
+The design choices are ablated (Table 4 of 2310.11453): **absmax** activation quantization beats the
+**elastic** alternative (better performance *and* smoother loss → enables the larger lr); and **SubLN**
+(the LayerNorm-before-quant placement, lbq02) **outperforms both Pre-LN** (the GPT default) **and BMT**,
+the two competing stabilizers for low-bit training. For **model parallelism**, they add **Group
+Quantization / Normalization** — computing the scales α, β, γ and the LayerNorm statistics **per group**
+along the partition dimension — so no extra `all-reduce` communication is needed across devices.
+
+--- note
+## Limitations & open questions (stated in the papers)
+Grounded in what the authors actually flag:
+
+- **Activations are 8-bit, not lower.** Both papers keep activations at 8-bit and leave **4-bit or lower
+  activations to future work** (b1.58 notes it "can be further losslessly compressed to 4 bits or even
+  lower … we leave as future work").
+- **Kernels are not yet optimal.** Latency/memory were measured with a **2-bit kernel**, so "there is
+  still room to further reduce the cost" — the full hardware win awaits the specialized silicon lbq05
+  calls for.
+- **Embeddings stay high-precision.** The input/output embeddings are *not* quantized (needed for
+  sampling probabilities), so the footprint is not purely ternary — though its share shrinks with scale.
+- **Directions left open:** 1-bit **MoE**, native long-sequence, edge/mobile deployment, and applying the
+  recipe to non-Transformer backbones (e.g. RetNet). These are proposals, **not** results — don't cite
+  them as measured.

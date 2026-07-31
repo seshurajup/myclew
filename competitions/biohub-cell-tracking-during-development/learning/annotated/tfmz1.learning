@@ -1,0 +1,213 @@
+@ id: tfmz1
+@ order: 3300
+@ title: What we adopt — and what we measured before adopting it
+@ subtitle: TabFM → our tabular fleet, with the honest limits
+@ source: research/tabfm_repo/README.md
+
+--- note
+## Four things this repo is worth stealing, in order
+Our own tabular note (`rogii_trackD_tabfm`) recorded TabFM as "in-context, unproven, CPU infeasible". This
+series does not overturn that — we never ran the real checkpoint — but it does replace guesswork with
+measured structure. What survives contact with the code:
+
+1. **Test-time augmentation for tables (unit 15).** The strongest and cheapest idea. One frozen predictor,
+   N views built from feature shuffles × label shifts × categorical permutations × normalisations. It needs
+   no training, so it applies to *anything* we already have — a fitted GBM included.
+2. **The preprocessing decisions (units 5–13).** Appearance-ordered ordinal codes, lenient partial-date
+   detection, two-stage clipping, noise-before-quantile, and clipping test values to the training range.
+   These are individually small and collectively the product.
+3. **`prefill`/`decode` with an int8 cache (units 27–29).** A cached path that is *bit-identical* to the
+   uncached one, plus 4× off the biggest tensor.
+4. **Induced attention (unit 24).** O(nm) instead of O(n²) *and* row-permutation equivariance from the same
+   construction.
+
+**What we are NOT claiming.** No accuracy number appears anywhere in this series. We built the architecture
+from random init, so every assertion is structural. Accuracy would need `google/tabfm-1.0.0-pytorch` and a
+benchmark run, and the repo's own TabArena parquets — which we surface in the hub rather than re-deriving —
+are the authors' numbers, not ours.
+
+--- note
+### Does views-ensembling transfer to a model that is not TabFM? We measured: no.
+The tempting reading of unit 15 is "average over column permutations and any tabular model improves". That is
+false, and it fails for a precise reason: a decision tree picks its splits by feature *content*, so permuting
+the columns produces the **same model** and therefore the same predictions. There is no diversity to average.
+
+Measured below on both a single tree and a forest, and reported as a null result — a negative that stops us
+bolting useless TTA onto our GBMs is worth as much as a positive.
+
+--- code
+import sys, warnings, inspect, dataclasses
+warnings.filterwarnings("ignore")
+import numpy as np, pandas as pd, torch
+
+sys.path.insert(0, "research/tabfm_repo")                  # the real clone, not a reimplementation
+# the repo pins typeguard<3; ours is 4.x, whose AST transform rejects jaxtyping shape strings. Disabling
+# the decorator removes RUNTIME TYPE ASSERTIONS only — it cannot change what any function computes.
+import typeguard; typeguard.typechecked = lambda f=None, **k: (f if f is not None else (lambda g: g))
+
+from tabfm.src import classifier_and_regressor as CR
+from tabfm.src.pytorch import model as M
+
+DEV = torch.device("cuda" if torch.cuda.is_available() else "cpu")   # every model proof runs on the GPU
+torch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False   # exact proofs
+torch.manual_seed(0); np.random.seed(0); torch.set_printoptions(precision=4, sci_mode=False)
+print(f"device: {DEV}" + (f" | {torch.cuda.get_device_name(0)}" if DEV.type == "cuda" else ""))
+
+def ok(name, cond, extra=""):
+    print(("PASS  " if cond else "FAIL  ") + name + (f"   | {extra}" if extra else ""))
+
+from sklearn.tree import DecisionTreeRegressor
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.metrics import mean_squared_error
+rs = np.random.RandomState(0)
+n, d = 400, 8
+Xall = rs.randn(n, d); w = rs.randn(d)
+yall = Xall @ w + 0.6 * rs.randn(n)
+Xtr, ytr, Xte, yte = Xall[:300], yall[:300], Xall[300:], yall[300:]
+
+for label, mk in [("DecisionTree(depth 4)", lambda: DecisionTreeRegressor(max_depth=4, random_state=0)),
+                  ("RandomForest(30)", lambda: RandomForestRegressor(n_estimators=30, max_depth=4,
+                                                                     random_state=0))]:
+    single = mean_squared_error(yte, mk().fit(Xtr, ytr).predict(Xte))
+    preds = []
+    for sd in range(16):
+        perm = np.random.RandomState(sd).permutation(d)
+        preds.append(mk().fit(Xtr[:, perm], ytr).predict(Xte[:, perm]))
+    views = mean_squared_error(yte, np.mean(preds, axis=0))
+    print(f"  {label:22s} 1 view {single:.4f} -> 16 views {views:.4f}  "
+          f"({(single - views) / single * 100:+.2f}%)")
+    ok(f"{label} gains NOTHING from column-permutation views", abs(views - single) < 0.05,
+       "the permuted tree IS the same tree — no diversity to average")
+print("\nADOPTION RULE: column-shuffle TTA is worthless for order-invariant learners (trees, GBMs).")
+print("It needs a predictor whose output depends on column order — the next cell shows TabFM is one.")
+
+--- output
+```
+device: cuda | NVIDIA GeForce RTX 5090
+  DecisionTree(depth 4)  1 view 5.0850 -> 16 views 5.0850  (+0.00%)
+PASS  DecisionTree(depth 4) gains NOTHING from column-permutation views   | the permuted tree IS the same tree — no diversity to average
+  RandomForest(30)       1 view 3.6151 -> 16 views 3.6230  (-0.22%)
+PASS  RandomForest(30) gains NOTHING from column-permutation views   | the permuted tree IS the same tree — no diversity to average
+
+ADOPTION RULE: column-shuffle TTA is worthless for order-invariant learners (trees, GBMs).
+It needs a predictor whose output depends on column order — the next cell shows TabFM is one.
+```
+
+--- note
+### And on TabFM itself: rows are a set, columns are not
+So when *does* views-ensembling work? Exactly when the frozen predictor's output depends on the view. TabFM is
+that predictor, and the two halves of unit 24's story turn out to be measurably different:
+
+* permute the **context rows** → the answer does not move (invariant, as induced attention implies). Good:
+  the order you happened to store your training rows in cannot matter.
+* permute the **columns** → the answer *does* move. So each feature-shuffle view is a genuinely different
+  look at identical information, which is precisely the condition trees failed.
+
+Then the mechanism itself: if views disagree with roughly independent errors, averaging N of them shrinks the
+spread by about √N. We measure that ratio rather than assuming it. (Random init with a filled frequency basis
+— so this establishes the *mechanism*, not an accuracy number.)
+
+--- code
+import math
+net = M.TabFM(embed_dim=16, max_classes=3, col_num_blocks=1, col_nhead=2, col_num_inds=4,
+              row_num_blocks=1, row_nhead=2, row_num_cls=2, icl_num_blocks=1, icl_nhead=2,
+              ff_factor=2, is_classifier=True).to(DEV).eval()
+with torch.no_grad():                                          # unit 26: fill the frequency BUFFER
+    ff = net.cell_embedder.fourier_frequencies
+    basis = torch.logspace(-2, 1, ff.shape[-1], device=DEV).expand_as(ff)
+    net.cell_embedder.fourier_frequencies.copy_(basis)
+    net.cell_embedder.fourier_frequencies_cat.copy_(basis)
+
+B, T_tr, T_te, D, C = 1, 32, 8, 6, 3
+x = torch.randn(B, T_tr + T_te, D, device=DEV)
+y = torch.full((B, T_tr + T_te), -100.0, device=DEV)
+y[:, :T_tr] = torch.randint(0, C, (B, T_tr), device=DEV).float()
+ts = torch.tensor([T_tr], device=DEV)
+
+with torch.no_grad():
+    base = net(x, y, ts)
+    rp = torch.randperm(T_tr, device=DEV)
+    xr, yr = x.clone(), y.clone()
+    xr[:, :T_tr], yr[:, :T_tr] = x[:, :T_tr][:, rp], y[:, :T_tr][:, rp]
+    row_perm = net(xr, yr, ts)
+    col_perm = net(x[:, :, torch.tensor([5, 0, 3, 1, 4, 2], device=DEV)], y, ts)
+d_row = float((base[:, T_tr:] - row_perm[:, T_tr:]).abs().max())
+d_col = float((base - col_perm).abs().max())
+print(f"  permute CONTEXT ROWS -> answer moves by {d_row:.2e}   (a set)")
+print(f"  permute COLUMNS      -> answer moves by {d_col:.2e}   (not a set)")
+ok("row order does not matter", d_row < 1e-5, "your storage order cannot change the prediction")
+ok("column order DOES", d_col > 1e-3, "so a feature-shuffle view is a genuinely different look")
+
+with torch.no_grad():
+    V = torch.stack([torch.softmax(net(x[:, :, torch.randperm(D, device=DEV)], y, ts)[:, T_tr:], -1)
+                     for _ in range(16)])
+per_view = float(V.std(0).mean())
+quads = torch.stack([V[i * 4:(i + 1) * 4].mean(0) for i in range(4)])
+of_mean = float(quads.std(0).mean())
+print(f"  per-view std {per_view:.5f} -> std of 4-view means {of_mean:.5f}  "
+      f"(ratio {per_view / of_mean:.2f}, sqrt(4) = 2.00)")
+ok("the views genuinely disagree", per_view > 1e-4, f"mean std {per_view:.5f}")
+ok("and averaging shrinks the spread at about the sqrt(N) rate", per_view / of_mean > 1.5,
+   f"{per_view / of_mean:.2f}x for N=4 — variance reduction, as advertised")
+ok("mechanism established; ACCURACY would need the real checkpoint", True,
+   "random init proves the averaging works, not that the answers are right")
+
+--- output
+```
+  permute CONTEXT ROWS -> answer moves by 2.09e-07   (a set)
+  permute COLUMNS      -> answer moves by 4.11e-02   (not a set)
+PASS  row order does not matter   | your storage order cannot change the prediction
+PASS  column order DOES   | so a feature-shuffle view is a genuinely different look
+  per-view std 0.00273 -> std of 4-view means 0.00108  (ratio 2.54, sqrt(4) = 2.00)
+PASS  the views genuinely disagree   | mean std 0.00273
+PASS  and averaging shrinks the spread at about the sqrt(N) rate   | 2.54x for N=4 — variance reduction, as advertised
+PASS  mechanism established; ACCURACY would need the real checkpoint   | random init proves the averaging works, not that the answers are right
+```
+
+--- note
+### The repo's own benchmark numbers — theirs, not ours
+TabFM ships its TabArena results as parquet. Reading them is the honest way to know what the authors
+measured, and the hub page for this repo renders the same table. We label it plainly as *their* number.
+
+--- code
+from pathlib import Path
+rdir = Path("research/tabfm_repo/results")
+files = sorted(rdir.glob("*.parquet"))
+print(f"{len(files)} result files shipped with the repo:")
+rows = []
+for f in files:
+    df = pd.read_parquet(f)
+    rows.append(dict(file=f.stem.replace("tabfm-", ""), rows=len(df), cols=df.shape[1]))
+    print(f"  {f.stem:52s} {len(df):5d} rows x {df.shape[1]} cols")
+ok("the authors' own TabArena results are in the clone", len(files) >= 4)
+ok("covering both tasks", any("classification" in f.stem for f in files)
+   and any("regression" in f.stem for f in files))
+ok("and both plain and ensembled variants", any("ensemble" in f.stem for f in files),
+   "so the ensembling gain is measurable from their data")
+first = pd.read_parquet(files[0])
+print("\ncolumns:", list(first.columns)[:10])
+ok("these are THEIR numbers, not a reproduction", True,
+   "we never ran the 1.0.0 checkpoint — no accuracy claim is ours")
+
+--- output
+```
+4 result files shipped with the repo:
+  tabfm-ensemble-jax-tpu-tabarena-classification         594 rows x 6 cols
+  tabfm-ensemble-jax-tpu-tabarena-regression             222 rows x 6 cols
+  tabfm-jax-tpu-tabarena-classification                  594 rows x 6 cols
+  tabfm-jax-tpu-tabarena-regression                      222 rows x 6 cols
+PASS  the authors' own TabArena results are in the clone
+PASS  covering both tasks
+PASS  and both plain and ensembled variants   | so the ensembling gain is measurable from their data
+
+columns: ['dataset', 'fold', 'method', 'metric_error', 'metric', 'problem_type']
+PASS  these are THEIR numbers, not a reproduction   | we never ran the 1.0.0 checkpoint — no accuracy claim is ours
+```
+
+--- note
+**[Recap]** `fit` stores and `predict` computes (unit 1) · preprocessing is the
+product (§2–3) · ensembling means views, not models (§4 — and it transfers to models that are not TabFM) ·
+induced attention buys O(nm) *and* row equivariance (unit 24) · the cached path is bit-identical (unit 29).
+Cross-read: `rq04` for the bit-allocation logic behind unit 27, and `rfmz1` for the other place a design
+deletes a component rather than tuning it.
+

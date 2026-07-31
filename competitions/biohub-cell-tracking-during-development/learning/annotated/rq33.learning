@@ -1,0 +1,12 @@
+@ id: rq33
+@ order: 2420
+@ title: NeurIPS Paper Checklist
+@ subtitle: RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory §
+@ source: docs/papers/ratequant/ratequant.md
+
+--- note
+## NeurIPS Paper Checklist
+**Paper:** RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory · § · pages 30–36 · equations (none) · 0 figures.
+
+> TODO(author): the *why* of § in 3–5 lines.
+

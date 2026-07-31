@@ -113,6 +113,23 @@ def build_corpus(spec):
         except (FileNotFoundError, ValueError) as e:
             reports["ledger"] = {"error": str(e)[:160]}
 
+    # LEAVE-ONE-DOMAIN-OUT. `exclude_domain`/`exclude_capabilities` drop every example whose TARGET is in
+    # the held-out set, from train AND val. The agents stay registered and retrievable -- only the training
+    # signal for choosing them is removed. That is the closest available proxy for a new competition, whose
+    # agent families are present in the roster but absent from the decision history.
+    excl = set(spec.get("exclude_capabilities") or ())
+    dom = spec.get("exclude_domain")
+    if dom:
+        from . import agent_routing as _AR
+        excl |= {n for n, c in _AR.capability_index().items() if (c.get("domain") or "") == dom}
+    if excl:
+        before = (len(train), len(val))
+        train = [e for e in train if e.get("capability") not in excl]
+        val = [e for e in val if e.get("capability") not in excl]
+        reports["holdout"] = {"domain": dom, "n_agents": len(excl),
+                              "dropped_train": before[0] - len(train),
+                              "dropped_val": before[1] - len(val)}
+
     import random as _r
     rng = _r.Random(int(spec.get("seed", 7)))
     rng.shuffle(train)

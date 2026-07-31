@@ -1,0 +1,14 @@
+{
+  "language": "python",
+  "title": "logging.py",
+  "hook": "Why print() is costing you debug time",
+  "playlist": "Learn Python",
+  "target_seconds": 90,
+  "max_seconds": 120,
+  "tts_engine": "chatterbox",
+  "music_prompt": "observant, leveled, professional",
+  "code_path": "code.py",
+  "transcript_path": "transcript.json",
+  "outputs_path": "outputs.json",
+  "accent": "ember"
+}

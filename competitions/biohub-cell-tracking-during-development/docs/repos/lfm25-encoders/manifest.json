@@ -1,0 +1,44 @@
+{
+  "slug": "lfm25-encoders",
+  "title": "LFM2.5-Encoders: Fast at Long Context, Even on CPU (Liquid AI)",
+  "source": "https://www.liquid.ai/blog/lfm2-5-encoders",
+  "commit": "",
+  "local": "docs/papers/lfm25-encoders",
+  "kind": "repo",
+  "sections": [
+    {
+      "num": "1",
+      "title": "The published architecture \u2014 what the config already proves",
+      "page": 1,
+      "level": 1
+    },
+    {
+      "num": "2",
+      "title": "The short convolution \u2014 O(L\u00b7k) instead of O(L\u00b2)",
+      "page": 2,
+      "level": 1
+    },
+    {
+      "num": "3",
+      "title": "The hybrid interleave \u2014 10 conv, 6 attention",
+      "page": 3,
+      "level": 1
+    },
+    {
+      "num": "4",
+      "title": "Bidirectional, not causal \u2014 what an encoder changes",
+      "page": 4,
+      "level": 1
+    },
+    {
+      "num": "5",
+      "title": "Measured \u2014 the crossover, GQA, and the CPU claim",
+      "page": 5,
+      "level": 1
+    }
+  ],
+  "pages": 5,
+  "figures": [],
+  "md": "docs/papers/lfm25-encoders/model_card.md",
+  "equations_json": "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/docs/repos/lfm25-encoders/units.json"
+}

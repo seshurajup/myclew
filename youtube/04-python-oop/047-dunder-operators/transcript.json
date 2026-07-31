@@ -1,0 +1,42 @@
+[
+  {
+    "text": "Dunder methods let your own objects work with Python's built-in operators, like plus and double-equals.",
+    "until_line": 4
+  },
+  {
+    "text": "Defining dunder-add tells Python what the plus sign should do between two of your objects.",
+    "until_line": 7
+  },
+  {
+    "text": "Here adding two vectors returns a new vector with their components summed.",
+    "until_line": 7
+  },
+  {
+    "text": "[chuckle] So a plus b just works, reading exactly like the math it represents.",
+    "until_line": 10
+  },
+  {
+    "text": "dunder-eq defines what double-equals means, letting you compare objects by value instead of identity.",
+    "until_line": 10
+  },
+  {
+    "text": "[sniff] Without it, Python would only check if two objects are literally the same one in memory.",
+    "until_line": 10
+  },
+  {
+    "text": "Now two separate vectors with the same numbers count as equal, which is usually what you want.",
+    "until_line": 18
+  },
+  {
+    "text": "[sigh] There are dunders for subtraction, multiplication, less-than, indexing — nearly every operator Python has.",
+    "until_line": 18
+  },
+  {
+    "text": "[groan] Operator overloading, used tastefully, makes your custom types feel like a natural part of the language.",
+    "until_line": 18
+  },
+  {
+    "text": "Up next, abstract classes. Comment PYTHON if you want the cheat sheet.",
+    "until_line": 18
+  }
+]

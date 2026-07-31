@@ -1,0 +1,12 @@
+@ id: gm14
+@ order: 2330
+@ title: D Computational Analysis: When GradMem is Compute-Efficient
+@ subtitle: GradMem: Learning to Write Context into Memory §D
+@ source: docs/papers/gradmem/gradmem.md
+
+--- note
+## D Computational Analysis: When GradMem is Compute-Efficient
+**Paper:** GradMem: Learning to Write Context into Memory · §D · pages 18–18 · equations (none) · 0 figures.
+
+> TODO(author): the *why* of §D in 3–5 lines.
+

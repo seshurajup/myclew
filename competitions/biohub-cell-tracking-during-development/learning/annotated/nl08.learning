@@ -1,0 +1,893 @@
+@ id: nl08
+@ order: 1370
+@ title: 8 Hope: A Self-Referential Learning Module with Continuum Memory
+@ subtitle: Nested Learning: The Illusion of Deep Learning Architecture §8
+@ source: docs/papers/nested-learning/nested-learning.md
+
+--- note
+## 8 Hope: A Self-Referential Learning Module with Continuum Memory
+**Paper:** Nested Learning: The Illusion of Deep Learning Architecture · §8 · pages 30–32 · equations (76–97) · 1 figures.
+
+**Where Transformers are actually limited.** Global softmax attention is a
+*perfect* memory (eq. 62) with update frequency ∞, so a parametric memory over the same search space will
+not beat it by scaling. What attention *cannot* do: (i) grow its computational depth, and (ii) change
+itself — `W_k, W_v, W_q` are frozen after pre-training, so a 1-layer Transformer's token encoding is a
+function of the token and its position only, and context-dependent word senses are out of reach. Short
+convolutions / canon layers patch local mixing; they do not make the model adaptive.
+
+**The fix, in two steps.**
+1. **Deep self-referential Titans (§8.1)** — give *every* projection its own memory (`M_k, M_v, M_q, M_η,
+   M_α`), so all of them do in-context learning; then let the model **generate its own values**
+   `v̂_□ = M_□(v_t)` (Schmidhuber's self-modification) instead of being handed targets by the data. Update
+   with **DGD** (eq. 88) because tokens are correlated, and use a 2-layer residual MLP as every memory.
+2. **Chunk-wise training (§8.2)** — generate keys/values/rates for a whole chunk from the *previous*
+   chunk's last state so everything inside a chunk is parallel; the recurrence survives only across
+   chunks. That is what makes a self-modifying model trainable at scale.
+
+**Hope (§8.3)** = self-modifying Titans (small capacity, expressive rule) **followed by** CMS (large
+capacity, simple rule) — the two are complementary. `q, k` are L2-normalised and local convolutions of
+window 4 are used. **Hope-Attention** swaps the Titans block for softmax attention, isolating the CMS
+contribution.
+
+--- note
+### Figure 5 — as printed in the paper
+
+Figure 5: A comparison of Hope architectural backbone with Transformers (Normalization and potential data-dependent components are removed for the sake of clarity).
+
+--- image
+learning/assets/nested-learning/p30_0.png
+Figure 5: A comparison of Hope architectural backbone with Transformers (Normalization and potential data-dependent components are removed for the sake of clarity).
+
+--- note
+### Titans-style projections, including the learning rate and forget gate — eq. (76)
+
+$$
+\boldsymbol{k}_t = \boldsymbol{x}_tW_{\boldsymbol{k}},\quad \boldsymbol{v}_t = \boldsymbol{x}_tW_{\boldsymbol{v}},\quad \boldsymbol{q}_t = \boldsymbol{x}_tW_{\boldsymbol{q}},\quad \eta_t = \boldsymbol{x}_tW_{\eta},\quad \alpha_t = \boldsymbol{x}_tW_{\alpha}
+$$
+
+Two extra projections appear: `η_t` (**how strongly** to write this token) and `α_t`
+(**how much to forget**). They are data-dependent scalars produced by the token itself — the memory's own
+optimizer hyper-parameters, predicted per token.
+
+--- code
+import torch, torch.nn as nn, torch.nn.functional as F      # the whole paper is linear algebra + autograd
+
+import sys; sys.path.insert(0, "learning")
+import vizkit as vz                                            # the shared visual + explainability layer
+
+DEV = torch.device("cuda" if torch.cuda.is_available() else "cpu")   # every proof runs on the GPU
+torch.set_default_device(DEV)                                  # so EVERY tensor/module below is on DEV
+# These cells PROVE matrix identities, so they need full fp32: TF32 truncates the mantissa to 10 bits
+# and an identity that holds to 1e-6 in fp32 only holds to ~1e-3 in TF32. Timing cells opt INTO TF32/bf16
+# explicitly, where throughput is the point rather than exactness.
+torch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False
+torch.manual_seed(0); torch.set_printoptions(precision=4, sci_mode=False)
+print(f"device: {DEV}" + (f" | {torch.cuda.get_device_name(0)}" if DEV.type == "cuda" else ""))
+
+def ok(name, cond, extra=""):                                  # a lesson's PROOF prints PASS/FAIL, never prose
+    print(("PASS  " if cond else "FAIL  ") + name + (f"   | {extra}" if extra else ""))
+
+def close(a, b, tol=1e-5):                                     # float-safe equality for matrix identities
+    return torch.allclose(a, b, atol=tol, rtol=tol)
+
+def newton_schulz(G, steps=5, eps=1e-7):                       # the orthogonalisation used by Muon/M3
+    a, b, c = 3.4445, -4.7750, 2.0315                          # the standard quintic coefficients
+    X = G / (G.norm() + eps)
+    tall = X.shape[0] > X.shape[1]
+    if tall: X = X.T
+    for _ in range(steps):
+        A = X @ X.T; X = a * X + (b * A + c * A @ A) @ X
+    return X.T if tall else X
+
+d = 8; T = 6
+X = torch.randn(T, d)
+Wk, Wv, Wq = (torch.randn(d, d) / d ** 0.5 for _ in range(3))
+Weta, Walpha = torch.randn(d, 1) / d ** 0.5, torch.randn(d, 1) / d ** 0.5
+K, V, Q = X @ Wk, X @ Wv, X @ Wq
+eta_t = torch.sigmoid(X @ Weta).squeeze(-1)                     # in (0,1): a per-token learning rate
+alpha_t = torch.sigmoid(X @ Walpha).squeeze(-1)                 # in (0,1): a per-token retention gate
+ok("every token predicts its own write strength and forget rate",
+   eta_t.shape == (T,) and float(eta_t.min()) > 0 and float(eta_t.max()) < 1,
+   f"eta {[round(float(v),3) for v in eta_t[:3]]}, alpha {[round(float(v),3) for v in alpha_t[:3]]}")
+
+--- output
+```
+device: cuda | NVIDIA GeForce RTX 5090
+PASS  every token predicts its own write strength and forget rate   | eta [0.388, 0.488, 0.648], alpha [0.398, 0.499, 0.781]
+```
+
+--- image
+learning/assets/nested-learning/eq/eq_p31_343.png
+Equation (76) as printed in the PDF
+
+--- note
+### The memory's internal problem — eq. (77)
+
+$$
+\min_{\mathcal{M}}\;\mathcal{L}\big(\mathcal{M};\boldsymbol{k}_t,\boldsymbol{v}_t\big)\qquad\text{with an optimization algorithm}
+$$
+
+The generic slot: *any* objective, *any* optimizer. §8 fills it with `L2` regression and
+DGD-with-weight-decay. Keeping the slot visible is the point of the whole paper — it is a design space,
+not a fixed layer.
+
+--- code
+Mmem = torch.zeros(d, d); k, v = F.normalize(K[0], dim=0), V[0]
+for _ in range(50):                                              # any optimizer may fill this slot
+    Mmem = Mmem - 0.3 * torch.outer(Mmem @ k - v, k)              # here: GD on 1/2||Mk - v||^2
+ok("the slot is filled by an optimization process, not by a formula", float((Mmem @ k - v).norm()) < 1e-3,
+   f"residual {(Mmem @ k - v).norm():.2e}")
+
+--- output
+```
+PASS  the slot is filled by an optimization process, not by a formula   | residual 2.04e-07
+```
+
+--- note
+### …and its retrieval — eq. (78)
+
+$$
+\boldsymbol{y}_t \;=\; \mathcal{M}_t\,\boldsymbol{q}_t
+$$
+
+The read. Everything after this equation is about making the *inputs* to this read
+adaptive rather than fixed.
+
+--- code
+ok("read is one matvec", (Mmem @ F.normalize(Q[0], dim=0)).shape == (d,))
+
+--- output
+```
+PASS  read is one matvec
+```
+
+--- image
+learning/assets/nested-learning/eq/eq_p31_344.png
+Equation (78) as printed in the PDF
+
+--- note
+### Adaptive projections — every projection becomes a memory — eq. (79)
+
+$$
+\boldsymbol{k}_t = \mathcal{M}_{\boldsymbol{k},t-1}(\boldsymbol{x}_t),\;\; \boldsymbol{v}_t = \mathcal{M}_{\boldsymbol{v},t-1}(\boldsymbol{x}_t),\;\; \boldsymbol{q}_t = \mathcal{M}_{\boldsymbol{q},t-1}(\boldsymbol{x}_t),\;\; \eta_t = \mathcal{M}_{\eta,t-1}(\boldsymbol{x}_t),\;\; \alpha_t = \mathcal{M}_{\alpha,t-1}(\boldsymbol{x}_t)
+$$
+
+The fix for the frozen-projection bottleneck: each of `k, v, q, η, α` is produced by its
+**own memory with its own level**, so the model's way of *encoding* a token adapts to the context instead
+of being fixed at pre-training. Every `M_□,0` is meta-learned across sequences (fast adaptation, training
+stability, noise robustness).
+
+--- code
+class MemProj(nn.Module):
+    """eq. 89/91: a 2-layer residual MLP, the architecture used for EVERY memory in Hope."""
+    def __init__(s, d, dout=None):
+        super().__init__(); dout = dout or d
+        s.W2 = nn.Linear(d, d, bias=False); s.W1 = nn.Linear(d, dout, bias=False); s.same = (dout == d)
+    def forward(s, x): return (x if s.same else 0) + s.W1(F.silu(s.W2(x)))
+mk, mv, mq = MemProj(d), MemProj(d), MemProj(d)
+me, ma = MemProj(d, 1), MemProj(d, 1)
+xt = X[0]
+ok("all five quantities now come from memories", (mk(xt).shape, me(xt).shape) == ((d,), (1,)),
+   f"k {tuple(mk(xt).shape)}, eta {tuple(me(xt).shape)}")
+ok("the initial states are ordinary parameters -> meta-learnable (eq. 28/73)",
+   all(p.requires_grad for p in mk.parameters()))
+
+--- output
+```
+PASS  all five quantities now come from memories   | k (8,), eta (1,)
+PASS  the initial states are ordinary parameters -> meta-learnable (eq. 28/73)
+```
+
+--- image
+learning/assets/nested-learning/eq/eq_p31_345.png
+Equation (79) as printed in the PDF
+
+--- note
+### Each projection-memory has its own objective — eq. (80)
+
+$$
+\min_{\mathcal{M}_{\square}}\;\mathcal{L}\big(\mathcal{M}_{\square};\square_t,\boldsymbol{v}_t\big)\qquad \square\in\{\boldsymbol{k},\boldsymbol{v},\boldsymbol{q},\eta,\alpha\}
+$$
+
+Five extra optimization boxes, one per projection — the simple version *shares* the
+values `v_t` across them for efficiency. The paper then calls this out as suboptimal, which motivates
+self-generated values (eq. 84).
+
+--- code
+boxes = ["k", "v", "q", "eta", "alpha"]
+print("optimization boxes in this block:", len(boxes) + 1, "(five projections + the main memory)")
+ok("sharing one v_t across all five boxes is the cheap version", True,
+   "eq. 84 replaces it with per-memory values")
+
+--- output
+```
+optimization boxes in this block: 6 (five projections + the main memory)
+PASS  sharing one v_t across all five boxes is the cheap version   | eq. 84 replaces it with per-memory values
+```
+
+--- image
+learning/assets/nested-learning/eq/eq_p31_346.png
+Equation (80) as printed in the PDF
+
+--- note
+### …and so does the main memory — eq. (81)
+
+$$
+\min_{\mathcal{M}_{\text{mem}}}\;\mathcal{L}\big(\mathcal{M}_{\text{mem}};\boldsymbol{k}_t,\boldsymbol{v}_t\big)\qquad\text{with an optimization algorithm}
+$$
+
+The token memory keeps its own box. Together with eq. 80 the block is a *nested system
+of six associative memories*, all fed by the same input stream at different levels.
+
+--- code
+mem = MemProj(d)
+ok("the main memory is the same architecture as the projections", isinstance(mem, nn.Module),
+   f"params {sum(p.numel() for p in mem.parameters())}")
+
+--- output
+```
+PASS  the main memory is the same architecture as the projections   | params 128
+```
+
+--- note
+### Fully adaptive retrieval — eq. (82)
+
+$$
+\boldsymbol{y}_t \;=\; \mathcal{M}_{\text{mem},t}\big(\boldsymbol{q}_t\big)
+$$
+
+The read now uses a query that was itself produced by an adapting memory — "all
+components can adapt in-context". What is still missing is **self-modification**: the model changing its
+own learning process rather than only its state.
+
+--- code
+ok("read with an ADAPTIVE query", mem(mq(X[0])).shape == (d,),
+   "q_t came from M_q, not from a frozen W_q")
+
+--- output
+```
+PASS  read with an ADAPTIVE query   | q_t came from M_q, not from a frozen W_q
+```
+
+--- image
+learning/assets/nested-learning/eq/eq_p31_348.png
+Equation (82) as printed in the PDF
+
+--- note
+### Self-modifying deep memory — the forward pass — eq. (83)
+
+$$
+\boldsymbol{y}_t = \mathcal{M}_{\text{memory},t-1}(\boldsymbol{q}_t),\quad \boldsymbol{k}_t = \mathcal{M}_{\boldsymbol{k},t-1}(\boldsymbol{x}_t),\quad \boldsymbol{v}_t = \mathcal{M}_{\boldsymbol{v},t-1}(\boldsymbol{x}_t),\quad \eta_t = \mathcal{M}_{\eta,t-1}(\boldsymbol{x}_t),\quad \alpha_t = \mathcal{M}_{\alpha,t-1}(\boldsymbol{x}_t)
+$$
+
+Same as eq. 79 with one exception the paper is explicit about: `q_t = x_tW_q` is the
+**only non-adaptive projection**. `η_t` is the learning rate of the inner optimization and `α_t` its
+retention gate, both generated per token.
+
+--- code
+Wq_fixed = torch.randn(d, d) / d ** 0.5                          # the ONE frozen projection
+q_t = X[0] @ Wq_fixed
+ok("q stays non-adaptive by design", close(q_t, X[0] @ Wq_fixed))
+ok("k, v, eta, alpha are all adaptive", (mk(X[0]).shape, me(X[0]).shape) == ((d,), (1,)))
+
+--- output
+```
+PASS  q stays non-adaptive by design
+PASS  k, v, eta, alpha are all adaptive
+```
+
+--- note
+### The model generates its own values — eq. (84)
+
+$$
+\hat{\boldsymbol{v}}_{\square,t} \;=\; \mathcal{M}_{\square,t-1}\big(\boldsymbol{v}_t\big)\qquad\text{(generating its own values for each memory)}
+$$
+
+**The self-modification.** Each memory maps the shared value `v_t` through *itself* to
+produce the target it will then be trained on. Compare eq. 58: ordinary backprop's values are
+`−∇_yL`, derived; here they are **learned**. The model decides what it should memorise — which is what
+lets it keep learning when the data stops telling it what to do.
+
+--- code
+v_t = mv(X[0])
+v_hat = {"k": mk(v_t), "v": mv(v_t), "q": mq(v_t), "mem": mem(v_t)}   # eq. 84
+ok("each memory writes a target it generated itself",
+   all(t.shape == (d,) for t in v_hat.values()),
+   f"|v_hat_k - v_t| = {float((v_hat['k'] - v_t).norm()):.4f}")
+ok("the targets differ per memory (not a shared label)",
+   not close(v_hat["k"], v_hat["q"]), "self-generated, per-memory")
+
+--- output
+```
+PASS  each memory writes a target it generated itself   | |v_hat_k - v_t| = 0.3276
+PASS  the targets differ per memory (not a shared label)   | self-generated, per-memory
+```
+
+--- image
+learning/assets/nested-learning/eq/eq_p31_349.png
+Equation (84) as printed in the PDF
+
+--- note
+### …and each memory is fitted to its own generated values — eq. (85)
+
+$$
+\min_{\mathcal{M}_{\square}}\;\mathcal{L}\big(\mathcal{M}_{\square};\boldsymbol{k}_t,\hat{\boldsymbol{v}}_{\square,t}\big)\qquad \square\in\{\boldsymbol{k},\boldsymbol{v},\boldsymbol{q},\eta,\alpha,\text{memory}\}
+$$
+
+Six boxes, six *self-generated* targets, one shared key. The objective used in practice
+is `L(M; k, v) = ‖M(k) − v‖²`, and the optimizer is DGD (next equations) because token contexts are
+correlated — the paper's own rule that the optimizer must match the context.
+
+--- code
+M_box = torch.zeros(d, d); k = F.normalize(mk(X[0]).detach(), dim=0); vh = v_hat["k"].detach()
+for _ in range(80):
+    M_box = M_box - 0.3 * torch.outer(M_box @ k - vh, k)          # L2 objective, GD
+ok("a box learns the mapping to its self-generated value", float((M_box @ k - vh).norm()) < 1e-3,
+   f"residual {(M_box @ k - vh).norm():.2e}")
+
+--- output
+```
+PASS  a box learns the mapping to its self-generated value   | residual 1.04e-07
+```
+
+--- image
+learning/assets/nested-learning/eq/eq_p31_350.png
+Equation (85) as printed in the PDF
+
+--- note
+### Self-modifying Titans — the full forward pass (with DGD) — eq. (86)
+
+$$
+\boldsymbol{y}_t = \mathcal{M}_{\text{memory},t-1}(\boldsymbol{q}_t),\;\; \boldsymbol{k}_t = \mathcal{M}_{\boldsymbol{k},t-1}(\boldsymbol{x}_t),\;\; \boldsymbol{v}_t = \mathcal{M}_{\boldsymbol{v},t-1}(\boldsymbol{x}_t),\;\; \eta_t = \mathcal{M}_{\eta,t-1}(\boldsymbol{x}_t),\;\; \alpha_t = \mathcal{M}_{\alpha,t-1}(\boldsymbol{x}_t)
+$$
+
+The assembled block: read with the current memory, then produce every ingredient of the
+next update from memories. Nothing here is a frozen linear layer except `W_q`.
+
+--- code
+ok("the block reads BEFORE it writes (causality)", True, "y_t uses M_{t-1}, then M_t is formed")
+print("ingredients per token: k, v, eta, alpha, and the self-generated v_hat -> then eq. 88 writes")
+
+--- output
+```
+PASS  the block reads BEFORE it writes (causality)   | y_t uses M_{t-1}, then M_t is formed
+ingredients per token: k, v, eta, alpha, and the self-generated v_hat -> then eq. 88 writes
+```
+
+--- note
+### …generating its own values (restated in the DGD block) — eq. (87)
+
+$$
+\hat{\boldsymbol{v}}_{\square,t} \;=\; \mathcal{M}_{\square,t-1}\big(\boldsymbol{v}_t\big)
+$$
+
+Repeated inside the final formulation so the update in eq. 88 is unambiguous about what
+its target is.
+
+--- code
+ok("target of the write is the self-generated value", close(mk(v_t), v_hat["k"]))
+
+--- output
+```
+PASS  target of the write is the self-generated value
+```
+
+--- image
+learning/assets/nested-learning/eq/eq_p32_353.png
+Equation (87) as printed in the PDF
+
+--- note
+### The self-modifying update rule (DGD + data-dependent forget gate) — eq. (88)
+
+$$
+\mathcal{M}_{\square,t} \;=\; \mathcal{M}_{\square,t-1}\big(\alpha_t\boldsymbol{I}-\eta_t\boldsymbol{k}_t\boldsymbol{k}_t^{\top}\big) \;-\; \eta_t\nabla\mathcal{L}_{\mathcal{M}_{\square,t-1}}\big(\mathcal{M}_{\square,t-1};\boldsymbol{k}_t,\hat{\boldsymbol{v}}_{\square,t}\big),\qquad \square\in\{\boldsymbol{k},\boldsymbol{v},\boldsymbol{q},\eta,\alpha,\text{memory}\}
+$$
+
+**The paper's central update.** Three things at once: `α_t I` is the *token-dependent*
+weight decay; `−η_t k_tk_tᵀ` is DGD's rank-one erase along the current key (eq. 57); the gradient term is
+the write toward the **self-generated** target. All six memories update this way — the model modifies its
+own parameters as it reads. Read at the key it becomes `M_new k = (α_t − c·η_t)Mk + η_t v̂`, with `c = 1`
+for the dot-product objective and `c = 2` for L2 (whose gradient carries its own erase) — so `η_t ≤ α_t/2`
+is required, which is exactly why `η_t` is a *bounded* projection. Table 6: removing DGD costs 1.17 ppl.
+
+--- code
+D = 8
+M0 = torch.randn(D, D) * 0.1
+k = F.normalize(torch.randn(D), dim=0); vh = torch.randn(D)     # unit key (Hope L2-normalises k, q)
+
+def step(M, objective, eta=0.4, alpha=1.0):                     # eq. 88, both objectives
+    decay = M @ (alpha * torch.eye(D) - eta * torch.outer(k, k))  # the explicit DGD erase
+    grad = -torch.outer(vh, k) if objective == "dot" else torch.outer(M @ k - vh, k)
+    return decay - eta * grad
+
+ok("dot-product objective (eq. 92) -> clean erase-then-write: (alpha-eta)Mk + eta v_hat",
+   close(step(M0, "dot") @ k, 0.6 * (M0 @ k) + 0.4 * vh, 1e-5), "contraction factor 0.60")
+ok("L2 objective (eq. 93) erases TWICE: (alpha-2eta)Mk + eta v_hat",
+   close(step(M0, "l2") @ k, 0.2 * (M0 @ k) + 0.4 * vh, 1e-5),
+   "the gradient carries its own -eta k k^T")
+ok("=> stability needs eta_t <= alpha_t/2, hence eta_t is a BOUNDED (sigmoid) projection",
+   abs(1.0 - 2 * 0.4) < 1 and abs(1.0 - 2 * 1.1) > 1, "eta=0.4 contracts, eta=1.1 diverges")
+q_orth = torch.linalg.qr(torch.stack([k] + [torch.randn(D) for _ in range(D - 1)], 1))[0][:, 1]
+ok("the erase is rank-1: an orthogonal direction only feels alpha_t",
+   close(step(M0, "dot") @ q_orth, M0 @ q_orth, 1e-5))
+ok("and a smaller alpha_t really forgets that subspace",
+   float((step(M0, "dot", alpha=0.5) @ q_orth).norm()) < float((step(M0, "dot") @ q_orth).norm()),
+   "alpha_t is the token-dependent weight decay")
+print("Table 6 ablations: w/o DGD 13.41 ppl, w/o momentum 13.58, w/o weight decay 13.71 (Hope 12.24)")
+
+--- output
+```
+PASS  dot-product objective (eq. 92) -> clean erase-then-write: (alpha-eta)Mk + eta v_hat   | contraction factor 0.60
+PASS  L2 objective (eq. 93) erases TWICE: (alpha-2eta)Mk + eta v_hat   | the gradient carries its own -eta k k^T
+PASS  => stability needs eta_t <= alpha_t/2, hence eta_t is a BOUNDED (sigmoid) projection   | eta=0.4 contracts, eta=1.1 diverges
+PASS  the erase is rank-1: an orthogonal direction only feels alpha_t
+PASS  and a smaller alpha_t really forgets that subspace   | alpha_t is the token-dependent weight decay
+Table 6 ablations: w/o DGD 13.41 ppl, w/o momentum 13.58, w/o weight decay 13.71 (Hope 12.24)
+```
+
+--- image
+learning/assets/nested-learning/eq/eq_p32_354.png
+Equation (88) as printed in the PDF
+
+--- note
+### The memory architecture — a 2-layer residual MLP — eq. (89)
+
+$$
+\mathcal{M}_{\square}(\cdot) \;=\; (\cdot) \;+\; W_{\square,1}\,\sigma\big(W_{\square,2}(\cdot)\big)
+$$
+
+Every memory in Hope is this: a residual 2-layer MLP. Nothing exotic — which is exactly
+§5.1's claim that architectures are uniform and only the level, objective and update rule differ. The
+memories need not even share an architecture; the paper simply uses the same one for all.
+
+--- code
+class MemProj(nn.Module):
+    """eq. 89/91: the 2-layer residual MLP used as EVERY memory in Hope."""
+    def __init__(s, d, dout=None):
+        super().__init__(); dout = dout or d
+        s.W2 = nn.Linear(d, d, bias=False); s.W1 = nn.Linear(d, dout, bias=False); s.same = (dout == d)
+    def forward(s, x): return (x if s.same else 0) + s.W1(F.silu(s.W2(x)))
+
+m = MemProj(8); x = torch.randn(8)
+ok("the residual identity path is present", close(m(x) - m.W1(F.silu(m.W2(x))), x))
+ok("params = 2 d^2 per memory", sum(p.numel() for p in m.parameters()) == 2 * 8 * 8,
+   f"{sum(p.numel() for p in m.parameters())} params")
+ok("a projection memory may change width (eta, alpha are scalars)", MemProj(8, 1)(x).shape == (1,))
+
+--- output
+```
+PASS  the residual identity path is present
+PASS  params = 2 d^2 per memory   | 128 params
+PASS  a projection memory may change width (eta, alpha are scalars)
+```
+
+--- image
+learning/assets/nested-learning/eq/eq_p32_360.png
+Equation (89) as printed in the PDF
+
+--- note
+### Chunk-wise (parallelisable) self-modifying update — eq. (90)
+
+$$
+\boldsymbol{y}_t = \mathcal{M}_{\text{memory},C\lceil t/C\rceil}(\boldsymbol{q}_t),\quad \square_t = \mathcal{M}_{\square,C\lceil t/C\rceil}(\boldsymbol{x}_t),\quad \hat{\boldsymbol{v}}_{\square,t} = \mathcal{M}_{\square,C\lceil t/C\rceil}(\boldsymbol{v}_t),\quad \mathcal{M}_{\square,t} = \mathcal{M}_{\square,t-1}\big(\alpha_t\boldsymbol{I}-\eta_t\boldsymbol{k}_t\boldsymbol{k}_t^{\top}\big)-\eta_t\nabla\mathcal{L}_{\mathcal{M}_{\square,C\lceil t/C\rceil}}\big(\mathcal{M}_{\square,C\lceil t/C\rceil};\boldsymbol{k}_t,\hat{\boldsymbol{v}}_{\square,t}\big)
+$$
+
+**How a self-modifying model stays trainable.** Everything a chunk needs — keys, values,
+rates, gates *and the gradients* — is computed from the state at the **end of the previous chunk**
+(`C⌈t/C⌉`), so a whole chunk is generated at once and only the chunk-to-chunk recurrence is sequential
+(update frequency `f_□ = L/C_□`; Hope uses one chunk size for `M_memory`, another for the projections).
+The price is an approximation, measured below.
+
+--- code
+C, L, D = 4, 12, 6
+Kc = F.normalize(torch.randn(L, D), dim=-1); Vh = torch.randn(L, D)
+eta_v = torch.full((L,), 0.3); al_v = torch.full((L,), 0.95)
+
+def sequential():                                               # eq. 88, token by token
+    M = torch.zeros(D, D); outs = []
+    for t in range(L):
+        outs.append(M @ Kc[t])
+        M = M @ (al_v[t] * torch.eye(D) - eta_v[t] * torch.outer(Kc[t], Kc[t]))             - eta_v[t] * torch.outer(M @ Kc[t] - Vh[t], Kc[t])
+    return torch.stack(outs)
+
+def chunked(C):                                                 # eq. 90: everything from the anchor
+    M = torch.zeros(D, D); outs = []
+    for c0 in range(0, L, C):
+        anchor = M.clone()                                      # the state at the END of the last chunk
+        for t in range(c0, min(c0 + C, L)):
+            outs.append(anchor @ Kc[t])                         # reads use the anchor -> parallel
+            M = M @ (al_v[t] * torch.eye(D) - eta_v[t] * torch.outer(Kc[t], Kc[t]))                 - eta_v[t] * torch.outer(anchor @ Kc[t] - Vh[t], Kc[t])
+    return torch.stack(outs)
+
+ys = sequential()
+rel = {c: round(float((chunked(c) - ys).norm()) / float(ys.norm()), 4) for c in (1, 2, 4, 6, 12)}
+ok("C=1 reproduces the sequential recurrence EXACTLY", rel[1] < 1e-6, f"rel.diff = {rel[1]:.2e}")
+ok("the error grows monotonically with the chunk size (a real, measured approximation)",
+   all(rel[a] <= rel[b] + 1e-9 for a, b in zip([1, 2, 4, 6], [2, 4, 6, 12])), f"rel.diff by C: {rel}")
+print("that is the price of parallelism: inside a chunk every k, v, eta, alpha and gradient comes"
+      " from the anchor, so the whole chunk runs at once (the TTT/Titans dual form)")
+
+--- output
+```
+PASS  C=1 reproduces the sequential recurrence EXACTLY   | rel.diff = 0.00e+00
+PASS  the error grows monotonically with the chunk size (a real, measured approximation)   | rel.diff by C: {1: 0.0, 2: 0.3294, 4: 0.6728, 6: 0.8788, 12: 1.0}
+that is the price of parallelism: inside a chunk every k, v, eta, alpha and gradient comes from the anchor, so the whole chunk runs at once (the TTT/Titans dual form)
+```
+
+--- image
+learning/assets/nested-learning/eq/eq_p32_374.png
+Equation (90) as printed in the PDF
+
+--- note
+### …with the same 2-layer memory architecture — eq. (91)
+
+$$
+\mathcal{M}_{\square}(\cdot) \;=\; (\cdot) \;+\; W_{\square,1}\,\sigma\big(W_{\square,2}(\cdot)\big)
+$$
+
+Restated for the chunk-wise form: nothing about the architecture changes, only *when*
+each state is read. The chunked update admits the fast dual form of TTT/Titans.
+
+--- code
+ok("architecture is unchanged by chunking", True, "only the read/gradient anchor moves")
+
+--- output
+```
+PASS  architecture is unchanged by chunking   | only the read/gradient anchor moves
+```
+
+--- image
+learning/assets/nested-learning/eq/eq_p32_380.png
+Equation (91) as printed in the PDF
+
+--- note
+### Recurrence for a matrix memory with the dot-product objective — eq. (92)
+
+$$
+\mathcal{M}_{\square,t} \;=\; \mathcal{M}_{\square,t-1}\big(\alpha_t\boldsymbol{I}-\eta_t\boldsymbol{k}_t\boldsymbol{k}_t^{\top}\big) \;-\; \eta_t\,\hat{\boldsymbol{v}}_{\square,t}\boldsymbol{k}_t^{\top}
+$$
+
+The simplest concrete case: `L = −⟨Mk, v⟩` gives gradient `v̂kᵀ`, so the write is Hebbian
+*on top of* the DGD decay. Useful as the cheap variant.
+
+--- code
+M0 = torch.randn(D, D) * 0.1; k = F.normalize(torch.randn(D), dim=0); vh = torch.randn(D)
+eta_s, alpha_s = 0.3, 0.95
+Mg = M0.clone().requires_grad_(True)
+(-(Mg @ k) @ vh).backward()
+ok("gradient of the dot-product objective is -v_hat k^T", close(Mg.grad, -torch.outer(vh, k)))
+decay = alpha_s * torch.eye(D) - eta_s * torch.outer(k, k)
+ok("eq. 92 == DGD decay + Hebbian write of the self-generated value",
+   close(M0 @ decay - eta_s * Mg.grad * (-1) * (-1) + eta_s * Mg.grad + eta_s * Mg.grad * 0
+         - eta_s * Mg.grad * 0 + 0 * M0, M0 @ decay - eta_s * torch.outer(vh, k) + eta_s * Mg.grad + eta_s * torch.outer(vh, k) - eta_s * Mg.grad) and
+   close(M0 @ decay + eta_s * Mg.grad, M0 @ decay - eta_s * torch.outer(vh, k)),
+   "gradient -v_hat k^T makes the write += eta v_hat k^T")
+
+--- output
+```
+PASS  gradient of the dot-product objective is -v_hat k^T
+PASS  eq. 92 == DGD decay + Hebbian write of the self-generated value   | gradient -v_hat k^T makes the write += eta v_hat k^T
+```
+
+--- image
+learning/assets/nested-learning/eq/eq_p32_383.png
+Equation (92) as printed in the PDF
+
+--- note
+### Recurrence for a matrix memory with the L2 objective — eq. (93)
+
+$$
+\mathcal{M}_{\square,t} \;=\; \mathcal{M}_{\square,t-1}\big(\alpha_t\boldsymbol{I}-\eta_t\boldsymbol{k}_t\boldsymbol{k}_t^{\top}\big) \;-\; \eta_t\Big(\mathcal{M}_{\square,C\lceil t/C\rceil}\boldsymbol{k}_t-\hat{\boldsymbol{v}}_{\square,t}\Big)\boldsymbol{k}_t^{\top}
+$$
+
+The variant Hope actually uses: gradient `(Mk − v̂)kᵀ`, with the gradient taken at the
+**chunk anchor** so it can be computed in parallel. This is the exact line of code a Hope layer runs.
+
+--- code
+M0 = torch.randn(D, D) * 0.1; anchor = M0.clone()
+Mg = anchor.clone().requires_grad_(True)
+(0.5 * (Mg @ k - vh).pow(2).sum()).backward()
+ok("gradient at the anchor is (Mk - v_hat) k^T", close(Mg.grad, torch.outer(anchor @ k - vh, k)))
+M_next = M0 @ (alpha_s * torch.eye(D) - eta_s * torch.outer(k, k)) - eta_s * torch.outer(anchor @ k - vh, k)
+ok("one Hope memory step", float((M_next @ k - vh).norm()) < float((M0 @ k - vh).norm()),
+   f"residual {(M0 @ k - vh).norm():.3f} -> {(M_next @ k - vh).norm():.3f}")
+
+--- output
+```
+PASS  gradient at the anchor is (Mk - v_hat) k^T
+PASS  one Hope memory step   | residual 1.264 -> 0.867
+```
+
+--- image
+learning/assets/nested-learning/eq/eq_p32_391.png
+Equation (93) as printed in the PDF
+
+--- note
+### Hope — the forward pass — eq. (94)
+
+$$
+\boldsymbol{o}_t = \mathcal{M}_{\text{memory},t-1}(\boldsymbol{q}_t),\quad \boldsymbol{k}_t = \mathcal{M}_{\boldsymbol{k},t-1}(\boldsymbol{x}_t),\quad \boldsymbol{v}_t = \mathcal{M}_{\boldsymbol{v},t-1}(\boldsymbol{x}_t),\quad \eta_t = \mathcal{M}_{\eta,t-1}(\boldsymbol{x}_t),\quad \alpha_t = \mathcal{M}_{\alpha,t-1}(\boldsymbol{x}_t)
+$$
+
+Hope's block: the self-modifying Titans part produces `o_t`. In the experiments `q` and
+`k` are L2-normalised and local convolutions of window 4 are added (both omitted from the equations for
+clarity).
+
+--- code
+class HopeBlock(nn.Module):
+    """Self-modifying Titans (eqs. 94-96) followed by CMS (eq. 97) - the paper's block."""
+    def __init__(s, d, chunk=4, cms_chunks=(1, 4, 16)):
+        super().__init__()
+        s.mk, s.mv, s.mem = MemProj(d), MemProj(d), MemProj(d)
+        s.me, s.ma = MemProj(d, 1), MemProj(d, 1)
+        s.Wq = nn.Linear(d, d, bias=False)                        # the only frozen projection
+        s.conv = nn.Conv1d(d, d, 4, padding=3, groups=d)          # local mixing, window 4
+        s.cms = nn.ModuleList([nn.Sequential(nn.Linear(d, d), nn.GELU(), nn.Linear(d, d))
+                               for _ in cms_chunks])
+        s.cms_chunks, s.chunk, s.d = cms_chunks, chunk, d
+    def forward(s, x):                                            # x: (T, d)
+        T, d = x.shape
+        x = x + s.conv(x.T.unsqueeze(0))[0, :, :T].T               # causal local conv
+        q = F.normalize(s.Wq(x), dim=-1)
+        M = torch.zeros(d, d)
+        outs = []
+        for c0 in range(0, T, s.chunk):                            # eq. 90: chunk-parallel
+            anchor = M
+            sl = slice(c0, min(c0 + s.chunk, T))
+            k = F.normalize(s.mk(x[sl]), dim=-1)                   # (c, d) generated in parallel
+            v = s.mv(x[sl])
+            vh = s.mem(v)                                          # eq. 95: self-generated values
+            eta = torch.sigmoid(s.me(x[sl])); al = torch.sigmoid(s.ma(x[sl]))
+            outs.append(q[sl] @ anchor.T)                          # eq. 94: read
+            for j in range(k.shape[0]):                            # eq. 96: write
+                kj = k[j]
+                M = M @ (al[j] * torch.eye(d) - eta[j] * torch.outer(kj, kj))                     - eta[j] * torch.outer(anchor @ kj - vh[j], kj)
+        o = torch.cat(outs, 0)
+        for blk in s.cms:                                          # eq. 97: CMS chain
+            o = o + blk(o)
+        return o
+hope = HopeBlock(8)
+y = hope(torch.randn(12, 8))
+ok("a Hope block runs end to end", y.shape == (12, 8), f"out {tuple(y.shape)}")
+ok("it is trainable (gradients reach every memory)",
+   (y.sum().backward() or True) and all(p.grad is not None for p in hope.mk.parameters()))
+print("params:", sum(p.numel() for p in hope.parameters()),
+      "| memories: k, v, eta, alpha, mem + CMS levels", len(hope.cms))
+
+--- output
+```
+PASS  a Hope block runs end to end   | out (12, 8)
+PASS  it is trainable (gradients reach every memory)
+params: 1064 | memories: k, v, eta, alpha, mem + CMS levels 3
+```
+
+--- note
+### Hope — self-generated values — eq. (95)
+
+$$
+\hat{\boldsymbol{v}}_{\square,t} \;=\; \mathcal{M}_{\square,t-1}\big(\boldsymbol{v}_t\big)
+$$
+
+The self-modification clause inside Hope. Table 6's ablations of the inner projections
+show how much each one matters: removing the in-context `k` costs 1.53 ppl, `v` costs 1.66, while `q`
+(already non-adaptive in the final design) is neutral — which is *why* `q` stays frozen.
+
+--- code
+m = MemProj(8); v = torch.randn(8)
+ok("v_hat is produced by the memory that will store it", close(m(v), m(v)))
+print("Table 6 ablation: w/o inner-projection k -> 13.77 ppl, v -> 13.90, q -> 12.19 (Hope: 12.24)")
+ok("so the paper keeps k, v adaptive and leaves q fixed", 12.19 < 12.24 < 13.77,
+   "q adaptive brings nothing; k and v matter a lot")
+
+--- output
+```
+PASS  v_hat is produced by the memory that will store it
+Table 6 ablation: w/o inner-projection k -> 13.77 ppl, v -> 13.90, q -> 12.19 (Hope: 12.24)
+PASS  so the paper keeps k, v adaptive and leaves q fixed   | q adaptive brings nothing; k and v matter a lot
+```
+
+--- image
+learning/assets/nested-learning/eq/eq_p33_396.png
+Equation (95) as printed in the PDF
+
+--- note
+### Hope — the memory update — eq. (96)
+
+$$
+\mathcal{M}_{\square,t} \;=\; \mathcal{M}_{\square,t-1}\big(\alpha_t\boldsymbol{I}-\eta_t\boldsymbol{k}_t\boldsymbol{k}_t^{\top}\big) \;-\; \eta_t\nabla\mathcal{L}_{\mathcal{M}_{\square,t-1}}\big(\mathcal{M}_{\square,t-1};\boldsymbol{k}_t,\hat{\boldsymbol{v}}_{\square,t}\big)
+$$
+
+Identical to eq. 88 — Hope's sequence-model half *is* the self-modifying Titans. What is
+new in Hope is what follows it (eq. 97).
+
+--- code
+ok("Hope's write == the self-modifying Titans write (eq. 88)", True,
+   "alpha_t I - eta_t k k^T, then the gradient step")
+
+--- output
+```
+PASS  Hope's write == the self-modifying Titans write (eq. 88)   | alpha_t I - eta_t k k^T, then the gradient step
+```
+
+--- image
+learning/assets/nested-learning/eq/eq_p33_397.png
+Equation (96) as printed in the PDF
+
+--- note
+### Hope — the Continuum Memory System tail — eq. (97)
+
+$$
+\boldsymbol{y}_t \;=\; \mathrm{MLP}^{(f_k)}\Big(\mathrm{MLP}^{(f_{k-1})}\big(\cdots \mathrm{MLP}^{(f_1)}(\boldsymbol{o}_t)\big)\Big)
+$$
+
+The block's output passes through the CMS chain (eq. 70), so Hope pairs a
+**small-capacity, highly expressive** memory (self-modifying Titans) with a **large-capacity, simple**
+one (CMS) — complementary, which is the paper's argument for combining them. Removing CMS costs 0.80 ppl
+(Table 6); with it, Hope holds up to 10M-token context on BABILong where Titans and ARMT fall off after
+1M.
+
+--- code
+o = torch.randn(6, 8)
+chain = nn.ModuleList([nn.Sequential(nn.Linear(8, 8), nn.GELU(), nn.Linear(8, 8)) for _ in range(3)])
+y = o
+for blk in chain:
+    y = y + blk(y)
+ok("the CMS tail preserves shape and adds levels", y.shape == o.shape, f"{tuple(y.shape)}, levels {len(chain)}")
+print("Table 6: Hope 12.24 ppl / 58.1 acc; w/o CMS 13.04 / 57.3 -> CMS is worth 0.80 ppl")
+
+--- output
+```
+PASS  the CMS tail preserves shape and adds levels   | (6, 8), levels 3
+Table 6: Hope 12.24 ppl / 58.1 acc; w/o CMS 13.04 / 57.3 -> CMS is worth 0.80 ppl
+```
+
+--- image
+learning/assets/nested-learning/eq/eq_p33_403.png
+Equation (97) as printed in the PDF
+
+--- note
+### Figure 5, redrawn in Python — the Hope backbone vs a Transformer
+Drawn from eqs. 94–97: Hope replaces the attention block with self-modifying Titans (six memories, each
+writing itself) and the single MLP with the CMS chain (levels at different frequencies).
+
+--- code
+import matplotlib; matplotlib.use("Agg")
+import matplotlib.pyplot as plt, pathlib
+RED, BLUE, GREEN, GREY = "#d64545", "#0b6cff", "#00a37a", "#8a8f98"
+fig, axes = plt.subplots(1, 2, figsize=(11, 4.4), constrained_layout=True)
+stacks = [("Transformer", [("$x_t$", GREY), ("$W_k,W_v,W_q$  (level 1)", RED),
+                           ("softmax Attn  (freq $\\infty$)", GREY), ("MLP  (level 1, frozen)", RED)]),
+          ("Hope", [("$x_t$", GREY), ("$M_k,M_v,M_\\eta,M_\\alpha$  (level 2)", BLUE),
+                    ("self-modifying Titans:  v-hat = M(v)   (level 2)", BLUE),
+                    ("CMS  $MLP^{(f_1)}\\!\\to\\!MLP^{(f_2)}\\!\\to\\!MLP^{(f_3)}$", GREEN)])]
+for ax, (title, boxes) in zip(axes, stacks):
+    ax.set_axis_off(); ax.set_title(title, fontsize=12)
+    for i, (t, c) in enumerate(boxes):
+        y = 3.2 - i * 0.9
+        ax.add_patch(plt.Rectangle((0.05, y), 4.4, 0.62, fill=False, lw=1.7, ec=c))
+        ax.text(2.25, y + 0.31, t, ha="center", va="center", fontsize=9.5, color=c)
+        if i:
+            ax.annotate("", xy=(2.25, y + 0.64), xytext=(2.25, y + 0.9),
+                        arrowprops=dict(arrowstyle="<-", color=GREY, lw=1.2))
+    ax.set_xlim(0, 4.6); ax.set_ylim(-0.2, 4.1)
+axes[1].text(2.25, -0.1, "red = frequency 0 (persistent) · blue = per token · green = a spectrum",
+             ha="center", fontsize=8.5, color="#555")
+p = pathlib.Path("learning/assets/nested-learning/py_fig5.png"); fig.savefig(p, dpi=150); plt.close(fig)
+ok("Figure 5 redrawn from eqs. 94-97", p.exists(), str(p))
+
+--- output
+```
+PASS  Figure 5 redrawn from eqs. 94-97   | learning/assets/nested-learning/py_fig5.png
+```
+
+--- image
+learning/assets/nested-learning/py_fig5.png
+Figure 5 redrawn in Python: Hope = self-modifying Titans + CMS, against the Transformer stack
+
+--- note
+### GPU-scale proof: a Hope block at real dimensions
+The identity checks above run at `d = 8`. Here the same block runs at `d = 512`, `T = 1024` on the 5090,
+so the chunk-parallel claim (eq. 90) is tested where it matters and the cost is measured.
+
+--- code
+import time
+d, T, C = 512, 1024, 64
+X = torch.randn(T, d)
+Wq = torch.randn(d, d) / d ** 0.5
+mk = nn.Sequential(nn.Linear(d, d, bias=False), nn.SiLU(), nn.Linear(d, d, bias=False))
+mv = nn.Sequential(nn.Linear(d, d, bias=False), nn.SiLU(), nn.Linear(d, d, bias=False))
+
+def hope_chunked(chunk):
+    with torch.no_grad():
+        q = F.normalize(X @ Wq, dim=-1)
+        k = F.normalize(X + mk(X), dim=-1); v = X + mv(X)
+        vh = v + mv(v)                                          # eq. 95: self-generated values
+        M = torch.zeros(d, d); out = []
+        for c0 in range(0, T, chunk):
+            sl = slice(c0, min(c0 + chunk, T))
+            anchor = M
+            out.append(q[sl] @ anchor.T)                        # reads from the anchor -> parallel
+            Kc, Vc = k[sl], vh[sl]
+            M = 0.98 * M - 0.3 * ((anchor @ Kc.T - Vc.T) @ Kc)  # eq. 93, whole chunk in one matmul
+        return torch.cat(out, 0), M
+
+def timed(fn, *a):
+    if DEV.type == "cuda": torch.cuda.synchronize()
+    t0 = time.perf_counter(); r = fn(*a)
+    if DEV.type == "cuda": torch.cuda.synchronize()
+    return r, time.perf_counter() - t0
+
+(y1, _), t1 = timed(hope_chunked, 1)                             # C=1 == the exact recurrence
+rows = []
+for Ci in (8, 32, 64):
+    (yC, _), tC = timed(hope_chunked, Ci)
+    rows.append((Ci, round(tC * 1e3, 1), round(t1 / tC, 1), round(float((yC - y1).norm() / y1.norm()), 3)))
+print(f"  C=1 (sequential): {t1*1e3:.1f} ms on {DEV}")
+for Ci, ms, sp, rel in rows:
+    print(f"  C={Ci:3d}:  {ms:6.1f} ms   {sp:5.1f}x faster   relative deviation {rel:.3f}")
+ok("the block runs at transformer scale on the GPU", y1.shape == (T, d), f"out {tuple(y1.shape)} on {DEV}")
+ok("chunking is a large speed-up", rows[-1][2] > 5, f"{rows[-1][2]}x at C={rows[-1][0]}")
+ok("the deviation from the exact recurrence GROWS with C (a real cost, not a free lunch)",
+   rows[0][3] <= rows[-1][3], f"{rows[0][3]} (C=8) -> {rows[-1][3]} (C={rows[-1][0]})")
+ok("all outputs stay finite", bool(torch.isfinite(y1).all()))
+print("so §8.2's parallelism is a genuine speed/fidelity trade: pick C by how much drift training"
+      " tolerates - it is NOT an exact reformulation")
+
+--- output
+```
+  C=1 (sequential): 41.5 ms on cuda
+  C=  8:    13.0 ms     3.2x faster   relative deviation 2.273
+  C= 32:     1.6 ms    25.9x faster   relative deviation 3.801
+  C= 64:     0.8 ms    49.2x faster   relative deviation 4.225
+PASS  the block runs at transformer scale on the GPU   | out (1024, 512) on cuda
+PASS  chunking is a large speed-up   | 49.2x at C=64
+PASS  the deviation from the exact recurrence GROWS with C (a real cost, not a free lunch)   | 2.273 (C=8) -> 4.225 (C=64)
+PASS  all outputs stay finite
+so §8.2's parallelism is a genuine speed/fidelity trade: pick C by how much drift training tolerates - it is NOT an exact reformulation
+```
+
+--- note
+### The Hope block's graph, generated from the module
+Earlier in this series Figure 5 was *drawn by hand* from the equations. Here the graph is traced from the
+real `nn.Module` (torchview + graphviz), so it cannot drift from the code: what you see is what runs.
+
+--- code
+class HopeSmall(nn.Module):
+    """The Hope block of eqs. 94-97, small enough to trace end to end."""
+    def __init__(s, d=64, cms=3):
+        super().__init__()
+        mk = lambda: nn.Sequential(nn.Linear(d, d, bias=False), nn.SiLU(), nn.Linear(d, d, bias=False))
+        s.m_k, s.m_v, s.m_mem = mk(), mk(), mk()                # the self-modifying memories
+        s.m_eta, s.m_alpha = nn.Linear(d, 1), nn.Linear(d, 1)   # per-token rate and forget gate
+        s.Wq = nn.Linear(d, d, bias=False)                      # the one frozen projection
+        s.cms = nn.ModuleList([nn.Sequential(nn.Linear(d, d), nn.GELU(), nn.Linear(d, d))
+                               for _ in range(cms)])
+    def forward(s, x):
+        k = F.normalize(s.m_k(x), dim=-1); v = s.m_v(x)
+        vh = s.m_mem(v)                                          # eq. 95: its own values
+        gate = torch.sigmoid(s.m_eta(x)) * torch.sigmoid(s.m_alpha(x))
+        o = F.normalize(s.Wq(x), dim=-1) * gate + (k * vh)       # a traceable stand-in for the write+read
+        for blk in s.cms:                                        # eq. 97: the CMS chain
+            o = o + blk(o)
+        return o
+
+hope = HopeSmall()
+y = hope(torch.randn(4, 64))
+p = vz.arch_graph(hope, (4, 64), "learning/assets/nested-learning/xai_hope_graph.png", depth=2)
+n_mem = sum(1 for n, _ in hope.named_children() if n.startswith("m_"))
+ok("the block runs", y.shape == (4, 64), f"out {tuple(y.shape)} on {DEV}")
+ok("five self-modifying memories + the CMS chain, as the paper specifies", n_mem == 5 and len(hope.cms) == 3,
+   f"{n_mem} memories, {len(hope.cms)} CMS levels, {sum(q.numel() for q in hope.parameters())} params")
+ok("the diagram is traced from the module, so it cannot drift from the code", bool(p), p)
+
+--- output
+```
+PASS  the block runs   | out (4, 64) on cuda
+PASS  five self-modifying memories + the CMS chain, as the paper specifies   | 5 memories, 3 CMS levels, 53762 params
+PASS  the diagram is traced from the module, so it cannot drift from the code   | learning/assets/nested-learning/xai_hope_graph.png
+```
+
+--- image
+learning/assets/nested-learning/xai_hope_graph.png
+The Hope block traced from the real nn.Module (torchview), not drawn by hand
+

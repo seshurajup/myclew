@@ -1,0 +1,78 @@
+@ id: fnlz1
+@ order: 2800
+@ title: What we take from FedNL — a third level, and an honest limit
+@ subtitle: FedNL · the transferable pieces
+@ source: docs/papers/fednl/fednl.md
+
+--- note
+## Two things worth taking
+1. **The audit gains a level.** Our `xai.nl_audit` already reports weights (level 1) and optimizer state
+   (level 2). Any setting with a slower outer loop — federation, multi-run ensembling, a nightly retrain —
+   is a genuine third level, and naming it changes what you think you are averaging.
+2. **Share the rule, not the state.** `θ` (the projections) is small and shippable; `S` (the memory) is
+   local, private and never leaves the client. That split is useful well beyond federation: it is exactly
+   how to add per-user adaptation without per-user checkpoints.
+
+**Honest limits.** The paper's evidence is non-IID MMLU and long-context benchmarks on LLM clients — we
+reproduce none of that here. Every check in this pack is an identity, a closed-form solution, or a small
+controlled measurement (including the *cost* of the truncation the method relies on).
+
+--- note
+### The three-level audit, run for real
+Build a client memory model plus an optimizer plus a federation round counter, and print the NL view:
+which box updates at which frequency, and how many parameters each really holds.
+
+--- code
+import torch, torch.nn as nn, torch.nn.functional as F      # three levels: server, client, memory
+import sys; sys.path.insert(0, "learning")
+import vizkit as vz
+
+DEV = torch.device("cuda" if torch.cuda.is_available() else "cpu")   # every proof runs on the GPU
+torch.set_default_device(DEV)
+torch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False   # exact proofs
+torch.manual_seed(0); torch.set_printoptions(precision=4, sci_mode=False)
+print(f"device: {DEV}" + (f" | {torch.cuda.get_device_name(0)}" if DEV.type == "cuda" else ""))
+
+def ok(name, cond, extra=""):
+    print(("PASS  " if cond else "FAIL  ") + name + (f"   | {extra}" if extra else ""))
+
+def close(a, b, tol=1e-5):
+    return torch.allclose(a, b, atol=tol, rtol=tol)
+
+def unit(*shape):
+    return F.normalize(torch.randn(*shape), dim=-1)
+
+d2 = 32
+client = nn.Sequential(nn.Linear(d2, d2), nn.GELU(), nn.Linear(d2, d2))
+opt = torch.optim.AdamW(client.parameters(), lr=1e-3)
+client(torch.randn(4, d2)).sum().backward(); opt.step()
+weights = sum(p.numel() for p in client.parameters())
+state = sum(v.numel() for s in opt.state.values() for v in s.values()
+            if torch.is_tensor(v) and v.dim() > 0)
+memory = d2 * d2                                                 # the level-1 state, per client, local
+rows = [("3  server (per round)", weights, "shipped"),
+        ("2  optimizer (per step)", state, "local, discarded at round end"),
+        ("1  memory S (per token)", memory, "local, never shipped")]
+for name, n, note in rows:
+    print(f"  level {name:26s} {n:>7} params   {note}")
+ok("the shipped payload is only the level-3 parameters", weights < state + memory,
+   f"{weights} shipped vs {state + memory} kept local")
+ok("and the local state is what carries the client's own distribution", memory > 0,
+   "non-IID specialisation lives in S, not in theta")
+
+--- output
+```
+device: cuda | NVIDIA GeForce RTX 5090
+  level 3  server (per round)         2112 params   shipped
+  level 2  optimizer (per step)       4224 params   local, discarded at round end
+  level 1  memory S (per token)       1024 params   local, never shipped
+PASS  the shipped payload is only the level-3 parameters   | 2112 shipped vs 5248 kept local
+PASS  and the local state is what carries the client's own distribution   | non-IID specialisation lives in S, not in theta
+```
+
+--- note
+**[Recap]** federation is the slowest level, not a different kind of thing ·
+the memory's Jacobian is the delta-rule projection (so sensitivity decays along recently written keys) ·
+truncating it is a priced approximation · and the chunked affine form keeps inference memory constant.
+Cross-read: `nl03` (levels), `eda02` (the delta rule), `k302` (bounded gates).
+

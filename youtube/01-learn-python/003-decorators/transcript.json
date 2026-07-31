@@ -1,0 +1,46 @@
+[
+  {
+    "text": "A decorator is just a function that wraps another function and changes what it does.",
+    "until_line": 1
+  },
+  {
+    "text": "Shout takes a function called func and returns a brand new function built around it.",
+    "until_line": 1
+  },
+  {
+    "text": "The inner wrapper accepts anything at all — star args and double-star kwargs catch every argument.",
+    "until_line": 2
+  },
+  {
+    "text": "Inside, it calls the original function and keeps the result.",
+    "until_line": 3
+  },
+  {
+    "text": "Then it upper-cases that result and adds an exclamation mark before handing it back.",
+    "until_line": 4
+  },
+  {
+    "text": "Line five returns the wrapper itself, not a call to it — that distinction matters.",
+    "until_line": 5
+  },
+  {
+    "text": "Now watch the at-sign syntax sitting right above greet.",
+    "until_line": 8
+  },
+  {
+    "text": "At-shout quietly replaces greet with shout of greet — same name, new behaviour.",
+    "until_line": 10
+  },
+  {
+    "text": "So calling greet with world doesn't politely say hello, it shouts it.",
+    "until_line": 13
+  },
+  {
+    "text": "Same function, zero changes to its body.",
+    "until_line": 13
+  },
+  {
+    "text": "In the next one we take on generators. Save this one for when you need it.",
+    "until_line": 13
+  }
+]

@@ -1,0 +1,659 @@
+[
+  {
+    "n": null,
+    "page": 3,
+    "latex": "X^{K}",
+    "raw": "K X",
+    "image": "assets/eq/eq_p03_000.png",
+    "y0": 220.7797393798828,
+    "y1": 238.55892944335938
+  },
+  {
+    "n": null,
+    "page": 3,
+    "latex": "N_{k}",
+    "raw": "Nk",
+    "image": "assets/eq/eq_p03_001.png",
+    "y0": 224.1569061279297,
+    "y1": 234.9615478515625
+  },
+  {
+    "n": "1",
+    "page": 3,
+    "latex": "\\mathcal{L}_{k}(\\theta; \\mathcal{D}_{k}),(1) N \\tag{1}",
+    "raw": "N Lk(\u03b8; Dk), (1)",
+    "image": "assets/eq/eq_p03_002.png",
+    "y0": 230.76783752441406,
+    "y1": 247.69354248046875
+  },
+  {
+    "n": null,
+    "page": 3,
+    "latex": "^{\\theta}",
+    "raw": "\u03b8",
+    "image": "assets/eq/eq_p03_003.png",
+    "y0": 239.7367706298828,
+    "y1": 246.7105712890625
+  },
+  {
+    "n": null,
+    "page": 3,
+    "latex": "^{k=1}",
+    "raw": "k=1",
+    "image": "assets/eq/eq_p03_004.png",
+    "y0": 245.2157745361328,
+    "y1": 252.1895751953125
+  },
+  {
+    "n": null,
+    "page": 3,
+    "latex": "1",
+    "raw": "\u00121",
+    "image": "assets/eq/eq_p03_005.png",
+    "y0": 494.7843322753906,
+    "y1": 504.8905029296875
+  },
+  {
+    "n": null,
+    "page": 3,
+    "latex": "_{2} +1_{2} \\|Sk_{t} -v_{t}\\| \\|S -S_{t-1}\\| 22\\eta",
+    "raw": "2\u2225Skt \u2212vt\u22252 + 1 2\u03b7 \u2225S \u2212St\u22121\u22252 \u0013",
+    "image": "assets/eq/eq_p03_006.png",
+    "y0": 494.7843322753906,
+    "y1": 518.4644775390625
+  },
+  {
+    "n": null,
+    "page": 3,
+    "latex": "S_{t} = S_{t-1} -\\eta\\nabla _{S}\\mathcal{L}_{mem} = S_{t-1} + \\eta(v_{t} -S_{t-1}k_{t})k^{^{\\top}}",
+    "raw": "St = St\u22121 \u2212\u03b7\u2207SLmem = St\u22121 + \u03b7(vt \u2212St\u22121kt)k\u22a4",
+    "image": "assets/eq/eq_p03_007.png",
+    "y0": 537.1983642578125,
+    "y1": 550.5234985351562
+  },
+  {
+    "n": null,
+    "page": 4,
+    "latex": "\"X",
+    "raw": "\"X",
+    "image": "assets/eq/eq_p04_008.png",
+    "y0": 152.02528381347656,
+    "y1": 169.55886840820312
+  },
+  {
+    "n": null,
+    "page": 4,
+    "latex": "#",
+    "raw": "#",
+    "image": "assets/eq/eq_p04_009.png",
+    "y0": 152.02528381347656,
+    "y1": 161.98788452148438
+  },
+  {
+    "n": null,
+    "page": 4,
+    "latex": "_{\\theta}\\mathcal{J}_{k}(\\theta) = E_{(x,y)\\sim \\mathcal{D}k}",
+    "raw": "\u03b8 Jk(\u03b8) = E(x,y)\u223cDk",
+    "image": "assets/eq/eq_p04_010.png",
+    "y0": 159.7213592529297,
+    "y1": 177.71051025390625
+  },
+  {
+    "n": null,
+    "page": 4,
+    "latex": "\\mathcal{L}_{task}(f(x_{t}, S_{t-1}(\\theta)), y_{t})",
+    "raw": "Ltask(f(xt, St\u22121(\u03b8)), yt)",
+    "image": "assets/eq/eq_p04_011.png",
+    "y0": 161.7687530517578,
+    "y1": 172.86293029785156
+  },
+  {
+    "n": null,
+    "page": 4,
+    "latex": "^{t}",
+    "raw": "t",
+    "image": "assets/eq/eq_p04_012.png",
+    "y0": 175.69068908691406,
+    "y1": 182.66448974609375
+  },
+  {
+    "n": null,
+    "page": 4,
+    "latex": "X^{K}",
+    "raw": "K X",
+    "image": "assets/eq/eq_p04_013.png",
+    "y0": 282.66973876953125,
+    "y1": 300.4489440917969
+  },
+  {
+    "n": null,
+    "page": 4,
+    "latex": "N_{k}",
+    "raw": "Nk",
+    "image": "assets/eq/eq_p04_014.png",
+    "y0": 286.04791259765625,
+    "y1": 296.8515319824219
+  },
+  {
+    "n": null,
+    "page": 4,
+    "latex": "_{\\theta}\\mathcal{G}(\\theta) =",
+    "raw": "\u03b8 G(\u03b8) =",
+    "image": "assets/eq/eq_p04_015.png",
+    "y0": 292.6578063964844,
+    "y1": 308.6005554199219
+  },
+  {
+    "n": "6",
+    "page": 4,
+    "latex": "\\mathcal{J}_{k}(\\theta).(6) N \\tag{6}",
+    "raw": "N Jk(\u03b8). (6)",
+    "image": "assets/eq/eq_p04_016.png",
+    "y0": 292.6578063964844,
+    "y1": 309.5835266113281
+  },
+  {
+    "n": null,
+    "page": 4,
+    "latex": "^{k=1}",
+    "raw": "k=1",
+    "image": "assets/eq/eq_p04_017.png",
+    "y0": 307.1057434082031,
+    "y1": 314.0795593261719
+  },
+  {
+    "n": null,
+    "page": 5,
+    "latex": "\uf8eb",
+    "raw": "\uf8eb",
+    "image": "assets/eq/eq_p05_018.png",
+    "y0": 631.15234375,
+    "y1": 641.114990234375
+  },
+  {
+    "n": null,
+    "page": 5,
+    "latex": "",
+    "raw": "\uf8f6",
+    "image": "assets/eq/eq_p05_019.png",
+    "y0": 631.15234375,
+    "y1": 641.114990234375
+  },
+  {
+    "n": null,
+    "page": 5,
+    "latex": "\\partial\\mathcal{L}_{task}",
+    "raw": "\u2202Ltask",
+    "image": "assets/eq/eq_p05_020.png",
+    "y0": 643.1227416992188,
+    "y1": 654.2169189453125
+  },
+  {
+    "n": null,
+    "page": 5,
+    "latex": "\\partial\\mathcal{L}_{t}",
+    "raw": "\u2202Lt",
+    "image": "assets/eq/eq_p05_021.png",
+    "y0": 643.1227416992188,
+    "y1": 654.0565185546875
+  },
+  {
+    "n": null,
+    "page": 5,
+    "latex": "\\partialy\u02c6_{t}",
+    "raw": "\u2202\u02c6yt",
+    "image": "assets/eq/eq_p05_022.png",
+    "y0": 643.251953125,
+    "y1": 654.0555419921875
+  },
+  {
+    "n": null,
+    "page": 5,
+    "latex": "\\partialy\u02c6_{t} + \\partial\\theta \\partialS_{t-1}",
+    "raw": "\u2202\u03b8 + \u2202\u02c6yt \u2202St\u22121",
+    "image": "assets/eq/eq_p05_023.png",
+    "y0": 643.2518920898438,
+    "y1": 667.6295776367188
+  },
+  {
+    "n": null,
+    "page": 5,
+    "latex": "\\partialS_{t-1}",
+    "raw": "\u2202St\u22121",
+    "image": "assets/eq/eq_p05_024.png",
+    "y0": 643.251953125,
+    "y1": 654.0565795898438
+  },
+  {
+    "n": null,
+    "page": 5,
+    "latex": "X",
+    "raw": "X",
+    "image": "assets/eq/eq_p05_025.png",
+    "y0": 647.6903076171875,
+    "y1": 657.6529541015625
+  },
+  {
+    "n": null,
+    "page": 5,
+    "latex": "\uf8ec \uf8ec \uf8ed",
+    "raw": "\uf8ec \uf8ec \uf8ed",
+    "image": "assets/eq/eq_p05_026.png",
+    "y0": 648.6873168945312,
+    "y1": 671.0029907226562
+  },
+  {
+    "n": "7",
+    "page": 5,
+    "latex": ".(7) \uf8f8 \\tag{7}",
+    "raw": "\uf8f7 \uf8f7 \uf8f8. (7)",
+    "image": "assets/eq/eq_p05_027.png",
+    "y0": 648.6873168945312,
+    "y1": 671.0029907226562
+  },
+  {
+    "n": null,
+    "page": 5,
+    "latex": "= \\partial\\theta",
+    "raw": "\u2202\u03b8 =",
+    "image": "assets/eq/eq_p05_028.png",
+    "y0": 649.991943359375,
+    "y1": 666.7885131835938
+  },
+  {
+    "n": null,
+    "page": 5,
+    "latex": "\\partialy\u02c6_{t}",
+    "raw": "\u2202\u02c6yt",
+    "image": "assets/eq/eq_p05_029.png",
+    "y0": 656.825927734375,
+    "y1": 667.6295776367188
+  },
+  {
+    "n": null,
+    "page": 5,
+    "latex": "\\partial\\theta _{Recursive Term}| {z }",
+    "raw": "\u2202\u03b8 | {z } Recursive Term",
+    "image": "assets/eq/eq_p05_030.png",
+    "y0": 656.825927734375,
+    "y1": 679.85791015625
+  },
+  {
+    "n": null,
+    "page": 5,
+    "latex": "^{t}",
+    "raw": "t",
+    "image": "assets/eq/eq_p05_031.png",
+    "y0": 663.7847290039062,
+    "y1": 670.758544921875
+  },
+  {
+    "n": null,
+    "page": 6,
+    "latex": "^{N}_{k}",
+    "raw": "Nk",
+    "image": "assets/eq/eq_p06_032.png",
+    "y0": 351.3836975097656,
+    "y1": 358.9792175292969
+  },
+  {
+    "n": null,
+    "page": 6,
+    "latex": "^{k\\in \\mathcal{K}}_{r}",
+    "raw": "k\u2208Kr",
+    "image": "assets/eq/eq_p06_033.png",
+    "y0": 358.4273376464844,
+    "y1": 366.0522155761719
+  },
+  {
+    "n": null,
+    "page": 13,
+    "latex": "X^{T}",
+    "raw": "T X",
+    "image": "assets/eq/eq_p13_034.png",
+    "y0": 127.22071838378906,
+    "y1": 144.99990844726562
+  },
+  {
+    "n": "8",
+    "page": 13,
+    "latex": "l(f(x_{t}; S_{t-1}, \\theta), x_{t+1}) , \\tag{8}",
+    "raw": "l(f(xt; St\u22121, \u03b8), xt+1) , (8)",
+    "image": "assets/eq/eq_p13_035.png",
+    "y0": 137.3379364013672,
+    "y1": 148.1416015625
+  },
+  {
+    "n": null,
+    "page": 13,
+    "latex": "^{t=1}",
+    "raw": "t=1",
+    "image": "assets/eq/eq_p13_036.png",
+    "y0": 151.30775451660156,
+    "y1": 158.28155517578125
+  },
+  {
+    "n": null,
+    "page": 13,
+    "latex": "S_{t} = S_{t-1} + \\beta_{t}(v_{t} -S_{t-1}k_{t})k^{^{\\top}}",
+    "raw": "St = St\u22121 + \u03b2t(vt \u2212St\u22121kt)k\u22a4",
+    "image": "assets/eq/eq_p13_037.png",
+    "y0": 176.45443725585938,
+    "y1": 189.779541015625
+  },
+  {
+    "n": "9",
+    "page": 13,
+    "latex": "_{t} . \\tag{9}",
+    "raw": "t . (9)",
+    "image": "assets/eq/eq_p13_038.png",
+    "y0": 178.3219451904297,
+    "y1": 190.74755859375
+  },
+  {
+    "n": null,
+    "page": 13,
+    "latex": "\uf8eb",
+    "raw": "\uf8eb",
+    "image": "assets/eq/eq_p13_039.png",
+    "y0": 277.2243347167969,
+    "y1": 287.1869201660156
+  },
+  {
+    "n": null,
+    "page": 13,
+    "latex": "",
+    "raw": "\uf8f6",
+    "image": "assets/eq/eq_p13_040.png",
+    "y0": 277.2243347167969,
+    "y1": 287.1869201660156
+  },
+  {
+    "n": null,
+    "page": 13,
+    "latex": "X^{T}",
+    "raw": "T X",
+    "image": "assets/eq/eq_p13_041.png",
+    "y0": 285.94671630859375,
+    "y1": 303.7259216308594
+  },
+  {
+    "n": null,
+    "page": 13,
+    "latex": "d\\mathcal{J}",
+    "raw": "dJ",
+    "image": "assets/eq/eq_p13_042.png",
+    "y0": 289.1947937011719,
+    "y1": 299.2864990234375
+  },
+  {
+    "n": null,
+    "page": 13,
+    "latex": "\\partiall_{t}",
+    "raw": "\u2202lt",
+    "image": "assets/eq/eq_p13_043.png",
+    "y0": 289.32391357421875,
+    "y1": 300.1285400390625
+  },
+  {
+    "n": null,
+    "page": 13,
+    "latex": "\\partiall_{t} + \\partialS_{t-1}",
+    "raw": "+ \u2202lt \u2202St\u22121",
+    "image": "assets/eq/eq_p13_044.png",
+    "y0": 289.32391357421875,
+    "y1": 313.7015380859375
+  },
+  {
+    "n": null,
+    "page": 13,
+    "latex": "dS_{t-1} \\cdot d\\theta |_{Recursive}{z}",
+    "raw": "\u00b7 dSt\u22121 d\u03b8 | {z } Recursive",
+    "image": "assets/eq/eq_p13_045.png",
+    "y0": 289.32391357421875,
+    "y1": 328.25494384765625
+  },
+  {
+    "n": null,
+    "page": 13,
+    "latex": "\uf8ec \uf8ec \uf8ed",
+    "raw": "\uf8ec \uf8ec \uf8ed",
+    "image": "assets/eq/eq_p13_046.png",
+    "y0": 294.75933837890625,
+    "y1": 317.075927734375
+  },
+  {
+    "n": "10",
+    "page": 13,
+    "latex": ".(10) \uf8f8 \\tag{10}",
+    "raw": "\uf8f7 \uf8f7 \uf8f8. (10)",
+    "image": "assets/eq/eq_p13_047.png",
+    "y0": 294.75933837890625,
+    "y1": 317.075927734375
+  },
+  {
+    "n": null,
+    "page": 13,
+    "latex": "= d\\theta",
+    "raw": "d\u03b8 =",
+    "image": "assets/eq/eq_p13_048.png",
+    "y0": 296.06390380859375,
+    "y1": 312.8605041503906
+  },
+  {
+    "n": null,
+    "page": 13,
+    "latex": "\\partial\\theta |{z}_{Direct}",
+    "raw": "\u2202\u03b8 |{z} Direct",
+    "image": "assets/eq/eq_p13_049.png",
+    "y0": 302.8979187011719,
+    "y1": 325.930908203125
+  },
+  {
+    "n": null,
+    "page": 13,
+    "latex": "^{t=1}",
+    "raw": "t=1",
+    "image": "assets/eq/eq_p13_050.png",
+    "y0": 310.0337219238281,
+    "y1": 317.0075378417969
+  },
+  {
+    "n": null,
+    "page": 13,
+    "latex": "dS_{t}",
+    "raw": "dSt",
+    "image": "assets/eq/eq_p13_051.png",
+    "y0": 395.52490234375,
+    "y1": 406.32952880859375
+  },
+  {
+    "n": null,
+    "page": 13,
+    "latex": "\\partialS_{t} = d\\theta \\partialS_{t-1}",
+    "raw": "d\u03b8 = \u2202St \u2202St\u22121",
+    "image": "assets/eq/eq_p13_052.png",
+    "y0": 395.5249328613281,
+    "y1": 419.9025573730469
+  },
+  {
+    "n": null,
+    "page": 13,
+    "latex": "dS_{t-1}",
+    "raw": "dSt\u22121",
+    "image": "assets/eq/eq_p13_053.png",
+    "y0": 395.5249328613281,
+    "y1": 406.3295593261719
+  },
+  {
+    "n": null,
+    "page": 13,
+    "latex": "\\partialS_{t} + d\\theta",
+    "raw": "d\u03b8 + \u2202St",
+    "image": "assets/eq/eq_p13_054.png",
+    "y0": 395.5249328613281,
+    "y1": 419.0615234375
+  },
+  {
+    "n": null,
+    "page": 13,
+    "latex": "\\partial\\theta",
+    "raw": "\u2202\u03b8",
+    "image": "assets/eq/eq_p13_055.png",
+    "y0": 409.09893798828125,
+    "y1": 419.0615234375
+  },
+  {
+    "n": null,
+    "page": 13,
+    "latex": "\\partialS_{t} \\partialS_{t-1}",
+    "raw": "\u2202St \u2202St\u22121",
+    "image": "assets/eq/eq_p13_056.png",
+    "y0": 453.39892578125,
+    "y1": 477.77655029296875
+  },
+  {
+    "n": null,
+    "page": 13,
+    "latex": "= I -\\beta_{t}k_{t}k^{^{\\top}}",
+    "raw": "= I \u2212\u03b2tktk\u22a4",
+    "image": "assets/eq/eq_p13_057.png",
+    "y0": 458.2703552246094,
+    "y1": 470.9425354003906
+  },
+  {
+    "n": "12",
+    "page": 13,
+    "latex": "_{t} . \\tag{12}",
+    "raw": "t . (12)",
+    "image": "assets/eq/eq_p13_058.png",
+    "y0": 460.1388854980469,
+    "y1": 472.5644836425781
+  },
+  {
+    "n": null,
+    "page": 13,
+    "latex": "\\partialk^{^{\\top}}",
+    "raw": "\u2202k\u22a4",
+    "image": "assets/eq/eq_p13_059.png",
+    "y0": 549.4163818359375,
+    "y1": 560.74853515625
+  },
+  {
+    "n": null,
+    "page": 13,
+    "latex": "\\partialv_{t}",
+    "raw": "\u0012\u2202vt",
+    "image": "assets/eq/eq_p13_060.png",
+    "y0": 550.641357421875,
+    "y1": 561.589599609375
+  },
+  {
+    "n": null,
+    "page": 13,
+    "latex": "",
+    "raw": "\u0013",
+    "image": "assets/eq/eq_p13_061.png",
+    "y0": 550.6412963867188,
+    "y1": 560.6039428710938
+  },
+  {
+    "n": null,
+    "page": 13,
+    "latex": "\\partialS_{t}",
+    "raw": "\u2202St",
+    "image": "assets/eq/eq_p13_062.png",
+    "y0": 550.7859497070312,
+    "y1": 561.589599609375
+  },
+  {
+    "n": null,
+    "page": 13,
+    "latex": "\\partial\\theta^{t}",
+    "raw": "t \u2202\u03b8",
+    "image": "assets/eq/eq_p13_063.png",
+    "y0": 555.5847778320312,
+    "y1": 574.322509765625
+  },
+  {
+    "n": null,
+    "page": 13,
+    "latex": "k^{^{\\top}} \\partial\\theta",
+    "raw": "\u2202\u03b8 k\u22a4",
+    "image": "assets/eq/eq_p13_064.png",
+    "y0": 555.6573486328125,
+    "y1": 574.322509765625
+  },
+  {
+    "n": null,
+    "page": 13,
+    "latex": "\\approx \\beta_{t}",
+    "raw": "\u2248\u03b2t",
+    "image": "assets/eq/eq_p13_065.png",
+    "y0": 557.3967895507812,
+    "y1": 568.32958984375
+  },
+  {
+    "n": null,
+    "page": 13,
+    "latex": "_{t} + v_{t}",
+    "raw": "t + vt",
+    "image": "assets/eq/eq_p13_066.png",
+    "y0": 557.5259399414062,
+    "y1": 569.9515380859375
+  },
+  {
+    "n": "13",
+    "page": 13,
+    "latex": "+ (. . . ). \\tag{13}",
+    "raw": "+ (. . . ). (13)",
+    "image": "assets/eq/eq_p13_067.png",
+    "y0": 557.5259399414062,
+    "y1": 567.7190551757812
+  },
+  {
+    "n": null,
+    "page": 13,
+    "latex": "\\partial\\theta",
+    "raw": "\u2202\u03b8",
+    "image": "assets/eq/eq_p13_068.png",
+    "y0": 564.3599243164062,
+    "y1": 574.322509765625
+  },
+  {
+    "n": "14",
+    "page": 14,
+    "latex": "S_{t} = S_{t-1}W_{t} + U_{t},(14) where W_{t} = (I -\\beta_{t}k_{t}k^{^{\\top}} \\tag{14}",
+    "raw": "St = St\u22121Wt + Ut, (14) where Wt = (I \u2212\u03b2tktk\u22a4",
+    "image": "assets/eq/eq_p14_069.png",
+    "y0": 89.03691101074219,
+    "y1": 115.3544921875
+  },
+  {
+    "n": null,
+    "page": 14,
+    "latex": "Y^{t}",
+    "raw": "tY",
+    "image": "assets/eq/eq_p14_070.png",
+    "y0": 294.1277160644531,
+    "y1": 311.90692138671875
+  },
+  {
+    "n": null,
+    "page": 14,
+    "latex": "W_{\\tau})q_{t}",
+    "raw": "W\u03c4)qt",
+    "image": "assets/eq/eq_p14_071.png",
+    "y0": 304.24591064453125,
+    "y1": 315.0495300292969
+  },
+  {
+    "n": null,
+    "page": 14,
+    "latex": "^{\\tau=i}",
+    "raw": "\u03c4=i",
+    "image": "assets/eq/eq_p14_072.png",
+    "y0": 318.3357238769531,
+    "y1": 325.3095397949219
+  }
+]

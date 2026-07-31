@@ -1,0 +1,50 @@
+[
+  {
+    "text": "Type hints tell you and your tools exactly what a function expects.",
+    "until_line": 1
+  },
+  {
+    "text": "Name is a string, times is an integer defaulting to one, and it returns a string.",
+    "until_line": 1
+  },
+  {
+    "text": "Python doesn't enforce any of this at runtime — it's documentation your editor can check.",
+    "until_line": 1
+  },
+  {
+    "text": "They cost you nothing at runtime and save you real time when the code grows.",
+    "until_line": 1
+  },
+  {
+    "text": "The body repeats the greeting and strips the trailing space.",
+    "until_line": 2
+  },
+  {
+    "text": "Variables take annotations too. Scores is a dict mapping string to int.",
+    "until_line": 4
+  },
+  {
+    "text": "Top is a list of strings, built by a comprehension over the items.",
+    "until_line": 5
+  },
+  {
+    "text": "Anyone reading line five now knows what's inside without running a thing.",
+    "until_line": 5
+  },
+  {
+    "text": "Calling greet with just a name uses the default and greets once.",
+    "until_line": 7
+  },
+  {
+    "text": "Pass three and you get it three times, and top gives us the high scorers.",
+    "until_line": 9
+  },
+  {
+    "text": "Run mypy over this file and it checks every one of those promises for you.",
+    "until_line": 9
+  },
+  {
+    "text": "Next video: enumerate and zip. Comment PYTHON if you want the cheat sheet.",
+    "until_line": 9
+  }
+]

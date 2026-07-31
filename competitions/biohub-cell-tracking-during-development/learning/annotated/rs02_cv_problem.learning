@@ -1,0 +1,46 @@
+@ id: rs02
+@ order: 31
+@ title: Why local CV misleads — the sparse-label trap
+@ subtitle: a detector can look better locally than it really is
+@ source: research/official_repo/src/tracking_cellmot/metrics.py
+
+--- note
+## The trap that wastes weeks
+Our golden-12 is leak-free (rs01) — but it can still **rank two detectors wrong**. The reason is
+the sparse-label adjustment in the metric (me01): FP edges among **unlabelled** cells are ignored.
+So a detector that over-predicts into unlabelled space pays **no local penalty** — but it *does*
+pay on the real (differently-labelled) test.
+
+--- note
+### The proof — canqiang inverts
+**[Data — measured, not guessed]** We ran a second public detector, `canqiang`. It is **denser**
+than pilkwang. On our local metric it scores **higher**; on the real LB it scores **lower**. The
+ranking is **inverted**:
+--- output
+| detector | golden-12 (local) | public LB | agree? |
+|---|---|---|---|
+| pilkwang | 0.870 | **0.885** | — |
+| canqiang | **0.903** | 0.866 | ❌ inverted |
+
+--- note
+### Why — density is free locally
+**[Domain]** canqiang predicts many cells; the extra ones land in unlabelled regions → the metric
+**ignores** them locally → its score inflates. On the real test (a different, unseen embryo) those
+extra predictions become real errors. **A denser detector always looks better locally than it is.**
+--- code
+# the metric only judges edges touching a GT-tracked node (me01):
+n_valid_pred_edges = int(edge_attrs["pred_valid"].sum())   # ignores FP in unlabelled space
+# => predicting MORE cells cannot hurt the local score, but can hurt the LB
+--- shape
+dense → inflated local<br>→ local CV can invert<br>→ **Kaggle LB is truth**
+
+--- note
+### The rule we adopted
+**[Craft]** Trust local CV for **relative** tweaks to the *same* precise detector (it's honest
+there). Do **not** trust it to rank a *denser* detector higher — validate density changes on the
+**Kaggle LB**. This single lesson saved us from chasing a mirage.
+--- shape
+same detector → trust local<br>denser detector → trust LB
+
+--- note
+**Next → rs03: the one place with real headroom — divisions.**

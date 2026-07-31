@@ -1,0 +1,33 @@
+# Reproduces pilkwang's 0.687 recipe (the public bar). Key lesson: the fancier V2/V3
+# tracking machinery (velocity prior, gap closing, Kalman) scores LOWER (0.611-0.618) than this
+# cleaner baseline — so they are OFF here. Win via detection quality + count control + pruning.
+run_name: pilkwang_0687
+
+SCALE: [1.625, 0.40625, 0.40625]
+MATCH_GATE_UM: 7.0
+
+# detection (pilkwang's exact knobs)
+XY_DS: 4
+SMOOTH_SIGMA: 1.0
+MIN_PEAK_DIST: 2
+THRESH_REL: 0.20
+USE_SUBVOXEL: true
+REFINE_RZ: 2
+REFINE_RYX: 5
+USE_BORDER_FILTER: true
+BORDER_KEEP_QUANTILE: 0.70   # drop weak border peaks (tile-scan artifacts)
+BORDER_MARGIN_VOX: 2
+NMS_RADIUS_UM: 2.65          # physical NMS removes duplicate detections
+
+# linking — keep it SIMPLE (complexity hurt on LB)
+MAX_LINK_DIST_UM: 11.0
+USE_VELOCITY_PRIOR: false    # V3 velocity prior scored 0.611 < 0.687 -> OFF
+USE_GAP_CLOSING: false       # gap closing scored lower -> OFF
+
+# divisions — conservative
+DETECT_DIVISIONS: true
+DIV_PARENT_DIST_UM: 8.75
+DIV_SISTER_DIST_UM: 6.25
+
+# post
+PRUNE_ISOLATED_NODES: true

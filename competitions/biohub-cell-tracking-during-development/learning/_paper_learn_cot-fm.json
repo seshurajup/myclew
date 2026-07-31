@@ -1,0 +1,39 @@
+{
+  "slug": "cot-fm",
+  "lessons": 8,
+  "ids": [
+    "cfmb1",
+    "cfm02",
+    "cfm03",
+    "cfm04",
+    "cfm05",
+    "cfm06",
+    "cfm10",
+    "cfmz1"
+  ],
+  "coverage": {
+    "total": 15,
+    "placed": 15,
+    "missing": [],
+    "taught": 15,
+    "untaught": [],
+    "proven": 15,
+    "unproven": [],
+    "cropped": 10,
+    "figures": 52,
+    "figures_placed": 44,
+    "lessons": 6
+  },
+  "curriculum": {
+    "appended": true,
+    "section": "COT-FM (2026) \u2014 who gets paired with whom decides how straight the flow is",
+    "lessons": 8
+  },
+  "pruned": [],
+  "code_cells": 19,
+  "cells_with_output": 19,
+  "silent_lessons": [],
+  "out_dir": "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated",
+  "assets": "learning/assets/cot-fm",
+  "python": "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/research/cellmot_venv/bin/python"
+}

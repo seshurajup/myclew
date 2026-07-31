@@ -1,0 +1,49 @@
+@ id: dopd04
+@ order: 623
+@ title: Results & claims — what the paper reports
+@ subtitle: weak teacher lifts a stronger student past its ceiling; shifts stack
+@ source: repo README + scripts/train_justrl_qwen.sh + datasets/eval
+
+--- note
+## Honesty note on figures
+The paper's PDF (arXiv 2607.05394) is **not in the cloned repo** (the repo ships only code, patched verl,
+eval parquets, and setup docs — no figure assets), so unlike our Gemma-4 / BitNet lessons we cannot render the
+authors' figures. What we CAN do — and did — is **reproduce the central claim ourselves and measure it** on the
+RTX 5090 (dopd06). The figure in this section is therefore our own measured result, not the paper's.
+
+--- note
+## The reported setup
+- **Weak RL teacher:** `JustRL-DeepSeek-1.5B` (a small model already RL-trained on math).
+- **Reference teacher:** `DeepSeek-R1-Distill-Qwen-1.5B` (the *pre-RL* version → gives Δ_T).
+- **Stronger student:** `Qwen3-1.7B` (better base, not yet RL'd on this task).
+- **Task:** competition math reasoning; train on Skywork-OR1 DAPO math, **eval on AIME-24, AIME-25, HMMT-Feb**
+  (the parquets shipped in `datasets/eval/`), long generations (val up to 32k tokens).
+- **Infra:** patched **verl** + vLLM/SGLang rollouts, GRPO-family update, `token_reward_direct` advantage.
+
+--- note
+## The four claims (as stated in the repo highlights)
+1. **Weak-to-strong:** a weak RL teacher **improves a stronger student** by transferring the RL-learned
+   direction — the student ends up **better than the weak teacher**.
+2. **No ceiling import:** because Direct-OPD does **not** match the post-RL teacher endpoint, it **avoids
+   importing the weak teacher's capacity ceiling** (which standard endpoint distillation would).
+3. **Credit-assignment reuse:** doing the expensive RL credit-assignment **once on the small model**, then
+   transferring the direction, **reduces the need to re-discover it on the larger model** (cheaper than RL-ing
+   the big model directly).
+4. **Sequential stacking:** policy shifts from **different RL processes** can be applied **sequentially** to the
+   same student (Δ_T's compose).
+
+--- image
+learning/assets/direct-opd/dopd_measured.png
+OUR measured reproduction (dopd06), standing in for the paper's results figure. The weak teacher's RL ceiling
+(red) sits far below the strong student's base (blue). Standard **endpoint distillation drags the strong
+student DOWN to the weak ceiling** (grey bar ≈ red line) — claim 2's failure mode, shown directly. **Direct-OPD
+(green) sits above both the weak teacher and endpoint distillation** — claim 1, in 7/8 seeds. The purple bar is
+the student's own attainable ceiling (direct RL), for scale.
+
+--- note
+## What the claims do and don't say (read carefully)
+The headline is **"beats the weak teacher and beats endpoint distillation."** That is the robust, central
+result and the one we reproduce cleanly. Whether the direction-transferred student also exceeds its **own
+pre-existing base** depends on how good the teacher's direction is (a very weak teacher's Δ_T can be net-neutral
+on skills the student already has) — our dopd06 measures exactly this regime dependence honestly, rather than
+asserting the strongest version everywhere.

@@ -1,0 +1,56 @@
+{
+  "slug": "tabfm",
+  "title": "TabFM: Tabular Foundation Models (google-research)",
+  "source": "https://github.com/google-research/tabfm",
+  "commit": "",
+  "local": "research/tabfm_repo",
+  "kind": "repo",
+  "sections": [
+    {
+      "num": "1",
+      "title": "The scikit-learn contract \u2014 fit stores, predict computes",
+      "page": 1,
+      "level": 1
+    },
+    {
+      "num": "2",
+      "title": "Encoding \u2014 how arbitrary columns become numbers",
+      "page": 2,
+      "level": 1
+    },
+    {
+      "num": "3",
+      "title": "Scaling \u2014 outliers, zero variance, and noise-then-quantile",
+      "page": 3,
+      "level": 1
+    },
+    {
+      "num": "4",
+      "title": "Ensembling over VIEWS, not models",
+      "page": 4,
+      "level": 1
+    },
+    {
+      "num": "5",
+      "title": "The padding contract",
+      "page": 5,
+      "level": 1
+    },
+    {
+      "num": "6",
+      "title": "The architecture \u2014 a Set Transformer over cells",
+      "page": 6,
+      "level": 1
+    },
+    {
+      "num": "7",
+      "title": "The in-context cache \u2014 prefill, decode, int8",
+      "page": 7,
+      "level": 1
+    }
+  ],
+  "pages": 7,
+  "figures": [],
+  "md": "research/tabfm_repo/README.md",
+  "equations_json": "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/docs/repos/tabfm/units.json"
+}

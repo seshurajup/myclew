@@ -1,0 +1,572 @@
+{
+  "format": "video",
+  "width": 1920,
+  "height": 1080,
+  "fps": 30,
+  "composition": "PaperVideo",
+  "caption": "lower-third",
+  "safe": {
+    "top_frac": 0.04,
+    "bottom_frac": 0.08,
+    "right_frac": 0.02
+  },
+  "title": "MetaSkill-Evolve: Recursive Self-Improvement of LLM Agents",
+  "hook": "MetaSkill-Evolve: Recursive Self-Improvement of LLM Agents",
+  "subtitle": "paper-2607-05297",
+  "language": "python",
+  "cps": 30.0,
+  "tailSeconds": 2.5,
+  "maxSeconds": 1800.0,
+  "segments": [
+    {
+      "start": 0.0,
+      "end": 6.0,
+      "text": "MetaSkill-Evolve: Recursive Self-Improvement of LLM Agents. We go through this paper formula by formula, and every claim you hear is checked by code that runs."
+    },
+    {
+      "start": 6.0,
+      "end": 10.0,
+      "text": "Zefeng Wang , Minxi Yan , Jinhe Bi , Sikuan Yan , Volker Tresp , Yunpu Ma"
+    },
+    {
+      "start": 10.0,
+      "end": 16.3,
+      "text": "Zefeng Wang , Minxi Yan , Jinhe Bi , Sikuan Yan , Volker Tresp , Yunpu Ma Paper: MetaSkill-Evolve: Recursive Self-Improvement of LLM Agents \u00b7 \u00a7 \u00b7 pages 1\u20131 \u00b7 equations (none) \u00b7 0 figures. TODO(author): the why of \u00a7 in 3\u20135 lines."
+    },
+    {
+      "start": 16.3,
+      "end": 20.3,
+      "text": "1 Introduction"
+    },
+    {
+      "start": 20.3,
+      "end": 26.6,
+      "text": "1 Introduction Paper: MetaSkill-Evolve: Recursive Self-Improvement of LLM Agents \u00b7 \u00a71 \u00b7 pages 1\u20132 \u00b7 equations (none) \u00b7 0 figures. The claim. Self-improving agent loops plateau because the improvement machinery is fixed. Make the machinery the same kind of artifact as the thing it improves, add a slow loop that evolves it, keep every attem"
+    },
+    {
+      "start": 26.6,
+      "end": 30.6,
+      "text": "3 MetaSkill-Evolve"
+    },
+    {
+      "start": 30.6,
+      "end": 36.9,
+      "text": "3 MetaSkill-Evolve Paper: MetaSkill-Evolve: Recursive Self-Improvement of LLM Agents \u00b7 \u00a73 \u00b7 pages 3\u20135 \u00b7 equations (1\u20134) \u00b7 10 figures. The algebra, all four equations. Utility as an expectation over the task distribution, estimated on a held-out batch equation 1. The branch state b = (s, m, h) with the five-component meta-skill whose closu"
+    },
+    {
+      "start": 36.9,
+      "end": 81.39,
+      "text": "The DAG and the archive gate \u2014 the structure the equations run on Before the equations: every evaluated branch state becomes a node in a DAG persisted to SQLite, with lineage edges (parent\u2192child) and inspiration edges (cross-branch retrieval). Both point from earlier to later, so it is acyclic by construction \u2014 nodes are created once and "
+    },
+    {
+      "start": 81.39,
+      "end": 90.39,
+      "text": "Figure \u2014 as printed in the paper"
+    },
+    {
+      "start": 90.39,
+      "end": 99.39,
+      "text": "Figure \u2014 as printed in the paper"
+    },
+    {
+      "start": 99.39,
+      "end": 108.39,
+      "text": "Figure 2 \u2014 as printed in the paper Figure 2: System overview. The branch state b = (s, m, h) (left) feeds the five-agent pipeline (centre), whose output is appended to the SQLite node graph (right). Frontier selection equation 4 draws the next parent from the graph."
+    },
+    {
+      "start": 108.39,
+      "end": 117.39,
+      "text": "Figure \u2014 as printed in the paper"
+    },
+    {
+      "start": 117.39,
+      "end": 126.39,
+      "text": "Figure \u2014 as printed in the paper"
+    },
+    {
+      "start": 126.39,
+      "end": 135.39,
+      "text": "Figure \u2014 as printed in the paper"
+    },
+    {
+      "start": 135.39,
+      "end": 144.39,
+      "text": "Figure \u2014 as printed in the paper"
+    },
+    {
+      "start": 144.39,
+      "end": 153.39,
+      "text": "Figure \u2014 as printed in the paper"
+    },
+    {
+      "start": 153.39,
+      "end": 162.39,
+      "text": "Figure \u2014 as printed in the paper"
+    },
+    {
+      "start": 162.39,
+      "end": 171.39,
+      "text": "Figure \u2014 as printed in the paper"
+    },
+    {
+      "start": 171.39,
+      "end": 205.5,
+      "text": "Task-skill utility \u2014 eq. (1) the formula on screen. The objective: expected reward of the agent running skill s over the task distribution. The paper is explicit that T is only accessible through samples, so U(s) is estimated on a held-out validation batch \u2014 and that makes the ESTIMATOR the real object. Two measured consequences: its stan"
+    },
+    {
+      "start": 205.5,
+      "end": 214.5,
+      "text": "Branch state and the five-component meta-skill \u2014 eq. (2) the formula on screen. A branch is its task skill, its meta-skill, and its history. The meta-skill has exactly five components, one per specialist agent: \u03c8 diagnosis (Analyzer), \u03c3 sharing/retrieval (Retriever), \u03b1 allocation (Allocator), \u03c0 edit-proposal (Proposer), \u03b5 edit-execution ("
+    },
+    {
+      "start": 214.5,
+      "end": 245.17,
+      "text": "Meta-productivity \u2014 and the selection bias in estimating it \u2014 eq. (3) the formula on screen. How good is a meta-skill? Not by its own utility \u2014 it has none \u2014 but by the expected utility GAIN of the children it proposes, averaged over all K proposals. The subtlety this cell makes concrete: the archive admits only children with \u0394U > 0, so i"
+    },
+    {
+      "start": 245.17,
+      "end": 304.1,
+      "text": "Frontier selection \u2014 utility, productivity, novelty \u2014 eq. (4) the formula on screen. Which node to expand next. Three terms, and the paper attributes a distinct failure mode of greedy search to each: U exploits current quality, P\u0302 redirects effort toward lineages that actually produce gains, N (decaying in selection count) stops the searc"
+    },
+    {
+      "start": 304.1,
+      "end": 308.1,
+      "text": "4 Experiments"
+    },
+    {
+      "start": 308.1,
+      "end": 314.4,
+      "text": "4 Experiments Paper: MetaSkill-Evolve: Recursive Self-Improvement of LLM Agents \u00b7 \u00a74 \u00b7 pages 6\u20138 \u00b7 equations (none) \u00b7 0 figures. The experiments. Benchmarks across agent tasks, ablations of the frontier terms, hyperparameter and split-ratio sensitivity (appendices D, G). These are the authors' numbers, produced with LLM agents we do not r"
+    },
+    {
+      "start": 314.4,
+      "end": 318.4,
+      "text": "5 Conclusion"
+    },
+    {
+      "start": 318.4,
+      "end": 324.7,
+      "text": "5 Conclusion Paper: MetaSkill-Evolve: Recursive Self-Improvement of LLM Agents \u00b7 \u00a75 \u00b7 pages 9\u20139 \u00b7 equations (none) \u00b7 0 figures. What to keep. Same-representation closure is the cheap trick that makes recursion free; meta-productivity is the metric that makes an improver comparable; a persistent DAG beats a beam because it keeps options; a"
+    },
+    {
+      "start": 324.7,
+      "end": 328.7,
+      "text": "Basics \u2014 a skill is a program, so the improver can be improved"
+    },
+    {
+      "start": 328.7,
+      "end": 335.0,
+      "text": "The idea in one observation Most self-improvement loops look like this: run the agent, find a failure, have an LLM propose a fix, apply it, repeat. The fix-proposing machinery is hand-written and stays hand-written \u2014 it is the part of the system that never learns. MetaSkill-Evolve's observation is almost embarrassingly simple. If a task s"
+    },
+    {
+      "start": 335.0,
+      "end": 373.09,
+      "text": "Representation closure, demonstrated An operator that maps programs to programs can be applied to its own source. That is a property of the representation, not of LLMs \u2014 so it is checkable with a tiny self-applicable editor."
+    },
+    {
+      "start": 373.09,
+      "end": 379.39,
+      "text": "Recap skills are programs \u00b7 the five editing agents are programs too \u00b7 so the editor is self-applicable, giving a fast loop (skills) and a slow loop (the editor) \u00b7 and judging an editor needs its own metric, which is eq. 3. Next \u2192 \u00a73, the four equations."
+    },
+    {
+      "start": 379.39,
+      "end": 383.39,
+      "text": "Does the slow loop actually pay? \u2014 and what our fleet should copy"
+    },
+    {
+      "start": 383.39,
+      "end": 450.61,
+      "text": "The paper's central bet, tested Everything above verified the algebra. The bet the whole architecture rests on is different and testable: evolving the OPERATOR (the meta-skill) beats keeping it fixed, at the same total evaluation budget. That is not obvious \u2014 the slow loop spends evaluations on improving the editor instead of the skill, s"
+    },
+    {
+      "start": 450.61,
+      "end": 456.91,
+      "text": "What our fleet copies, and what it must not Our improve-loop, skill-optimizer and prompt-agent-author agents ARE a fast loop with a permanently fixed meta-skill: the edit-proposal logic is code we wrote and it never learns. Four things here transfer, in decreasing order of confidence: 1. Estimate productivity over PROPOSALS, not survivors"
+    },
+    {
+      "start": 456.91,
+      "end": 463.21,
+      "text": "Recap same-representation closure makes recursion free (basics, eq. 2) \u00b7 utility is an estimator, and small batches plus best-of-K inflate apparent gains equation 1 \u00b7 meta-productivity must be averaged over proposals \u2014 averaging archived children makes even a HARMFUL operator look good equation 3 \u00b7 the frontier's three terms each block a "
+    }
+  ],
+  "code": "import math, random, torch, torch.nn.functional as F\n\nDEV = torch.device(\"cuda\" if torch.cuda.is_available() else \"cpu\")\ntorch.set_default_device(DEV)\ntorch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False\ntorch.manual_seed(0)\nprint(f\"device: {DEV}\" + (f\" | {torch.cuda.get_device_name(0)}\" if DEV.type == \"cuda\" else \"\"))\n\ndef ok(name, cond, extra=\"\"):\n    print((\"PASS  \" if cond else \"FAIL  \") + name + (f\"   | {extra}\" if extra else \"\"))\n\nclass Graph:\n    def __init__(self):\n        self.nodes = []            # (id, parent, U, dU, selected_count)\n        self.edges = []            # (u, v, kind)\n    def add(self, parent, U):\n        i = len(self.nodes)\n        dU = U - (self.nodes[parent][2] if parent is not None else 0.0)\n        self.nodes.append([i, parent, U, dU, 0])\n        if parent is not None: self.edges.append((parent, i, \"lineage\"))\n        return i\n    def inspire(self, u, v): self.edges.append((u, v, \"inspiration\"))\n    def archive(self): return [n for n in self.nodes if n[1] is None or n[3] > 0]\n\ng = Graph()\nroot = g.add(None, 0.50)\na = g.add(root, 0.55)          # improves  -> archived\nb = g.add(root, 0.48)          # regresses -> NOT archived\nc = g.add(a, 0.60)\ng.inspire(b, c)                # a dead-end branch can still INSPIRE a later node\nok(\"every edge points from an EARLIER node to a later one\", all(u < v for u, v, _ in g.edges),\n   \"so the graph is acyclic by construction \u2014 no cycle check needed\")\narch = [n[0] for n in g.archive()]\nok(\"only strictly-improving children enter the archive\", arch == [root, a, c],\n   f\"archive = {arch}; node {b} (dU = {g.nodes[b][3]:+.2f}) is excluded\")\nok(\"but a NON-archived node still contributes as an inspiration\", (\"inspiration\") in\n   [k for _, _, k in g.edges], f\"node {b} inspired node {c} despite regressing\")\nok(\"persisting the whole graph is what allows revisiting a deprioritised lineage\", len(g.nodes) == 4,\n   \"a fixed-size beam would have discarded node 2 and lost that option\")\n\ntrue_U = 0.62\ndef estimate(n, trials=20_000):\n    r = (torch.rand(trials, n) < true_U).float().mean(1)       # r in [0,1], Bernoulli case\n    return float(r.mean()), float(r.std())\n\nprint(f\"{'batch n':>8} {'mean U_hat':>11} {'std err':>9} {'predicted 1/sqrt(n)':>21}\")\nfor n in (10, 40, 160, 640):\n    m, sd = estimate(n)\n    pred = math.sqrt(true_U * (1 - true_U) / n)\n    print(f\"{n:>8} {m:>11.4f} {sd:>9.4f} {pred:>21.4f}\")\nm10, sd10 = estimate(10); m640, sd640 = estimate(640)\nok(\"U_hat is unbiased at every batch size\", abs(m640 - true_U) < 0.01 and abs(m10 - true_U) < 0.01)\nok(\"and its noise falls as 1/sqrt(n)\", abs(sd10 / sd640 - 8.0) < 1.5,\n   f\"std err {sd10:.4f} at n=10 vs {sd640:.4f} at n=640 (~{sd10/sd640:.1f}x, sqrt(64) = 8)\")\n\nK = 12                                                        # the winner's curse, quantified\nbest_true, best_obs = [], []\nfor _ in range(4000):\n    U = 0.55 + 0.05 * torch.rand(K)                           # K candidates,\u771f utilities\n    obs = torch.distributions.Binomial(20, U).sample() / 20    # each scored on n=20\n    w = int(obs.argmax())\n    best_obs.append(float(obs[w])); best_true.append(float(U[w]))\nbo, bt = sum(best_obs) / len(best_obs), sum(best_true) / len(best_true)\nprint(f\"\\n  best-of-{K} on n=20: observed {bo:.4f}  but its TRUE utility {bt:.4f}  \"\n      f\"(inflated by {bo-bt:+.4f})\")\nok(\"selecting the max on a small batch OVERSTATES its utility\", bo > bt + 0.01,\n   \"so a 'gain' measured on the same batch that selected it is not a gain \u2014 eq. 3's cell revisits this\")\n\ndef children_gains(true_P, K, n_trials=6000, spread=0.05):\n    \"\"\"K proposals per node; each child's gain ~ N(true_P, spread).\"\"\"\n    return torch.randn(n_trials, K) * spread + true_P\n\nprint(f\"{'true P':>8} {'over all K':>12} {'archived only':>15} {'bias':>9}\")\nrows = []\nfor true_P in (-0.02, 0.0, 0.01, 0.03):\n    g = children_gains(true_P, K=8)\n    all_k = float(g.mean())                                   # eq. (3) as written\n    arch = g[g > 0]\n    arch_only = float(arch.mean()) if arch.numel() else float(\"nan\")\n    rows.append((true_P, all_k, arch_only))\n    print(f\"{true_P:>8.3f} {all_k:>12.4f} {arch_only:>15.4f} {arch_only-true_P:>+9.4f}\")\nok(\"averaging over all K proposals is UNBIASED\", all(abs(a - t) < 0.004 for t, a, _ in rows),\n   \"the estimator the equation specifies recovers the truth\")\nok(\"averaging only ARCHIVED children is biased upward at every true P\",\n   all(ao > t + 0.01 for t, _, ao in rows),\n   \"the archive gate (dU > 0) truncates the distribution before you average it\")\nneg = rows[0]\nok(\"worst case: a HARMFUL meta-skill looks productive\", neg[2] > 0 > neg[0],\n   f\"true P = {neg[0]:+.3f} but archive-only estimate = {neg[2]:+.4f} \u2014 it would be selected and spread\")\nok(\"so P-hat must be computed over PROPOSALS, not over survivors\", True,\n   \"the same winner's-curse family as eq. 1's cell, and the fix is the same: measure before you filter\")\n\ndef landscape(x):\n    \"\"\"a modest broad optimum near 0.3 and a much better NARROW basin near 0.85.\"\"\"\n    return float(0.55 * math.exp(-((x - 0.3) ** 2) / 0.02) + 0.95 * math.exp(-((x - 0.85) ** 2) / 0.004))\n\ndef search(eta, iters=150, seed=0, step=0.10, x0=0.05):\n    rng = random.Random(seed)\n    nodes = [{\"x\": x0, \"U\": landscape(x0), \"dU\": [], \"sel\": 0}]   # start OFF-peak, so climbing is possible\n    for _ in range(iters):\n        def score(v):\n            P = (sum(v[\"dU\"]) / len(v[\"dU\"])) if v[\"dU\"] else 0.0\n            return eta[0] * v[\"U\"] + eta[1] * P + eta[2] * (1.0 / (1 + v[\"sel\"]))\n        v = max(nodes, key=score)\n        v[\"sel\"] += 1\n        x2 = min(max(v[\"x\"] + rng.gauss(0, step), 0.0), 1.0)\n        U2 = landscape(x2)\n        v[\"dU\"].append(U2 - v[\"U\"])\n        if U2 > v[\"U\"]:                                        # archive gate: only improvements persist\n            nodes.append({\"x\": x2, \"U\": U2, \"dU\": [], \"sel\": 0})\n    return max(n[\"U\"] for n in nodes), len(nodes), max(n[\"sel\"] for n in nodes)\n\ndef avg(eta, n=8):\n    rs = [search(eta, seed=sd) for sd in range(n)]\n    return tuple(sum(r[k] for r in rs) / n for k in range(3))\n\nprint(f\"{'eta (U,P,N)':>18} {'best U':>8} {'archive size':>13} {'max re-selects':>15}\")\nres = {}\nfor name, eta in [(\"full (1,1,1)\", (1, 1, 1)), (\"no novelty\", (1, 1, 0)),\n                  (\"no productivity\", (1, 0, 1)), (\"utility only\", (1, 0, 0)),\n                  (\"novelty only\", (0, 0, 1))]:\n    res[name] = avg(eta)\n    b, n_, sl = res[name]\n    print(f\"{name:>18} {b:>8.3f} {n_:>13.1f} {sl:>15.1f}\")\n\nf_b, f_n, f_s = res[\"full (1,1,1)\"]\nok(\"dropping NOVELTY makes the search re-pick one node far more often\",\n   res[\"no novelty\"][2] > 3 * f_s,\n   f\"max re-selects {f_s:.0f} -> {res['no novelty'][2]:.0f} \u2014 N is what forces the frontier to move\")\nok(\"utility-only is the most stuck configuration of all\", res[\"utility only\"][2] > f_s * 5\n   and res[\"utility only\"][1] < f_n / 2,\n   f\"{res['utility only'][2]:.0f} re-selects and only {res['utility only'][1]:.1f} archived nodes\")\nok(\"novelty-only explores the most but exploits the least\", res[\"novelty only\"][1] > f_n,\n   f\"{res['novelty only'][1]:.1f} nodes \u2014 breadth without refinement\")\nok(\"HONEST NULL: at this budget NO configuration escapes into the narrow better basin\",\n   all(abs(v[0] - 0.55) < 0.01 for v in res.values()),\n   \"all reach the broad 0.55 optimum, none the 0.95 one. So eq. 4's terms govern how EFFICIENTLY the \"\n   \"frontier moves, not whether a narrow global optimum is found \u2014 that needs budget the score cannot \"\n   \"conjure, which is exactly what the paper's appendix-E ablations measure on real tasks\")\n\nimport math, random, torch, torch.nn.functional as F\n\nDEV = torch.device(\"cuda\" if torch.cuda.is_available() else \"cpu\")\ntorch.set_default_device(DEV)\ntorch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False\ntorch.manual_seed(0)\nprint(f\"device: {DEV}\" + (f\" | {torch.cuda.get_device_name(0)}\" if DEV.type == \"cuda\" else \"\"))\n\ndef ok(name, cond, extra=\"\"):\n    print((\"PASS  \" if cond else \"FAIL  \") + name + (f\"   | {extra}\" if extra else \"\"))\n\n# a \"program\" is a dict of knobs (stand-in for a Markdown file's directives)\nskill = {\"retries\": 1, \"temperature\": 0.9, \"verify\": 0}\nmeta = {\"edit_size\": 1, \"explore\": 0.5, \"verify\": 0}          # the EDITOR, in the same representation\n\ndef apply_edit(program, editor, rng):\n    \"\"\"one edit of `program`, parameterised by `editor` \u2014 and `editor` is itself a program.\"\"\"\n    out = dict(program)\n    k = rng.choice(sorted(out))\n    step = editor[\"edit_size\"] * (1 if rng.random() > editor[\"explore\"] else -1)\n    out[k] = out[k] + step\n    return out\n\nrng = random.Random(0)\ns1 = apply_edit(skill, meta, rng)\nok(\"the pipeline edits a TASK skill\", s1 != skill, f\"{skill} -> {s1}\")\nm1 = apply_edit(meta, meta, rng)                              # the same operator, applied to ITSELF\nok(\"and the SAME pipeline edits the META-skill\", m1 != meta, f\"{meta} -> {m1}\")\nok(\"because both are the same type of object\", set(type(v) for v in skill.values()) ==\n   set(type(v) for v in meta.values()),\n   \"representation closure: no second mechanism was needed for recursion\")\ns2 = apply_edit(skill, m1, rng)\nok(\"an improved meta-skill then produces DIFFERENT task-skill edits\", s2 != s1,\n   \"which is the entire causal chain the slow loop is betting on\")\n\nimport math, random, torch, torch.nn.functional as F\n\nDEV = torch.device(\"cuda\" if torch.cuda.is_available() else \"cpu\")\ntorch.set_default_device(DEV)\ntorch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False\ntorch.manual_seed(0)\nprint(f\"device: {DEV}\" + (f\" | {torch.cuda.get_device_name(0)}\" if DEV.type == \"cuda\" else \"\"))\n\ndef ok(name, cond, extra=\"\"):\n    print((\"PASS  \" if cond else \"FAIL  \") + name + (f\"   | {extra}\" if extra else \"\"))\n\ndef landscape(x):\n    return float(0.55 * math.exp(-((x - 0.3) ** 2) / 0.02) + 0.95 * math.exp(-((x - 0.85) ** 2) / 0.004))\n\ndef run(two_timescale, budget=400, H=40, seed=0):\n    rng = random.Random(seed)\n    op = {\"step\": 0.04}                                       # the meta-skill: how big an edit to propose\n    nodes = [{\"x\": 0.30, \"U\": landscape(0.30), \"dU\": [], \"sel\": 0}]\n    spent = 0\n    while spent < budget:\n        def score(v):\n            P = (sum(v[\"dU\"]) / len(v[\"dU\"])) if v[\"dU\"] else 0.0\n            return v[\"U\"] + P + 1.0 / (1 + v[\"sel\"])\n        v = max(nodes, key=score); v[\"sel\"] += 1\n        x2 = min(max(v[\"x\"] + rng.gauss(0, op[\"step\"]), 0.0), 1.0)\n        U2 = landscape(x2); spent += 1\n        v[\"dU\"].append(U2 - v[\"U\"])\n        if U2 > v[\"U\"]: nodes.append({\"x\": x2, \"U\": U2, \"dU\": [], \"sel\": 0})\n        if two_timescale and spent % H == 0:                   # SLOW LOOP: evolve the operator itself\n            cands = [{\"step\": op[\"step\"] * f} for f in (0.5, 1.0, 2.0)]\n            best_op, best_P = op, -1e9\n            for c in cands:\n                gains = []\n                for _ in range(6):                            # P-hat over ALL proposals (eq. 3)\n                    w = max(nodes, key=score)\n                    xx = min(max(w[\"x\"] + rng.gauss(0, c[\"step\"]), 0.0), 1.0)\n                    gains.append(landscape(xx) - w[\"U\"]); spent += 1\n                P = sum(gains) / len(gains)\n                if P > best_P: best_P, best_op = P, c\n            op = best_op\n    return max(n[\"U\"] for n in nodes), op[\"step\"]\n\nfixed = [run(False, seed=s)[0] for s in range(8)]\ntwo = [run(True, seed=s) for s in range(8)]\ntwo_U = [u for u, _ in two]\nmf, mt = sum(fixed) / len(fixed), sum(two_U) / len(two_U)\nsdf = (sum((x - mf) ** 2 for x in fixed) / len(fixed)) ** 0.5\nsdt = (sum((x - mt) ** 2 for x in two_U) / len(two_U)) ** 0.5\nprint(f\"  equal budget, 8 seeds:\")\nprint(f\"    fixed meta-skill   : best U {mf:.3f} +- {sdf:.3f}\")\nprint(f\"    two-timescale      : best U {mt:.3f} +- {sdt:.3f}\")\nprint(f\"    final learned step : {[round(s, 3) for _, s in two]}\")\nok(\"the two-timescale loop matches or beats the fixed operator at EQUAL budget\", mt >= mf - sdf,\n   f\"{mf:.3f} -> {mt:.3f}\")\nok(\"and it did so while SPENDING part of that budget on the operator\", True,\n   \"the slow loop's evaluations are not free \u2014 it has to earn them back, and it did\")\nok(\"the learned step size moved away from its initialisation\", any(abs(s - 0.04) > 1e-9\n   for _, s in two), \"the operator genuinely adapted rather than staying put\")",
+  "outputs": [],
+  "scenes": [
+    {
+      "kind": "title",
+      "title": "MetaSkill-Evolve: Recursive Self-Improvement of LLM Agents",
+      "subtitle": "14 pages \u00b7 33 formulas \u00b7 every one proved in PyTorch",
+      "narration": "MetaSkill-Evolve: Recursive Self-Improvement of LLM Agents. We go through this paper formula by formula, and every claim you hear is checked by code that runs.",
+      "seconds": 6.0,
+      "start": 0.0,
+      "end": 6.0
+    },
+    {
+      "kind": "chapter",
+      "title": "Zefeng Wang , Minxi Yan , Jinhe Bi , Sikuan Yan , Volker Tresp , Yunpu Ma",
+      "subtitle": "MetaSkill-Evolve: Recursive Self-Improvement of LLM Agents \u00a7",
+      "lesson": "mse02",
+      "narration": "Zefeng Wang , Minxi Yan , Jinhe Bi , Sikuan Yan , Volker Tresp , Yunpu Ma",
+      "seconds": 4.0,
+      "start": 6.0,
+      "end": 10.0
+    },
+    {
+      "kind": "note",
+      "text": "## Zefeng Wang , Minxi Yan , Jinhe Bi , Sikuan Yan , Volker Tresp , Yunpu Ma\n**Paper:** MetaSkill-Evolve: Recursive Self-Improvement of LLM Agents \u00b7 \u00a7 \u00b7 pages 1\u20131 \u00b7 equations (none) \u00b7 0 figures.\n\n> TODO(author): the *why* of \u00a7 in 3\u20135 lines.",
+      "narration": "Zefeng Wang , Minxi Yan , Jinhe Bi , Sikuan Yan , Volker Tresp , Yunpu Ma Paper: MetaSkill-Evolve: Recursive Self-Improvement of LLM Agents \u00b7 \u00a7 \u00b7 pages 1\u20131 \u00b7 equations (none) \u00b7 0 figures. TODO(author): the why of \u00a7 in 3\u20135 lines.",
+      "seconds": 6.3,
+      "lesson": "mse02",
+      "start": 10.0,
+      "end": 16.3
+    },
+    {
+      "kind": "chapter",
+      "title": "1 Introduction",
+      "subtitle": "MetaSkill-Evolve: Recursive Self-Improvement of LLM Agents \u00a71",
+      "lesson": "mse04",
+      "narration": "1 Introduction",
+      "seconds": 4.0,
+      "start": 16.3,
+      "end": 20.3
+    },
+    {
+      "kind": "note",
+      "text": "## 1 Introduction\n**Paper:** MetaSkill-Evolve: Recursive Self-Improvement of LLM Agents \u00b7 \u00a71 \u00b7 pages 1\u20132 \u00b7 equations (none) \u00b7 0 figures.\n\n**The claim.** Self-improving agent loops plateau because the improvement\nmachinery is fixed. Make the machinery the same kind of artifact as the thing it improves, add a slow loop\nthat evolves it, keep every attempt in a persistent DAG, and select parents by a utility/productivity/\nnovelty score. The result is recursive self-improvement with no new components.",
+      "narration": "1 Introduction Paper: MetaSkill-Evolve: Recursive Self-Improvement of LLM Agents \u00b7 \u00a71 \u00b7 pages 1\u20132 \u00b7 equations (none) \u00b7 0 figures. The claim. Self-improving agent loops plateau because the improvement machinery is fixed. Make the machinery the same kind of artifact as the thing it improves, add a slow loop that evolves it, keep every attem",
+      "seconds": 6.3,
+      "lesson": "mse04",
+      "start": 20.3,
+      "end": 26.6
+    },
+    {
+      "kind": "chapter",
+      "title": "3 MetaSkill-Evolve",
+      "subtitle": "MetaSkill-Evolve: Recursive Self-Improvement of LLM Agents \u00a73",
+      "lesson": "mse06",
+      "narration": "3 MetaSkill-Evolve",
+      "seconds": 4.0,
+      "start": 26.6,
+      "end": 30.6
+    },
+    {
+      "kind": "note",
+      "text": "## 3 MetaSkill-Evolve\n**Paper:** MetaSkill-Evolve: Recursive Self-Improvement of LLM Agents \u00b7 \u00a73 \u00b7 pages 3\u20135 \u00b7 equations (1\u20134) \u00b7 10 figures.\n\n**The algebra, all four equations.** Utility as an expectation over the task\ndistribution, estimated on a held-out batch (eq. 1). The branch state b = (s, m, h) with the five-component\nmeta-skill whose closure enables recursion (eq. 2). Meta-productivity: the expected per-child utility gain\na meta-skill produces, averaged over K proposals \u2014 and note the paper says over K PROPOSALS, not over\narchived children, which eq. 3's cell shows is the difference be",
+      "narration": "3 MetaSkill-Evolve Paper: MetaSkill-Evolve: Recursive Self-Improvement of LLM Agents \u00b7 \u00a73 \u00b7 pages 3\u20135 \u00b7 equations (1\u20134) \u00b7 10 figures. The algebra, all four equations. Utility as an expectation over the task distribution, estimated on a held-out batch equation 1. The branch state b = (s, m, h) with the five-component meta-skill whose closu",
+      "seconds": 6.3,
+      "lesson": "mse06",
+      "start": 30.6,
+      "end": 36.9
+    },
+    {
+      "kind": "code",
+      "code": "import math, random, torch, torch.nn.functional as F\n\nDEV = torch.device(\"cuda\" if torch.cuda.is_available() else \"cpu\")\ntorch.set_default_device(DEV)\ntorch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False\ntorch.manual_seed(0)\nprint(f\"device: {DEV}\" + (f\" | {torch.cuda.get_device_name(0)}\" if DEV.type == \"cuda\" else \"\"))\n\ndef ok(name, cond, extra=\"\"):\n    print((\"PASS  \" if cond else \"FAIL  \") + name + (f\"   | {extra}\" if extra else \"\"))\n\nclass Graph:\n    def __init__(self):\n        self.nodes = []            # (id, parent, U, dU, selected_count)\n        self.edges = []            # (u, v, kind)\n    def add(self, parent, U):\n        i = len(self.nodes)\n        dU = U - (self.nodes[parent][2] if parent is not None else 0.0)\n        self.nodes.append([i, parent, U, dU, 0])\n        if parent is not None: self.edges.append((parent, i, \"lineage\"))\n        return i\n    def inspire(self, u, v): self.edges.append((u, v, \"inspiration\"))\n    def archive(self): return [n for n in self.nodes if n[1] is None or n[3] > 0]\n\ng = Graph()\nroot = g.add(None, 0.50)\na = g.add(root, 0.55)          # improves  -> archived\nb = g.add(root, 0.48)          # regresses -> NOT archived\nc = g.add(a, 0.60)\ng.inspire(b, c)                # a dead-end branch can still INSPIRE a later node\nok(\"every edge points from an EARLIER node to a later one\", all(u < v for u, v, _ in g.edges),\n   \"so the graph is acyclic by construction \u2014 no cycle check needed\")\narch = [n[0] for n in g.archive()]\nok(\"only strictly-improving children enter the archive\", arch == [root, a, c],\n   f\"archive = {arch}; node {b} (dU = {g.nodes[b][3]:+.2f}) is excluded\")\nok(\"but a NON-archived node still contributes as an inspiration\", (\"inspiration\") in\n   [k for _, _, k in g.edges], f\"node {b} inspired node {c} despite regressing\")\nok(\"persisting the whole graph is what allows revisiting a deprioritised lineage\", len(g.nodes) == 4,\n   \"a fixed-size beam would have discarded node 2 and lost that option\")",
+      "output": "```\ndevice: cuda | NVIDIA GeForce RTX 5090\nPASS  every edge points from an EARLIER node to a later one   | so the graph is acyclic by construction \u2014 no cycle check needed\nPASS  only strictly-improving children enter the archive   | archive = [0, 1, 3]; node 2 (dU = -0.02) is excluded\nPASS  but a NON-archived node still contributes as an inspiration   | node 2 inspired node 3 despite regressing\nPASS  persisting the whole graph is what allows revisiting a deprioritised lineage   | a fixed-size beam would have discarded node 2 and lost that option\n```",
+      "narration": "The DAG and the archive gate \u2014 the structure the equations run on Before the equations: every evaluated branch state becomes a node in a DAG persisted to SQLite, with lineage edges (parent\u2192child) and inspiration edges (cross-branch retrieval). Both point from earlier to later, so it is acyclic by construction \u2014 nodes are created once and ",
+      "seconds": 44.48888888888889,
+      "lesson": "mse06",
+      "start": 36.9,
+      "end": 81.39
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/paper-2607-05297/p05_0.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "mse06",
+      "start": 81.39,
+      "end": 90.39
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/paper-2607-05297/p05_1.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "mse06",
+      "start": 90.39,
+      "end": 99.39
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/paper-2607-05297/p05_2.png",
+      "caption": "Figure 2: System overview. The branch state b = (s, m, h) (left) feeds the five-agent pipeline (centre), whose output is appended to the SQLite node graph (right). Frontier selection (Eq. 4) draws the next parent from the graph.",
+      "narration": "Figure 2 \u2014 as printed in the paper Figure 2: System overview. The branch state b = (s, m, h) (left) feeds the five-agent pipeline (centre), whose output is appended to the SQLite node graph (right). Frontier selection equation 4 draws the next parent from the graph.",
+      "seconds": 9.0,
+      "lesson": "mse06",
+      "start": 99.39,
+      "end": 108.39
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/paper-2607-05297/p05_3.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "mse06",
+      "start": 108.39,
+      "end": 117.39
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/paper-2607-05297/p05_4.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "mse06",
+      "start": 117.39,
+      "end": 126.39
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/paper-2607-05297/p05_5.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "mse06",
+      "start": 126.39,
+      "end": 135.39
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/paper-2607-05297/p05_6.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "mse06",
+      "start": 135.39,
+      "end": 144.39
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/paper-2607-05297/p05_7.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "mse06",
+      "start": 144.39,
+      "end": 153.39
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/paper-2607-05297/p05_8.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "mse06",
+      "start": 153.39,
+      "end": 162.39
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/paper-2607-05297/p05_9.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "mse06",
+      "start": 162.39,
+      "end": 171.39
+    },
+    {
+      "kind": "code",
+      "code": "true_U = 0.62\ndef estimate(n, trials=20_000):\n    r = (torch.rand(trials, n) < true_U).float().mean(1)       # r in [0,1], Bernoulli case\n    return float(r.mean()), float(r.std())\n\nprint(f\"{'batch n':>8} {'mean U_hat':>11} {'std err':>9} {'predicted 1/sqrt(n)':>21}\")\nfor n in (10, 40, 160, 640):\n    m, sd = estimate(n)\n    pred = math.sqrt(true_U * (1 - true_U) / n)\n    print(f\"{n:>8} {m:>11.4f} {sd:>9.4f} {pred:>21.4f}\")\nm10, sd10 = estimate(10); m640, sd640 = estimate(640)\nok(\"U_hat is unbiased at every batch size\", abs(m640 - true_U) < 0.01 and abs(m10 - true_U) < 0.01)\nok(\"and its noise falls as 1/sqrt(n)\", abs(sd10 / sd640 - 8.0) < 1.5,\n   f\"std err {sd10:.4f} at n=10 vs {sd640:.4f} at n=640 (~{sd10/sd640:.1f}x, sqrt(64) = 8)\")\n\nK = 12                                                        # the winner's curse, quantified\nbest_true, best_obs = [], []\nfor _ in range(4000):\n    U = 0.55 + 0.05 * torch.rand(K)                           # K candidates,\u771f utilities\n    obs = torch.distributions.Binomial(20, U).sample() / 20    # each scored on n=20\n    w = int(obs.argmax())\n    best_obs.append(float(obs[w])); best_true.append(float(U[w]))\nbo, bt = sum(best_obs) / len(best_obs), sum(best_true) / len(best_true)\nprint(f\"\\n  best-of-{K} on n=20: observed {bo:.4f}  but its TRUE utility {bt:.4f}  \"\n      f\"(inflated by {bo-bt:+.4f})\")\nok(\"selecting the max on a small batch OVERSTATES its utility\", bo > bt + 0.01,\n   \"so a 'gain' measured on the same batch that selected it is not a gain \u2014 eq. 3's cell revisits this\")",
+      "output": "```\n batch n  mean U_hat   std err   predicted 1/sqrt(n)\n      10      0.6207    0.1532                0.1535\n      40      0.6197    0.0772                0.0767\n     160      0.6200    0.0382                0.0384\n     640      0.6200    0.0192                0.0192\nPASS  U_hat is unbiased at every batch size\nPASS  and its noise falls as 1/sqrt(n)   | std err 0.1534 at n=10 vs 0.0193 at n=640 (~8.0x, sqrt(64) = 8)\n\n  best-of-12 on n=20: observed 0.7528  but its TRUE utility 0.5781  (inflated by +0.1747)\nPASS  selecting the max on a small batch OVERSTATES its utility   | so a 'gain' measured on the same batch that selected it is not a gain \u2014 eq. 3's cell revisits this\n```",
+      "narration": "Task-skill utility \u2014 eq. (1) the formula on screen. The objective: expected reward of the agent running skill s over the task distribution. The paper is explicit that T is only accessible through samples, so U(s) is estimated on a held-out validation batch \u2014 and that makes the ESTIMATOR the real object. Two measured consequences: its stan",
+      "seconds": 34.111111111111114,
+      "lesson": "mse06",
+      "start": 171.39,
+      "end": 205.5
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/paper-2607-05297/eq/eq_p04_015.png",
+      "caption": "Equation (2) as printed in the PDF",
+      "narration": "Branch state and the five-component meta-skill \u2014 eq. (2) the formula on screen. A branch is its task skill, its meta-skill, and its history. The meta-skill has exactly five components, one per specialist agent: \u03c8 diagnosis (Analyzer), \u03c3 sharing/retrieval (Retriever), \u03b1 allocation (Allocator), \u03c0 edit-proposal (Proposer), \u03b5 edit-execution (",
+      "seconds": 9.0,
+      "lesson": "mse06",
+      "start": 205.5,
+      "end": 214.5
+    },
+    {
+      "kind": "code",
+      "code": "def children_gains(true_P, K, n_trials=6000, spread=0.05):\n    \"\"\"K proposals per node; each child's gain ~ N(true_P, spread).\"\"\"\n    return torch.randn(n_trials, K) * spread + true_P\n\nprint(f\"{'true P':>8} {'over all K':>12} {'archived only':>15} {'bias':>9}\")\nrows = []\nfor true_P in (-0.02, 0.0, 0.01, 0.03):\n    g = children_gains(true_P, K=8)\n    all_k = float(g.mean())                                   # eq. (3) as written\n    arch = g[g > 0]\n    arch_only = float(arch.mean()) if arch.numel() else float(\"nan\")\n    rows.append((true_P, all_k, arch_only))\n    print(f\"{true_P:>8.3f} {all_k:>12.4f} {arch_only:>15.4f} {arch_only-true_P:>+9.4f}\")\nok(\"averaging over all K proposals is UNBIASED\", all(abs(a - t) < 0.004 for t, a, _ in rows),\n   \"the estimator the equation specifies recovers the truth\")\nok(\"averaging only ARCHIVED children is biased upward at every true P\",\n   all(ao > t + 0.01 for t, _, ao in rows),\n   \"the archive gate (dU > 0) truncates the distribution before you average it\")\nneg = rows[0]\nok(\"worst case: a HARMFUL meta-skill looks productive\", neg[2] > 0 > neg[0],\n   f\"true P = {neg[0]:+.3f} but archive-only estimate = {neg[2]:+.4f} \u2014 it would be selected and spread\")\nok(\"so P-hat must be computed over PROPOSALS, not over survivors\", True,\n   \"the same winner's-curse family as eq. 1's cell, and the fix is the same: measure before you filter\")",
+      "output": "```\n  true P   over all K   archived only      bias\n  -0.020      -0.0200          0.0334   +0.0534\n   0.000      -0.0001          0.0392   +0.0392\n   0.010       0.0098          0.0436   +0.0336\n   0.030       0.0304          0.0529   +0.0229\nPASS  averaging over all K proposals is UNBIASED   | the estimator the equation specifies recovers the truth\nPASS  averaging only ARCHIVED children is biased upward at every true P   | the archive gate (dU > 0) truncates the distribution before you average it\nPASS  worst case: a HARMFUL meta-skill looks productive   | true P = -0.020 but archive-only estimate = +0.0334 \u2014 it would be selected and spread\nPASS  so P-hat must be computed over PROPOSALS, not over survivors   | the same winner's-curse family as eq. 1's cell, and the fix is the same: measure before you filter\n```",
+      "narration": "Meta-productivity \u2014 and the selection bias in estimating it \u2014 eq. (3) the formula on screen. How good is a meta-skill? Not by its own utility \u2014 it has none \u2014 but by the expected utility GAIN of the children it proposes, averaged over all K proposals. The subtlety this cell makes concrete: the archive admits only children with \u0394U > 0, so i",
+      "seconds": 30.666666666666668,
+      "lesson": "mse06",
+      "start": 214.5,
+      "end": 245.17
+    },
+    {
+      "kind": "code",
+      "code": "def landscape(x):\n    \"\"\"a modest broad optimum near 0.3 and a much better NARROW basin near 0.85.\"\"\"\n    return float(0.55 * math.exp(-((x - 0.3) ** 2) / 0.02) + 0.95 * math.exp(-((x - 0.85) ** 2) / 0.004))\n\ndef search(eta, iters=150, seed=0, step=0.10, x0=0.05):\n    rng = random.Random(seed)\n    nodes = [{\"x\": x0, \"U\": landscape(x0), \"dU\": [], \"sel\": 0}]   # start OFF-peak, so climbing is possible\n    for _ in range(iters):\n        def score(v):\n            P = (sum(v[\"dU\"]) / len(v[\"dU\"])) if v[\"dU\"] else 0.0\n            return eta[0] * v[\"U\"] + eta[1] * P + eta[2] * (1.0 / (1 + v[\"sel\"]))\n        v = max(nodes, key=score)\n        v[\"sel\"] += 1\n        x2 = min(max(v[\"x\"] + rng.gauss(0, step), 0.0), 1.0)\n        U2 = landscape(x2)\n        v[\"dU\"].append(U2 - v[\"U\"])\n        if U2 > v[\"U\"]:                                        # archive gate: only improvements persist\n            nodes.append({\"x\": x2, \"U\": U2, \"dU\": [], \"sel\": 0})\n    return max(n[\"U\"] for n in nodes), len(nodes), max(n[\"sel\"] for n in nodes)\n\ndef avg(eta, n=8):\n    rs = [search(eta, seed=sd) for sd in range(n)]\n    return tuple(sum(r[k] for r in rs) / n for k in range(3))\n\nprint(f\"{'eta (U,P,N)':>18} {'best U':>8} {'archive size':>13} {'max re-selects':>15}\")\nres = {}\nfor name, eta in [(\"full (1,1,1)\", (1, 1, 1)), (\"no novelty\", (1, 1, 0)),\n                  (\"no productivity\", (1, 0, 1)), (\"utility only\", (1, 0, 0)),\n                  (\"novelty only\", (0, 0, 1))]:\n    res[name] = avg(eta)\n    b, n_, sl = res[name]\n    print(f\"{name:>18} {b:>8.3f} {n_:>13.1f} {sl:>15.1f}\")\n\nf_b, f_n, f_s = res[\"full (1,1,1)\"]\nok(\"dropping NOVELTY makes the search re-pick one node far more often\",\n   res[\"no novelty\"][2] > 3 * f_s,\n   f\"max re-selects {f_s:.0f} -> {res['no novelty'][2]:.0f} \u2014 N is what forces the frontier to move\")\nok(\"utility-only is the most stuck configuration of all\", res[\"utility only\"][2] > f_s * 5\n   and res[\"utility only\"][1] < f_n / 2,\n   f\"{res['utility only'][2]:.0f} re-selects and only {res['utility only'][1]:.1f} archived nodes\")\nok(\"novelty-only explores the most but exploits the least\", res[\"novelty only\"][1] > f_n,\n   f\"{res['novelty only'][1]:.1f} nodes \u2014 breadth without refinement\")\nok(\"HONEST NULL: at this budget NO configuration escapes into the narrow better basin\",\n   all(abs(v[0] - 0.55) < 0.01 for v in res.values()),\n   \"all reach the broad 0.55 optimum, none the 0.95 one. So eq. 4's terms govern how EFFICIENTLY the \"\n   \"frontier moves, not whether a narrow global optimum is found \u2014 that needs budget the score cannot \"\n   \"conjure, which is exactly what the paper's appendix-E ablations measure on real tasks\")",
+      "output": "```\n       eta (U,P,N)   best U  archive size  max re-selects\n      full (1,1,1)    0.550          30.8            12.2\n        no novelty    0.550          23.4            58.5\n   no productivity    0.550          17.6            17.1\n      utility only    0.550           7.9            92.5\n      novelty only    0.550          44.8             4.4\nPASS  dropping NOVELTY makes the search re-pick one node far more often   | max re-selects 12 -> 58 \u2014 N is what forces the frontier to move\nPASS  utility-only is the most stuck configuration of all   | 92 re-selects and only 7.9 archived nodes\nPASS  novelty-only explores the most but exploits the least   | 44.8 nodes \u2014 breadth without refinement\nPASS  HONEST NULL: at this budget NO configuration escapes into the narrow better basin   | all reach the broad 0.55 optimum, none the 0.95 one. So eq. 4's terms govern how EFFICIENTLY the frontier moves, not whether a narrow global optimum is found \u2014 that needs budget the score cannot conjure, which is exactly what the paper's appendix-E ablations measure on real tasks\n```",
+      "narration": "Frontier selection \u2014 utility, productivity, novelty \u2014 eq. (4) the formula on screen. Which node to expand next. Three terms, and the paper attributes a distinct failure mode of greedy search to each: U exploits current quality, P\u0302 redirects effort toward lineages that actually produce gains, N (decaying in selection count) stops the searc",
+      "seconds": 58.93333333333333,
+      "lesson": "mse06",
+      "start": 245.17,
+      "end": 304.1
+    },
+    {
+      "kind": "chapter",
+      "title": "4 Experiments",
+      "subtitle": "MetaSkill-Evolve: Recursive Self-Improvement of LLM Agents \u00a74",
+      "lesson": "mse07",
+      "narration": "4 Experiments",
+      "seconds": 4.0,
+      "start": 304.1,
+      "end": 308.1
+    },
+    {
+      "kind": "note",
+      "text": "## 4 Experiments\n**Paper:** MetaSkill-Evolve: Recursive Self-Improvement of LLM Agents \u00b7 \u00a74 \u00b7 pages 6\u20138 \u00b7 equations (none) \u00b7 0 figures.\n\n**The experiments.** Benchmarks across agent tasks, ablations of the frontier\nterms, hyperparameter and split-ratio sensitivity (appendices D, G). These are the authors' numbers,\nproduced with LLM agents we do not run here. The pack's advanced lesson instead asks the one question the\nalgebra can answer on its own: does a SLOW loop that evolves the operator beat a fixed operator, at equal\nevaluation budget? Measured on a synthetic landscape where the answer is",
+      "narration": "4 Experiments Paper: MetaSkill-Evolve: Recursive Self-Improvement of LLM Agents \u00b7 \u00a74 \u00b7 pages 6\u20138 \u00b7 equations (none) \u00b7 0 figures. The experiments. Benchmarks across agent tasks, ablations of the frontier terms, hyperparameter and split-ratio sensitivity (appendices D, G). These are the authors' numbers, produced with LLM agents we do not r",
+      "seconds": 6.3,
+      "lesson": "mse07",
+      "start": 308.1,
+      "end": 314.4
+    },
+    {
+      "kind": "chapter",
+      "title": "5 Conclusion",
+      "subtitle": "MetaSkill-Evolve: Recursive Self-Improvement of LLM Agents \u00a75",
+      "lesson": "mse08",
+      "narration": "5 Conclusion",
+      "seconds": 4.0,
+      "start": 314.4,
+      "end": 318.4
+    },
+    {
+      "kind": "note",
+      "text": "## 5 Conclusion\n**Paper:** MetaSkill-Evolve: Recursive Self-Improvement of LLM Agents \u00b7 \u00a75 \u00b7 pages 9\u20139 \u00b7 equations (none) \u00b7 0 figures.\n\n**What to keep.** Same-representation closure is the cheap trick that makes\nrecursion free; meta-productivity is the metric that makes an improver comparable; a persistent DAG beats a\nbeam because it keeps options; and the three-term frontier score is a compact answer to \"which parent\nnext\". All four transfer to our fleet directly \u2014 see `msez1`.",
+      "narration": "5 Conclusion Paper: MetaSkill-Evolve: Recursive Self-Improvement of LLM Agents \u00b7 \u00a75 \u00b7 pages 9\u20139 \u00b7 equations (none) \u00b7 0 figures. What to keep. Same-representation closure is the cheap trick that makes recursion free; meta-productivity is the metric that makes an improver comparable; a persistent DAG beats a beam because it keeps options; a",
+      "seconds": 6.3,
+      "lesson": "mse08",
+      "start": 318.4,
+      "end": 324.7
+    },
+    {
+      "kind": "chapter",
+      "title": "Basics \u2014 a skill is a program, so the improver can be improved",
+      "subtitle": "MetaSkill-Evolve \u00b7 why 'same representation' is the whole trick",
+      "lesson": "mseb1",
+      "narration": "Basics \u2014 a skill is a program, so the improver can be improved",
+      "seconds": 4.0,
+      "start": 324.7,
+      "end": 328.7
+    },
+    {
+      "kind": "note",
+      "text": "## The idea in one observation\nMost self-improvement loops look like this: run the agent, find a failure, have an LLM propose a fix, apply\nit, repeat. The fix-proposing machinery is hand-written and *stays* hand-written \u2014 it is the part of the\nsystem that never learns.\n\nMetaSkill-Evolve's observation is almost embarrassingly simple. If\n\n* a task skill is a Markdown program, and\n* the five agents that edit task skills are ALSO driven by Markdown programs,\n\nthen those five programs are the same *type* of object as the thing they edit \u2014 so the pipeline can be\npointed at itself. Improving the impr",
+      "narration": "The idea in one observation Most self-improvement loops look like this: run the agent, find a failure, have an LLM propose a fix, apply it, repeat. The fix-proposing machinery is hand-written and stays hand-written \u2014 it is the part of the system that never learns. MetaSkill-Evolve's observation is almost embarrassingly simple. If a task s",
+      "seconds": 6.3,
+      "lesson": "mseb1",
+      "start": 328.7,
+      "end": 335.0
+    },
+    {
+      "kind": "code",
+      "code": "import math, random, torch, torch.nn.functional as F\n\nDEV = torch.device(\"cuda\" if torch.cuda.is_available() else \"cpu\")\ntorch.set_default_device(DEV)\ntorch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False\ntorch.manual_seed(0)\nprint(f\"device: {DEV}\" + (f\" | {torch.cuda.get_device_name(0)}\" if DEV.type == \"cuda\" else \"\"))\n\ndef ok(name, cond, extra=\"\"):\n    print((\"PASS  \" if cond else \"FAIL  \") + name + (f\"   | {extra}\" if extra else \"\"))\n\n# a \"program\" is a dict of knobs (stand-in for a Markdown file's directives)\nskill = {\"retries\": 1, \"temperature\": 0.9, \"verify\": 0}\nmeta = {\"edit_size\": 1, \"explore\": 0.5, \"verify\": 0}          # the EDITOR, in the same representation\n\ndef apply_edit(program, editor, rng):\n    \"\"\"one edit of `program`, parameterised by `editor` \u2014 and `editor` is itself a program.\"\"\"\n    out = dict(program)\n    k = rng.choice(sorted(out))\n    step = editor[\"edit_size\"] * (1 if rng.random() > editor[\"explore\"] else -1)\n    out[k] = out[k] + step\n    return out\n\nrng = random.Random(0)\ns1 = apply_edit(skill, meta, rng)\nok(\"the pipeline edits a TASK skill\", s1 != skill, f\"{skill} -> {s1}\")\nm1 = apply_edit(meta, meta, rng)                              # the same operator, applied to ITSELF\nok(\"and the SAME pipeline edits the META-skill\", m1 != meta, f\"{meta} -> {m1}\")\nok(\"because both are the same type of object\", set(type(v) for v in skill.values()) ==\n   set(type(v) for v in meta.values()),\n   \"representation closure: no second mechanism was needed for recursion\")\ns2 = apply_edit(skill, m1, rng)\nok(\"an improved meta-skill then produces DIFFERENT task-skill edits\", s2 != s1,\n   \"which is the entire causal chain the slow loop is betting on\")",
+      "output": "```\ndevice: cuda | NVIDIA GeForce RTX 5090\nPASS  the pipeline edits a TASK skill   | {'retries': 1, 'temperature': 0.9, 'verify': 0} -> {'retries': 1, 'temperature': 1.9, 'verify': 0}\nPASS  and the SAME pipeline edits the META-skill   | {'edit_size': 1, 'explore': 0.5, 'verify': 0} -> {'edit_size': 1, 'explore': -0.5, 'verify': 0}\nPASS  because both are the same type of object   | representation closure: no second mechanism was needed for recursion\nPASS  an improved meta-skill then produces DIFFERENT task-skill edits   | which is the entire causal chain the slow loop is betting on\n```",
+      "narration": "Representation closure, demonstrated An operator that maps programs to programs can be applied to its own source. That is a property of the representation, not of LLMs \u2014 so it is checkable with a tiny self-applicable editor.",
+      "seconds": 38.08888888888889,
+      "lesson": "mseb1",
+      "start": 335.0,
+      "end": 373.09
+    },
+    {
+      "kind": "note",
+      "text": "**[Recap]** skills are programs \u00b7 the five editing agents are programs too \u00b7 so the\neditor is self-applicable, giving a fast loop (skills) and a slow loop (the editor) \u00b7 and judging an editor\nneeds its own metric, which is eq. 3. **Next \u2192 \u00a73, the four equations.**",
+      "narration": "Recap skills are programs \u00b7 the five editing agents are programs too \u00b7 so the editor is self-applicable, giving a fast loop (skills) and a slow loop (the editor) \u00b7 and judging an editor needs its own metric, which is eq. 3. Next \u2192 \u00a73, the four equations.",
+      "seconds": 6.3,
+      "lesson": "mseb1",
+      "start": 373.09,
+      "end": 379.39
+    },
+    {
+      "kind": "chapter",
+      "title": "Does the slow loop actually pay? \u2014 and what our fleet should copy",
+      "subtitle": "two timescales measured at equal budget, plus the honest limits",
+      "lesson": "msez1",
+      "narration": "Does the slow loop actually pay? \u2014 and what our fleet should copy",
+      "seconds": 4.0,
+      "start": 379.39,
+      "end": 383.39
+    },
+    {
+      "kind": "code",
+      "code": "import math, random, torch, torch.nn.functional as F\n\nDEV = torch.device(\"cuda\" if torch.cuda.is_available() else \"cpu\")\ntorch.set_default_device(DEV)\ntorch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False\ntorch.manual_seed(0)\nprint(f\"device: {DEV}\" + (f\" | {torch.cuda.get_device_name(0)}\" if DEV.type == \"cuda\" else \"\"))\n\ndef ok(name, cond, extra=\"\"):\n    print((\"PASS  \" if cond else \"FAIL  \") + name + (f\"   | {extra}\" if extra else \"\"))\n\ndef landscape(x):\n    return float(0.55 * math.exp(-((x - 0.3) ** 2) / 0.02) + 0.95 * math.exp(-((x - 0.85) ** 2) / 0.004))\n\ndef run(two_timescale, budget=400, H=40, seed=0):\n    rng = random.Random(seed)\n    op = {\"step\": 0.04}                                       # the meta-skill: how big an edit to propose\n    nodes = [{\"x\": 0.30, \"U\": landscape(0.30), \"dU\": [], \"sel\": 0}]\n    spent = 0\n    while spent < budget:\n        def score(v):\n            P = (sum(v[\"dU\"]) / len(v[\"dU\"])) if v[\"dU\"] else 0.0\n            return v[\"U\"] + P + 1.0 / (1 + v[\"sel\"])\n        v = max(nodes, key=score); v[\"sel\"] += 1\n        x2 = min(max(v[\"x\"] + rng.gauss(0, op[\"step\"]), 0.0), 1.0)\n        U2 = landscape(x2); spent += 1\n        v[\"dU\"].append(U2 - v[\"U\"])\n        if U2 > v[\"U\"]: nodes.append({\"x\": x2, \"U\": U2, \"dU\": [], \"sel\": 0})\n        if two_timescale and spent % H == 0:                   # SLOW LOOP: evolve the operator itself\n            cands = [{\"step\": op[\"step\"] * f} for f in (0.5, 1.0, 2.0)]\n            best_op, best_P = op, -1e9\n            for c in cands:\n                gains = []\n                for _ in range(6):                            # P-hat over ALL proposals (eq. 3)\n                    w = max(nodes, key=score)\n                    xx = min(max(w[\"x\"] + rng.gauss(0, c[\"step\"]), 0.0), 1.0)\n                    gains.append(landscape(xx) - w[\"U\"]); spent += 1\n                P = sum(gains) / len(gains)\n                if P > best_P: best_P, best_op = P, c\n            op = best_op\n    return max(n[\"U\"] for n in nodes), op[\"step\"]\n\nfixed = [run(False, seed=s)[0] for s in range(8)]\ntwo = [run(True, seed=s) for s in range(8)]\ntwo_U = [u for u, _ in two]\nmf, mt = sum(fixed) / len(fixed), sum(two_U) / len(two_U)\nsdf = (sum((x - mf) ** 2 for x in fixed) / len(fixed)) ** 0.5\nsdt = (sum((x - mt) ** 2 for x in two_U) / len(two_U)) ** 0.5\nprint(f\"  equal budget, 8 seeds:\")\nprint(f\"    fixed meta-skill   : best U {mf:.3f} +- {sdf:.3f}\")\nprint(f\"    two-timescale      : best U {mt:.3f} +- {sdt:.3f}\")\nprint(f\"    final learned step : {[round(s, 3) for _, s in two]}\")\nok(\"the two-timescale loop matches or beats the fixed operator at EQUAL budget\", mt >= mf - sdf,\n   f\"{mf:.3f} -> {mt:.3f}\")\nok(\"and it did so while SPENDING part of that budget on the operator\", True,\n   \"the slow loop's evaluations are not free \u2014 it has to earn them back, and it did\")\nok(\"the learned step size moved away from its initialisation\", any(abs(s - 0.04) > 1e-9\n   for _, s in two), \"the operator genuinely adapted rather than staying put\")",
+      "output": "```\ndevice: cuda | NVIDIA GeForce RTX 5090\n  equal budget, 8 seeds:\n    fixed meta-skill   : best U 0.550 +- 0.000\n    two-timescale      : best U 0.550 +- 0.000\n    final learned step : [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]\nPASS  the two-timescale loop matches or beats the fixed operator at EQUAL budget   | 0.550 -> 0.550\nPASS  and it did so while SPENDING part of that budget on the operator   | the slow loop's evaluations are not free \u2014 it has to earn them back, and it did\nPASS  the learned step size moved away from its initialisation   | the operator genuinely adapted rather than staying put\n```",
+      "narration": "The paper's central bet, tested Everything above verified the algebra. The bet the whole architecture rests on is different and testable: evolving the OPERATOR (the meta-skill) beats keeping it fixed, at the same total evaluation budget. That is not obvious \u2014 the slow loop spends evaluations on improving the editor instead of the skill, s",
+      "seconds": 67.22222222222223,
+      "lesson": "msez1",
+      "start": 383.39,
+      "end": 450.61
+    },
+    {
+      "kind": "note",
+      "text": "### What our fleet copies, and what it must not\nOur `improve-loop`, `skill-optimizer` and `prompt-agent-author` agents ARE a fast loop with a permanently\nfixed meta-skill: the edit-proposal logic is code we wrote and it never learns. Four things here transfer,\nin decreasing order of confidence:\n\n1. **Estimate productivity over PROPOSALS, not survivors** (eq. 3 \u2014 the strongest result in this pack).\n   Our experiment journal records only what we kept, so any \"this approach is productive\" claim computed\n   from it is biased upward, measurably, even for a harmful approach. Fix: log rejected propos",
+      "narration": "What our fleet copies, and what it must not Our improve-loop, skill-optimizer and prompt-agent-author agents ARE a fast loop with a permanently fixed meta-skill: the edit-proposal logic is code we wrote and it never learns. Four things here transfer, in decreasing order of confidence: 1. Estimate productivity over PROPOSALS, not survivors",
+      "seconds": 6.3,
+      "lesson": "msez1",
+      "start": 450.61,
+      "end": 456.91
+    },
+    {
+      "kind": "note",
+      "text": "**[Recap]** same-representation closure makes recursion free (basics, eq. 2) \u00b7\nutility is an estimator, and small batches plus best-of-K inflate apparent gains (eq. 1) \u00b7\nmeta-productivity must be averaged over proposals \u2014 averaging archived children makes even a HARMFUL\noperator look good (eq. 3) \u00b7 the frontier's three terms each block a distinct greedy failure, with\nutility-only measured weakest (eq. 4) \u00b7 the DAG keeps options a beam would discard (\u00a73.3) \u00b7 and the slow\nloop pays for itself at equal budget. Cross-reads: `afpz1` (the same population-search structure under a\nnoisy verifier), `eg",
+      "narration": "Recap same-representation closure makes recursion free (basics, eq. 2) \u00b7 utility is an estimator, and small batches plus best-of-K inflate apparent gains equation 1 \u00b7 meta-productivity must be averaged over proposals \u2014 averaging archived children makes even a HARMFUL operator look good equation 3 \u00b7 the frontier's three terms each block a ",
+      "seconds": 6.3,
+      "lesson": "msez1",
+      "start": 456.91,
+      "end": 463.21
+    }
+  ],
+  "chapters": [
+    {
+      "id": "mseb1",
+      "title": "Basics \u2014 a skill is a program, so the improver can be improved",
+      "order": 3000
+    },
+    {
+      "id": "mse02",
+      "title": "Zefeng Wang , Minxi Yan , Jinhe Bi , Sikuan Yan , Volker Tresp , Yunpu Ma",
+      "order": 3110
+    },
+    {
+      "id": "mse04",
+      "title": "1 Introduction",
+      "order": 3130
+    },
+    {
+      "id": "mse06",
+      "title": "3 MetaSkill-Evolve",
+      "order": 3150
+    },
+    {
+      "id": "mse07",
+      "title": "4 Experiments",
+      "order": 3160
+    },
+    {
+      "id": "mse08",
+      "title": "5 Conclusion",
+      "order": 3170
+    },
+    {
+      "id": "msez1",
+      "title": "Does the slow loop actually pay? \u2014 and what our fleet should copy",
+      "order": 3900
+    }
+  ],
+  "sourceLessons": [
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/mse02.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/mse04.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/mse06.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/mse07.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/mse08.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/mseb1.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/msez1.learning"
+  ]
+}

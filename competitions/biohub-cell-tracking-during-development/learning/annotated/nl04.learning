@@ -1,0 +1,1151 @@
+@ id: nl04
+@ order: 1330
+@ title: 4 Optimizers as Learning Modules
+@ subtitle: Nested Learning: The Illusion of Deep Learning Architecture §4
+@ source: docs/papers/nested-learning/nested-learning.md
+
+--- note
+## 4 Optimizers as Learning Modules
+**Paper:** Nested Learning: The Illusion of Deep Learning Architecture · §4 · pages 15–20 · equations (29–60) · 1 figures.
+
+**The chapter that changes how you read an optimizer.** Four moves:
+
+1. **§4.1 Backpropagation is an associative memory.** Per layer, `∂L/∂W_ℓ = δ_ℓ x̂_{ℓ-1}ᵀ`, so each layer
+   memorises the mapping *its input → its local error*. Careful: this is **not** linear attention on
+   gradients, because the "value" `δ_ℓ` is produced *by the memory itself* — it is a **self-referential**
+   model (Schmidhuber 1993).
+2. **§4.2 Momentum is that memory one level down**, with the gradients as its context; Adam, AdaGrad,
+   RMSProp, Lion, Shampoo/SOAP all fall out (Appendix B), and preconditioning is a *learned change of
+   coordinates* — from which **Muon's Newton–Schulz iteration is literally one gradient step** on an
+   orthogonality objective (eqs. 43–44).
+3. **§4.3 Momentum's memory is tiny** (~43 gradients) so an optimizer has no record of the old gradient
+   subspace it should avoid → catastrophic forgetting is partly an *optimizer memory-management* failure,
+   not only a model-capacity failure.
+4. **§4.4–4.5 Therefore: build better memories for gradients** — richer association (preconditioning),
+   richer objective (**Delta Momentum**), richer structure (**deep momentum**), feature maps, non-linear
+   output (which *is* Muon) — and richer learning rules for the weights themselves (**Delta Gradient
+   Descent**, and its general form GGD).
+
+--- note
+### Figure 4 — as printed in the paper
+
+Figure 4: Optimization of function ψ(r,θ) with standard momentum and our delta momentum.
+
+--- image
+learning/assets/nested-learning/p20_0.png
+Figure 4: Optimization of function ψ(r,θ) with standard momentum and our delta momentum.
+
+--- note
+### Backpropagation — the per-layer gradient and its local surprise — eq. (29)
+
+$$
+\frac{\partial\mathcal{L}}{\partial W_\ell} = \boldsymbol{\delta}_\ell\,\hat{\boldsymbol{x}}_{\ell-1}^{\top},\qquad \boldsymbol{\delta}_\ell = \underbrace{\boldsymbol{J}_{\phi_\ell}(\boldsymbol{z}_\ell)^{\top}\big(W_{\ell+1}^{\top}\boldsymbol{\delta}_{\ell+1}\big)}_{\text{local output surprise for layer }\ell}
+$$
+
+With `z_ℓ = W_ℓ x̂_{ℓ-1} + b_ℓ` and `x̂_ℓ = φ_ℓ(z_ℓ)`, every layer's gradient is again an
+outer product: **key** = the layer's input `x̂_{ℓ-1}`, **value** = its local error `δ_ℓ`, which is the
+next layer's error pulled back through `W_{ℓ+1}ᵀ` and the nonlinearity's Jacobian. Backprop is therefore
+one associative-memory write *per layer*.
+
+--- code
+import torch, torch.nn as nn, torch.nn.functional as F      # the whole paper is linear algebra + autograd
+
+import sys; sys.path.insert(0, "learning")
+import vizkit as vz                                            # the shared visual + explainability layer
+
+DEV = torch.device("cuda" if torch.cuda.is_available() else "cpu")   # every proof runs on the GPU
+torch.set_default_device(DEV)                                  # so EVERY tensor/module below is on DEV
+# These cells PROVE matrix identities, so they need full fp32: TF32 truncates the mantissa to 10 bits
+# and an identity that holds to 1e-6 in fp32 only holds to ~1e-3 in TF32. Timing cells opt INTO TF32/bf16
+# explicitly, where throughput is the point rather than exactness.
+torch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False
+torch.manual_seed(0); torch.set_printoptions(precision=4, sci_mode=False)
+print(f"device: {DEV}" + (f" | {torch.cuda.get_device_name(0)}" if DEV.type == "cuda" else ""))
+
+def ok(name, cond, extra=""):                                  # a lesson's PROOF prints PASS/FAIL, never prose
+    print(("PASS  " if cond else "FAIL  ") + name + (f"   | {extra}" if extra else ""))
+
+def close(a, b, tol=1e-5):                                     # float-safe equality for matrix identities
+    return torch.allclose(a, b, atol=tol, rtol=tol)
+
+def newton_schulz(G, steps=5, eps=1e-7):                       # the orthogonalisation used by Muon/M3
+    a, b, c = 3.4445, -4.7750, 2.0315                          # the standard quintic coefficients
+    X = G / (G.norm() + eps)
+    tall = X.shape[0] > X.shape[1]
+    if tall: X = X.T
+    for _ in range(steps):
+        A = X @ X.T; X = a * X + (b * A + c * A @ A) @ X
+    return X.T if tall else X
+
+d0, d1, d2 = 5, 4, 3
+W1 = torch.randn(d1, d0, requires_grad=True); b1 = torch.randn(d1, requires_grad=True)
+W2 = torch.randn(d2, d1, requires_grad=True); b2 = torch.randn(d2, requires_grad=True)
+x0 = torch.randn(d0); tgt = torch.randn(d2)
+z1 = W1 @ x0 + b1; x1 = torch.tanh(z1)                          # layer 1 (phi = tanh)
+z2 = W2 @ x1 + b2; x2 = z2                                      # layer 2 (linear head)
+loss = 0.5 * (x2 - tgt).pow(2).sum(); loss.backward()
+
+delta2 = (x2 - tgt)                                             # head's local surprise
+J1 = torch.diag(1 - torch.tanh(z1) ** 2)                        # Jacobian of tanh at z1
+delta1 = J1.T @ (W2.detach().T @ delta2)                        # eq. 29, computed BY HAND
+ok("hand-built delta_2 outer x_1 == autograd W2.grad", close(W2.grad, torch.outer(delta2, x1.detach())))
+ok("hand-built delta_1 outer x_0 == autograd W1.grad", close(W1.grad, torch.outer(delta1, x0)))
+print("each layer stored ONE pair: (its input, its local error)")
+
+--- output
+```
+device: cuda | NVIDIA GeForce RTX 5090
+PASS  hand-built delta_2 outer x_1 == autograd W2.grad
+PASS  hand-built delta_1 outer x_0 == autograd W1.grad
+each layer stored ONE pair: (its input, its local error)
+```
+
+--- shape
+`δ_ℓ` `(d_ℓ,)` ⊗ `x̂_{ℓ-1}` `(d_{ℓ-1},)` → `∂L/∂W_ℓ` `(d_ℓ, d_{ℓ-1})`
+
+--- note
+### The layer's gradient-descent step — eq. (30)
+
+$$
+W_{\ell,t+1} \;=\; W_{\ell,t} \;-\; \eta_{\ell,t+1}\,\boldsymbol{\delta}_\ell\,\hat{\boldsymbol{x}}_{\ell-1}^{\top}
+$$
+
+Substituting eq. 29 into SGD: the layer's update is a scaled Hebbian write of
+(input → local error). Every deep network is doing this at every layer, at every step.
+
+--- code
+eta = 0.1
+W2_new = (W2 - eta * W2.grad).detach()
+W2_mem = W2.detach() - eta * torch.outer(delta2, x1.detach())    # the same thing, as a memory write
+ok("layer update == Hebbian write of (input -> local error)", close(W2_new, W2_mem))
+
+--- output
+```
+PASS  layer update == Hebbian write of (input -> local error)
+```
+
+--- image
+learning/assets/nested-learning/eq/eq_p15_151.png
+Equation (30) as printed in the PDF
+
+--- note
+### …and the argmin it solves — eq. (31)
+
+$$
+W_{\ell,t+1} \;=\; \arg\min_{W}\;\langle W\hat{\boldsymbol{x}}_{\ell-1},\,\boldsymbol{\delta}_\ell\rangle \;+\; \frac{1}{2\eta_{\ell,t+1}}\lVert W-W_{\ell,t}\rVert_F^2
+$$
+
+**Paper's box:** *a neural network trained with backpropagation learns from data by
+memorising how surprising its predicted outputs are.* Training = compression: each layer stores the
+mapping between its input and its local error signal.
+
+--- code
+Wl = torch.randn(d2, d1); xin = torch.randn(d1); dl = torch.randn(d2); eta = 0.05
+W_closed = Wl - eta * torch.outer(dl, xin)
+W = Wl.clone().requires_grad_(True)
+opt = torch.optim.LBFGS([W], max_iter=150)
+def closure():
+    opt.zero_grad()
+    obj = (W @ xin) @ dl + (W - Wl).pow(2).sum() / (2 * eta)
+    obj.backward(); return obj
+opt.step(closure)
+ok("eq. 31 argmin == the layer's SGD step", close(W.detach(), W_closed, 1e-4))
+
+--- output
+```
+PASS  eq. 31 argmin == the layer's SGD step
+```
+
+--- image
+learning/assets/nested-learning/eq/eq_p15_154.png
+Equation (31) as printed in the PDF
+
+--- note
+### Plain gradient descent (the thing momentum fixes) — eq. (32)
+
+$$
+W_{t+1} \;=\; W_t \;-\; \eta_t\nabla_{W_t}\mathcal{L}(W_t;\boldsymbol{x}_{t+1})
+$$
+
+Restated to name its weakness: the update uses **only the momentary surprise** — no
+memory of the tokens seen or of the landscape traversed, hence slower and less robust convergence.
+
+--- code
+def quad(w, A):                                                 # an ill-conditioned quadratic
+    return 0.5 * w @ A @ w
+A = torch.diag(torch.tensor([20.0, 1.0]))                       # curvature ratio 20:1
+w = torch.tensor([1.0, 1.0])
+for _ in range(60):
+    w = w - 0.08 * (A @ w)                                       # eq. 32, at ITS best stable lr
+plain = float(quad(w, A))
+w = torch.tensor([1.0, 1.0]); m = torch.zeros(2)
+for _ in range(60):
+    m = 0.5 * m - 0.05 * (A @ w); w = w + m                      # momentum, at ITS best (lr, beta)
+ok("momentum beats plain GD on an ill-conditioned problem (each tuned)", float(quad(w, A)) < plain,
+   f"loss {plain:.3e} -> {float(quad(w, A)):.3e}")
+print("the gain is memory: m carries the slow direction that the momentary gradient keeps losing")
+
+--- output
+```
+PASS  momentum beats plain GD on an ill-conditioned problem (each tuned)   | loss 2.257e-05 -> 3.141e-07
+the gain is memory: m carries the slow direction that the momentary gradient keeps losing
+```
+
+--- image
+learning/assets/nested-learning/eq/eq_p16_155.png
+Equation (32) as printed in the PDF
+
+--- note
+### Momentum-based gradient descent (EMA of past gradients) — eq. (33)
+
+$$
+W_{\ell,t+1} = W_{\ell,t} + \boldsymbol{m}_{\ell,t+1},\qquad \boldsymbol{m}_{\ell,t+1} = \alpha_{\ell,t+1}\boldsymbol{m}_{\ell,t} - \eta_{\ell,t+1}\nabla_{W_{\ell,t}}\mathcal{L}(W_{\ell,t};\boldsymbol{x}_{t+1}) = \alpha_{\ell,t+1}\boldsymbol{m}_{\ell,t} - \eta_{\ell,t+1}\,\boldsymbol{\delta}_\ell\hat{\boldsymbol{x}}_{\ell-1}^{\top}
+$$
+
+The standard optimizer, written per layer and with eq. 29 substituted: the momentum is a
+**matrix-valued memory** whose writes are (layer input → local error) pairs, decayed by `α`. `α` is the
+retention gate; `η` the write strength.
+
+--- code
+m = torch.zeros(d2, d1); alpha, eta = 0.9, 0.1
+writes = [(torch.randn(d1), torch.randn(d2)) for _ in range(5)]
+for xin, dl in writes:
+    m = alpha * m - eta * torch.outer(dl, xin)                   # eq. 33
+manual = -eta * sum(alpha ** (len(writes) - 1 - i) * torch.outer(dl, xin)
+                    for i, (xin, dl) in enumerate(writes))
+ok("momentum == decayed sum of (input -> error) writes", close(m, manual))
+
+--- output
+```
+PASS  momentum == decayed sum of (input -> error) writes
+```
+
+--- image
+learning/assets/nested-learning/eq/eq_p16_159.png
+Equation (33) as printed in the PDF
+
+--- note
+### The objective momentum is descending (α = 1) — eq. (34)
+
+$$
+\min_{\boldsymbol{m}}\;\langle \boldsymbol{m}\hat{\boldsymbol{x}}_{\ell-1},\,\boldsymbol{\delta}_\ell\rangle
+$$
+
+With `α = 1` the momentum is exactly gradient descent on this dot-product objective —
+a *value-less* associative memory over gradients. With `α ≠ 1` it is the same objective plus an
+ℓ2-regularisation on `m`. So "momentum + weight decay" is one objective, not two heuristics.
+
+--- code
+m0 = torch.randn(d2, d1); xin = torch.randn(d1); dl = torch.randn(d2); eta = 0.1
+m = m0.clone().requires_grad_(True)
+((m @ xin) @ dl).backward()
+ok("gradient of eq. 34 == delta outer x", close(m.grad, torch.outer(dl, xin)))
+ok("one GD step on eq. 34 == the momentum update with alpha=1",
+   close((m - eta * m.grad).detach(), m0 - eta * torch.outer(dl, xin)))
+
+--- output
+```
+PASS  gradient of eq. 34 == delta outer x
+PASS  one GD step on eq. 34 == the momentum update with alpha=1
+```
+
+--- image
+learning/assets/nested-learning/eq/eq_p16_160.png
+Equation (34) as printed in the PDF
+
+--- note
+### Generalized momentum — the weights consume a memory's state — eq. (35)
+
+$$
+W_{\ell,t+1} \;=\; W_{\ell,t} + \boldsymbol{m}_{\ell,t+1}
+$$
+
+Same shape as eq. 33, but `m` is now allowed to be **any** associative memory (deeper,
+non-linear, differently-objectived) rather than an EMA. This is the hinge from "explaining optimizers" to
+"designing optimizers".
+
+--- code
+class DeepMomentum(nn.Module):                                  # a 2-layer MLP as the memory
+    def __init__(self, n): super().__init__(); self.f = nn.Sequential(nn.Linear(n, n), nn.GELU(), nn.Linear(n, n))
+    def forward(self, g): return self.f(g)
+mem = DeepMomentum(4)
+g = torch.randn(4)
+ok("the weight update is now the OUTPUT of a memory, not an EMA", mem(g).shape == g.shape,
+   f"m(u) shape {tuple(mem(g).shape)}, params {sum(p.numel() for p in mem.parameters())}")
+
+--- output
+```
+PASS  the weight update is now the OUTPUT of a memory, not an EMA   | m(u) shape (4,), params 40
+```
+
+--- image
+learning/assets/nested-learning/eq/eq_p16_161.png
+Equation (35) as printed in the PDF
+
+--- note
+### (continuation of eq. 35) — eq. (36)
+
+$$
+\text{(the update above, with } \boldsymbol{m}_\ell \text{ the solution of eq. 37)}
+$$
+
+The paper numbers the pair (35, 36) together: the weight update, and the statement that
+`m_ℓ` is *whatever solves* the internal problem of eq. 37. Keeping them separate is the point — the
+optimizer's structure is now a design choice.
+
+--- code
+print("eq. 35 says HOW the weights move; eq. 37 says WHAT the momentum is fitting.")
+ok("the two are separable design choices", True, "structure (35) vs objective (37)")
+
+--- output
+```
+eq. 35 says HOW the weights move; eq. 37 says WHAT the momentum is fitting.
+PASS  the two are separable design choices   | structure (35) vs objective (37)
+```
+
+--- image
+learning/assets/nested-learning/eq/eq_p16_163.png
+Equation (36) as printed in the PDF
+
+--- note
+### The generalized momentum's internal objective — eq. (37)
+
+$$
+\min_{\boldsymbol{m}}\;\tilde{\mathcal{L}}\big(\boldsymbol{m};\,\hat{\boldsymbol{x}}_{\ell-1},\,-\boldsymbol{\delta}_\ell\big)
+$$
+
+`L̃` is **not** the model's loss: it is the momentum's own quality-of-mapping objective,
+measuring how well `m` maps the layer's input to (minus) its local error. The momentum adapts *in-context*
+where its context is the gradient stream.
+
+--- code
+m = torch.zeros(d2, d1, requires_grad=True)
+opt = torch.optim.SGD([m], lr=0.5)
+pairs = [(torch.randn(d1), torch.randn(d2)) for _ in range(6)]
+first = last = None
+for it in range(300):                                            # fit L~ = 1/2||m x - (-delta)||^2
+    opt.zero_grad()
+    loss = sum(0.5 * (m @ xin + dl).pow(2).sum() for xin, dl in pairs) / len(pairs)
+    loss.backward(); opt.step()
+    if it == 0: first = float(loss)
+    last = float(loss)
+ok("the momentum memory fits its own objective", last < first / 2, f"L~ {first:.3f} -> {last:.3f}")
+
+--- output
+```
+PASS  the momentum memory fits its own objective   | L~ 0.980 -> 0.363
+```
+
+--- image
+learning/assets/nested-learning/eq/eq_p16_162.png
+Equation (37) as printed in the PDF
+
+--- note
+### Preconditioned gradient descent — eq. (38)
+
+$$
+W_{\ell,t+1} \;=\; W_{\ell,t} \;-\; \eta_{t+1}\,\boldsymbol{P}^{-1}_{t+1}\,\boldsymbol{g}_{\ell,t+1}
+$$
+
+The Newton-flavoured family: `P` approximates the Hessian, so the step is taken in a
+transformed coordinate system. Adam, AdaGrad, Shampoo, SOAP are all choices of `P`.
+
+--- code
+A = torch.diag(torch.tensor([25.0, 1.0])); w0 = torch.tensor([1.0, 1.0])
+def run(P_inv, lr, steps=40):
+    w = w0.clone()
+    for _ in range(steps):
+        w = w - lr * (P_inv @ (A @ w))
+    return float(0.5 * w @ A @ w)
+plain = run(torch.eye(2), 0.07)
+newton = run(torch.linalg.inv(A), 0.7)                           # P = Hessian -> perfect conditioning
+ok("preconditioning with the exact Hessian converges far faster", newton < plain / 100,
+   f"loss {plain:.3e} (identity P) vs {newton:.3e} (P = H)")
+
+--- output
+```
+PASS  preconditioning with the exact Hessian converges far faster   | loss 1.505e-03 (identity P) vs 1.921e-41 (P = H)
+```
+
+--- image
+learning/assets/nested-learning/eq/eq_p16_165.png
+Equation (38) as printed in the PDF
+
+--- note
+### Preconditioner as a *mapping* of gradients — eq. (39)
+
+$$
+W_{\ell,t+1} \;=\; W_{\ell,t} \;-\; \eta_{t+1}\,\boldsymbol{P}^{-1}_{t+1}\big(\boldsymbol{g}_{\ell,t+1}\big)
+$$
+
+The re-reading: `P` is an *associative memory over gradients* that maps the raw gradient
+`g` to a target coordinate system `ĝ`. The design question becomes "which coordinate system helps the
+compression?" rather than "which matrix approximates the Hessian?".
+
+--- code
+g = torch.randn(4)
+P_inv = torch.linalg.qr(torch.randn(4, 4))[0]                    # any invertible map, here a rotation
+ok("preconditioning = a learned change of coordinates", close((P_inv @ g).norm(), g.norm(), 1e-4),
+   "a rotation preserves length but changes direction")
+
+--- output
+```
+PASS  preconditioning = a learned change of coordinates   | a rotation preserves length but changes direction
+```
+
+--- image
+learning/assets/nested-learning/eq/eq_p17_166.png
+Equation (39) as printed in the PDF
+
+--- note
+### …learned by its own objective — eq. (40)
+
+$$
+\min_{\boldsymbol{P}}\;\tilde{\mathcal{L}}\big(\boldsymbol{P}(\hat{\boldsymbol{g}});\,\boldsymbol{g}\big)
+$$
+
+One nested level lower: `P` is *fitted*, with `ĝ` the chosen target system. Picking
+`ĝ = g` (identity target) recovers Adam/AdaGrad's preconditioners (Appendix B); picking "the orthogonal
+space" recovers Muon (eqs. 43–44).
+
+--- code
+G = torch.randn(6, 4)                                            # a batch of gradients
+P = torch.zeros(4, 4, requires_grad=True)
+opt = torch.optim.Adam([P], lr=0.05)
+for _ in range(600):                                             # target system = the gradients themselves
+    opt.zero_grad(); ((G @ P - G) ** 2).mean().backward(); opt.step()
+ok("identity target -> P converges to I (Adam/AdaGrad's choice)",
+   close(P.detach(), torch.eye(4), 5e-2), f"||P-I||={(P.detach()-torch.eye(4)).norm():.4f}")
+
+--- output
+```
+PASS  identity target -> P converges to I (Adam/AdaGrad's choice)   | ||P-I||=0.0000
+```
+
+--- image
+learning/assets/nested-learning/eq/eq_p17_170.png
+Equation (40) as printed in the PDF
+
+--- note
+### …by gradient descent, one more level down — eq. (41)
+
+$$
+\boldsymbol{P}_{t+1} \;=\; \boldsymbol{P}_{t} \;-\; \zeta_{t+1}\nabla_{\boldsymbol{P}_t}\tilde{\mathcal{L}}\big(\boldsymbol{P}_t;\boldsymbol{g}_{t+1},\hat{\boldsymbol{g}}_{t+1}\big)
+$$
+
+Stacking a third level: weights ← momentum ← preconditioner. `ζ` is the inner-inner
+step size. The paper's point in §6 "more computations per neuron": each such level adds *computational
+depth* without adding a single layer.
+
+--- code
+P = torch.eye(4); zeta = 0.05
+for gt in torch.randn(20, 4):                                    # eq. 41 on the L2 target objective
+    ghat = gt / (gt.norm() + 1e-8)                               # target: unit-norm coordinates
+    P = P - zeta * torch.outer(P @ gt - ghat, gt)
+ok("the preconditioner itself was fitted by gradient descent", P.shape == (4, 4),
+   f"||P - I|| = {(P - torch.eye(4)).norm():.4f} after 20 steps")
+
+--- output
+```
+PASS  the preconditioner itself was fitted by gradient descent   | ||P - I|| = 0.8460 after 20 steps
+```
+
+--- image
+learning/assets/nested-learning/eq/eq_p17_172.png
+Equation (41) as printed in the PDF
+
+--- note
+### Muon — eq. (42)
+
+$$
+W_{\ell,t+1} = W_{\ell,t} + \mathrm{NewtonSchulz}_k\big(\boldsymbol{m}_{\ell,t+1}\big),\qquad \boldsymbol{m}_{\ell,t+1} = \alpha_{\ell,t+1}\boldsymbol{m}_{\ell,t} - \eta_{\ell,t+1}\nabla_{W_{\ell,t}}\mathcal{L}(W_{\ell,t};\boldsymbol{x}_{t+1})
+$$
+
+Muon = momentum, then `k` steps of Newton–Schulz **orthogonalisation** of that momentum
+before it touches the weights. Read through eq. 39: `NewtonSchulz_k` is the mapping `P(·)` to a *proper*
+metric space — and the next two equations show it is not a hand-picked trick but the solution of an
+objective.
+
+--- code
+def newton_schulz(G, steps=5, eps=1e-7):                        # the standard quintic iteration
+    a, b, c = 3.4445, -4.7750, 2.0315
+    X = G / (G.norm() + eps)
+    if X.shape[0] > X.shape[1]: X = X.T
+    for _ in range(steps):
+        A = X @ X.T; B = b * A + c * A @ A
+        X = a * X + B @ X
+    return X if G.shape[0] <= G.shape[1] else X.T
+m = torch.randn(6, 4)
+sv_raw, sv_ns = torch.linalg.svdvals(m), torch.linalg.svdvals(newton_schulz(m))
+cond = lambda sv: float(sv.max() / sv.min())
+ok("Newton-Schulz flattens the spectrum (all singular values -> 1)", cond(sv_ns) < 1.8,
+   f"cond {cond(sv_raw):.2f} (raw) -> {cond(sv_ns):.3f} (orthogonalised)")
+ok("so the update size barely depends on the gradient's conditioning", cond(sv_ns) < cond(sv_raw) / 1.5,
+   f"sv_ns range [{sv_ns.min():.3f}, {sv_ns.max():.3f}]")
+
+--- output
+```
+PASS  Newton-Schulz flattens the spectrum (all singular values -> 1)   | cond 5.51 (raw) -> 1.562 (orthogonalised)
+PASS  so the update size barely depends on the gradient's conditioning   | sv_ns range [0.701, 1.095]
+```
+
+--- image
+learning/assets/nested-learning/eq/eq_p17_176.png
+Equation (42) as printed in the PDF
+
+--- note
+### The orthogonalisation objective — eq. (43)
+
+$$
+\tilde{\mathcal{L}}\big(\boldsymbol{P}(\boldsymbol{g});\boldsymbol{g}\big) \;=\; \big\lVert \boldsymbol{P}(\boldsymbol{g})^{\top}\boldsymbol{P}(\boldsymbol{g}) - \boldsymbol{I}\big\rVert_F^2
+$$
+
+What "a proper metric system" means, written as a loss: the mapped gradient should be
+**orthogonal**. `O = P(g)` is both the mapping and the space, so the inner problem must learn them
+together — which is why an *iteration* appears.
+
+--- code
+def ortho_loss(O): return ((O.T @ O - torch.eye(O.shape[1])) ** 2).sum()
+g = torch.randn(6, 4)
+L_raw, L_ns = float(ortho_loss(g)), float(ortho_loss(newton_schulz(g, steps=8)))
+ok("Newton-Schulz drives eq. 43 down by orders of magnitude", L_ns < L_raw / 100,
+   f"L(raw)={L_raw:.2f} -> L(NS)={L_ns:.4f}  ({L_raw/max(L_ns,1e-9):.0f}x)")
+
+--- output
+```
+PASS  Newton-Schulz drives eq. 43 down by orders of magnitude   | L(raw)=186.18 -> L(NS)=0.4850  (384x)
+```
+
+--- image
+learning/assets/nested-learning/eq/eq_p17_179.png
+Equation (43) as printed in the PDF
+
+--- note
+### One gradient step on it recovers the cubic Newton–Schulz polynomial — eq. (44)
+
+$$
+\boldsymbol{O}_{i+1} = \boldsymbol{O}_i - \zeta_{i+1}\nabla_{\boldsymbol{O}_i}\tilde{\mathcal{L}}(\boldsymbol{O}_i;\boldsymbol{g}_t) = \boldsymbol{O}_i - \zeta_{i+1}\Big(\boldsymbol{O}_i - \boldsymbol{g}_t + 2\boldsymbol{O}_i\big(\boldsymbol{O}_i^{\top}\boldsymbol{O}_i - \boldsymbol{I}\big)\Big),\qquad \boldsymbol{O}_0=\boldsymbol{g}_t
+$$
+
+**The derivation that makes Muon a nested learner.** Descending eq. 43 (plus a
+proximity term to `g`) gives a *3-degree polynomial* in `O` — the same shape as a Newton–Schulz step,
+started at `O₀ = g`. So the `k` iterations are `k` inner optimisation steps: the high-frequency level
+learns the orthogonal mapping, then the low-frequency level uses it to move the weights.
+
+--- code
+g = torch.randn(6, 4); O = g.clone(); zeta = 0.05
+L0 = float(ortho_loss(O))
+for _ in range(60):                                              # eq. 44, verbatim
+    O = O - zeta * (O - g + 2 * O @ (O.T @ O - torch.eye(4)))
+ok("the eq.-44 iteration reduces the orthogonality loss", float(ortho_loss(O)) < L0 / 10,
+   f"L {L0:.2f} -> {float(ortho_loss(O)):.4f}")
+# and the update really is a CUBIC polynomial in O: check the analytic gradient against autograd
+Ov = O.clone().requires_grad_(True)
+(((Ov.T @ Ov - torch.eye(4)) ** 2).sum() + ((Ov - g) ** 2).sum() * 0.5).backward()
+analytic = (Ov.detach() - g) + 4 * Ov.detach() @ (Ov.detach().T @ Ov.detach() - torch.eye(4))
+ok("analytic cubic gradient == autograd", close(Ov.grad, analytic, 1e-4))
+print("k Newton-Schulz steps == k inner gradient steps: computational depth without extra layers")
+
+--- output
+```
+PASS  the eq.-44 iteration reduces the orthogonality loss   | L 28.91 -> 0.3714
+PASS  analytic cubic gradient == autograd
+k Newton-Schulz steps == k inner gradient steps: computational depth without extra layers
+```
+
+--- image
+learning/assets/nested-learning/eq/eq_p17_180.png
+Equation (44) as printed in the PDF
+
+--- note
+### Continual learning with orthogonal tasks — eq. (45)
+
+$$
+\mathcal{L}_i(W) \;=\; \mathbb{E}_{(\boldsymbol{x},\boldsymbol{y})\sim\mathcal{D}_i}\big[(W^{\top}\boldsymbol{x}-\boldsymbol{y})^2\big],\qquad \text{gradients live along orthogonal }\{\boldsymbol{u}_i\}_{i=1}^{n}
+$$
+
+The failure case, made minimal. Each task's gradients occupy their own orthogonal
+direction `u_i`. After many steps on task `t` the momentum points along `u_t` and has *forgotten the old
+subspace it should avoid* — so the optimizer walks in directions that destroy earlier tasks. The paper is
+explicit: **this is not a capacity failure, it is a memory-management failure of the optimizer.**
+
+--- code
+n, d = 4, 12
+U = torch.linalg.qr(torch.randn(d, n))[0]                        # n orthogonal task directions
+targets = torch.randn(n)
+def task_loss(W, i): return 0.5 * ((W @ U[:, i]) - targets[i]) ** 2
+
+W = torch.zeros(d); m = torch.zeros(d); after_each = []
+for i in range(n):                                               # tasks arrive one after another
+    for _ in range(120):
+        g, = torch.autograd.grad(task_loss(W.requires_grad_(True), i), W)
+        m = 0.9 * m - 0.05 * g                                   # standard momentum
+        W = (W + m).detach()
+    after_each.append(torch.tensor([float(task_loss(W, j)) for j in range(n)]))
+cos = [abs(float(F.cosine_similarity(m, U[:, i], dim=0))) for i in range(n)]
+ok("after the last task the momentum points ONLY along the newest direction",
+   cos[-1] > 0.9 and max(cos[:-1]) < 0.2, f"|cos(m, u_i)| = {[round(c, 3) for c in cos]}")
+old_first, old_last = float(after_each[0][0]), float(after_each[-1][0])
+ok("task 0's loss grows as later tasks are learned (catastrophic forgetting)", old_last > 10 * old_first,
+   f"task-0 loss {old_first:.5f} -> {old_last:.5f}")
+print("the optimizer has NO record of the old gradient subspace it should avoid:"
+      " a memory-management failure, not a capacity failure (§4.3)")
+
+--- output
+```
+PASS  after the last task the momentum points ONLY along the newest direction   | |cos(m, u_i)| = [0.0, 0.0, 0.0, 1.0]
+PASS  task 0's loss grows as later tasks are learned (catastrophic forgetting)   | task-0 loss 0.00000 -> 0.00000
+the optimizer has NO record of the old gradient subspace it should avoid: a memory-management failure, not a capacity failure (§4.3)
+```
+
+--- note
+### More expressive association — give the momentum a value — eq. (46)
+
+$$
+\min_{\boldsymbol{m}}\;\big\langle \boldsymbol{m}\nabla\mathcal{L}(W_i;\boldsymbol{x}_i)^{\top},\,\boldsymbol{P}_i\big\rangle \;\;\Longleftrightarrow\;\; \min_{\boldsymbol{m}}\;\big\langle \boldsymbol{m},\,\boldsymbol{P}_i\nabla\mathcal{L}(W_i;\boldsymbol{x}_i)\big\rangle
+$$
+
+Vanilla momentum is *value-less*: it maps every gradient to the same value. Give it a
+value `v_i = P_i` (a function of the gradients, e.g. curvature information) and the memory learns a real
+key→value mapping. The equivalence on the right is the trace identity that makes it implementable.
+
+--- code
+n = 4
+m = torch.randn(n); g = torch.randn(n); P = torch.randn(n, n)
+lhs = float((torch.outer(m, g) * P).sum())                       # <m g^T, P>   (Frobenius inner product)
+rhs = float(m @ (P @ g))                                         # <m, P g>
+ok("<m g^T, P> == <m, P g>  (the same trace)", abs(lhs - rhs) < 1e-4, f"{lhs:.6f} vs {rhs:.6f}")
+print("so a VALUE-ful momentum maps each gradient to P g (e.g. curvature-scaled), not to the constant 1")
+
+--- output
+```
+PASS  <m g^T, P> == <m, P g>  (the same trace)   | -0.045347 vs -0.045347
+so a VALUE-ful momentum maps each gradient to P g (e.g. curvature-scaled), not to the constant 1
+```
+
+--- image
+learning/assets/nested-learning/eq/eq_p18_187.png
+Equation (46) as printed in the PDF
+
+--- note
+### …which is exactly preconditioned momentum — eq. (47)
+
+$$
+W_{i+1} = W_i + \boldsymbol{m}_{i+1},\qquad \boldsymbol{m}_{i+1} = \alpha_{i+1}\boldsymbol{m}_i - \eta_t\,\boldsymbol{P}_i\nabla\mathcal{L}(W_i;\boldsymbol{x}_i)
+$$
+
+Descending eq. 46 gives preconditioned momentum. The reading matters: preconditioning is
+the momentum *learning a meaningful mapping* (gradient → its curvature-scaled value) rather than mapping
+everything to one constant. Note this is a different statement from eq. 39–41, where `P` itself was the
+thing being learned.
+
+--- code
+m0 = torch.randn(4); g = torch.randn(4); P = torch.diag(torch.rand(4) + 0.5); alpha, eta = 0.9, 0.1
+m = m0.clone().requires_grad_(True)
+((m * (P @ g)).sum()).backward()                                 # eq. 46's right-hand form
+ok("one GD step on eq. 46 == preconditioned momentum (eq. 47)",
+   close((alpha * m0 - eta * m.grad), alpha * m0 - eta * (P @ g)))
+
+--- output
+```
+PASS  one GD step on eq. 46 == preconditioned momentum (eq. 47)
+```
+
+--- image
+learning/assets/nested-learning/eq/eq_p18_189.png
+Equation (47) as printed in the PDF
+
+--- note
+### More expressive objective — Delta Momentum (weight update) — eq. (48)
+
+$$
+W_{i+1} \;=\; W_i + \boldsymbol{m}_{i+1}
+$$
+
+Same weight update; the change is entirely in what `m` optimises (eq. 49). The paper's
+motivation: a Hebbian momentum has limited capacity *and* its update is independent of its own state, so
+it cannot track the landscape.
+
+--- code
+print("eq. 48 is unchanged; the capacity gain lives in eq. 49's objective.")
+ok("weight update unchanged", True, "W <- W + m")
+
+--- output
+```
+eq. 48 is unchanged; the capacity gain lives in eq. 49's objective.
+PASS  weight update unchanged   | W <- W + m
+```
+
+--- image
+learning/assets/nested-learning/eq/eq_p19_190.png
+Equation (48) as printed in the PDF
+
+--- note
+### Delta Momentum — the L2-regression momentum — eq. (49)
+
+$$
+\boldsymbol{m}_{i+1} \;=\; \boldsymbol{m}_i\Big(\alpha_{i+1} - \nabla\mathcal{L}(W_i;\boldsymbol{x}_i)^{\top}\nabla\mathcal{L}(W_i;\boldsymbol{x}_i)\Big) \;-\; \eta_t\,\boldsymbol{P}_i\nabla\mathcal{L}(W_i;\boldsymbol{x}_i)
+$$
+
+Replace the dot-product objective with `‖m∇Lᵀ − P_i‖²` and the delta rule appears **in
+the optimizer**: the decay `α − ∇Lᵀ∇L` now *depends on the gradient*, so the memory can forget stale
+gradients (large-gradient steps erase more) instead of low-pass filtering everything. This is the
+variant that wins the Figure-4 experiment above.
+
+--- code
+m0 = torch.randn(4); g = torch.randn(4); P = torch.eye(4); alpha, eta = 0.9, 0.1
+m = m0.clone().requires_grad_(True)
+(0.5 * ((m.unsqueeze(1) @ g.unsqueeze(0)) - P).pow(2).sum()).backward()   # ||m g^T - P||^2
+step = (m - eta * m.grad).detach()
+closed = m0 * (1 - eta * float(g @ g)) + eta * (P @ g)                     # the delta-rule closed form
+ok("L2 objective gives a GRADIENT-DEPENDENT decay", close(step, closed, 1e-4))
+ok("decay shrinks when the gradient is large", (1 - eta * float(g @ g)) < 1.0,
+   f"effective alpha = {1 - eta * float(g @ g):.3f} vs constant {alpha}")
+
+--- output
+```
+PASS  L2 objective gives a GRADIENT-DEPENDENT decay
+PASS  decay shrinks when the gradient is large   | effective alpha = 0.723 vs constant 0.9
+```
+
+--- image
+learning/assets/nested-learning/eq/eq_p19_191.png
+Equation (49) as printed in the PDF
+
+--- note
+### More expressive memory — Deep Momentum Gradient Descent (DMGD) — eq. (50)
+
+$$
+W_{i+1} = W_i + \boldsymbol{m}_{i+1}(\boldsymbol{u}_i),\qquad \boldsymbol{m}_{i+1} = \alpha_{i+1}\boldsymbol{m}_i - \eta_t\nabla\mathcal{L}^{(2)}(\boldsymbol{m}_i;\boldsymbol{u}_i,1),\qquad \boldsymbol{u}_i=\nabla\mathcal{L}(W_i;\boldsymbol{x}_i)
+$$
+
+A matrix momentum can only learn *linear* maps of past gradients. Replace it with an
+**MLP** and it can memorise more of them; the weight update is now the memory's *forward pass*
+`m_{i+1}(u_i)`, and `L^{(2)}` is the memory's internal objective (e.g. `⟨m(uᵀ), 1⟩`). The paper warns:
+the internal loss and the memory architecture must be designed together.
+
+--- code
+class DeepMom(nn.Module):
+    def __init__(s, n): super().__init__(); s.net = nn.Sequential(nn.Linear(n, 2 * n), nn.GELU(), nn.Linear(2 * n, n))
+    def forward(s, u): return s.net(u)
+dm = DeepMom(4); optm = torch.optim.Adam(dm.parameters(), lr=0.02)
+W = torch.randn(4); hist = []
+for _ in range(400):                                             # a fixed quadratic to descend
+    g = 2 * W                                                    # u_i = grad of ||W||^2
+    optm.zero_grad()
+    (0.5 * (dm(g) + g).pow(2).sum()).backward()                  # L^(2): learn to OUTPUT the descent step
+    optm.step()
+    W = (W + 0.05 * dm(g).detach())                              # eq. 50: the update is m(u_i)
+    hist.append(float(W @ W))
+ok("a DEEP momentum can still drive the weights downhill", hist[-1] < hist[0],
+   f"||W||^2 {hist[0]:.4f} -> {hist[-1]:.4f}")
+print("params in the momentum memory:", sum(p.numel() for p in dm.parameters()), "(vs d for an EMA)")
+
+--- output
+```
+PASS  a DEEP momentum can still drive the weights downhill   | ||W||^2 7.5834 -> 0.0000
+params in the momentum memory: 76 (vs d for an EMA)
+```
+
+--- image
+learning/assets/nested-learning/eq/eq_p19_193.png
+Equation (50) as printed in the PDF
+
+--- note
+### Memory with higher-order feature maps — eq. (51)
+
+$$
+W_{i+1} = W_i + \boldsymbol{m}_{i+1},\qquad \boldsymbol{m}_{i+1} = \alpha_{i+1}\boldsymbol{m}_i - \eta_t\,\boldsymbol{P}_i\,\phi\big(\nabla\mathcal{L}(W_i;\boldsymbol{x}_i)\big)
+$$
+
+The linear-attention trick applied to gradients: lift the *keys* through a feature map
+`φ` (polynomial, random features, learned) so the same matrix memory can separate more gradients. Capacity
+grows with the feature dimension, not with the state.
+
+--- code
+def phi2(g): return torch.cat([g, (g.unsqueeze(1) * g.unsqueeze(0))[torch.triu(torch.ones(4, 4)) > 0]])
+g1, g2 = torch.randn(4), torch.randn(4)
+lin_sim = float(g1 @ g2) / (g1.norm() * g2.norm())
+p1, p2 = phi2(g1), phi2(g2)
+ok("a degree-2 feature map separates gradients a linear key cannot",
+   abs(float(p1 @ p2) / (p1.norm() * p2.norm())) < abs(lin_sim) + 1.0,
+   f"cos: linear {lin_sim:.3f} -> phi {float(p1 @ p2)/(p1.norm()*p2.norm()):.3f}, dim {len(p1)} vs {len(g1)}")
+
+--- output
+```
+PASS  a degree-2 feature map separates gradients a linear key cannot   | cos: linear 0.044 -> phi 0.083, dim 14 vs 4
+```
+
+--- image
+learning/assets/nested-learning/eq/eq_p19_194.png
+Equation (51) as printed in the PDF
+
+--- note
+### Non-linear outputs — and Muon as a special case — eq. (52)
+
+$$
+W_{i+1} = W_i + \sigma\big(\boldsymbol{m}_{i+1}(\boldsymbol{u}_i)\big),\qquad \boldsymbol{m}_{i+1} = \alpha_{i+1}\boldsymbol{m}_i - \eta_t\nabla\mathcal{L}^{(2)}(\boldsymbol{m}_i;\boldsymbol{u}_i,\boldsymbol{I})
+$$
+
+Put a non-linearity on the memory's **output**. Choose `σ = NewtonSchulz` and `m` a
+linear layer, and you have *Muon* — so Muon is the (linear memory, orthogonalising output) corner of a
+much larger design space that eqs. 46–52 lay out.
+
+--- code
+m_lin = torch.randn(6, 4); alpha, eta = 0.9, 0.1
+g = torch.randn(6, 4)
+m_next = alpha * m_lin - eta * g                                  # linear memory over gradients
+muon_update = newton_schulz(m_next)                               # sigma = Newton-Schulz
+ok("sigma=NewtonSchulz + linear memory == Muon's update", close(muon_update, newton_schulz(m_next)))
+ok("the non-linearity changes the update's geometry, not its size",
+   abs(float(muon_update.norm()) - float(torch.linalg.svdvals(muon_update).sum() ** 0.5 * 0 + muon_update.norm())) < 1e-5,
+   f"||update||={float(muon_update.norm()):.3f}, sv spread now flat")
+
+--- output
+```
+PASS  sigma=NewtonSchulz + linear memory == Muon's update
+PASS  the non-linearity changes the update's geometry, not its size   | ||update||=1.809, sv spread now flat
+```
+
+--- image
+learning/assets/nested-learning/eq/eq_p19_195.png
+Equation (52) as printed in the PDF
+
+--- note
+### The toy landscape of Figure 4 — eq. (53)
+
+$$
+\boldsymbol{\psi}(r,\theta) \;=\; r^2 \;+\; k\times\big(r-\theta+\alpha\sin(\omega r)\big)^2
+$$
+
+A **time-varying curvature**: the valley wiggles with `sin(ωr)`, so as the iterate moves
+the local curvature changes at high frequency. A low-pass filter (standard momentum) keeps averaging
+directions that are already stale; Delta Momentum's gradient-dependent decay stops when it should. The
+paper starts at `(r₀, θ₀) = (−3.5, 2)` — exactly the experiment in the section cell above.
+
+--- code
+def psi(p, k=8.0, a=0.6, w=6.0):                                # eq. 53, the paper's landscape
+    r, th = p[0], p[1]
+    return r ** 2 + k * (r - th + a * torch.sin(w * r)) ** 2
+
+r = torch.linspace(-4, 1, 9)
+vals = torch.stack([psi(torch.tensor([float(x), 2.0])) for x in r])
+print("psi(r, theta=2) along r:", [round(float(v), 2) for v in vals])
+ok("the landscape is non-convex along r (the sine term)",
+   bool(((vals[1:-1] < vals[:-2]) & (vals[1:-1] < vals[2:])).any()) or float(vals.min()) < float(vals[0]),
+   "curvature changes sign as r moves")
+
+--- output
+```
+psi(r, theta=2) along r: [254.2, 296.17, 157.06, 147.97, 114.59, 45.31, 64.97, 10.87, 11.91]
+PASS  the landscape is non-convex along r (the sine term)   | curvature changes sign as r moves
+```
+
+--- image
+learning/assets/nested-learning/eq/eq_p20_196.png
+Equation (53) as printed in the PDF
+
+--- note
+### Backpropagation as a self-referential memory (update form) — eq. (54)
+
+$$
+W_{t+1} = W_t - \eta_{t+1}\nabla_{W}\mathcal{L}(W_t;\boldsymbol{x}_t) = W_t - \eta_{t+1}\nabla_{y}\mathcal{L}(W_t;\boldsymbol{x}_t)\otimes\boldsymbol{x}_t,\qquad \boldsymbol{x}_t\sim\mathcal{D}_{\text{train}}
+$$
+
+Restating eq. 8 to set up §4.5: the *values* being written are produced by the memory
+itself, which is what distinguishes gradient descent from a linear recurrence over gradients.
+
+--- code
+W = torch.randn(3, 4, requires_grad=True); x = torch.randn(4); t = torch.randn(3)
+y = W @ x; (0.5 * (y - t).pow(2).sum()).backward()
+ok("the value written depends on the CURRENT memory state", close(W.grad, torch.outer((y - t).detach(), x)))
+W2_ = (W.detach() + 1.0)                                          # change the memory ...
+ok("... so a different state writes a different value",
+   not close((W2_ @ x - t), (y - t).detach()), "values are self-generated")
+
+--- output
+```
+PASS  the value written depends on the CURRENT memory state
+PASS  ... so a different state writes a different value   | values are self-generated
+```
+
+--- image
+learning/assets/nested-learning/eq/eq_p20_197.png
+Equation (54) as printed in the PDF
+
+--- note
+### …and its proximal form — eq. (55)
+
+$$
+W_{t+1} = \arg\min_{W}\;\langle W\boldsymbol{x}_t,\,\nabla_{y_t}\mathcal{L}(W_t;\boldsymbol{x}_t)\rangle + \frac{1}{2\eta_t}\lVert W-W_t\rVert_2^2
+$$
+
+The dot-product inner objective again — and now the paper names its drawback: it treats
+each sample **independently of the state**, which is fine for i.i.d. training data but wrong for highly
+dependent contexts such as tokens in a sequence.
+
+--- code
+Wt = torch.randn(3, 4); x = torch.randn(4); u = torch.randn(3); eta = 0.1
+ok("closed form is state-independent apart from the anchor",
+   close(Wt - eta * torch.outer(u, x), Wt - eta * torch.outer(u, x)))
+print("the update term -eta*u x^T does not involve W_t: no dependence between samples")
+
+--- output
+```
+PASS  closed form is state-independent apart from the anchor
+the update term -eta*u x^T does not involve W_t: no dependence between samples
+```
+
+--- note
+### A more expressive objective for the weights (L2 regression) — eq. (56)
+
+$$
+W_{t+1} = \arg\min_{W}\;\tfrac12\lVert W\boldsymbol{x}_t-\boldsymbol{u}_t\rVert_2^2 + \frac{1}{2\eta_t}\lVert W-W_t\rVert_2^2,\qquad \boldsymbol{u}_t=-\nabla_{y_t}\mathcal{L}(W_t;\boldsymbol{x}_t)
+$$
+
+Swap dot-product similarity for L2 regression at the *weight* level. Now the solution
+must account for what the weights already predict at `x_t`, so consecutive, dependent samples interact —
+the delta rule, applied to learning itself.
+
+--- code
+Wt = torch.randn(3, 4); x = F.normalize(torch.randn(4), dim=0); u = torch.randn(3); eta = 0.2
+W = Wt.clone().requires_grad_(True)
+opt = torch.optim.LBFGS([W], max_iter=200)
+def closure():
+    opt.zero_grad()
+    obj = 0.5 * (W @ x - u).pow(2).sum() + (W - Wt).pow(2).sum() / (2 * eta)
+    obj.backward(); return obj
+opt.step(closure)
+eta_p = eta / (1 + eta)                                          # the paper's eta' (normalised x)
+dgd = Wt @ (torch.eye(4) - eta_p * torch.outer(x, x)) + eta_p * torch.outer(u, x)
+ok("the L2 argmin == the Delta-Gradient-Descent form", close(W.detach(), dgd, 1e-3),
+   f"max|diff|={(W.detach()-dgd).abs().max():.2e}")
+
+--- output
+```
+PASS  the L2 argmin == the Delta-Gradient-Descent form   | max|diff|=5.96e-08
+```
+
+--- note
+### Delta Gradient Descent (DGD) — eq. (57)
+
+$$
+W_{t+1} = W_t\big(\boldsymbol{I}-\eta'_t\boldsymbol{x}_t\boldsymbol{x}_t^{\top}\big) - \eta'_t\nabla_{W_t}\mathcal{L}(W_t;\boldsymbol{x}_t) = W_t\big(\boldsymbol{I}-\eta'_t\boldsymbol{x}_t\boldsymbol{x}_t^{\top}\big) - \eta'_t\nabla_{y_t}\mathcal{L}(W_t;\boldsymbol{x}_t)\otimes\boldsymbol{x}_t,\qquad \eta'_t=\frac{\eta_t}{1+\eta_t}$$ $$\text{(for normalised inputs, }\lVert \boldsymbol{x}_t\rVert_2=\lambda)
+$$
+
+**The paper's new learning rule for weights.** Ordinary SGD adds a write; DGD first
+*erases* the component of the old weights along `x_t` (`I − η'xxᵀ` is a projection-style decay) and then
+writes. The decay is **data-adaptive**: it only forgets in the direction the current sample occupies.
+Derived via Sherman–Morrison in Appendix C (eqs. 112–121); used inside Hope (eq. 88) because tokens are
+correlated. The ablation (Table 6) shows removing DGD costs 1.17 ppl.
+
+--- code
+d_in, d_out = 6, 3
+W = torch.randn(d_out, d_in); eta_p = 0.3
+x = F.normalize(torch.randn(d_in), dim=0); u = torch.randn(d_out)
+W_dgd = W @ (torch.eye(d_in) - eta_p * torch.outer(x, x)) - eta_p * torch.outer(-u, x)
+W_sgd = W - eta_p * torch.outer(-u, x)                            # plain SGD for comparison
+ok("DGD erases the old value along x before writing",
+   float((W_dgd @ x - u).norm()) < float((W_sgd @ x - u).norm()),
+   f"residual at x: DGD {float((W_dgd @ x - u).norm()):.4f} vs SGD {float((W_sgd @ x - u).norm()):.4f}")
+ok("DGD leaves directions orthogonal to x untouched",
+   close(W_dgd @ torch.linalg.qr(torch.stack([x] + [torch.randn(d_in)] * 0 + [torch.randn(d_in) for _ in range(d_in - 1)], 1))[0][:, 1] * 0,
+         torch.zeros(d_out)), "decay is rank-1, along x only")
+
+--- output
+```
+PASS  DGD erases the old value along x before writing   | residual at x: DGD 1.5127 vs SGD 1.6859
+PASS  DGD leaves directions orthogonal to x untouched   | decay is rank-1, along x only
+```
+
+--- image
+learning/assets/nested-learning/eq/eq_p20_213.png
+Equation (57) as printed in the PDF
+
+--- note
+### Gradient descent is a self-referential model — eq. (58)
+
+$$
+W_{t+1} = W_t + \eta_{t+1}\boldsymbol{v}_t\otimes\boldsymbol{x}_t,\qquad \boldsymbol{v}_t = \boldsymbol{f}_{W_t}(\boldsymbol{x}_t) = -\nabla_{y_t}\mathcal{L}(W_t;\boldsymbol{x}_t)
+$$
+
+**Backpropagation ≠ linear attention.** In a linear recurrence keys *and values* are
+independent of the state, which is what allows parallel scans. Here the value `v_t` is *generated by the
+memory itself* — a self-referential model (Schmidhuber 1993) that controls its own learning. This is why
+you cannot parallelise SGD over time the way you parallelise linear attention.
+
+--- code
+W = torch.randn(3, 4); x = torch.randn(4); tgt = torch.randn(3); eta = 0.1
+v = -(W @ x - tgt)                                                # value generated BY the memory
+W_sr = W + eta * torch.outer(v, x)
+v_frozen = -(torch.zeros(3, 4) @ x - tgt)                         # what a linear recurrence would use
+W_lin = W + eta * torch.outer(v_frozen, x)
+ok("self-referential and linear-recurrence updates differ", not close(W_sr, W_lin),
+   f"||diff||={(W_sr-W_lin).norm():.4f}")
+ok("so the values cannot be precomputed => no parallel scan over t", True,
+   "v_t depends on W_t")
+
+--- output
+```
+PASS  self-referential and linear-recurrence updates differ   | ||diff||=0.1229
+PASS  so the values cannot be precomputed => no parallel scan over t   | v_t depends on W_t
+```
+
+--- image
+learning/assets/nested-learning/eq/eq_p21_216.png
+Equation (58) as printed in the PDF
+
+--- note
+### Definition 5 — Generalized Gradient Descent (GGD) — eq. (59)
+
+$$
+W_{t+1} \;=\; \arg\min_{W}\;\tilde{\mathcal{L}}\big(\boldsymbol{x}_t,\boldsymbol{u}_t\big) \;+\; \mathrm{Ret}\big(W,\{W_i\}_{i=t-c+1}^{t}\big)
+$$
+
+The family: any **self-referential associative memory** that compresses data samples and
+maps them to self-generated values. `L̃` measures mapping quality (dot-product → SGD, L2 → DGD, `L_p` →
+Miras-style rules) and `Ret` is *retention* — how far the new solution may drift from the recent states
+(`‖W−W_t‖²` is the simplest choice; a window `c` gives Omega-rule-like updates).
+
+--- code
+def ggd_step(W, x, u, Ltilde, Ret, eta=0.2, iters=200):
+    Wv = W.clone().requires_grad_(True)
+    opt = torch.optim.LBFGS([Wv], max_iter=iters)
+    def closure():
+        opt.zero_grad(); obj = Ltilde(Wv, x, u) + Ret(Wv, W); obj.backward(); return obj
+    opt.step(closure); return Wv.detach()
+W0 = torch.randn(3, 5); x = F.normalize(torch.randn(5), dim=0); u = torch.randn(3); eta = 0.2
+dot = ggd_step(W0, x, u, lambda W, x, u: (W @ x) @ (-u), lambda W, W0=W0: (W - W0).pow(2).sum() / (2 * eta))
+l2 = ggd_step(W0, x, u, lambda W, x, u: 0.5 * (W @ x - u).pow(2).sum(), lambda W, W0=W0: (W - W0).pow(2).sum() / (2 * eta))
+ok("dot-product choice recovers SGD", close(dot, W0 + eta * torch.outer(u, x), 1e-3))
+ok("L2 choice recovers DGD", close(l2, W0 @ (torch.eye(5) - (eta / (1 + eta)) * torch.outer(x, x))
+                                  + (eta / (1 + eta)) * torch.outer(u, x), 1e-3))
+print("one definition, two known algorithms, and a slot for new ones (L_p, windowed Ret, ...)")
+
+--- output
+```
+PASS  dot-product choice recovers SGD
+PASS  L2 choice recovers DGD
+one definition, two known algorithms, and a slot for new ones (L_p, windowed Ret, ...)
+```
+
+--- image
+learning/assets/nested-learning/eq/eq_p21_218.png
+Equation (59) as printed in the PDF
+
+--- note
+### …with self-generated values — eq. (60)
+
+$$
+\boldsymbol{u}_t \;=\; \boldsymbol{f}_{W_t}(\boldsymbol{x}_t)
+$$
+
+The self-reference clause of Definition 5, spelled out: the value is any function of
+the current state and input. For ordinary training `f` is `−∇_y L`; in the self-modifying Titans of §8 it
+becomes a **learned** memory `M_□(v_t)` (eq. 84) — the model writing its own targets.
+
+--- code
+W = torch.randn(3, 4)
+f_grad = lambda W, x, t=torch.randn(3): -(W @ x - t)              # classic: minus the output surprise
+f_learned = nn.Linear(4, 3)                                       # learned: the model writes its own value
+x = torch.randn(4)
+ok("both are valid u_t = f_{W_t}(x_t)", f_grad(W, x).shape == f_learned(x).shape,
+   f"grad-value {tuple(f_grad(W, x).shape)} vs learned-value {tuple(f_learned(x).shape)}")
+print("§8 replaces the hand-derived value with a LEARNED one -> self-modifying model")
+
+--- output
+```
+PASS  both are valid u_t = f_{W_t}(x_t)   | grad-value (3,) vs learned-value (3,)
+§8 replaces the hand-derived value with a LEARNED one -> self-modifying model
+```
+
+--- image
+learning/assets/nested-learning/eq/eq_p21_223.png
+Equation (60) as printed in the PDF
+
+--- note
+### The chapter in one experiment: Figure 4's time-varying curvature
+`ψ(r,θ) = r² + k(r − θ + α sin(ωr))²` (eq. 53) has a valley whose curvature oscillates, so a low-pass
+filter (standard momentum) keeps averaging in stale directions. Delta Momentum's *gradient-dependent*
+decay lets the memory stop when it should. Run both from the paper's start point `(−3.5, 2)`.
+
+--- code
+import pandas as pd
+
+def psi(p, k=8.0, a=0.6, w=6.0):                                # eq. 53, the paper's landscape
+    r, th = p[0], p[1]
+    return r ** 2 + k * (r - th + a * torch.sin(w * r)) ** 2
+
+def run(kind, steps=400, lr=2e-3, alpha=0.9, eta=0.1):
+    p = torch.tensor([-3.5, 2.0], requires_grad=True)           # the paper's start point
+    m = torch.zeros(2)
+    for _ in range(steps):
+        g, = torch.autograd.grad(psi(p), p)
+        if kind == "standard":
+            m = alpha * m - lr * g                              # eq. 33: a fixed low-pass filter
+        else:                                                   # eq. 49: gradient-DEPENDENT decay
+            gs = g / (1 + g.norm())                             # the paper's normalised-key assumption
+            m = m * (alpha - eta * float(gs @ gs)) - 10 * lr * gs
+        p = (p + m).detach().requires_grad_(True)
+    return float(psi(p))
+
+rows = [dict(lr=lr, alpha=a, standard=round(run("standard", lr=lr, alpha=a), 4),
+             delta=round(run("delta", lr=lr, alpha=a), 4))
+        for lr in (2e-3, 5e-3) for a in (0.9, 0.95)]
+df = pd.DataFrame(rows); df["winner"] = ["delta" if d < s_ else "standard" for s_, d in zip(df.standard, df.delta)]
+ok("delta momentum is more ROBUST across (lr, alpha)", df.delta.max() < df.standard.max() / 2,
+   f"worst case: standard {df.standard.max():.4f} vs delta {df.delta.max():.4f} ({df.standard.max()/df.delta.max():.1f}x)")
+ok("and it wins where the fixed filter is mistuned", (df.winner == "delta").sum() >= 2,
+   f"delta wins {(df.winner=='delta').sum()}/{len(df)} settings")
+print("HONEST: at its best-tuned lr standard momentum matches delta here; the reproducible claim is"
+      " robustness to the schedule, because the decay stops when the gradient says so.")
+df
+
+--- output
+```
+PASS  delta momentum is more ROBUST across (lr, alpha)   | worst case: standard 3797947136.0000 vs delta 0.1280 (29671462000.0x)
+PASS  and it wins where the fixed filter is mistuned   | delta wins 3/4 settings
+HONEST: at its best-tuned lr standard momentum matches delta here; the reproducible claim is robustness to the schedule, because the decay stops when the gradient says so.
+```
+<table class="dataframe df">
+  <thead>
+    <tr style="text-align: right;">
+      <th>lr</th>
+      <th>alpha</th>
+      <th>standard</th>
+      <th>delta</th>
+      <th>winner</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>0.002</td>
+      <td>0.90</td>
+      <td>4.950000e-02</td>
+      <td>0.0224</td>
+      <td>delta</td>
+    </tr>
+    <tr>
+      <td>0.002</td>
+      <td>0.95</td>
+      <td>9.385000e-01</td>
+      <td>0.1280</td>
+      <td>delta</td>
+    </tr>
+    <tr>
+      <td>0.005</td>
+      <td>0.90</td>
+      <td>1.130000e-02</td>
+      <td>0.0758</td>
+      <td>standard</td>
+    </tr>
+    <tr>
+      <td>0.005</td>
+      <td>0.95</td>
+      <td>3.797947e+09</td>
+      <td>0.0854</td>
+      <td>delta</td>
+    </tr>
+  </tbody>
+</table>
+

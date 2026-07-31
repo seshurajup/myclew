@@ -1,0 +1,607 @@
+{
+  "title": "Nested Learning: The Illusion of Deep Learning Architecture",
+  "subtitle": "nested-learning",
+  "scenes": [
+    {
+      "kind": "title",
+      "title": "Nested Learning: The Illusion of Deep Learning Architecture",
+      "subtitle": "52 pages \u00b7 642 formulas \u00b7 every one proved in PyTorch",
+      "narration": "Nested Learning: The Illusion of Deep Learning Architecture. We go through this paper formula by formula, and every claim you hear is checked by code that runs.",
+      "seconds": 6.0
+    },
+    {
+      "kind": "chapter",
+      "title": "1 Introduction",
+      "subtitle": "Nested Learning: The Illusion of Deep Learning Architecture \u00a71",
+      "lesson": "nl01",
+      "narration": "1 Introduction",
+      "seconds": 4.0
+    },
+    {
+      "kind": "note",
+      "text": "## 1 Introduction\n**Paper:** Nested Learning: The Illusion of Deep Learning Architecture \u00b7 \u00a71 \u00b7 pages 1\u20135 \u00b7 equations (none) \u00b7 3 figures.\n\n**The claim.** Depth is not the only axis. Stacking layers buys expressivity for\n*static* prediction but it does not buy: computational depth (\u00a7 Merrill et al.), capacity for some\nparameter classes, escape from a bad optimizer, or the ability to keep learning after deployment.\n\n**The diagnosis.** An LLM after pre-training has *anterograde amnesia*: the context window is its only\nmutable memory, and nothing in the context ever reaches the MLP weights that ho",
+      "narration": "1 Introduction Paper: Nested Learning: The Illusion of Deep Learning Architecture \u00b7 \u00a71 \u00b7 pages 1\u20135 \u00b7 equations (none) \u00b7 3 figures. The claim. Depth is not the only axis. Stacking layers buys expressivity for static prediction but it does not buy: computational depth (\u00a7 Merrill et al.), capacity for some parameter classes, escape from a ba",
+      "seconds": 6.3,
+      "lesson": "nl01"
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/nested-learning/p01_0.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "nl01"
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/nested-learning/p02_0.png",
+      "caption": "Figure 1: The uniform and reusable structure as well as multi time scale update in the brain are the key components to unlock the continual learning in humans. Nested Learning (NL) allows for multi time-scale update for each component of the brain, while showing that well-known architectures such as Transformers are in fact linear layers with different frequency updates.",
+      "narration": "Figure 1 \u2014 as printed in the paper Figure 1: The uniform and reusable structure as well as multi time scale update in the brain are the key components to unlock the continual learning in humans. Nested Learning (NL) allows for multi time-scale update for each component of the brain, while showing that well-known architectures such as Tran",
+      "seconds": 9.0,
+      "lesson": "nl01"
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/nested-learning/p04_0.png",
+      "caption": "Figure 2: Nested Learning Paradigm that represent a machine learning model and its training procedure as a set of nested optimization problems. (Left) An example of Hybrid architecture. While deep learning perspective, as the flattened image of NL, does not provide insight about the depth of computation in the blocks, NL transparently represent all the inner gradient flows. (Right) A Neural Learning Module: A computational model that learns how to compress its own context flow. For example, the first level corresponds to the model\u2019s most outer-loop training, often refer to as \u201cpre-training\u201d step.",
+      "narration": "Figure 2 \u2014 as printed in the paper Figure 2: Nested Learning Paradigm that represent a machine learning model and its training procedure as a set of nested optimization problems. (Left) An example of Hybrid architecture. While deep learning perspective, as the flattened image of NL, does not provide insight about the depth of computation ",
+      "seconds": 9.0,
+      "lesson": "nl01"
+    },
+    {
+      "kind": "code",
+      "code": "import torch, torch.nn as nn, torch.nn.functional as F      # the whole paper is linear algebra + autograd\n\nimport sys; sys.path.insert(0, \"learning\")\nimport vizkit as vz                                            # the shared visual + explainability layer\n\nDEV = torch.device(\"cuda\" if torch.cuda.is_available() else \"cpu\")   # every proof runs on the GPU\ntorch.set_default_device(DEV)                                  # so EVERY tensor/module below is on DEV\n# These cells PROVE matrix identities, so they need full fp32: TF32 truncates the mantissa to 10 bits\n# and an identity that holds to 1e-6 in fp32 only holds to ~1e-3 in TF32. Timing cells opt INTO TF32/bf16\n# explicitly, where throughput is the point rather than exactness.\ntorch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False\ntorch.manual_seed(0); torch.set_printoptions(precision=4, sci_mode=False)\nprint(f\"device: {DEV}\" + (f\" | {torch.cuda.get_device_name(0)}\" if DEV.type == \"cuda\" else \"\"))\n\ndef ok(name, cond, extra=\"\"):                                  # a lesson's PROOF prints PASS/FAIL, never prose\n    print((\"PASS  \" if cond else \"FAIL  \") + name + (f\"   | {extra}\" if extra else \"\"))\n\ndef close(a, b, tol=1e-5):                                     # float-safe equality for matrix identities\n    return torch.allclose(a, b, atol=tol, rtol=tol)\n\ndef newton_schulz(G, steps=5, eps=1e-7):                       # the orthogonalisation used by Muon/M3\n    a, b, c = 3.4445, -4.7750, 2.0315                          # the standard quintic coefficients\n    X = G / (G.norm() + eps)\n    tall = X.shape[0] > X.shape[1]\n    if tall: X = X.T\n    for _ in range(steps):\n        A = X @ X.T; X = a * X + (b * A + c * A @ A) @ X\n    return X.T if tall else X\n\nd = 8\nQ_, _ = torch.linalg.qr(torch.randn(d, d))                      # orthonormal keys -> exact recall\nctx = [(Q_[:, i], torch.randn(d)) for i in range(5)]            # 5 in-context (key, value) facts\nprobe_k, probe_v = ctx[2]                                       # ask about the 3rd fact afterwards\n\nW_frozen = torch.randn(d, d)                                    # \"MLP after pre-training\": frequency 0\nerr_frozen = (W_frozen @ probe_k - probe_v).norm().item()\n\nM = torch.zeros(d, d)                                           # a memory with frequency > 0\nfor k, v in ctx:                                                # it WRITES while it reads (delta rule)\n    M = M @ (torch.eye(d) - torch.outer(k, k)) + torch.outer(v, k)\nerr_adaptive = (M @ probe_k - probe_v).norm().item()\n\nok(\"frozen weights cannot recall a context fact\", err_frozen > 1.0, f\"err={err_frozen:.3f}\")\nok(\"an updating memory recalls it (to solver precision)\", err_adaptive < 1e-2,\n   f\"err={err_adaptive:.2e} vs frozen {err_frozen:.3f}\")\nprint(f\"same shapes, same FLOPs class - the only difference is update frequency \"\n      f\"(0 vs {len(ctx)} writes)\")",
+      "output": "```\ndevice: cuda | NVIDIA GeForce RTX 5090\nPASS  frozen weights cannot recall a context fact   | err=1.849\nPASS  an updating memory recalls it (to solver precision)   | err=2.29e-07 vs frozen 1.849\nsame shapes, same FLOPs class - the only difference is update frequency (0 vs 5 writes)\n```",
+      "narration": "The amnesia, made numerical A frozen MLP cannot absorb anything from its context; a memory with a nonzero update frequency can. This is the whole paper in six lines of PyTorch \u2014 the difference is not the module type, it is whether the module is allowed to update while reading.",
+      "seconds": 64.17777777777778,
+      "lesson": "nl01"
+    },
+    {
+      "kind": "chapter",
+      "title": "2 Preliminaries",
+      "subtitle": "Nested Learning: The Illusion of Deep Learning Architecture \u00a72",
+      "lesson": "nl02",
+      "narration": "2 Preliminaries",
+      "seconds": 4.0
+    },
+    {
+      "kind": "note",
+      "text": "## 2 Preliminaries\n**Paper:** Nested Learning: The Illusion of Deep Learning Architecture \u00b7 \u00a72 \u00b7 pages 6\u20136 \u00b7 equations (1\u20135) \u00b7 0 figures.\n\n**Notation you need for every later formula.** `x \u2208 R^{N\u00d7d_in}` is the input,\n`M_t` the state of memory `M` at time `t`, `K/V/Q` the key/value/query matrices, bold lowercase with a\nsubscript (`k_t, v_t, q_t`) the vector for token `t`, `p(T)` the distribution of a random variable `T`.\nMemories are MLPs with `L_M \u2265 1` layers plus a residual connection, parameterised by\n`\u03b8_M \u2287 {W_1,\u2026,W_{L_M}}`. A **superscript in parentheses** is the *level*: `W^{(\u2113)}` or, equ",
+      "narration": "2 Preliminaries Paper: Nested Learning: The Illusion of Deep Learning Architecture \u00b7 \u00a72 \u00b7 pages 6\u20136 \u00b7 equations (1\u20135) \u00b7 0 figures. Notation you need for every later formula. x \u2208 R^{N\u00d7din} is the input, Mt the state of memory M at time t, K/V/Q the key/value/query matrices, bold lowercase with a subscript (kt, vt, qt) the vector for token ",
+      "seconds": 6.3,
+      "lesson": "nl02"
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/nested-learning/eq/eq_p06_000.png",
+      "caption": "Equation (1) as printed in the PDF",
+      "narration": "Stochastic gradient descent \u2014 eq. (1) the formula on screen. The baseline the whole paper re-reads. \u03b7t > 0 is the step size and \u2207{Wt}L(Wt; xt) is the surprise: how much this sample disagrees with what the weights currently encode. Note what it lacks \u2014 no dependence on earlier samples, no memory of the landscape.",
+      "seconds": 9.0,
+      "lesson": "nl02"
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/nested-learning/eq/eq_p29_312.png",
+      "caption": "Equation (2) as printed in the PDF",
+      "narration": "Gradient descent as steepest descent (proximal form) \u2014 eq. (2) the formula on screen. The same step read as an optimization problem: minimise the first-order Taylor expansion, regularised by a quadratic proximal term. The \u2016W\u2212Wt\u2016\u00b2 term is an implicit bias toward small moves in L2 \u2014 and it is the slot where every later \"retention gate\" (Ret",
+      "seconds": 9.0,
+      "lesson": "nl02"
+    },
+    {
+      "kind": "code",
+      "code": "W1 = torch.randn(d); eta = 0.05\ngs = [torch.randn(d) for _ in range(9)]\nW_sgd = W1.clone()\nfor gt in gs:\n    W_sgd = W_sgd - eta * gt                                    # per-step form\nok(\"SGD trajectory == FTRL closed form\", close(W_sgd, W1 - eta * torch.stack(gs).sum(0)))",
+      "output": "```\nPASS  SGD trajectory == FTRL closed form\n```",
+      "narration": "Accumulated form: follow-the-regularized-leader (FTRL) \u2014 eq. (3) the formula on screen. Constant step size lets the per-step proximal problems collapse into ONE argmin over the sum of all past gradients, anchored at the initialisation. Read it as: the optimizer's state is a compressed record of every gradient it has seen \u2014 the sentence th",
+      "seconds": 9.0,
+      "lesson": "nl02"
+    },
+    {
+      "kind": "code",
+      "code": "# inner: one gradient step on a task; outer: choose the shared init Phi that makes that step best\ndef task_loss(theta, A, b):\n    return 0.5 * ((A @ theta - b) ** 2).mean()\ntasks = [(torch.randn(4, 3), torch.randn(4)) for _ in range(6)]  # p(T): 6 linear tasks\ndef outer(Phi, inner_lr=0.3):\n    tot = 0.\n    for A, b in tasks:\n        g, = torch.autograd.grad(task_loss(Phi, A, b), Phi, create_graph=True)   # INNER: one step\n        tot = tot + task_loss(Phi - inner_lr * g, A, b)           # loss AFTER adaptation\n    return tot / len(tasks)\nPhi = torch.zeros(3, requires_grad=True)\nbefore = outer(Phi).item()\nopt = torch.optim.Adam([Phi], lr=0.1)\nfor _ in range(300):                                             # OUTER level: eq. 4\n    opt.zero_grad(); l = outer(Phi); l.backward(); opt.step()\nok(\"outer loop lowers post-adaptation loss across tasks\", outer(Phi).item() < before,\n   f\"{before:.4f} -> {outer(Phi).item():.4f}\")",
+      "output": "```\nPASS  outer loop lowers post-adaptation loss across tasks   | 0.1447 -> 0.1007\n```",
+      "narration": "Meta learning \u2014 the outer loop \u2014 eq. (4) the formula on screen. Two levels, written down: the inner procedure solves task Ti with parameters \u03b8; the outer level chooses \u03a6 (an initialisation, a learning rate, an architecture choice) to minimise the inner loss in expectation over tasks. Nested Learning generalises exactly this: \u03a6 is simply a",
+      "seconds": 20.666666666666668,
+      "lesson": "nl02"
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/nested-learning/eq/eq_p07_017.png",
+      "caption": "Equation (5) as printed in the PDF",
+      "narration": "Fast Weight Programmer / vanilla FWP \u2014 eq. (5) the formula on screen. The matrix-valued recurrent state: a slow \"programmer\" net maps each input to (k, v, q) and the fast weights Mt \u2208 R^{dout\u00d7dkey} are written by a rank-one Hebbian outer product and read by a matrix\u2013vector product. Constant state size, no cache growth \u2014 and the direct anc",
+      "seconds": 9.0,
+      "lesson": "nl02"
+    },
+    {
+      "kind": "chapter",
+      "title": "3 Nested Learning",
+      "subtitle": "Nested Learning: The Illusion of Deep Learning Architecture \u00a73",
+      "lesson": "nl03",
+      "narration": "3 Nested Learning",
+      "seconds": 4.0
+    },
+    {
+      "kind": "note",
+      "text": "## 3 Nested Learning\n**Paper:** Nested Learning: The Illusion of Deep Learning Architecture \u00b7 \u00a73 \u00b7 pages 7\u201314 \u00b7 equations (6\u201328) \u00b7 1 figures.\n\n**Nested Learning proper.** Definition 1 fixes what a memory *is*; then a\nsequence of worked examples shows that a 1-layer MLP trained by SGD, the same MLP trained with momentum,\nand a linear-attention layer are all the *same* object at different levels. Definition 2 supplies the\nordering (update frequency), Definitions 3\u20134 the formal nested system, and \u00a73.3 the five ways levels can\nexchange knowledge \u2014 conditioning on parameters, conditioning on output",
+      "narration": "3 Nested Learning Paper: Nested Learning: The Illusion of Deep Learning Architecture \u00b7 \u00a73 \u00b7 pages 7\u201314 \u00b7 equations (6\u201328) \u00b7 1 figures. Nested Learning proper. Definition 1 fixes what a memory is; then a sequence of worked examples shows that a 1-layer MLP trained by SGD, the same MLP trained with momentum, and a linear-attention layer are",
+      "seconds": 6.3,
+      "lesson": "nl03"
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/nested-learning/p10_0.png",
+      "caption": "Figure 3: An example of comparing a FFN (e.g., MLP) with linear attention in a Transformer-based backbone, optimizing with gradient descent. The red components are blocks in the first level (with frequency 1), while blue components are blocks in the second level (frequency L). Linear attention with learnable initial memory state (referred to as Linear Attention++) is the same as an MLP layer but with in-context learning ability and adaptation to the input sequence.",
+      "narration": "Figure 3 \u2014 as printed in the paper Figure 3: An example of comparing a FFN (e.g., MLP) with linear attention in a Transformer-based backbone, optimizing with gradient descent. The red components are blocks in the first level (with frequency 1), while blue components are blocks in the second level (frequency L). Linear attention with learn",
+      "seconds": 9.0,
+      "lesson": "nl03"
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/nested-learning/eq/eq_p07_018.png",
+      "caption": "Equation (6) as printed in the PDF",
+      "narration": "Definition 1 \u2014 associative memory \u2014 eq. (6) the formula on screen. The definition everything else is an instance of: an operator mapping keys K \u2286 R^{dk} to values V \u2286 R^{dv}, learned by minimising a quality objective L\u0303. Keys and values need not be tokens \u2014 later they are gradients (optimizers), sub-sequences, or layer inputs and their lo",
+      "seconds": 9.0,
+      "lesson": "nl03"
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/nested-learning/eq/eq_p08_020.png",
+      "caption": "Equation (7) as printed in the PDF",
+      "narration": "Training objective of a 1-layer MLP \u2014 eq. (7) the formula on screen. The ordinary supervised problem \u2014 stated so that the next equation can re-read it as a memory. Dtrain is this level's context flow; the paper's punchline in \u00a76 is that pre-training is therefore just in-context learning with an ultra-large context.",
+      "seconds": 9.0,
+      "lesson": "nl03"
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/nested-learning/eq/eq_p08_021.png",
+      "caption": "Equation (8) as printed in the PDF",
+      "narration": "The update rule, split into surprise \u00d7 input \u2014 eq. (8) the formula on screen. The factorisation that starts the paper's argument. Because y = Wx, the weight gradient is the outer product of the Local Surprise Signal u = \u2207y L with the input. So a training step writes the pair (key = input, value = its surprise) into W. \u2207y L is zero exactly",
+      "seconds": 9.0,
+      "lesson": "nl03"
+    },
+    {
+      "kind": "code",
+      "code": "Wt = torch.randn(3, 5); x = torch.randn(5); u = torch.randn(3); eta = 0.1\nW_closed = Wt - eta * torch.outer(u, x)                         # the closed-form minimiser\nW = Wt.clone().requires_grad_(True)\nopt = torch.optim.LBFGS([W], max_iter=150)\ndef closure():\n    opt.zero_grad()\n    obj = (W @ x) @ u + (W - Wt).pow(2).sum() / (2 * eta)\n    obj.backward(); return obj\nopt.step(closure)\nok(\"eq. 9 argmin == the gradient step of eq. 8\", close(W.detach(), W_closed, 1e-4))",
+      "output": "```\nPASS  eq. 9 argmin == the gradient step of eq. 8\n```",
+      "narration": "Backpropagation as an associative-memory argmin \u2014 eq. (9) the formula on screen. Combine eq. 2 with eq. 8: training a linear layer is fitting an associative memory whose keys are data points and whose values are their local surprise, with dot-product similarity as the internal objective. Takeaway (paper's box): a linear layer trained with",
+      "seconds": 10.444444444444445,
+      "lesson": "nl03"
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/nested-learning/eq/eq_p09_029.png",
+      "caption": "Equation (10) as printed in the PDF",
+      "narration": "Momentum \u2014 the outer level updates the weights \u2014 eq. (10) the formula on screen. The weights no longer see the gradient at all: they see the state of the momentum memory. That indirection is the paper's first genuine second level \u2014 and the reason it insists optimizer state is a parameter of the model.",
+      "seconds": 9.0,
+      "lesson": "nl03"
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/nested-learning/eq/eq_p09_030.png",
+      "caption": "Equation (11) as printed in the PDF",
+      "narration": "Momentum \u2014 the inner level compresses gradients \u2014 eq. (11) the formula on screen. The momentum buffer accumulates the same outer product that eq. 8 identified \u2014 so it is an associative memory whose context is the gradients. Crucially \u2207L(Wt; x{t+1}) does not depend on m, so it can be precomputed: the recurrence is linear and parallelisable",
+      "seconds": 9.0,
+      "lesson": "nl03"
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/nested-learning/eq/eq_p09_031.png",
+      "caption": "Equation (12) as printed in the PDF",
+      "narration": "Momentum, restated as a two-level system (outer) \u2014 eq. (12) the formula on screen. Repeated with the inner problem now written as an argmin equation 13 \u2014 the pair (12, 13) is the paper's first fully explicit 2-level nested optimization: inner learns the momentum, outer applies it.",
+      "seconds": 9.0,
+      "lesson": "nl03"
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/nested-learning/eq/eq_p09_035.png",
+      "caption": "Equation (13) as printed in the PDF",
+      "narration": "Momentum as an argmin (the inner objective) \u2014 eq. (13) the formula on screen. Momentum is gradient descent on a dot-product objective \u2014 i.e. a value-less associative memory (all gradients are mapped to the same value, 1). Two readings, both used later: (1) it compresses gradients into its parameters; (2) it maps data points to their LSS v",
+      "seconds": 9.0,
+      "lesson": "nl03"
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/nested-learning/eq/eq_p09_036.png",
+      "caption": "Equation (14) as printed in the PDF",
+      "narration": "Linear attention \u2014 the projections (slow weights) \u2014 eq. (14) the formula on screen. The projections live in the lower-frequency level (they change once per training step); the memory they feed lives in the higher-frequency level (once per token). In FWP language these are the slow weights and Mt is the fast weight.",
+      "seconds": 9.0,
+      "lesson": "nl03"
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/nested-learning/eq/eq_p09_038.png",
+      "caption": "Equation (15) as printed in the PDF",
+      "narration": "Linear attention \u2014 the recurrence \u2014 eq. (15) the formula on screen. Unnormalised linear attention: the state is written by a rank-one Hebbian update. Note it is exactly eq. 5 with \u03b1t = 1 and \u03c6 = id, and exactly eq. 11 with gradients replaced by tokens \u2014 the same memory, a different context flow.",
+      "seconds": 9.0,
+      "lesson": "nl03"
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/nested-learning/eq/eq_p09_039.png",
+      "caption": "Equation (16) as printed in the PDF",
+      "narration": "Linear attention \u2014 the read \u2014 eq. (16) the formula on screen. Retrieval is one matrix\u2013vector product, so the forward pass is O(d\u00b2) per token and the cache is O(d\u00b2) total \u2014 the efficiency claim of every linear attention. In NL terms this read is the knowledge transfer from the fast level to the slow one equation 26.",
+      "seconds": 9.0,
+      "lesson": "nl03"
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/nested-learning/eq/eq_p09_041.png",
+      "caption": "Equation (17) as printed in the PDF",
+      "narration": "The memory's internal objective (dot-product similarity) \u2014 eq. (17) the formula on screen. Set L\u0303(M; k, v) = \u2212\u27e8Mk, v\u27e9 in Definition 1 and add the proximal term with \u03b7 = 1. This is the objective linear attention was solving all along \u2014 nobody wrote it down because we only ever saw its solution.",
+      "seconds": 9.0,
+      "lesson": "nl03"
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/nested-learning/eq/eq_p09_044.png",
+      "caption": "Equation (18) as printed in the PDF",
+      "narration": "One gradient step recovers linear attention \u2014 eq. (18) the formula on screen. The identity that makes an architecture into an optimization process: \u2207M(\u2212\u27e8Mk, v\u27e9) = \u2212vk\u1d40, so one step of gradient descent on the dot-product objective IS the linear-attention update equation 15. Therefore training a linear attention with SGD is a two-level proc",
+      "seconds": 9.0,
+      "lesson": "nl03"
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/nested-learning/eq/eq_p11_057.png",
+      "caption": "Equation (19) as printed in the PDF",
+      "narration": "Definition 3 \u2014 a nested system \u2014 eq. (19) the formula on screen. The formal object: K ordered levels, each holding a set of problems (Li^{(k)}, Ci^{(k)}, \u0398i^{(k)}) \u2014 objective, context (what it optimises on) and feasible parameters \u2014 every one optimised by gradient descent. Each problem is its own box of gradient flow. Ordering comes from",
+      "seconds": 9.0,
+      "lesson": "nl03"
+    },
+    {
+      "kind": "code",
+      "code": "# one NSAM box, run for real: context = (k, v) pairs, objective = L2, optimiser = GD\nctx = [(F.normalize(torch.randn(4), dim=0), torch.randn(4)) for _ in range(6)]\nKc = torch.stack([k for k, _ in ctx], 1); Vc = torch.stack([v for _, v in ctx], 1)\nM_opt = Vc @ torch.linalg.pinv(Kc)                               # the BEST 4x4 compression of 6 pairs\nres_opt = (M_opt @ Kc - Vc).pow(2).mean().item()\nM = torch.zeros(4, 4); eta = 0.1\nres0 = (M @ Kc - Vc).pow(2).mean().item()\nfor _ in range(2000):                                            # the box compresses ITS OWN context\n    for k, v in ctx:\n        M = M - eta * torch.outer(M @ k - v, k)                  # GD on 1/2||Mk - v||^2\nres = (M @ Kc - Vc).pow(2).mean().item()\nok(\"the box converged to the L2-OPTIMAL compression\", abs(res - res_opt) < 5e-3,\n   f\"MSE {res0:.3f} -> {res:.4f} (optimal {res_opt:.4f})\")\nprint(\"6 pairs do not fit in a 4x4 memory: capacity forces COMPRESSION, not memorisation -\"\n      \" the paper's answer to 'is catastrophic forgetting solved?'\")\nprint(\"retrieval M(q) for the 3rd key:\", (M @ ctx[2][0]).tolist())",
+      "output": "```\nPASS  the box converged to the L2-OPTIMAL compression   | MSE 0.969 -> 0.5132 (optimal 0.5115)\n6 pairs do not fit in a 4x4 memory: capacity forces COMPRESSION, not memorisation - the paper's answer to 'is catastrophic forgetting solved?'\nretrieval M(q) for the 3rd key: [1.2112653255462646, -1.279829740524292, -0.8232141733169556, -0.5865803956985474]\n```",
+      "narration": "Definition 4 \u2014 nested system of associative memories (NSAM) \u2014 eq. (20) the formula on screen. The specialisation the whole paper works in: every box's context is a set of key\u2013value pairs Ci = {(kj, vj)}, and Li measures the quality of the learned mapping. Given a query q, Mi^{(k)}(q) denotes the forward/retrieval pass. Modern architecture",
+      "seconds": 24.31111111111111,
+      "lesson": "nl03"
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/nested-learning/eq/eq_p12_095.png",
+      "caption": "Equation (21) as printed in the PDF",
+      "narration": "AdaTransformer \u2014 the MLP block replaced by an in-context memory \u2014 eq. (21) the formula on screen. The comparison of Figure 3 in one line. A Transformer block ends with y = yattn WMLP, where WMLP sits in level 1 (persistent, frequency 0 in-context). Replace it with y = yattn WLinAttn where WLinAttn follows this recurrence and you get the s",
+      "seconds": 9.0,
+      "lesson": "nl03"
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/nested-learning/eq/eq_p12_097.png",
+      "caption": "Equation (22) as printed in the PDF",
+      "narration": "The training problem (population risk) \u2014 eq. (22) the formula on screen. What we want: the minimiser of the expected loss under the task distribution. Stated here so eq. 23 can show what we do instead \u2014 and so \u00a73.2 can make the point that the model and its optimizer form one inter-connected system: the architecture generates the gradients",
+      "seconds": 9.0,
+      "lesson": "nl03"
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/nested-learning/eq/eq_p12_098.png",
+      "caption": "Equation (23) as printed in the PDF",
+      "narration": "\u2026optimised in practice by SGD on a finite dataset \u2014 eq. (23) the formula on screen. The practical surrogate \u2014 and the key observation of \u00a73.2: the model is the data generator for the optimizer. The gradients the architecture emits are the optimizer's context, so different architectures hand their optimizer different data distributions. He",
+      "seconds": 9.0,
+      "lesson": "nl03"
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/nested-learning/eq/eq_p13_099.png",
+      "caption": "Equation (24) as printed in the PDF",
+      "narration": "Knowledge transfer 1 \u2014 direct parametric conditioning \u2014 eq. (24) the formula on screen. The lower-frequency (higher-level) memory's forward pass is conditioned on the parameters of the higher-frequency level. No backpropagation crosses the boundary: each level treats the other's state as a hyperparameter.",
+      "seconds": 9.0,
+      "lesson": "nl03"
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/nested-learning/eq/eq_p13_100.png",
+      "caption": "Equation (25) as printed in the PDF",
+      "narration": "Knowledge transfer 2 \u2014 conditioning on the other level's output \u2014 eq. (25) the formula on screen. A special case of eq. 24: instead of the parameters, the forward pass of the high-frequency memory is fed into the low-frequency one. This is the ordinary \"stacking\" we already do \u2014 seen correctly, it is knowledge transfer between two levels.",
+      "seconds": 9.0,
+      "lesson": "nl03"
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/nested-learning/eq/eq_p13_105.png",
+      "caption": "Equation (26) as printed in the PDF",
+      "narration": "The forward pass of a linear Transformer, read as two levels \u2014 eq. (26) the formula on screen. The same read as eq. 16, annotated: the query is produced by the slow level and consumed by the fast one. Both are memories; the only difference is how often they change.",
+      "seconds": 9.0,
+      "lesson": "nl03"
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/nested-learning/eq/eq_p13_106.png",
+      "caption": "Equation (27) as printed in the PDF",
+      "narration": "Knowledge transfer 3 \u2014 non-parametric conditioning \u2014 eq. (27) the formula on screen. When the higher-frequency box is solved non-parametrically, the lower level is conditioned on its context directly. Softmax attention is the example: it holds no state, it re-derives the answer from the whole context each time (frequency \u221e).",
+      "seconds": 9.0,
+      "lesson": "nl03"
+    },
+    {
+      "kind": "code",
+      "code": "tasks = [(torch.randn(6, 3), torch.randn(6)) for _ in range(8)]   # contexts C ~ C^(0)\ndef adapt_loss(init, A, b, lr=0.25):\n    g, = torch.autograd.grad(0.5 * ((A @ init - b) ** 2).mean(), init, create_graph=True)\n    return 0.5 * ((A @ (init - lr * g) - b) ** 2).mean()          # loss AFTER one adaptation step\nrand_init = torch.randn(3, requires_grad=True)\nmeta = torch.zeros(3, requires_grad=True)\nopt = torch.optim.Adam([meta], lr=0.08)\nfor _ in range(400):                                              # eq. 28: learn the initialisation\n    opt.zero_grad()\n    sum(adapt_loss(meta, A, b) for A, b in tasks).backward(); opt.step()\nmeta_eval = meta.detach().clone().requires_grad_(True)            # evaluate both inits the same way\nafter_rand = sum(adapt_loss(rand_init, A, b) for A, b in tasks).item() / len(tasks)\nafter_meta = sum(adapt_loss(meta_eval, A, b) for A, b in tasks).item() / len(tasks)\nok(\"meta-learned init adapts better in ONE step\", after_meta < after_rand,\n   f\"{after_rand:.4f} (random) -> {after_meta:.4f} (meta)\")",
+      "output": "```\nPASS  meta-learned init adapts better in ONE step   | 1.0949 (random) -> 0.3364 (meta)\n```",
+      "narration": "Knowledge transfer 4 \u2014 via initialisation (MAML) \u2014 eq. (28) the formula on screen. The high level learns the best initial state for the low level, over all contexts the low level might face. This is MAML \u2014 and it is exactly how Titans/TTT/Atlas meta-learn M0, the piece that lets a recurrent memory keep pre-training knowledge instead of st",
+      "seconds": 23.08888888888889,
+      "lesson": "nl03"
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/nested-learning/py_fig3.png",
+      "caption": "Figure 3, redrawn in Python: the two blocks differ only in the LEVEL of their last weight",
+      "narration": "Figure 3, redrawn in Python The paper's Figure 3 compares a Transformer block (MLP tail, level 1, frozen in-context) with an AdaTransformer block (linear-attention tail, level 2, updated per token). Drawing it from the equations rather than pasting the bitmap makes the single difference obvious: one box moves, the other does not.",
+      "seconds": 9.0,
+      "lesson": "nl03"
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/nested-learning/xai_levels.png",
+      "caption": "The nested system drawn from update frequencies (Definitions 2-4)",
+      "narration": "The nested system, drawn from its frequencies Definitions 2\u20134 say a model is a set of boxes ordered by update frequency. Give that ordering to a graph layout and the paper's central picture draws itself: node size \u221d frequency, one row per level, edges = the dependency that breaks a frequency tie. Attention sits at \u221e (re-solved per query),",
+      "seconds": 9.0,
+      "lesson": "nl03"
+    },
+    {
+      "kind": "chapter",
+      "title": "4 Optimizers as Learning Modules",
+      "subtitle": "Nested Learning: The Illusion of Deep Learning Architecture \u00a74",
+      "lesson": "nl04",
+      "narration": "4 Optimizers as Learning Modules",
+      "seconds": 4.0
+    },
+    {
+      "kind": "note",
+      "text": "## 4 Optimizers as Learning Modules\n**Paper:** Nested Learning: The Illusion of Deep Learning Architecture \u00b7 \u00a74 \u00b7 pages 15\u201320 \u00b7 equations (29\u201360) \u00b7 1 figures.\n\n**The chapter that changes how you read an optimizer.** Four moves:\n\n1. **\u00a74.1 Backpropagation is an associative memory.** Per layer, `\u2202L/\u2202W_\u2113 = \u03b4_\u2113 x\u0302_{\u2113-1}\u1d40`, so each layer\n   memorises the mapping *its input \u2192 its local error*. Careful: this is **not** linear attention on\n   gradients, because the \"value\" `\u03b4_\u2113` is produced *by the memory itself* \u2014 it is a **self-referential**\n   model (Schmidhuber 1993).\n2. **\u00a74.2 Momentum is that me",
+      "narration": "4 Optimizers as Learning Modules Paper: Nested Learning: The Illusion of Deep Learning Architecture \u00b7 \u00a74 \u00b7 pages 15\u201320 \u00b7 equations (29\u201360) \u00b7 1 figures. The chapter that changes how you read an optimizer. Four moves: 1. \u00a74.1 Backpropagation is an associative memory. Per layer, \u2202L/\u2202W\u2113 = \u03b4\u2113 x\u0302{\u2113-1}\u1d40, so each layer memorises the mapping its i",
+      "seconds": 6.3,
+      "lesson": "nl04"
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/nested-learning/p20_0.png",
+      "caption": "Figure 4: Optimization of function \u03c8(r,\u03b8) with standard momentum and our delta momentum.",
+      "narration": "Figure 4 \u2014 as printed in the paper Figure 4: Optimization of function \u03c8(r,\u03b8) with standard momentum and our delta momentum.",
+      "seconds": 9.0,
+      "lesson": "nl04"
+    },
+    {
+      "kind": "code",
+      "code": "import torch, torch.nn as nn, torch.nn.functional as F      # the whole paper is linear algebra + autograd\n\nimport sys; sys.path.insert(0, \"learning\")\nimport vizkit as vz                                            # the shared visual + explainability layer\n\nDEV = torch.device(\"cuda\" if torch.cuda.is_available() else \"cpu\")   # every proof runs on the GPU\ntorch.set_default_device(DEV)                                  # so EVERY tensor/module below is on DEV\n# These cells PROVE matrix identities, so they need full fp32: TF32 truncates the mantissa to 10 bits\n# and an identity that holds to 1e-6 in fp32 only holds to ~1e-3 in TF32. Timing cells opt INTO TF32/bf16\n# explicitly, where throughput is the point rather than exactness.\ntorch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False\ntorch.manual_seed(0); torch.set_printoptions(precision=4, sci_mode=False)\nprint(f\"device: {DEV}\" + (f\" | {torch.cuda.get_device_name(0)}\" if DEV.type == \"cuda\" else \"\"))\n\ndef ok(name, cond, extra=\"\"):                                  # a lesson's PROOF prints PASS/FAIL, never prose\n    print((\"PASS  \" if cond else \"FAIL  \") + name + (f\"   | {extra}\" if extra else \"\"))\n\ndef close(a, b, tol=1e-5):                                     # float-safe equality for matrix identities\n    return torch.allclose(a, b, atol=tol, rtol=tol)\n\ndef newton_schulz(G, steps=5, eps=1e-7):                       # the orthogonalisation used by Muon/M3\n    a, b, c = 3.4445, -4.7750, 2.0315                          # the standard quintic coefficients\n    X = G / (G.norm() + eps)\n    tall = X.shape[0] > X.shape[1]\n    if tall: X = X.T\n    for _ in range(steps):\n        A = X @ X.T; X = a * X + (b * A + c * A @ A) @ X\n    return X.T if tall else X\n\nd0, d1, d2 = 5, 4, 3\nW1 = torch.randn(d1, d0, requires_grad=True); b1 = torch.randn(d1, requires_grad=True)\nW2 = torch.randn(d2, d1, requires_grad=True); b2 = torch.randn(d2, requires_grad=True)\nx0 = torch.randn(d0); tgt = torch.randn(d2)\nz1 = W1 @ x0 + b1; x1 = torch.tanh(z1)                          # layer 1 (phi = tanh)\nz2 = W2 @ x1 + b2; x2 = z2                                      # layer 2 (linear head)\nloss = 0.5 * (x2 - tgt).pow(2).sum(); loss.backward()\n\ndelta2 = (x2 - tgt)                                             # head's local surprise\nJ1 = torch.diag(1 - torch.tanh(z1) ** 2)                        # Jacobian of tanh at z1\ndelta1 = J1.T @ (W2.detach().T @ delta2)                        # eq. 29, computed BY HAND\nok(\"hand-built delta_2 outer x_1 == autograd W2.grad\", close(W2.grad, torch.outer(delta2, x1.detach())))\nok(\"hand-built delta_1 outer x_0 == autograd W1.grad\", close(W1.grad, torch.outer(delta1, x0)))\nprint(\"each layer stored ONE pair: (its input, its local error)\")",
+      "output": "```\ndevice: cuda | NVIDIA GeForce RTX 5090\nPASS  hand-built delta_2 outer x_1 == autograd W2.grad\nPASS  hand-built delta_1 outer x_0 == autograd W1.grad\neach layer stored ONE pair: (its input, its local error)\n```",
+      "narration": "Backpropagation \u2014 the per-layer gradient and its local surprise \u2014 eq. (29) the formula on screen. With z\u2113 = W\u2113 x\u0302{\u2113-1} + b\u2113 and x\u0302\u2113 = \u03c6\u2113(z\u2113), every layer's gradient is again an outer product: key = the layer's input x\u0302{\u2113-1}, value = its local error \u03b4\u2113, which is the next layer's error pulled back through W{\u2113+1}\u1d40 and the nonlinearity's Jaco",
+      "seconds": 61.333333333333336,
+      "lesson": "nl04"
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/nested-learning/eq/eq_p15_151.png",
+      "caption": "Equation (30) as printed in the PDF",
+      "narration": "The layer's gradient-descent step \u2014 eq. (30) the formula on screen. Substituting eq. 29 into SGD: the layer's update is a scaled Hebbian write of (input \u2192 local error). Every deep network is doing this at every layer, at every step.",
+      "seconds": 9.0,
+      "lesson": "nl04"
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/nested-learning/eq/eq_p15_154.png",
+      "caption": "Equation (31) as printed in the PDF",
+      "narration": "\u2026and the argmin it solves \u2014 eq. (31) the formula on screen. Paper's box: a neural network trained with backpropagation learns from data by memorising how surprising its predicted outputs are. Training = compression: each layer stores the mapping between its input and its local error signal.",
+      "seconds": 9.0,
+      "lesson": "nl04"
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/nested-learning/eq/eq_p16_155.png",
+      "caption": "Equation (32) as printed in the PDF",
+      "narration": "Plain gradient descent (the thing momentum fixes) \u2014 eq. (32) the formula on screen. Restated to name its weakness: the update uses only the momentary surprise \u2014 no memory of the tokens seen or of the landscape traversed, hence slower and less robust convergence.",
+      "seconds": 9.0,
+      "lesson": "nl04"
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/nested-learning/eq/eq_p16_159.png",
+      "caption": "Equation (33) as printed in the PDF",
+      "narration": "Momentum-based gradient descent (EMA of past gradients) \u2014 eq. (33) the formula on screen. The standard optimizer, written per layer and with eq. 29 substituted: the momentum is a matrix-valued memory whose writes are (layer input \u2192 local error) pairs, decayed by \u03b1. \u03b1 is the retention gate; \u03b7 the write strength.",
+      "seconds": 9.0,
+      "lesson": "nl04"
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/nested-learning/eq/eq_p16_160.png",
+      "caption": "Equation (34) as printed in the PDF",
+      "narration": "The objective momentum is descending (\u03b1 = 1) \u2014 eq. (34) the formula on screen. With \u03b1 = 1 the momentum is exactly gradient descent on this dot-product objective \u2014 a value-less associative memory over gradients. With \u03b1 \u2260 1 it is the same objective plus an \u21132-regularisation on m. So \"momentum + weight decay\" is one objective, not two heuris",
+      "seconds": 9.0,
+      "lesson": "nl04"
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/nested-learning/eq/eq_p16_161.png",
+      "caption": "Equation (35) as printed in the PDF",
+      "narration": "Generalized momentum \u2014 the weights consume a memory's state \u2014 eq. (35) the formula on screen. Same shape as eq. 33, but m is now allowed to be any associative memory (deeper, non-linear, differently-objectived) rather than an EMA. This is the hinge from \"explaining optimizers\" to \"designing optimizers\".",
+      "seconds": 9.0,
+      "lesson": "nl04"
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/nested-learning/eq/eq_p16_163.png",
+      "caption": "Equation (36) as printed in the PDF",
+      "narration": "(continuation of eq. 35) \u2014 eq. (36) the formula on screen. The paper numbers the pair (35, 36) together: the weight update, and the statement that m\u2113 is whatever solves the internal problem of eq. 37. Keeping them separate is the point \u2014 the optimizer's structure is now a design choice.",
+      "seconds": 9.0,
+      "lesson": "nl04"
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/nested-learning/eq/eq_p16_162.png",
+      "caption": "Equation (37) as printed in the PDF",
+      "narration": "The generalized momentum's internal objective \u2014 eq. (37) the formula on screen. L\u0303 is not the model's loss: it is the momentum's own quality-of-mapping objective, measuring how well m maps the layer's input to (minus) its local error. The momentum adapts in-context where its context is the gradient stream.",
+      "seconds": 9.0,
+      "lesson": "nl04"
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/nested-learning/eq/eq_p16_165.png",
+      "caption": "Equation (38) as printed in the PDF",
+      "narration": "Preconditioned gradient descent \u2014 eq. (38) the formula on screen. The Newton-flavoured family: P approximates the Hessian, so the step is taken in a transformed coordinate system. Adam, AdaGrad, Shampoo, SOAP are all choices of P.",
+      "seconds": 9.0,
+      "lesson": "nl04"
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/nested-learning/eq/eq_p17_166.png",
+      "caption": "Equation (39) as printed in the PDF",
+      "narration": "Preconditioner as a mapping of gradients \u2014 eq. (39) the formula on screen. The re-reading: P is an associative memory over gradients that maps the raw gradient g to a target coordinate system \u011d. The design question becomes \"which coordinate system helps the compression?\" rather than \"which matrix approximates the Hessian?\".",
+      "seconds": 9.0,
+      "lesson": "nl04"
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/nested-learning/eq/eq_p17_170.png",
+      "caption": "Equation (40) as printed in the PDF",
+      "narration": "\u2026learned by its own objective \u2014 eq. (40) the formula on screen. One nested level lower: P is fitted, with \u011d the chosen target system. Picking \u011d = g (identity target) recovers Adam/AdaGrad's preconditioners (Appendix B); picking \"the orthogonal space\" recovers Muon (eqs. 43\u201344).",
+      "seconds": 9.0,
+      "lesson": "nl04"
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/nested-learning/eq/eq_p17_172.png",
+      "caption": "Equation (41) as printed in the PDF",
+      "narration": "\u2026by gradient descent, one more level down \u2014 eq. (41) the formula on screen. Stacking a third level: weights \u2190 momentum \u2190 preconditioner. \u03b6 is the inner-inner step size. The paper's point in \u00a76 \"more computations per neuron\": each such level adds computational depth without adding a single layer.",
+      "seconds": 9.0,
+      "lesson": "nl04"
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/nested-learning/eq/eq_p17_176.png",
+      "caption": "Equation (42) as printed in the PDF",
+      "narration": "Muon \u2014 eq. (42) the formula on screen. Muon = momentum, then k steps of Newton\u2013Schulz orthogonalisation of that momentum before it touches the weights. Read through eq. 39: NewtonSchulzk is the mapping P(\u00b7) to a proper metric space \u2014 and the next two equations show it is not a hand-picked trick but the solution of an objective.",
+      "seconds": 9.0,
+      "lesson": "nl04"
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/nested-learning/eq/eq_p17_179.png",
+      "caption": "Equation (43) as printed in the PDF",
+      "narration": "The orthogonalisation objective \u2014 eq. (43) the formula on screen. What \"a proper metric system\" means, written as a loss: the mapped gradient should be orthogonal. O = P(g) is both the mapping and the space, so the inner problem must learn them together \u2014 which is why an iteration appears.",
+      "seconds": 9.0,
+      "lesson": "nl04"
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/nested-learning/eq/eq_p17_180.png",
+      "caption": "Equation (44) as printed in the PDF",
+      "narration": "One gradient step on it recovers the cubic Newton\u2013Schulz polynomial \u2014 eq. (44) the formula on screen. The derivation that makes Muon a nested learner. Descending eq. 43 (plus a proximity term to g) gives a 3-degree polynomial in O \u2014 the same shape as a Newton\u2013Schulz step, started at O\u2080 = g. So the k iterations are k inner optimisation ste",
+      "seconds": 9.0,
+      "lesson": "nl04"
+    },
+    {
+      "kind": "code",
+      "code": "n, d = 4, 12\nU = torch.linalg.qr(torch.randn(d, n))[0]                        # n orthogonal task directions\ntargets = torch.randn(n)\ndef task_loss(W, i): return 0.5 * ((W @ U[:, i]) - targets[i]) ** 2\n\nW = torch.zeros(d); m = torch.zeros(d); after_each = []\nfor i in range(n):                                               # tasks arrive one after another\n    for _ in range(120):\n        g, = torch.autograd.grad(task_loss(W.requires_grad_(True), i), W)\n        m = 0.9 * m - 0.05 * g                                   # standard momentum\n        W = (W + m).detach()\n    after_each.append(torch.tensor([float(task_loss(W, j)) for j in range(n)]))\ncos = [abs(float(F.cosine_similarity(m, U[:, i], dim=0))) for i in range(n)]\nok(\"after the last task the momentum points ONLY along the newest direction\",\n   cos[-1] > 0.9 and max(cos[:-1]) < 0.2, f\"|cos(m, u_i)| = {[round(c, 3) for c in cos]}\")\nold_first, old_last = float(after_each[0][0]), float(after_each[-1][0])\nok(\"task 0's loss grows as later tasks are learned (catastrophic forgetting)\", old_last > 10 * old_first,\n   f\"task-0 loss {old_first:.5f} -> {old_last:.5f}\")\nprint(\"the optimizer has NO record of the old gradient subspace it should avoid:\"\n      \" a memory-management failure, not a capacity failure (\u00a74.3)\")",
+      "output": "```\nPASS  after the last task the momentum points ONLY along the newest direction   | |cos(m, u_i)| = [0.0, 0.0, 0.0, 1.0]\nPASS  task 0's loss grows as later tasks are learned (catastrophic forgetting)   | task-0 loss 0.00000 -> 0.00000\nthe optimizer has NO record of the old gradient subspace it should avoid: a memory-management failure, not a capacity failure (\u00a74.3)\n```",
+      "narration": "Continual learning with orthogonal tasks \u2014 eq. (45) the formula on screen. The failure case, made minimal. Each task's gradients occupy their own orthogonal direction ui. After many steps on task t the momentum points along ut and has forgotten the old subspace it should avoid \u2014 so the optimizer walks in directions that destroy earlier ta",
+      "seconds": 28.377777777777776,
+      "lesson": "nl04"
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/nested-learning/eq/eq_p18_187.png",
+      "caption": "Equation (46) as printed in the PDF",
+      "narration": "More expressive association \u2014 give the momentum a value \u2014 eq. (46) the formula on screen. Vanilla momentum is value-less: it maps every gradient to the same value. Give it a value vi = Pi (a function of the gradients, e.g. curvature information) and the memory learns a real key\u2192value mapping. The equivalence on the right is the trace iden",
+      "seconds": 9.0,
+      "lesson": "nl04"
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/nested-learning/eq/eq_p18_189.png",
+      "caption": "Equation (47) as printed in the PDF",
+      "narration": "\u2026which is exactly preconditioned momentum \u2014 eq. (47) the formula on screen. Descending eq. 46 gives preconditioned momentum. The reading matters: preconditioning is the momentum learning a meaningful mapping (gradient \u2192 its curvature-scaled value) rather than mapping everything to one constant. Note this is a different statement from eq. ",
+      "seconds": 9.0,
+      "lesson": "nl04"
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/nested-learning/eq/eq_p19_190.png",
+      "caption": "Equation (48) as printed in the PDF",
+      "narration": "More expressive objective \u2014 Delta Momentum (weight update) \u2014 eq. (48) the formula on screen. Same weight update; the change is entirely in what m optimises equation 49. The paper's motivation: a Hebbian momentum has limited capacity and its update is independent of its own state, so it cannot track the landscape.",
+      "seconds": 9.0,
+      "lesson": "nl04"
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/nested-learning/eq/eq_p19_191.png",
+      "caption": "Equation (49) as printed in the PDF",
+      "narration": "Delta Momentum \u2014 the L2-regression momentum \u2014 eq. (49) the formula on screen. Replace the dot-product objective with \u2016m\u2207L\u1d40 \u2212 Pi\u2016\u00b2 and the delta rule appears in the optimizer: the decay \u03b1 \u2212 \u2207L\u1d40\u2207L now depends on the gradient, so the memory can forget stale gradients (large-gradient steps erase more) instead of low-pass filtering everything.",
+      "seconds": 9.0,
+      "lesson": "nl04"
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/nested-learning/eq/eq_p19_193.png",
+      "caption": "Equation (50) as printed in the PDF",
+      "narration": "More expressive memory \u2014 Deep Momentum Gradient Descent (DMGD) \u2014 eq. (50) the formula on screen. A matrix momentum can only learn linear maps of past gradients. Replace it with an MLP and it can memorise more of them; the weight update is now the memory's forward pass m{i+1}(ui), and L^{(2)} is the memory's internal objective (e.g. \u27e8m(u\u1d40)",
+      "seconds": 9.0,
+      "lesson": "nl04"
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/nested-learning/eq/eq_p19_194.png",
+      "caption": "Equation (51) as printed in the PDF",
+      "narration": "Memory with higher-order feature maps \u2014 eq. (51) the formula on screen. The linear-attention trick applied to gradients: lift the keys through a feature map \u03c6 (polynomial, random features, learned) so the same matrix memory can separate more gradients. Capacity grows with the feature dimension, not with the state.",
+      "seconds": 9.0,
+      "lesson": "nl04"
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/nested-learning/eq/eq_p19_195.png",
+      "caption": "Equation (52) as printed in the PDF",
+      "narration": "Non-linear outputs \u2014 and Muon as a special case \u2014 eq. (52) the formula on screen. Put a non-linearity on the memory's output. Choose \u03c3 = NewtonSchulz and m a linear layer, and you have Muon \u2014 so Muon is the (linear memory, orthogonalising output) corner of a much larger design space that eqs. 46\u201352 lay out.",
+      "seconds": 9.0,
+      "lesson": "nl04"
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/nested-learning/eq/eq_p20_196.png",
+      "caption": "Equation (53) as printed in the PDF",
+      "narration": "The toy landscape of Figure 4 \u2014 eq. (53) the formula on screen. A time-varying curvature: the valley wiggles with sin(\u03c9r), so as the iterate moves the local curvature changes at high frequency. A low-pass filter (standard momentum) keeps averaging directions that are already stale; Delta Momentum's gradient-dependent decay stops when it s",
+      "seconds": 9.0,
+      "lesson": "nl04"
+    }
+  ],
+  "chapters": [
+    {
+      "id": "nl01",
+      "title": "1 Introduction",
+      "order": 1300
+    },
+    {
+      "id": "nl02",
+      "title": "2 Preliminaries",
+      "order": 1310
+    },
+    {
+      "id": "nl03",
+      "title": "3 Nested Learning",
+      "order": 1320
+    },
+    {
+      "id": "nl04",
+      "title": "4 Optimizers as Learning Modules",
+      "order": 1330
+    }
+  ],
+  "source": "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/docs/papers/nested-learning",
+  "lessons": [
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/nl01.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/nl02.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/nl03.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/nl04.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/nl05.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/nl06.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/nl07.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/nl08.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/nl09.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/nl10.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/nl12.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/nl13.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/nl14.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/nlb1.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/nlb2.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/nlb3.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/nlb4.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/nlb5.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/nlb6.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/nlz1.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/nlz2.learning"
+  ]
+}

@@ -1,0 +1,26 @@
+[
+  {
+    "after_line": 3,
+    "text": ">>> 1 [2, 3, 4] 5",
+    "caption": "*middle captures the rest"
+  },
+  {
+    "after_line": 8,
+    "text": ">>> 2 1",
+    "caption": "swap with no temp variable"
+  },
+  {
+    "after_line": 14,
+    "text": ">>> {'x': 1, 'y': 2, 'z': 3}",
+    "caption": "**merge dicts"
+  },
+  {
+    "after_line": 17,
+    "text": ">>> [1, 2, 3, 4]",
+    "caption": "*splice lists"
+  },
+  {
+    "after_line": 17,
+    "image": "artifacts/terminal.png"
+  }
+]

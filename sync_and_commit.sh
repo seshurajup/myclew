@@ -6,6 +6,7 @@ set -uo pipefail
 REPO="/home/seshu/kaggle/2026/myclew"
 BIOHUB="/home/seshu/kaggle/2026/biohub-cell-tracking-during-development"
 ROGII="/home/seshu/kaggle/2026/rogii-wellbore-geology-prediction"
+YOUTUBE="/home/seshu/kaggle/2026/youtube"
 cd "$REPO" || exit 1
 
 RSYNC_EXCLUDES=(--exclude '__pycache__' --exclude '*.pyc' --exclude '.venv' --exclude 'venv'
@@ -24,6 +25,31 @@ mkdir -p "$REPO/competitions/rogii-wellbore-geology-prediction"
 rsync -a "${RSYNC_EXCLUDES[@]}" --include '*/' --include '*.py' --include '*.yml' --include '*.yaml' \
   --include '*.sh' --include '*.md' --exclude '*' \
   "$ROGII/" "$REPO/competitions/rogii-wellbore-geology-prediction/"
+
+# 2a) biohub competition code + the learning packs (CODE ONLY — input/, models/, research/ and the
+# multi-GB experiment outputs stay on the box; myclew is the single GitHub home for SOURCE).
+mkdir -p "$REPO/competitions/biohub-cell-tracking-during-development"
+# rsync: FIRST matching rule wins, so every --exclude must precede the --include filters or files
+# inside an excluded dir match '*.py' first and get copied anyway.
+rsync -a --delete "${RSYNC_EXCLUDES[@]}" \
+  --exclude 'tools/' --exclude 'learning/public_pull/' --exclude 'public_notebooks/' \
+  --exclude 'docs/public_nb_lineage/' --exclude 'scratchpad/' --exclude 'scratch_ksubmit/' \
+  --exclude 'docs/gm_writeups/_github/' --exclude '*_notebook_raw.py' --exclude '*notebook_code.py' \
+  --exclude 'config/_auto/' --exclude '*token*.json' --exclude '*secret*' --exclude '*credential*' \
+  --exclude 'kaggle.json' --exclude '.env' --exclude '*.pem' --exclude '*.key' \
+  --exclude 'fleet_agents/' --exclude 'test_fleet_agents/' --exclude 'models/' \
+  --exclude 'experiments/' --exclude 'model_scratch/' --exclude 'submissions/' \
+  --include '*/' --include '*.py' --include '*.yml' --include '*.yaml' \
+  --include '*.sh' --include '*.md' --include '*.learning' --include '*.json' --exclude '*' \
+  "$BIOHUB/" "$REPO/competitions/biohub-cell-tracking-during-development/"
+
+# 2c) the YouTube curriculum — lesson sources, props and the Remotion composition code. Rendered video
+# (gallery/), node_modules and the vendored checkout are regenerable/huge and never tracked here.
+mkdir -p "$REPO/youtube"
+rsync -a --delete "${RSYNC_EXCLUDES[@]}" \
+  --exclude 'gallery/' --exclude 'vendor/' --exclude 'node_modules/' --exclude '*.mp4' \
+  --exclude '*.wav' --exclude '*.mp3' --exclude '*.m4a' --exclude '.git' \
+  "$YOUTUBE/" "$REPO/youtube/"
 
 # 2b) shell environment — the zsh/ML setup this box's work depends on.
 # Explicit file list, never a whole-directory rsync: ~/.zsh_history and the atuin

@@ -1,0 +1,45 @@
+@ id: g409
+@ order: 409
+@ title: Post-training / instruction tuning
+@ subtitle: turning PT models into IT models, thinking mode, and the chat/tool format
+@ source: arxiv 2607.02770
+
+--- note
+## Overall
+Pre-trained (PT) models are turned into instruction-tuned (IT) models "with a similar post-training
+approach as in Gemma 3." The **significant new difference is the addition of thinking mode** (g402) —
+the model can output a reasoning trace before answering. The report describes the *data* and *format*
+of post-training but, like pre-training, does not disclose exact RL/SFT recipe hyperparameters, so we
+report only what it states.
+
+--- note
+## Data filtering for post-training
+Post-training data is carefully curated. The report says they **filter out** examples that show:
+
+- certain **personal information**,
+- **unsafe or toxic** model outputs,
+- **mistaken self-identification** data, and
+- **duplicated** examples.
+
+And they deliberately **include subsets** that encourage **better in-context attribution, hedging, and
+refusals** — which "minimise hallucinations" and **improve factuality metrics without degrading** other
+metrics. This is a notable, honest claim: better-calibrated refusal/hedging data helped factuality at
+no measured cost elsewhere.
+
+--- note
+## PT vs IT formatting
+All models share one tokenizer; some **control tokens are reserved for IT formatting**. A concrete
+difference: **PT models emit `<eos>`** at end of generation, while **IT models emit `<turn|>`**.
+Fine-tuning either model type therefore requires adding its respective end token.
+
+--- image
+learning/assets/gemma4/t11_format.png
+Table 11 — the IT conversation format. Control tokens: `<|think|>` toggles thinking mode (in a leading system turn); `<|tool>declaration:...<tool|>` declares a function; `<|tool_call>call:...<tool_call|>` calls one; `<|channel>thought ...<channel|>` carries the reasoning trace; `<|turn>system/user/model` open turns and `<turn|>` ends them. The worked example (booking a train ticket) shows thinking + a function call interleaved. Note: explicitly add `[BOS]` after tokenization (or `add_bos=True`).
+
+--- note
+## Function calling
+The format also defines **function declaration and function calling** inline (the `<|tool>` and
+`<|tool_call>` tokens above), so an IT model can be prompted with tool schemas and will emit structured
+tool calls in the thought/answer stream. This is the surface our own **agentic** LLM workers rely on:
+a thinking channel plus tool calls is exactly the leader/researcher agent loop. The report defers the
+detailed declaration/call syntax to the official documentation.

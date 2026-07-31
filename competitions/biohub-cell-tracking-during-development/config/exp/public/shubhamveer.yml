@@ -1,0 +1,10 @@
+# PUBLIC notebook config — **shubhamveer** / math foundations
+name: pub_shubhamveer
+source: **shubhamveer** / math foundations
+family: other
+base: unknown
+lb: None
+golden_cv: None
+mined_params: ""
+run: manual
+score: golden-12 (adj_edge_J + 0.1*div_J), by_embryo

@@ -1,0 +1,42 @@
+[
+  {
+    "text": "Polymorphism means many different objects can respond to the same method call, each in its own way.",
+    "until_line": 3
+  },
+  {
+    "text": "Every Shape promises an area method, even though the base class doesn't know how to compute it.",
+    "until_line": 3
+  },
+  {
+    "text": "Square implements area as side squared, while Circle uses pi times radius squared.",
+    "until_line": 15
+  },
+  {
+    "text": "[chuckle] The magic is here — we put different shapes in one list and treat them identically.",
+    "until_line": 17
+  },
+  {
+    "text": "The loop calls dot area on each, and Python automatically runs the right version for that object.",
+    "until_line": 19
+  },
+  {
+    "text": "[sniff] The loop doesn't know or care whether it's holding a square or a circle — it just asks for the area.",
+    "until_line": 19
+  },
+  {
+    "text": "Each shape answers correctly, using its own formula, from the very same line of code.",
+    "until_line": 19
+  },
+  {
+    "text": "[sigh] That's the power — you write general code once, and it works with any object that honors the interface.",
+    "until_line": 19
+  },
+  {
+    "text": "[groan] Polymorphism is what makes object-oriented code so extensible — add a new shape, and the loop just works.",
+    "until_line": 19
+  },
+  {
+    "text": "Video 46 tackles dunder str and repr. Save this one for when you need it.",
+    "until_line": 19
+  }
+]

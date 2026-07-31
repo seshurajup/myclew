@@ -1,0 +1,83 @@
+@ id: g4demo
+@ order: 415
+@ title: Gemma 4 runs — a real toy demo end-to-end
+@ subtitle: load the ungated E2B model on our 5090, generate on gsm8k, then measure the 3 infra levers on the REAL config
+@ source: experiments/gemma4_toy_demo.py + arxiv 2607.02770
+
+--- note
+## What this lesson proves
+Every other Gemma-4 lesson (g401–g414) teaches the report's ideas and builds a fleet agent for the
+*arithmetic* behind them. This lesson closes the loop: it **actually loads a Gemma 4 model and generates
+text**, on our RTX 5090, then feeds the model's **real config** into those agents so the numbers are
+measured on a live model — not a slide.
+
+Everything below is the **real output** of `python experiments/gemma4_toy_demo.py` (idempotent, guarded).
+
+--- note
+## The model we could actually load
+The official `google/gemma-4-*` repos are **gated** (they need an accepted licence + an HF token). We
+have no token, so we use the **ungated unsloth mirror**, picking the **smallest** variant:
+
+- **Repo:** `unsloth/gemma-4-E2B-it` (safetensors, ungated, no token needed)
+- **Loaded:** `Gemma4ForConditionalGeneration`, **5.10B stored params** (the "E2B" *effective-2B*
+  MatFormer keeps extra per-layer input embeddings, so the on-disk count is larger), bf16, on cuda.
+- **VRAM:** 10.21 GB — trivial on the 32 GB 5090, so **bf16, no 4-bit needed** (bitsandbytes is
+  installed if a 4-bit path is ever wanted; for a 2 B toy inference run it would only add quant error).
+- **Config:** 35 layers · hidden 1536 · 8 attn heads · **1 KV head** · head_dim 256 · vocab 262,144 ·
+  sliding-window 512 · 20 KV-shared layers · 131 k max context · **dense** (no MoE block).
+
+**Gotcha we hit (and the lesson for next time):** transformers **5.1.0 does not know the `gemma4`
+architecture** — `AutoConfig` raises *"Transformers does not recognize this architecture"*. We bumped to
+**transformers 5.14.1** the ABI-safe way (numpy restored to the env's 2.2.6 so opencv keeps working,
+torch stayed 2.8.0+cu128 with `cuda.is_available()=True`). Also: `apply_chat_template` on this
+multimodal-capable model returns a **BatchEncoding**, so generate needs `return_dict=True` + `**inputs`,
+not a bare tensor.
+
+--- note
+## Real inference on gsm8k test[:5]
+We formatted each grade-school-math question with Gemma-4's chat template, generated greedily
+(max 256 new tokens), and checked the final number against the gold answer. **Toy accuracy: 4/5.**
+
+- **Ex 1** — Janet's ducks (gold 18): model works it step by step → **pred 18 ✓** (3.9 s, 256 tok)
+- **Ex 2** — robe bolts (gold 3): "2 blue + 1 white = 3 bolts" → **pred 3 ✓** (2.5 s, 177 tok)
+- **Ex 3** — house flip (gold 70000): reasoning was correct but got **truncated at 256 tokens** before
+  the final line, so the number-extractor grabbed a mid-calculation "3" → **pred 3 ✗**. Honest failure
+  mode: token budget, not reasoning. (Raising max_new_tokens fixes it.)
+- **Ex 4** — James sprints (gold 540): "3×60×3 = 540" → **pred 540 ✓** (2.6 s, 177 tok)
+- **Ex 5** — Wendi's chickens (gold 20): back-solves flock size = 20 → **pred 20 ✓** (3.6 s, 256 tok)
+
+This is the whole point: **Gemma 4 loads and reasons end-to-end on our box**, in a few seconds per
+question, from an ungated checkpoint with zero training.
+
+--- note
+## Tying the REAL config back to our 3 infra agents
+We dispatched the model's actual config through the fleet HANDLERS registry (`fleet_dispatch`). The
+numbers below are computed on **this run's config**, not the paper's table.
+
+**moe-inference-cost** (g402 lever) — E2B is **dense**, so the agent honestly reports **5.10B active /
+5.10B total (100%)**: no MoE saving to be had. Run on the family's **real MoE sibling** geometry
+(`gemma-4-26B-A4B-it`: 128 experts, top-8, moe_inter 704, 30 layers), the same agent reproduces the
+headline: **4.59B active / 26.0B total → compute 17.7% of a dense-26B → 5.7× cheaper compute**, but all
+**26B must stay resident** (memory, not FLOPs, is the constraint — exactly the report's "26B-A4B" claim).
+
+**kv-cache-longctx** (g403 lever) — real E2B geometry (35 layers, 1 KV head, head_dim 256, bf16,
+4-sliding : 1-full, window 512, values=keys, KV-sharing on the 20 shared layers) at **32,768 context**:
+**0.073 GB** total KV cache — **7 global / 28 local** layers, **global-KV cut 75%**, **total cut 93.8%
+vs a naive all-global fp16 cache**. That's why Gemma 4 can hold 131k context on a small model.
+
+**mtp-speculative-decode** (g404 lever) — the E2B drafter is **76M params** vs the **5.10B base**, a real
+cost ratio **c = 0.0149**. At an assumed per-token acceptance **α = 0.80**, the agent finds the optimal
+draft length **γ = 12 → 4.73 accepted tokens per verify → 4.0× decode speedup**. The tiny drafter is
+essentially free (c≈0.015), so speculation is almost pure win.
+
+--- note
+## Reproduce it
+```
+python experiments/gemma4_toy_demo.py          # loads model, runs gsm8k, runs the 3 agents
+cat docs/gemma4_toy_demo_results.json          # every input/output + agent number, machine-readable
+```
+The script is **guarded**: if the model can't load (deps/arch/download), it prints the exact blocker and
+still runs the agents on the published E2B config, clearly flagged — it never fabricates model output.
+
+**One token away:** point `REPO` at `google/gemma-4-E2B-it` and set an `HF_TOKEN` and the *official*
+(gated) weights load through the identical path. We stayed on the ungated unsloth mirror on purpose.

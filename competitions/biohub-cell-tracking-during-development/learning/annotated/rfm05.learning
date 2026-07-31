@@ -1,0 +1,12 @@
+@ id: rfm05
+@ order: 2440
+@ title: 4 Experiments
+@ subtitle: Routing-Free Mixture-of-Experts §4
+@ source: docs/papers/routing-free-moe/routing-free-moe.md
+
+--- note
+## 4 Experiments
+**Paper:** Routing-Free Mixture-of-Experts · §4 · pages 5–7 · equations (none) · 0 figures.
+
+> TODO(author): the *why* of §4 in 3–5 lines.
+

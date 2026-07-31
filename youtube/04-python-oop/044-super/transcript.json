@@ -1,0 +1,42 @@
+[
+  {
+    "text": "When a subclass has its own init, it often still needs the parent's setup — and super is how you call it.",
+    "until_line": 5
+  },
+  {
+    "text": "Vehicle sets up the number of wheels in its constructor.",
+    "until_line": 5
+  },
+  {
+    "text": "Car adds a brand, but it still wants Vehicle's wheels — so it calls super dot init with four.",
+    "until_line": 10
+  },
+  {
+    "text": "[chuckle] That runs the parent's constructor first, setting wheels, before Car adds its own brand attribute.",
+    "until_line": 10
+  },
+  {
+    "text": "Without super, you'd have to copy the parent's setup by hand and risk it drifting out of sync.",
+    "until_line": 10
+  },
+  {
+    "text": "[sniff] super works for any method, not just init — here describe extends the parent instead of replacing it.",
+    "until_line": 13
+  },
+  {
+    "text": "It grabs the parent's description, then wraps it with the brand, building on top rather than starting over.",
+    "until_line": 13
+  },
+  {
+    "text": "So the car reports both its brand and its inherited wheel count in one line.",
+    "until_line": 17
+  },
+  {
+    "text": "[groan] super keeps your subclasses cooperative — they enhance the parent's behavior instead of duplicating it.",
+    "until_line": 17
+  },
+  {
+    "text": "polymorphism is next, video number 45. Follow so you don't miss it.",
+    "until_line": 17
+  }
+]

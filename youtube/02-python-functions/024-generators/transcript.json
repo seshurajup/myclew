@@ -1,0 +1,42 @@
+[
+  {
+    "text": "A generator is a function that produces values one at a time, using yield instead of return.",
+    "until_line": 4
+  },
+  {
+    "text": "Each time the generator is asked for a value, it runs until it hits yield, then pauses right there.",
+    "until_line": 4
+  },
+  {
+    "text": "So countdown yields three, then two, then one, resuming exactly where it left off each time.",
+    "until_line": 7
+  },
+  {
+    "text": "[chuckle] This fibonacci generator yields numbers on the fly, never building the whole sequence in memory.",
+    "until_line": 14
+  },
+  {
+    "text": "Wrap it in list and you can collect them all, but the generator itself only holds one value at a time.",
+    "until_line": 15
+  },
+  {
+    "text": "[sigh] That laziness is the whole point — this generator expression describes a million squares.",
+    "until_line": 18
+  },
+  {
+    "text": "But nothing is computed until you ask — next pulls exactly one value, then the next call pulls another.",
+    "until_line": 20
+  },
+  {
+    "text": "So you could iterate over billions of items using almost no memory at all.",
+    "until_line": 20
+  },
+  {
+    "text": "[groan] Generators are Python's secret to handling huge or even infinite streams of data gracefully.",
+    "until_line": 20
+  },
+  {
+    "text": "recursion is next, video number 25. Which one do you already use? Comment below.",
+    "until_line": 20
+  }
+]

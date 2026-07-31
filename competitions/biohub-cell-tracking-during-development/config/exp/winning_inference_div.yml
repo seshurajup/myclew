@@ -1,0 +1,24 @@
+# THE winning solution — assembled from all 73 public solutions' knowledge + our div_J edge.
+# Inference-only base (no training) + learned division post-proc. Python agents run this end-to-end.
+name: winning_inference_div
+purpose: >
+  Beat the 0.891 public ceiling. Base = the shared learned-graph inference (pilkwang pipeline, best
+  checkpoint) which everyone uses and caps at ~0.891 with div_J~=0. Edge = our learned sister/division
+  detector (div-model, AUC 0.922) applied high-precision in post-proc to claim the untouched +0.1 div term.
+inference:                         # PART A — no training, reuse the community pipeline
+  base: pilkwang_learned_graph
+  weights: research/pilkwang_support_pack/repo   # best checkpoint
+  det_threshold: 0.99
+  gap_um: 5.5
+  safe_divisions: true             # keep the heuristic caps as a guardrail
+division_model:                    # PART B — the differentiator
+  agent: div-model                 # small XGBoost/rule-based sister classifier (fleet trains it)
+  apply: post_link
+  precision_threshold: 0.9         # high precision — a wrong daughter = division FP + edge FP
+  caps: {parent_um: 4.6, sister_um: 6.9, existing_child_um: 7.4, per_frame: 0.008, global: 0.004}
+score:
+  metric: adj_edge_jaccard + 0.1*div_jaccard
+  split: golden-12
+  by_embryo: true                  # div_J must rise, adj_edge_J must not regress
+  anchor: golden ~0.87 -> LB ~0.89 ; target > 0.891
+submit: human_only                 # NEVER auto-submit

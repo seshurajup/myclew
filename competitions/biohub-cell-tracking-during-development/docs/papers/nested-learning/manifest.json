@@ -1,0 +1,491 @@
+{
+  "slug": "nested-learning",
+  "source": "https://alibehrouz.com/files/NL.pdf",
+  "pdf": "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/docs/papers/nested-learning/source.pdf",
+  "title": "Nested Learning: The Illusion of Deep Learning Architecture",
+  "backend": "docling+pymupdf-assets",
+  "pages": 52,
+  "figures": [
+    {
+      "page": 1,
+      "path": "assets/fig/p01_0.png",
+      "y0": 135.39276123046875,
+      "y1": 151.65899658203125,
+      "caption": "",
+      "label": "",
+      "w": 3568,
+      "h": 512
+    },
+    {
+      "page": 2,
+      "path": "assets/fig/p02_0.png",
+      "y0": 72.85922241210938,
+      "y1": 242.1190185546875,
+      "caption": "Figure 1: The uniform and reusable structure as well as multi time scale update in the brain are the key components to unlock the continual learning in humans. Nested Learning (NL) allows for multi time-scale update for each component of the brain, while showing that well-known architectures such as Transformers are in fact linear layers with different frequency updates.",
+      "label": "Figure 1",
+      "w": 2800,
+      "h": 968
+    },
+    {
+      "page": 4,
+      "path": "assets/fig/p04_0.png",
+      "y0": 72.8590087890625,
+      "y1": 252.78497314453125,
+      "caption": "Figure 2: Nested Learning Paradigm that represent a machine learning model and its training procedure as a set of nested optimization problems. (Left) An example of Hybrid architecture. While deep learning perspective, as the flattened image of NL, does not provide insight about the depth of computation in the blocks, NL transparently represent all the inner gradient flows. (Right) A Neural Learning Module: A computational model that learns how to compress its own context flow. For example, the first level corresponds to the model\u2019s most outer-loop training, often refer to as \u201cpre-training\u201d step.",
+      "label": "Figure 2",
+      "w": 2800,
+      "h": 1029
+    },
+    {
+      "page": 10,
+      "path": "assets/fig/p10_0.png",
+      "y0": 72.85977172851562,
+      "y1": 234.7960205078125,
+      "caption": "Figure 3: An example of comparing a FFN (e.g., MLP) with linear attention in a Transformer-based backbone, optimizing with gradient descent. The red components are blocks in the first level (with frequency 1), while blue components are blocks in the second level (frequency L). Linear attention with learnable initial memory state (referred to as Linear Attention++) is the same as an MLP layer but with in-context learning ability and adaptation to the input sequence.",
+      "label": "Figure 3",
+      "w": 2800,
+      "h": 1029
+    },
+    {
+      "page": 20,
+      "path": "assets/fig/p20_0.png",
+      "y0": 68.28575897216797,
+      "y1": 190.46600341796875,
+      "caption": "Figure 4: Optimization of function \u03c8(r,\u03b8) with standard momentum and our delta momentum.",
+      "label": "Figure 4",
+      "w": 1451,
+      "h": 1291
+    },
+    {
+      "page": 30,
+      "path": "assets/fig/p30_0.png",
+      "y0": 72.85977172851562,
+      "y1": 234.7960205078125,
+      "caption": "Figure 5: A comparison of Hope architectural backbone with Transformers (Normalization and potential data-dependent components are removed for the sake of clarity).",
+      "label": "Figure 5",
+      "w": 2800,
+      "h": 1029
+    },
+    {
+      "page": 33,
+      "path": "assets/fig/p33_0.png",
+      "y0": 72.86012268066406,
+      "y1": 173.4739990234375,
+      "caption": "Figure 6: Class-incremental learning in the text classification domain on (Left) CLINC dataset (Larson et al. 2019), (Middle) Banking dataset (Casanueva et al. 2020), and (Right) DBpedia dataset (Auer et al. 2007). Hope-enhanced architecture achieves the best accuracy among other continual learning methods, including ICL.",
+      "label": "Figure 6",
+      "w": 1780,
+      "h": 1180
+    },
+    {
+      "page": 33,
+      "path": "assets/fig/p33_1.png",
+      "y0": 72.86012268066406,
+      "y1": 173.4739990234375,
+      "caption": "",
+      "label": "",
+      "w": 1780,
+      "h": 1180
+    },
+    {
+      "page": 33,
+      "path": "assets/fig/p33_2.png",
+      "y0": 72.86012268066406,
+      "y1": 173.4739990234375,
+      "caption": "",
+      "label": "",
+      "w": 1780,
+      "h": 1180
+    },
+    {
+      "page": 34,
+      "path": "assets/fig/p34_0.png",
+      "y0": 73.04468536376953,
+      "y1": 180.208984375,
+      "caption": "Figure 7: The effect of memory levels on the in-context learning performance of the model in (Left) MK-NIAH of RULER (Hsieh et al. 2024), (Middle) LongHealth (Adams et al. 2025), (Right) QASPER (Dasigi et al. 2021) benchmarks. Note that for QASPER benchmark (Right), the lower values indicate better performance.",
+      "label": "Figure 7",
+      "w": 1779,
+      "h": 1180
+    },
+    {
+      "page": 34,
+      "path": "assets/fig/p34_1.png",
+      "y0": 72.86305236816406,
+      "y1": 180.208984375,
+      "caption": "",
+      "label": "",
+      "w": 1779,
+      "h": 1182
+    },
+    {
+      "page": 34,
+      "path": "assets/fig/p34_2.png",
+      "y0": 73.04468536376953,
+      "y1": 180.208984375,
+      "caption": "",
+      "label": "",
+      "w": 1779,
+      "h": 1180
+    },
+    {
+      "page": 35,
+      "path": "assets/fig/p35_0.png",
+      "y0": 72.86233520507812,
+      "y1": 193.0170135498047,
+      "caption": "Table 1: Needle-In-A-Haystack experiments with: (1) Single needle with three levels of difficulty: single-needle tasks\u2014S-NIAH-1 (passkey retrieval), S-NIAH-2 (numerical needle), and S-NIAH-3 (UUID-based needle); (2) multi-query; (3) multi-key; and (4) multi-value settings of the benchmark.",
+      "label": "Table 1",
+      "w": 1779,
+      "h": 1180
+    },
+    {
+      "page": 35,
+      "path": "assets/fig/p35_1.png",
+      "y0": 256.07135009765625,
+      "y1": 376.22601318359375,
+      "caption": "Figure 8: Continual Translation of a Novel Language (CTNL) task. Red points are the results with only one language. Blue points are the results in the continual leanring setup.",
+      "label": "Figure 8",
+      "w": 1779,
+      "h": 1180
+    },
+    {
+      "page": 39,
+      "path": "assets/fig/p39_0.png",
+      "y0": 72.8616943359375,
+      "y1": 177.33700561523438,
+      "caption": "Table 6: Ablation Study on Hope. All components of Hope are positively contributing to its performance.",
+      "label": "Table 6",
+      "w": 1780,
+      "h": 1180
+    },
+    {
+      "page": 39,
+      "path": "assets/fig/p39_1.png",
+      "y0": 252.66253662109375,
+      "y1": 352.0360107421875,
+      "caption": "Figure 12: Training time of models with 140M and 1.3B parameters with Muon, AdaMuon, and M3 optimizers.",
+      "label": "Figure 12",
+      "w": 1779,
+      "h": 1180
+    },
+    {
+      "page": 39,
+      "path": "assets/fig/p39_2.png",
+      "y0": 252.7177734375,
+      "y1": 352.0360107421875,
+      "caption": "Figure 11: ViT test and train loss on ImageNet-21K (Ridnik et al. 2021), trained with AdamW, Muon, and our M3 optimizers.",
+      "label": "Figure 11",
+      "w": 1780,
+      "h": 1180
+    },
+    {
+      "page": 39,
+      "path": "assets/fig/p39_3.png",
+      "y0": 247.07415771484375,
+      "y1": 345.6659851074219,
+      "caption": "Figure 10: The effect of context usage on the perplexity of the model. We expect the per- plexity of a model with powerful memory management to decrease with more context.",
+      "label": "Figure 10",
+      "w": 1779,
+      "h": 1180
+    }
+  ],
+  "tables": [
+    {
+      "page": 37,
+      "rows": 4,
+      "cols": 12,
+      "image": "assets/tab/p37_1.png"
+    },
+    {
+      "page": 37,
+      "rows": 4,
+      "cols": 12,
+      "image": "assets/tab/p37_2.png"
+    }
+  ],
+  "sections": [
+    {
+      "level": 1,
+      "page": 1,
+      "num": "1",
+      "title": "Introduction",
+      "heading": "1 Introduction"
+    },
+    {
+      "level": 2,
+      "page": 3,
+      "num": "1.1",
+      "title": "Human Brain Perspective and Neurophysiological Motivation",
+      "heading": "1.1 Human Brain Perspective and Neurophysiological Motivation"
+    },
+    {
+      "level": 2,
+      "page": 4,
+      "num": "1.2",
+      "title": "Contributions and Roadmap",
+      "heading": "1.2 Contributions and Roadmap"
+    },
+    {
+      "level": 1,
+      "page": 6,
+      "num": "2",
+      "title": "Preliminaries",
+      "heading": "2 Preliminaries"
+    },
+    {
+      "level": 1,
+      "page": 7,
+      "num": "3",
+      "title": "Nested Learning",
+      "heading": "3 Nested Learning"
+    },
+    {
+      "level": 2,
+      "page": 7,
+      "num": "3.1",
+      "title": "Associative Memory",
+      "heading": "3.1 Associative Memory"
+    },
+    {
+      "level": 2,
+      "page": 10,
+      "num": "3.2",
+      "title": "Nested Optimization Processes",
+      "heading": "3.2 Nested Optimization Processes"
+    },
+    {
+      "level": 2,
+      "page": 13,
+      "num": "3.3",
+      "title": "Knowledge Transfer Between Levels",
+      "heading": "3.3 Knowledge Transfer Between Levels"
+    },
+    {
+      "level": 1,
+      "page": 15,
+      "num": "4",
+      "title": "Optimizers as Learning Modules",
+      "heading": "4 Optimizers as Learning Modules"
+    },
+    {
+      "level": 2,
+      "page": 15,
+      "num": "4.1",
+      "title": "Backpropagation as an Associative Memory",
+      "heading": "4.1 Backpropagation as an Associative Memory"
+    },
+    {
+      "level": 2,
+      "page": 15,
+      "num": "4.2",
+      "title": "Momentum-based Optimizers as Associative Memories",
+      "heading": "4.2 Momentum-based Optimizers as Associative Memories"
+    },
+    {
+      "level": 2,
+      "page": 17,
+      "num": "4.3",
+      "title": "Long Context in Optimizers: An Example of Continual Learning with Orthogonal Tasks",
+      "heading": "4.3 Long Context in Optimizers: An Example of Continual Learning with Orthogonal Tasks"
+    },
+    {
+      "level": 2,
+      "page": 18,
+      "num": "4.4",
+      "title": "More Expressive Designs for Momentum as an Associative Memory",
+      "heading": "4.4 More Expressive Designs for Momentum as an Associative Memory"
+    },
+    {
+      "level": 2,
+      "page": 20,
+      "num": "4.5",
+      "title": "Going Beyond Simple Gradient Descent and Momentum",
+      "heading": "4.5 Going Beyond Simple Gradient Descent and Momentum"
+    },
+    {
+      "level": 1,
+      "page": 21,
+      "num": "5",
+      "title": "Existing Architectures as Neural Learning Modules",
+      "heading": "5 Existing Architectures as Neural Learning Modules"
+    },
+    {
+      "level": 2,
+      "page": 23,
+      "num": "5.1",
+      "title": "Revisiting the Human Brain Perspective of Nested Learning",
+      "heading": "5.1 Revisiting the Human Brain Perspective of Nested Learning"
+    },
+    {
+      "level": 1,
+      "page": 24,
+      "num": "6",
+      "title": "Takeaways and Revisiting Common Terms",
+      "heading": "6 Takeaways and Revisiting Common Terms"
+    },
+    {
+      "level": 1,
+      "page": 27,
+      "num": "7",
+      "title": "Continuum Multi-Timescale Memory System",
+      "heading": "7 Continuum Multi-Timescale Memory System"
+    },
+    {
+      "level": 2,
+      "page": 27,
+      "num": "7.1",
+      "title": "Continuum Memory System (CMS)",
+      "heading": "7.1 Continuum Memory System (CMS)"
+    },
+    {
+      "level": 2,
+      "page": 29,
+      "num": "7.2",
+      "title": "Continuum Memory System In Optimizers",
+      "heading": "7.2 Continuum Memory System In Optimizers"
+    },
+    {
+      "level": 2,
+      "page": 29,
+      "num": "7.3",
+      "title": "Ad-hoc Level Stacking: Initializing CMS with Pre-Trained Models",
+      "heading": "7.3 Ad-hoc Level Stacking: Initializing CMS with Pre-Trained Models"
+    },
+    {
+      "level": 1,
+      "page": 30,
+      "num": "8",
+      "title": "Hope: A Self-Referential Learning Module with Continuum Memory",
+      "heading": "8 Hope: A Self-Referential Learning Module with Continuum Memory"
+    },
+    {
+      "level": 2,
+      "page": 31,
+      "num": "8.1",
+      "title": "Deep Self-Referential Titans",
+      "heading": "8.1 Deep Self-Referential Titans"
+    },
+    {
+      "level": 2,
+      "page": 32,
+      "num": "8.2",
+      "title": "Fast and Parallelizable Training",
+      "heading": "8.2 Fast and Parallelizable Training"
+    },
+    {
+      "level": 2,
+      "page": 33,
+      "num": "8.3",
+      "title": "Hope Neural Learning Module",
+      "heading": "8.3 Hope Neural Learning Module"
+    },
+    {
+      "level": 1,
+      "page": 33,
+      "num": "9",
+      "title": "Experiments",
+      "heading": "9 Experiments"
+    },
+    {
+      "level": 2,
+      "page": 33,
+      "num": "9.1",
+      "title": "Hope: Continual Learning and Long Context Understanding",
+      "heading": "9.1 Hope: Continual Learning and Long Context Understanding"
+    },
+    {
+      "level": 2,
+      "page": 36,
+      "num": "9.2",
+      "title": "Hope: Long Context Understanding",
+      "heading": "9.2 Hope: Long Context Understanding"
+    },
+    {
+      "level": 2,
+      "page": 37,
+      "num": "9.3",
+      "title": "Hope: Language Modeling and Common-Sense Reasoning",
+      "heading": "9.3 Hope: Language Modeling and Common-Sense Reasoning"
+    },
+    {
+      "level": 2,
+      "page": 38,
+      "num": "9.4",
+      "title": "Hope: In-context Recall Tasks and MAD Synthetic Benchmark",
+      "heading": "9.4 Hope: In-context Recall Tasks and MAD Synthetic Benchmark"
+    },
+    {
+      "level": 2,
+      "page": 38,
+      "num": "9.5",
+      "title": "Language Recognition Tasks",
+      "heading": "9.5 Language Recognition Tasks"
+    },
+    {
+      "level": 2,
+      "page": 39,
+      "num": "9.6",
+      "title": "Hope: Ablation Studies and Scaling",
+      "heading": "9.6 Hope: Ablation Studies and Scaling"
+    },
+    {
+      "level": 2,
+      "page": 39,
+      "num": "9.7",
+      "title": "Expressive Optimizers",
+      "heading": "9.7 Expressive Optimizers"
+    },
+    {
+      "level": 1,
+      "page": 40,
+      "num": "10",
+      "title": "Conclusion",
+      "heading": "10 Conclusion"
+    },
+    {
+      "level": 1,
+      "page": 41,
+      "num": "",
+      "title": "References",
+      "heading": "References"
+    },
+    {
+      "level": 1,
+      "page": 50,
+      "num": "A",
+      "title": "Generalized Formulation for Nested Learning and Nested Systems",
+      "heading": "A Generalized Formulation for Nested Learning and Nested Systems"
+    },
+    {
+      "level": 1,
+      "page": 50,
+      "num": "B",
+      "title": "Adam, AdaGrad, and Other Similar Optimizers as Associative Memory Modules",
+      "heading": "B Adam, AdaGrad, and Other Similar Optimizers as Associative Memory Modules"
+    },
+    {
+      "level": 1,
+      "page": 52,
+      "num": "C",
+      "title": "Delta Gradient Descent with Normalization",
+      "heading": "C Delta Gradient Descent with Normalization"
+    }
+  ],
+  "equations": 642,
+  "numbered": 121,
+  "md": "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/docs/papers/nested-learning/nested-learning.md",
+  "equations_json": "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/docs/papers/nested-learning/equations.json",
+  "available": {
+    "pymupdf": true,
+    "marker": true,
+    "docling": true
+  },
+  "score": {
+    "chars": 273667,
+    "headings": 59,
+    "equations": 124,
+    "eq_tags": 2,
+    "images": 139,
+    "tables": 79,
+    "latex_cmds": 1553,
+    "mojibake": 0
+  }
+}

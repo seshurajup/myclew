@@ -1,0 +1,31 @@
+[
+  {
+    "after_line": 6,
+    "text": ">>> Adult",
+    "caption": "if/else picks one branch"
+  },
+  {
+    "after_line": 14,
+    "text": ">>> B",
+    "caption": "elif checks in order, first match wins"
+  },
+  {
+    "after_line": 19,
+    "text": ">>> Great beach day!",
+    "caption": "and / or combine conditions"
+  },
+  {
+    "after_line": 27,
+    "text": ">>> Withdrew 300, remaining 200",
+    "caption": "nested if for layered logic"
+  },
+  {
+    "after_line": 30,
+    "text": ">>> adult",
+    "caption": "ternary: one-line if/else"
+  },
+  {
+    "after_line": 33,
+    "image": "artifacts/terminal.png"
+  }
+]

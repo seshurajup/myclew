@@ -1,0 +1,42 @@
+[
+  {
+    "text": "A lambda is a tiny, anonymous function you can write in a single line, with no name and no def keyword.",
+    "until_line": 2
+  },
+  {
+    "text": "The word lambda, then the parameters, a colon, and one expression whose value is returned automatically.",
+    "until_line": 2
+  },
+  {
+    "text": "So square of five gives twenty-five, and add of three and seven gives ten — just like regular functions.",
+    "until_line": 5
+  },
+  {
+    "text": "[chuckle] But you rarely name a lambda like this — their real power is being passed straight into another function.",
+    "until_line": 9
+  },
+  {
+    "text": "Here we hand a lambda to map, squaring every number in the list without ever defining a separate function.",
+    "until_line": 10
+  },
+  {
+    "text": "[sigh] Lambdas are perfect as a sort key too — this one tells sort to order the pairs by their second element.",
+    "until_line": 15
+  },
+  {
+    "text": "So the tuples rearrange alphabetically by their letter, not by their number.",
+    "until_line": 15
+  },
+  {
+    "text": "A lambda can even hold a conditional expression, returning pass or fail depending on the score.",
+    "until_line": 19
+  },
+  {
+    "text": "[groan] Keep them short though — if a lambda gets complicated, a normal named function is always the clearer choice.",
+    "until_line": 19
+  },
+  {
+    "text": "In the next one we take on map and filter. Which one do you already use? Comment below.",
+    "until_line": 19
+  }
+]

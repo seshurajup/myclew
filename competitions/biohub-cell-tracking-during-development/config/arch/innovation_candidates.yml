@@ -1,0 +1,444 @@
+adopt_cheap:
+- FlashAttention-3
+- global-motion registration
+- anisotropic 3D conv
+- RMSNorm
+- SwiGLU FFN
+- pre-norm residual
+- Trackastra
+- gap-closing / track-stitch
+- residual blocks
+- large-kernel stem
+- EMA weights
+- cosine + warmup LR
+- BF16/FP16 mixed
+- stochastic rounding
+- Loopie layer-loop (R=2)
+- VISTA3D
+- micro-SAM
+- Cellpose-SAM
+- DiScoFormer head-consistency TTA
+- SAM2 promptable
+search_candidates:
+- U-Mamba
+- SegMamba
+- EfficientViT
+- FP8 (E4M3/E5M2)
+- GQA grouped-query
+- RoPE positions
+- sliding-window attn
+- Mamba / SSM
+- focal loss
+- CenterNet gaussian-focal
+- Tversky loss
+- focal-Tversky
+- varifocal loss
+- MedNeXt
+- Cellpose3 restore
+- nnU-Net recipe
+- SE channel attention
+- StarDist star-convex
+- Cellpose flow-field
+- ConvNeXt-V2 block
+- depthwise-separable
+- NVFP4 microscaling
+- MXFP4
+- BitNet b1.58 ternary
+- sparse MoE (top-k)
+- OHEM
+- deep supervision
+- nnU-Net ResEnc-L
+- Attention U-Net gates
+- ASPP dilated context
+- INT8 PTQ
+- INT4 (GPTQ/AWQ)
+- Swin-UNETR encoder
+- Primus 3D transformer
+ranked:
+- name: FlashAttention-3
+  stage: attention
+  acc: '0'
+  speed: ++
+  note: exact attention, ~2x faster + less memory (Shah 2024)
+  status: adopt-if-attn
+- name: U-Mamba
+  stage: backbone
+  acc: +
+  speed: +
+  note: 'hybrid CNN+Mamba SSM: long-range context at LINEAR cost for 3D biomedical
+    seg (Ma 2024)'
+  status: search
+- name: SegMamba
+  stage: backbone
+  acc: +
+  speed: +
+  note: whole-volume Mamba encoder; global 3D receptive field, faster than transformer
+    (Xing MICCAI 2024)
+  status: search
+- name: global-motion registration
+  stage: linker
+  acc: ++
+  speed: '0'
+  note: "compensate whole-volume setup drift BEFORE linking so true match falls inside\
+    \ gate \u2014 ultrack Tribolium TRA 0.443\u21920.623 (+0.18); OUR 47%-jump embryo;\
+    \ GENERALIZING\u2192LB-transferable"
+  status: adopt-now
+- name: EfficientViT
+  stage: detector
+  acc: '0'
+  speed: ++
+  note: cascaded group attention for fast dense detection (Liu 2023)
+  status: search
+- name: anisotropic 3D conv
+  stage: detector
+  acc: +
+  speed: +
+  note: "z-thin kernels for anisotropic voxels (our data) \u2014 fewer params"
+  status: adopt-data
+- name: FP8 (E4M3/E5M2)
+  stage: precision
+  acc: '0'
+  speed: ++
+  note: Hopper/Blackwell native; ~2x over FP16 for training (not on T4)
+  status: search
+- name: GQA grouped-query
+  stage: attention
+  acc: '-'
+  speed: ++
+  note: "share KV heads \u2192 big memory/speed win, tiny acc cost (Ainslie 2023)"
+  status: search
+- name: RoPE positions
+  stage: attention
+  acc: +
+  speed: '0'
+  note: rotary positions generalise better; standard now
+  status: search
+- name: sliding-window attn
+  stage: attention
+  acc: '0'
+  speed: +
+  note: local window = O(n) for our short temporal horizon
+  status: search
+- name: Mamba / SSM
+  stage: sequence
+  acc: '0'
+  speed: +
+  note: linear-time state-space; strong on long sequences (Gu 2024)
+  status: search
+- name: RMSNorm
+  stage: backbone
+  acc: '0'
+  speed: +
+  note: "drop the mean-subtraction \u2192 faster than LayerNorm, same acc"
+  status: adopt-cheap
+- name: SwiGLU FFN
+  stage: backbone
+  acc: +
+  speed: '0'
+  note: gated FFN beats ReLU/GELU FFN at equal params (Shazeer 2020)
+  status: adopt-cheap
+- name: pre-norm residual
+  stage: backbone
+  acc: +
+  speed: '0'
+  note: stable deep training; standard
+  status: adopt-cheap
+- name: focal loss
+  stage: loss
+  acc: +
+  speed: '0'
+  note: "down-weights easy examples, concentrates gradient on HARD positives \u2192\
+    \ dim nuclei (Lin RetinaNet 2017)"
+  status: search
+- name: CenterNet gaussian-focal
+  stage: loss
+  acc: +
+  speed: '0'
+  note: "keypoint-heatmap focal; penalty-reduced near-peak \u2192 sub-pixel dim-peak\
+    \ recall (Zhou 'Objects as Points' 2019)"
+  status: search
+- name: Tversky loss
+  stage: loss
+  acc: +
+  speed: '0'
+  note: "tunable FP/FN weighting (\u03B1,\u03B2) \u2192 RECALL-tilt for rare positives\
+    \ (Salehi 2017)"
+  status: search
+- name: focal-Tversky
+  stage: loss
+  acc: +
+  speed: '0'
+  note: "focal \xD7 Tversky: focuses on hard imbalanced regions (small/dim) (Abraham\
+    \ 2019)"
+  status: search
+- name: varifocal loss
+  stage: loss
+  acc: +
+  speed: '0'
+  note: IoU/quality-aware focal; weights positives by localisation quality (Zhang
+    VarifocalNet 2021)
+  status: search
+- name: MedNeXt
+  stage: backbone
+  acc: +
+  speed: '0'
+  note: "scalable ConvNeXt for 3D medical with LARGE kernels + deep sup \u2014 validates\
+    \ our stem=[7,7,7] (Roy MICCAI 2023)"
+  status: search
+- name: Cellpose3 restore
+  stage: detector
+  acc: +
+  speed: '0'
+  note: "image-restoration \u2192 segmentation; recovers DIM/noisy nuclei before detection\
+    \ \u2014 fits our dim-miss (Stringer 2024)"
+  status: search
+- name: Trackastra
+  stage: linker
+  acc: +
+  speed: '0'
+  note: "transformer that learns cell-track ASSOCIATION incl. divisions, no tuning\
+    \ \u2014 in-domain (Gallusser ECCV 2024)"
+  status: adopt-data
+- name: gap-closing / track-stitch
+  stage: linker
+  acc: +
+  speed: '0'
+  note: "2nd-pass LAP connecting track-end\u2192track-start across k=1-3 missed/frozen\
+    \ frames \u2192 recovers adjacency edge_jaccard; gate to motion-consistent (ultrack\
+    \ close_tracks_gaps, KIT-GE min-cost-flow)"
+  status: adopt-now
+- name: topology-gated division
+  stage: linker
+  acc: +
+  speed: '0'
+  note: "propose division ONLY where accepted parent splits into 2 detections + daughter-symmetry\
+    \ + non-overlap gate (NOT synthetic masks \u2014 that flooded FP); ultrack division_weight\
+    \ (Salehi/royerlab)"
+  status: prototype
+- name: nnU-Net recipe
+  stage: backbone
+  acc: +
+  speed: '0'
+  note: "self-configuring 3D U-Net; residual enc + deep sup + big patch \u2014 SOTA\
+    \ 3D biomedical baseline (Isensee 2021)"
+  status: search
+- name: residual blocks
+  stage: backbone
+  acc: +
+  speed: '0'
+  note: "identity skips ease deep-net optimisation; our search kept blocks_per_stage=3\
+    \ \u2192 residual matters (He 2016)"
+  status: adopt-cheap
+- name: SE channel attention
+  stage: backbone
+  acc: +
+  speed: '0'
+  note: squeeze-excite recalibrates channels ~free; helps low-contrast feature emphasis
+    (Hu 2018)
+  status: search
+- name: StarDist star-convex
+  stage: detector
+  acc: +
+  speed: '0'
+  note: star-convex polygon nucleus rep; IN-DOMAIN SOTA for crowded nuclei (Weigert/Schmidt
+    2020)
+  status: search
+- name: Cellpose flow-field
+  stage: detector
+  acc: +
+  speed: '0'
+  note: gradient-flow representation separates touching cells; in-domain (Stringer
+    2021)
+  status: search
+- name: large-kernel stem
+  stage: backbone
+  acc: +
+  speed: '0'
+  note: "big early receptive field captures whole nucleus + context \u2014 our search\
+    \ PICKED stem=[7,7,7] (RepLKNet Ding 2022)"
+  status: adopt-data
+- name: ConvNeXt-V2 block
+  stage: detector
+  acc: +
+  speed: '0'
+  note: modern conv (GRN + depthwise) rivals ViT, conv-fast (Woo 2023)
+  status: search
+- name: depthwise-separable
+  stage: detector
+  acc: '-'
+  speed: ++
+  note: "factorised conv \u2192 far fewer FLOPs; small acc cost"
+  status: search
+- name: EMA weights
+  stage: training
+  acc: +
+  speed: '0'
+  note: "exponential-moving-avg of weights \u2192 free generalisation"
+  status: adopt-cheap
+- name: cosine + warmup LR
+  stage: training
+  acc: +
+  speed: '0'
+  note: standard schedule; stabilises + improves
+  status: adopt-cheap
+- name: BF16/FP16 mixed
+  stage: precision
+  acc: '0'
+  speed: +
+  note: standard mixed precision; 2x speed/mem, ~no acc loss; works on T4
+  status: adopt-cheap
+- name: NVFP4 microscaling
+  stage: precision
+  acc: '-'
+  speed: ++
+  note: Blackwell native 4-bit, block-16 scaling; 2-3x over FP8, half mem; stochastic
+    rounding needed (NVIDIA 2026)
+  status: search
+- name: MXFP4
+  stage: precision
+  acc: '-'
+  speed: ++
+  note: microscaling FP4 (block-32); FQT weights+acts+grads at 4-bit
+  status: search
+- name: BitNet b1.58 ternary
+  stage: precision
+  acc: '-'
+  speed: ++
+  note: 1.58-bit ternary {-1,0,1} weights; train-from-scratch native low-bit
+  status: search
+- name: stochastic rounding
+  stage: precision
+  acc: +
+  speed: '0'
+  note: essential for stable FP4/low-bit training (removes quant bias)
+  status: adopt-if-fp4
+- name: DiScoFormer density/score oracle
+  stage: estimator
+  acc: +
+  speed: '0'
+  note: "train-once equivariant transformer maps sample-set\u2192density+score across\
+    \ distributions; self-attention = generalized KDE. Plug-in score oracle for score-debiased\
+    \ KDE, Fisher info, Fokker-Planck; density-ratio adv-val features (Ilin 2026)"
+  status: prototype
+- name: Loopie layer-loop (R=2)
+  stage: backbone
+  acc: +
+  speed: '-'
+  note: "weight-SHARED recurrent depth: apply each block R=2\xD7 \u2192 EFFECTIVE\
+    \ depth without extra params (2\xD7 compute); activation memory stays O(stored\
+    \ depth) via single checkpointed unit \u2192 reinvest freed mem into bigger microbatch.\
+    \ Beats param-scaling ONLY under a compute-matched-by-measured-wall-clock budget;\
+    \ benefit peaks at R=2 & decays (Gao 'Loop the Loopies!' arXiv:2607.16051). WIRED:\
+    \ gnn_link_train loop_r knob + layer-grow tests loop-vs-add. Param-constrained\
+    \ regimes only; PROVE via layer-grow"
+  status: adopt-if-param-constrained
+- name: sparse MoE (top-k)
+  stage: backbone
+  acc: +
+  speed: '-'
+  note: more capacity at ~same FLOPs; memory heavy (per data-regime experts)
+  status: search
+- name: OHEM
+  stage: loss
+  acc: +
+  speed: '-'
+  note: 'online hard-example mining: backprop only top-loss (hardest) samples (Shrivastava
+    2016)'
+  status: search
+- name: deep supervision
+  stage: detector
+  acc: +
+  speed: '-'
+  note: "auxiliary losses at multiple decoder depths \u2192 stronger gradient to small/dim\
+    \ objects (Lee DSN 2015)"
+  status: search
+- name: nnU-Net ResEnc-L
+  stage: backbone
+  acc: +
+  speed: '-'
+  note: residual-encoder nnU-Net 'revisited' STILL beats transformers on 3D biomedical
+    (Isensee 2024)
+  status: search
+- name: VISTA3D
+  stage: detector
+  acc: +
+  speed: '-'
+  note: 3D medical foundation segmentation model, promptable + auto (NVIDIA 2024)
+  status: adopt-if-foundation
+- name: micro-SAM
+  stage: detector
+  acc: +
+  speed: '-'
+  note: 'SAM specialised for MICROSCOPY: interactive + automatic instance seg (Archit
+    2024)'
+  status: adopt-if-foundation
+- name: Cellpose-SAM
+  stage: detector
+  acc: +
+  speed: '-'
+  note: "SAM backbone in Cellpose \u2192 generalist crowded-cell segmentation (Pachitariu\
+    \ 2025)"
+  status: adopt-if-foundation
+- name: Attention U-Net gates
+  stage: backbone
+  acc: +
+  speed: '-'
+  note: "attention gates on skip connections suppress irrelevant BG, focus on faint\
+    \ structures \u2192 dim nuclei (Oktay 2018)"
+  status: search
+- name: ASPP dilated context
+  stage: backbone
+  acc: +
+  speed: '-'
+  note: atrous spatial pyramid = multi-scale context; low-contrast/dim nuclei need
+    surrounding context (Chen DeepLab 2017)
+  status: search
+- name: INT8 PTQ
+  stage: precision
+  acc: '-'
+  speed: +
+  note: post-training int8 quant for INFERENCE; T4-friendly, fast
+  status: search
+- name: INT4 (GPTQ/AWQ)
+  stage: precision
+  acc: '-'
+  speed: +
+  note: 4-bit weight quant for inference; more acc cost, big mem save
+  status: search
+- name: DiScoFormer head-consistency TTA
+  stage: tta
+  acc: +
+  speed: '-'
+  note: "amortized set\u2192(density,score) cross-attn oracle; score head==\u2207\
+    log-density head gives a label-free consistency loss \u2192 few grad steps adapt\
+    \ to OOD at inference (Ilin arXiv:2511.05924 ICLR26). WIRED: inference_tricks_pack.head_consistency_tta\
+    \ + agent 'head-consistency'; reference model disco_density.py"
+  status: adopt-now
+- name: SAM2 promptable
+  stage: detector
+  acc: '0'
+  speed: '-'
+  note: promptable video/volume segmentation; strong zero-shot, needs prompts/finetune
+    (Ravi 2024)
+  status: adopt-if-foundation
+- name: ILP / min-cost-flow link
+  stage: linker
+  acc: '0'
+  speed: '-'
+  note: "global optimizer \u2014 SKIP as edge lever (our learned-edge \u03940.000,\
+    \ greedy\u2248ILP once assoc good); use ONLY as vehicle for division+gap constraints"
+  status: skip
+- name: Swin-UNETR encoder
+  stage: backbone
+  acc: +
+  speed: --
+  note: shifted-window transformer encoder for 3D medical; strong but heavy (Hatamizadeh
+    2022)
+  status: search
+- name: Primus 3D transformer
+  stage: backbone
+  acc: '0'
+  speed: --
+  note: pure-ViT 3D medical that finally matches CNNs with the right tricks (Wald
+    2024)
+  status: search

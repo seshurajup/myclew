@@ -1,0 +1,21 @@
+[
+  {
+    "after_line": 4,
+    "text": ">>> list has 5 items",
+    "caption": "assign + test in one line"
+  },
+  {
+    "after_line": 9,
+    "text": ">>> floor sqrt is 5",
+    "caption": "compute once, reuse"
+  },
+  {
+    "after_line": 15,
+    "text": ">>> sum before zero: 13",
+    "caption": "walrus in a while condition"
+  },
+  {
+    "after_line": 16,
+    "image": "artifacts/terminal.png"
+  }
+]

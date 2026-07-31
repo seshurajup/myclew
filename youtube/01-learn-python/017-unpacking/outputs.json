@@ -1,0 +1,5 @@
+[
+  {"after_line": 3, "text": ">>> 1 5\n>>> [2, 3, 4]", "caption": "star grabs the middle"},
+  {"after_line": 7, "text": ">>> 2 1", "caption": "swap with no temp variable"},
+  {"after_line": 11, "text": ">>> {'size': 'M', 'color': 'blue'}", "caption": "** merges dicts, later wins"}
+]

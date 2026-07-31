@@ -1,0 +1,21 @@
+[
+  {
+    "after_line": 6,
+    "text": ">>> /home/user\\n>>> /home/user\\n>>> a/b/c.txt",
+    "caption": "os: directories, env, paths"
+  },
+  {
+    "after_line": 10,
+    "text": ">>> (files in the folder)",
+    "caption": "os.listdir walks a directory"
+  },
+  {
+    "after_line": 15,
+    "text": ">>> (3, 12)\\n>>> linux\\n>>> 1 command-line args",
+    "caption": "sys: the runtime itself"
+  },
+  {
+    "after_line": 15,
+    "image": "artifacts/terminal.png"
+  }
+]

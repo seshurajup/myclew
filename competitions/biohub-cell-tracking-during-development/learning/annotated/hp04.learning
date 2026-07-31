@@ -1,0 +1,32 @@
+@ id: hp04
+@ order: 1030
+@ title: 4 The Neural Signal Distribution
+@ subtitle: Hilbert Operator for Progressive Encoding (HOPE) §4
+@ source: docs/papers/hope-hilbert/hope-hilbert.md
+
+--- note
+## 4 The Neural Signal Distribution
+**Paper:** Hilbert Operator for Progressive Encoding (HOPE) · §4 · pages 6–6 · 0 numbered equation(s), 0 figure(s).
+
+> TODO(author): the *why* of this section in 3–5 lines, then teach each formula below.
+> Source markdown: `docs/papers/hope-hilbert/hope-hilbert.md`
+
+--- note
+### Unnumbered formula
+
+$$
+= E_{x\sim P}\Psi(y_{i})\Psi(y_{j})] \cdot ^{\mathcal{H}} ^{\mathcal{X}} [
+$$
+
+> TODO(author): what each symbol is, what it *does*, and why the paper needs it.
+
+--- code
+# TODO(author): the unnumbered formula in runnable PyTorch, then assert it matches the paper.
+
+--- image
+learning/assets/hope-hilbert/eq/eq_p06_003.png
+Unnumbered formula as rendered in the PDF
+
+--- note
+**[Recap]** TODO(author): 3 bullets — the claim, the mechanism, the consequence for our own models.
+

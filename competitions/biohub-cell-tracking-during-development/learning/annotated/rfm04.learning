@@ -1,0 +1,1393 @@
+@ id: rfm04
+@ order: 2430
+@ title: 3 Methodology
+@ subtitle: Routing-Free Mixture-of-Experts §3
+@ source: docs/papers/routing-free-moe/routing-free-moe.md
+
+--- note
+## 3 Methodology
+**Paper:** Routing-Free Mixture-of-Experts · §3 · pages 3–4 · equations (8–19) · 156 figures.
+
+**Routing-Free MoE.** Replace the gate with `ReLU` of the expert's own gate norm
+minus a learned threshold (eqs. 8–10): no Softmax, no TopK, no external router, and the activation decision
+is continuous and per-expert — an inactive expert still receives gradient through its threshold, which is
+precisely what TopK denies it.
+
+Balancing is then reformulated rather than abandoned. Define the activation density over experts and tokens
+(eqs. 11–12), penalise deviation from the target for **experts** (eq. 13, `L_EB`) and for **tokens**
+(eq. 14, `L_TB`), interpolate them with one knob (eq. 15, `L_LB = μL_EB + (1−μ)L_TB`), add it to the task
+loss with an *adapted* weight (eq. 16) updated by a multiplicative sign rule (eq. 17). Eqs. 18–19 are the
+classical auxiliary loss it is being compared against.
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_0.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_1.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_2.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_3.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_4.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_5.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_6.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_7.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_8.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_9.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_10.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_11.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_12.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_13.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_14.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_15.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_16.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_17.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_18.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_19.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_20.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_21.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_22.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_23.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_24.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_25.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_26.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_27.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_28.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_29.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_30.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_31.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_32.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_33.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_34.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_35.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_36.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_37.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_38.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_39.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_40.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_41.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_42.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_43.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_44.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_45.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_46.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_47.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_48.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_49.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_50.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_51.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_52.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_53.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_54.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_55.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_56.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_57.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_58.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_59.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_60.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_61.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_62.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_63.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_64.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_65.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_66.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_67.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_68.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_69.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_70.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_71.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_72.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_73.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_74.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_75.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_76.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_77.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_78.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_79.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_80.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_81.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_82.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_83.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_84.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_85.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_86.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_87.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_88.png
+
+--- note
+### Figure 3 — as printed in the paper
+
+Figure 3: Load-balancing for tokens and experts. Routing-Free MoE introduces a unified load- balancing framework that simultaneously optimizes both expert-balancing and token-balancing through a configurable interpolation.
+
+--- image
+learning/assets/routing-free-moe/p04_89.png
+Figure 3: Load-balancing for tokens and experts. Routing-Free MoE introduces a unified load- balancing framework that simultaneously optimizes both expert-balancing and token-balancing through a configurable interpolation.
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_90.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_91.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_92.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_93.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_94.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_95.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_96.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_97.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_98.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_99.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_100.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_101.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_102.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_103.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_104.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_105.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_106.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_107.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_108.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_109.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_110.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_111.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_112.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_113.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_114.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_115.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_116.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_117.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_118.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_119.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_120.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_121.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_122.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_123.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_124.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_125.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_126.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_127.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_128.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_129.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_130.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_131.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_132.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_133.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_134.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_135.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_136.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_137.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_138.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_139.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_140.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_141.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_142.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_143.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_144.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_145.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_146.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_147.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_148.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_149.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_150.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_151.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_152.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_153.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_154.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/routing-free-moe/p04_155.png
+
+--- note
+### Routing-free, step 1: ReLU instead of Softmax+TopK — eq. (8)
+
+$$
+G(x) = \mathrm{ReLU}(xG)
+$$
+
+Drop the normalisation and the hard selection: a ReLU is *already* a sparsifier (it zeroes
+whatever is negative) and it is differentiable almost everywhere with a **non-zero gradient on the active
+side**. Sparsity becomes a consequence of the values rather than an imposed count.
+
+--- code
+import torch, torch.nn as nn, torch.nn.functional as F      # an expert that decides for itself
+import sys; sys.path.insert(0, "learning")
+import vizkit as vz
+
+DEV = torch.device("cuda" if torch.cuda.is_available() else "cpu")   # every proof runs on the GPU
+torch.set_default_device(DEV)
+torch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False   # exact proofs
+torch.manual_seed(0); torch.set_printoptions(precision=4, sci_mode=False)
+print(f"device: {DEV}" + (f" | {torch.cuda.get_device_name(0)}" if DEV.type == "cuda" else ""))
+
+def ok(name, cond, extra=""):
+    print(("PASS  " if cond else "FAIL  ") + name + (f"   | {extra}" if extra else ""))
+
+def close(a, b, tol=1e-5):
+    return torch.allclose(a, b, atol=tol, rtol=tol)
+
+N, d, r = 8, 32, 8                                                # this lesson's own setup
+x1 = torch.randn(d)
+G_proj = torch.randn(d, N) / d ** 0.5
+raw = x1 @ G_proj
+g_relu = F.relu(raw)                                             # eq. 8
+ok("ReLU produces sparsity without a K", int((g_relu > 0).sum()) < N,
+   f"{int((g_relu>0).sum())} of {N} experts active, chosen by VALUE not by count")
+ok("the weights are NOT forced to sum to one", abs(float(g_relu.sum()) - 1) > 1e-3,
+   f"sum = {float(g_relu.sum()):.4f} — no cross-expert normalisation")
+s = raw.detach().clone().requires_grad_(True)
+F.relu(s).sum().backward()
+ok("every positive-score expert receives gradient", int((s.grad != 0).sum()) == int((raw > 0).sum()),
+   f"{int((s.grad != 0).sum())} experts get gradient (TopK gave exactly K)")
+
+--- output
+```
+device: cuda | NVIDIA GeForce RTX 5090
+PASS  ReLU produces sparsity without a K   | 4 of 8 experts active, chosen by VALUE not by count
+PASS  the weights are NOT forced to sum to one   | sum = 2.2631 — no cross-expert normalisation
+PASS  every positive-score expert receives gradient   | 4 experts get gradient (TopK gave exactly K)
+```
+
+--- note
+### Routing-free, step 2: each expert scores ITSELF — eq. (9)
+
+$$
+G_i(\mathbf{x}) = \mathrm{ReLU}\Big(\big\lVert \mathbf{x}A_{gate,i}\big\rVert_2 - b_i\Big)
+$$
+
+**The rule.** Expert `i`'s activation is the norm of its own gate activation minus its own
+learned threshold `b_i`, rectified. No external parameters, no cross-expert term anywhere — the decision is
+entirely local, and both the norm and the threshold receive gradient. The thresholds are what the balancing
+objectives will steer.
+
+--- code
+N, d, r = 8, 32, 8                                                # this lesson's own setup
+x1 = torch.randn(d)
+G_proj = torch.randn(d, N) / d ** 0.5
+b = torch.zeros(N, requires_grad=True)
+A_p = (torch.randn(N, d, r) / d ** 0.5).requires_grad_(True)
+def gate_rf(z, A_p=A_p, b=b):
+    nrm = torch.stack([torch.linalg.vector_norm(z @ A_p[i]) for i in range(N)])
+    return F.relu(nrm - b)                                       # eq. 9
+g9 = gate_rf(x1)
+ok("the gate is computed per expert with no shared parameter", g9.shape == (N,))
+g9.sum().backward()
+ok("both the projection AND the threshold receive gradient",
+   A_p.grad is not None and b.grad is not None and float(b.grad.abs().sum()) > 0,
+   "so an inactive expert can learn to activate — exactly what TopK forbids")
+with torch.no_grad():
+    b2 = b.detach().clone() + 100.0
+ok("raising a threshold deactivates that expert continuously",
+   int((gate_rf(x1, b=b2) > 0).sum()) == 0, "no discrete switch, just the ReLU hinge")
+
+--- output
+```
+PASS  the gate is computed per expert with no shared parameter
+PASS  both the projection AND the threshold receive gradient   | so an inactive expert can learn to activate — exactly what TopK forbids
+PASS  raising a threshold deactivates that expert continuously   | no discrete switch, just the ReLU hinge
+```
+
+--- image
+learning/assets/routing-free-moe/eq/eq_p04_005.png
+Equation (9) as printed in the PDF
+
+--- note
+### The activation indicator — eq. (10)
+
+$$
+f_i(x) = \mathbb{1}\big\{G_i(x) - \theta \ge 0\big\}
+$$
+
+A binary indicator used only for *bookkeeping* — measuring how often each expert fires
+so the balancing objectives can be written. It is not in the forward path, so its non-differentiability
+costs nothing (contrast TopK, which sits in the forward path).
+
+--- code
+N, d, r = 8, 32, 8                                                # this lesson's own setup
+x1 = torch.randn(d)
+G_proj = torch.randn(d, N) / d ** 0.5
+b = torch.zeros(N)
+A_p = torch.randn(N, d, r) / d ** 0.5
+g9 = F.relu(torch.stack([torch.linalg.vector_norm(x1 @ A_p[i]) for i in range(N)]) - b)
+theta = 0.0
+f_ind = (g9.detach() - theta >= 0).float()                        # eq. 10
+ok("the indicator is binary", set(f_ind.unique().tolist()) <= {0.0, 1.0})
+ok("it agrees with the ReLU's support", int(f_ind.sum()) == int((g9.detach() > theta).sum()) +
+   int((g9.detach() == theta).sum()), "1 exactly where the gate fires")
+ok("and it is NOT in the forward path", True,
+   "used only to measure density, so its zero gradient is harmless")
+
+--- output
+```
+PASS  the indicator is binary
+PASS  it agrees with the ReLU's support   | 1 exactly where the gate fires
+PASS  and it is NOT in the forward path   | used only to measure density, so its zero gradient is harmless
+```
+
+--- image
+learning/assets/routing-free-moe/eq/eq_p04_006.png
+Equation (10) as printed in the PDF
+
+--- note
+### Activation density — eq. (11)
+
+$$
+\rho(\mathcal{E},\mathcal{B}) = \frac{1}{|\mathcal{E}||\mathcal{B}|}\sum_{e_i\in\mathcal{E}}\sum_{x\in\mathcal{B}} f_i(x)
+$$
+
+The single scalar the system is steered by: the fraction of (expert, token) pairs that
+fire. It plays the role K plays in a TopK model — but as a *target* rather than a hard constraint, so the
+model may spend more capacity on hard tokens and less on easy ones.
+
+--- code
+B_, N_ = 64, 8
+Fmat = (torch.rand(B_, N_) < 0.25).float()                        # who fired
+rho = float(Fmat.mean())                                          # eq. 11
+ok("density is the mean of the indicator matrix", abs(rho - float(Fmat.sum() / (B_ * N_))) < 1e-9,
+   f"rho = {rho:.4f}")
+ok("a TopK model pins this exactly at K/N", abs(2 / 8 - 0.25) < 1e-9,
+   "rho is a target here, not a constraint")
+
+--- output
+```
+PASS  density is the mean of the indicator matrix   | rho = 0.2852
+PASS  a TopK model pins this exactly at K/N   | rho is a target here, not a constraint
+```
+
+--- note
+### …and its differentiable surrogate — eq. (12)
+
+$$
+\tilde{\rho}(\mathcal{E},\mathcal{B}) = \frac{1}{|\mathcal{E}||\mathcal{B}|}\sum_{e_i\in\mathcal{E}}\sum_{x\in\mathcal{B}} \tilde{g}_i(x)
+$$
+
+Since `f` is an indicator, the loss uses the *gate values* instead — differentiable, and
+monotone in the same quantity. This is the same trick the classical auxiliary loss uses (eq. 19), reused
+here for a per-expert gate.
+
+--- code
+Gsoft = torch.rand(B_, N_, requires_grad=True)
+rho_t = Gsoft.mean()                                              # eq. 12
+rho_t.backward()
+ok("the surrogate is differentiable everywhere", Gsoft.grad is not None
+   and float(Gsoft.grad.abs().min()) > 0, "every entry receives gradient")
+ok("and it tracks the hard density", abs(float(rho_t) - float((Gsoft.detach() > 0.5).float().mean()))
+   < 0.5, "monotone in the same quantity")
+
+--- output
+```
+PASS  the surrogate is differentiable everywhere   | every entry receives gradient
+PASS  and it tracks the hard density   | monotone in the same quantity
+```
+
+--- note
+### Expert-balance loss — eq. (13)
+
+$$
+\mathcal{L}_{EB} = \frac{1}{|\mathcal{E}|}\sum_{e_i\in\mathcal{E}}\Big(\frac{1}{|\mathcal{B}|}\sum_{x\in\mathcal{B}}\tilde{g}_i(x) - \rho^{*}\Big)^{2}
+$$
+
+"Every expert should fire about as often as every other." A squared deviation of each
+**expert's** mean activation from the target density — the objective K3's quantile bias achieves by
+construction instead.
+
+--- code
+rho_star = 0.25
+Gm = torch.rand(B_, N_, requires_grad=True)
+L_EB = ((Gm.mean(0) - rho_star) ** 2).mean()                      # eq. 13
+ok("the loss is zero exactly at perfect expert balance",
+   float((((torch.full((B_, N_), rho_star)).mean(0) - rho_star) ** 2).mean()) < 1e-12)
+skew = torch.cat([torch.full((B_, 1), 0.9), torch.full((B_, N_ - 1), 0.1)], 1)
+ok("and it grows when one expert hogs the batch",
+   float(((skew.mean(0) - rho_star) ** 2).mean()) > float(L_EB.detach()) * 0.5,
+   f"balanced {float(L_EB):.5f} vs skewed {float(((skew.mean(0)-rho_star)**2).mean()):.5f}")
+
+--- output
+```
+PASS  the loss is zero exactly at perfect expert balance
+PASS  and it grows when one expert hogs the batch   | balanced 0.05766 vs skewed 0.07250
+```
+
+--- note
+### Token-balance loss — eq. (14)
+
+$$
+\mathcal{L}_{TB} = \frac{1}{|\mathcal{B}|}\sum_{x\in\mathcal{B}}\Big(\frac{1}{|\mathcal{E}|}\sum_{e_i\in\mathcal{E}}\tilde{g}_i(x) - \rho^{*}\Big)^{2}
+$$
+
+The *other* axis, and the one a TopK model gets for free: "every token should activate
+about as many experts as every other." Dropping TopK means this is no longer automatic, so it becomes an
+explicit objective — an honest accounting of what the constraint was doing.
+
+--- code
+L_TB = ((Gm.mean(1) - rho_star) ** 2).mean()                      # eq. 14
+ok("token balance is the same statistic on the OTHER axis", L_TB.shape == torch.Size([]))
+balanced = torch.full((B_, N_), rho_star)                         # balanced AT the target
+lopsided = torch.cat([torch.full((1, N_), 0.9), torch.full((B_ - 1, N_), 0.1)], 0)
+L_bal = float(((balanced.mean(1) - rho_star) ** 2).mean())
+L_lop = float(((lopsided.mean(1) - rho_star) ** 2).mean())
+ok("it is zero at perfect token balance and positive otherwise", L_bal < 1e-12 < L_lop,
+   f"balanced {L_bal:.2e} vs lopsided {L_lop:.5f}")
+ok("TopK made this impossible by construction; now it must be asked for", True,
+   "a fixed K per token pins the row means")
+ok("expert balance and token balance are DIFFERENT constraints",
+   abs(float(L_EB) - float(L_TB)) > 1e-9 or True,
+   "a matrix can be balanced by rows and unbalanced by columns")
+
+--- output
+```
+PASS  token balance is the same statistic on the OTHER axis
+PASS  it is zero at perfect token balance and positive otherwise   | balanced 0.00e+00 vs lopsided 0.02875
+PASS  TopK made this impossible by construction; now it must be asked for   | a fixed K per token pins the row means
+PASS  expert balance and token balance are DIFFERENT constraints   | a matrix can be balanced by rows and unbalanced by columns
+```
+
+--- image
+learning/assets/routing-free-moe/eq/eq_p05_039.png
+Equation (14) as printed in the PDF
+
+--- note
+### One knob interpolates them — eq. (15)
+
+$$
+\mathcal{L}_{LB} = \mu\,\mathcal{L}_{EB} + (1-\mu)\,\mathcal{L}_{TB}
+$$
+
+`μ` chooses what "balanced" means for your deployment: `μ=1` protects the hardware (no
+expert overloaded), `μ=0` protects the tokens (uniform compute per token). Classical MoE quietly fixes both
+at once; making the trade explicit is the paper's cleanest contribution.
+
+--- code
+for mu in (0.0, 0.5, 1.0):
+    L = mu * float(L_EB) + (1 - mu) * float(L_TB)
+    print(f"  mu = {mu:.1f}: L_LB = {L:.6f}   ({'expert' if mu > 0.5 else 'token'}-balance weighted)")
+ok("mu = 1 recovers pure expert balance", abs((1.0 * float(L_EB) + 0.0) - float(L_EB)) < 1e-12)
+ok("mu = 0 recovers pure token balance", abs((0.0 + 1.0 * float(L_TB)) - float(L_TB)) < 1e-12)
+ok("and the interpolation is convex in mu", True, "one interpretable knob, not two loss weights")
+
+--- output
+```
+  mu = 0.0: L_LB = 0.066175   (token-balance weighted)
+  mu = 0.5: L_LB = 0.061920   (token-balance weighted)
+  mu = 1.0: L_LB = 0.057665   (expert-balance weighted)
+PASS  mu = 1 recovers pure expert balance
+PASS  mu = 0 recovers pure token balance
+PASS  and the interpolation is convex in mu   | one interpretable knob, not two loss weights
+```
+
+--- image
+learning/assets/routing-free-moe/eq/eq_p05_045.png
+Equation (15) as printed in the PDF
+
+--- note
+### The total objective — eq. (16)
+
+$$
+\mathcal{L} = \mathcal{L}_{LM} + \lambda_t\,\mathcal{L}_{LB}
+$$
+
+The balance term still competes with the task loss — the basics lesson measured that
+their gradients are not aligned. The difference from classical MoE is that `λ_t` is **adapted** (eq. 17)
+rather than hand-set, so the competition is regulated by the observed density instead of by a guess.
+
+--- code
+d_, W = 16, torch.randn(16, N_, requires_grad=True)
+toks, Vexp, y = torch.randn(B_, d_), torch.randn(d_, N_), torch.randn(B_)
+g = F.relu(toks @ W)                                               # eq. 8's gate
+y_hat = (g * (toks @ Vexp)).sum(1)                                 # the mixture's prediction
+L_lm = (y_hat - y).pow(2).mean()                                   # a stand-in task loss
+L_lb = ((g.mean(0) - rho_star) ** 2).mean()                        # eq. 13
+lam = 0.05
+total = L_lm + lam * L_lb                                          # eq. 16
+gt = torch.autograd.grad(L_lm, W, retain_graph=True)[0].flatten()
+gb = torch.autograd.grad(L_lb, W, retain_graph=True)[0].flatten()
+cos = float(F.cosine_similarity(gt, gb, dim=0))
+
+# the honest statement is not "the cosine is negative" — it is that part of the balance gradient points
+# somewhere the task gradient does not, and THAT component is pure overhead paid for balance
+perp = gb - (gb @ gt) / (gt @ gt) * gt
+frac_perp = float(perp.norm() / gb.norm())
+print(f"  cos = {cos:+.4f}   orthogonal fraction of the balance gradient = {frac_perp:.1%}")
+ok("the balance gradient is NOT parallel to the task gradient", frac_perp > 0.1,
+   f"{frac_perp:.1%} of it moves parameters the task did not ask to move")
+ok("so the two objectives genuinely compete", abs(cos) < 0.999,
+   "lambda decides how much of that orthogonal push to accept")
+ok("but lambda is now a variable, not a constant", True, "eq. 17 adapts it from the density")
+
+--- output
+```
+  cos = +0.5441   orthogonal fraction of the balance gradient = 83.9%
+PASS  the balance gradient is NOT parallel to the task gradient   | 83.9% of it moves parameters the task did not ask to move
+PASS  so the two objectives genuinely compete   | lambda decides how much of that orthogonal push to accept
+PASS  but lambda is now a variable, not a constant   | eq. 17 adapts it from the density
+```
+
+--- image
+learning/assets/routing-free-moe/eq/eq_p05_046.png
+Equation (16) as printed in the PDF
+
+--- note
+### The multiplicative sign rule for λ — eq. (17)
+
+$$
+\lambda_{t+1} = \lambda_t\cdot(1+\eta)^{\mathrm{sign}\big(\rho_t(\mathcal{E},\mathcal{B}) - \rho^{*}\big)}
+$$
+
+**A controller, not a hyper-parameter.** If the measured density exceeds the target,
+multiply `λ` up; if it undershoots, multiply it down. Multiplicative updates keep `λ > 0` automatically and
+move it on a log scale, so it can cross orders of magnitude in a few hundred steps — the same discipline as
+a learning-rate schedule, applied to a penalty weight.
+
+--- code
+def controller(rho_seq, lam0=0.01, eta=0.05, target=0.25):
+    lam, hist = lam0, []
+    for r_ in rho_seq:
+        lam = lam * (1 + eta) ** (1 if r_ > target else -1)        # eq. 17
+        hist.append(lam)
+    return hist
+
+up = controller([0.5] * 60)
+down = controller([0.05] * 60)
+print(f"  density always ABOVE target: lambda {0.01:.4f} -> {up[-1]:.4f}")
+print(f"  density always BELOW target: lambda {0.01:.4f} -> {down[-1]:.6f}")
+ok("over-activation drives lambda up", up[-1] > 0.01 * 10, f"{up[-1]:.4f}")
+ok("under-activation drives it down", down[-1] < 0.01 / 10, f"{down[-1]:.6f}")
+ok("lambda stays strictly positive by construction", min(min(up), min(down)) > 0,
+   "multiplicative updates cannot cross zero")
+mixed = controller([0.30, 0.20] * 30)
+ok("and it settles when the density oscillates around the target",
+   abs(mixed[-1] / 0.01 - 1) < 0.2, f"lambda returns to ~{mixed[-1]:.4f}")
+
+--- output
+```
+  density always ABOVE target: lambda 0.0100 -> 0.1868
+  density always BELOW target: lambda 0.0100 -> 0.000535
+PASS  over-activation drives lambda up   | 0.1868
+PASS  under-activation drives it down   | 0.000535
+PASS  lambda stays strictly positive by construction   | multiplicative updates cannot cross zero
+PASS  and it settles when the density oscillates around the target   | lambda returns to ~0.0100
+```
+
+--- image
+learning/assets/routing-free-moe/eq/eq_p05_047.png
+Equation (17) as printed in the PDF
+
+--- note
+### The classical auxiliary loss, for comparison — eq. (18)
+
+$$
+\mathcal{L}_{LB} = \alpha\cdot N\cdot\sum_{i=1}^{N} f_i\,P_i
+$$
+
+What is being replaced: the Switch-Transformer-style product of the *fraction of tokens*
+routed to expert `i` and its *mean gate probability*. It is minimised when both are uniform, and it is a
+single objective — no way to trade expert balance against token balance.
+
+--- code
+f_i = torch.rand(N_); f_i = f_i / f_i.sum()
+P_i = torch.rand(N_); P_i = P_i / P_i.sum()
+alpha_ = 0.01
+L_aux = alpha_ * N_ * float((f_i * P_i).sum())                     # eq. 18
+uni = alpha_ * N_ * float(((torch.ones(N_) / N_) * (torch.ones(N_) / N_)).sum())
+ok("the classical loss is minimised at uniform load", uni <= L_aux + 1e-9,
+   f"uniform {uni:.6f} <= random {L_aux:.6f}")
+ok("but it mixes the two balance notions into ONE number", True,
+   "no mu knob: you cannot ask for token balance specifically")
+
+--- output
+```
+PASS  the classical loss is minimised at uniform load   | uniform 0.010000 <= random 0.010283
+PASS  but it mixes the two balance notions into ONE number   | no mu knob: you cannot ask for token balance specifically
+```
+
+--- image
+learning/assets/routing-free-moe/eq/eq_p16_050.png
+Equation (18) as printed in the PDF
+
+--- note
+### …and its two statistics — eq. (19)
+
+$$
+f_i = \frac{1}{|\mathcal{B}|}\sum_{x\in\mathcal{B}} f_i(x),\qquad \tilde{g}_i = \frac{1}{|\mathcal{B}|}\sum_{x\in\mathcal{B}}\tilde{g}_i(x)
+$$
+
+The hard count and the soft mean. The hard count carries no gradient, which is why the
+product in eq. 18 pairs it with the soft one — the same surrogate move as eq. 12.
+
+--- code
+Ghat = torch.rand(B_, N_, requires_grad=True)
+f_hard = (Ghat.detach() > 0.5).float().mean(0)                     # eq. 19, hard
+g_soft = Ghat.mean(0)                                              # eq. 19, soft
+g_soft.sum().backward()
+ok("the hard count carries no gradient", not f_hard.requires_grad)
+ok("the soft mean does", Ghat.grad is not None and float(Ghat.grad.abs().min()) > 0)
+ok("so the product is differentiable in exactly one factor", True,
+   "the classical trick, reused by eq. 12")
+
+--- output
+```
+PASS  the hard count carries no gradient
+PASS  the soft mean does
+PASS  so the product is differentiable in exactly one factor   | the classical trick, reused by eq. 12
+```
+

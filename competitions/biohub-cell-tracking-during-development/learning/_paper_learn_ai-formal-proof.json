@@ -1,0 +1,43 @@
+{
+  "slug": "ai-formal-proof",
+  "lessons": 12,
+  "ids": [
+    "afpb1",
+    "afp01",
+    "afp02",
+    "afp03",
+    "afp04",
+    "afp05",
+    "afp06",
+    "afp07",
+    "afp08",
+    "afp09",
+    "afp10",
+    "afpz1"
+  ],
+  "coverage": {
+    "total": 16,
+    "placed": 16,
+    "missing": [],
+    "taught": 16,
+    "untaught": [],
+    "proven": 16,
+    "unproven": [],
+    "cropped": 20,
+    "figures": 13,
+    "figures_placed": 13,
+    "lessons": 10
+  },
+  "curriculum": {
+    "appended": true,
+    "section": "AI-Driven Formal Proof Search (2026) \u2014 search with a perfect verifier",
+    "lessons": 12
+  },
+  "pruned": [],
+  "code_cells": 18,
+  "cells_with_output": 18,
+  "silent_lessons": [],
+  "out_dir": "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated",
+  "assets": "learning/assets/ai-formal-proof",
+  "python": "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/research/cellmot_venv/bin/python"
+}

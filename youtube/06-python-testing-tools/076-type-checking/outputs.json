@@ -1,0 +1,16 @@
+[
+  {
+    "after_line": 15,
+    "text": ">>> Hello, Alice\\n>>> 6",
+    "caption": "mypy checks types without running"
+  },
+  {
+    "after_line": 20,
+    "text": "",
+    "caption": "handle the empty case safely"
+  },
+  {
+    "after_line": 20,
+    "image": "artifacts/terminal.png"
+  }
+]

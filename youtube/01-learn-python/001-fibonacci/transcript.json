@@ -1,0 +1,42 @@
+[
+  {
+    "text": "Fibonacci is the sequence where every number is the sum of the two before it, and we'll build it in eight lines.",
+    "until_line": 1
+  },
+  {
+    "text": "The signature says it all — take an integer n, hand back a list of integers.",
+    "until_line": 1
+  },
+  {
+    "text": "A docstring on line two documents what the function does for whoever reads it next.",
+    "until_line": 2
+  },
+  {
+    "text": "We seed the list with zero and one, because the sequence needs two numbers before it can grow.",
+    "until_line": 3
+  },
+  {
+    "text": "Then we loop while the list is still shorter than n — that's our stopping condition.",
+    "until_line": 4
+  },
+  {
+    "text": "Each pass appends the sum of the last two entries. Minus one is the final item, minus two the one before it.",
+    "until_line": 5
+  },
+  {
+    "text": "Negative indexing reads from the end backwards, so this stays readable however long the list gets.",
+    "until_line": 5
+  },
+  {
+    "text": "The final slice quietly handles the edge case where n is smaller than two.",
+    "until_line": 6
+  },
+  {
+    "text": "And printing the first ten shows that classic curve — small, then suddenly not.",
+    "until_line": 8
+  },
+  {
+    "text": "Next video: list comprehensions. Comment the topic you want after that.",
+    "until_line": 8
+  }
+]

@@ -1,0 +1,16 @@
+[
+  {
+    "after_line": 10,
+    "text": ">>> <p>\\n>>> hello\\n>>> </p>",
+    "caption": "@contextmanager from a generator"
+  },
+  {
+    "after_line": 17,
+    "text": ">>> kept going",
+    "caption": "suppress() ignores chosen errors"
+  },
+  {
+    "after_line": 17,
+    "image": "artifacts/terminal.png"
+  }
+]

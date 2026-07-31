@@ -1,0 +1,26 @@
+[
+  {
+    "after_line": 8,
+    "text": ">>> 25\n>>> Alice\n>>> 95.5\n>>> True",
+    "caption": "each variable keeps its own type"
+  },
+  {
+    "after_line": 12,
+    "text": ">>> <class 'int'>\n>>> <class 'str'>",
+    "caption": "type() reveals the variable's type"
+  },
+  {
+    "after_line": 15,
+    "text": ">>> 1 2 3",
+    "caption": "multiple assignment in one line"
+  },
+  {
+    "after_line": 18,
+    "text": ">>> twenty-five",
+    "caption": "Python is dynamically typed"
+  },
+  {
+    "after_line": 21,
+    "image": "artifacts/terminal.png"
+  }
+]

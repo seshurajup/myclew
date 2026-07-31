@@ -1,0 +1,19 @@
+@ id: k301
+@ order: 1700
+@ title: 1 Introduction
+@ subtitle: KIMI K3: OPEN FRONTIER INTELLIGENCE §1
+@ source: docs/papers/kimi-k3/kimi-k3.md
+
+--- note
+## 1 Introduction
+**Paper:** KIMI K3: OPEN FRONTIER INTELLIGENCE · §1 · pages 2–2 · equations (none) · 0 figures.
+
+**What K3 claims.** 2.8T total parameters, **104B activated**, native vision,
+**1M-token** context, ≈**2.5×** K2's overall scaling efficiency. The gains are attributed to four
+architectural changes — Kimi Delta Attention, Attention Residuals, Stable LatentMoE, and a
+quantile-balanced router — plus training/data recipe work and RL across general domains.
+
+Because the weights are open, this is a rare case where the claims are checkable: `config.json` gives
+896 experts with 16 active, 93 layers of width 7168, a 1 048 576-position context, `hidden_act = situ`
+and `attn_res_block_size = 12`.
+

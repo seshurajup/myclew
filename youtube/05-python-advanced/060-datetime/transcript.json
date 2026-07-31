@@ -1,0 +1,42 @@
+[
+  {
+    "text": "The datetime module handles dates and times, which are surprisingly tricky to get right by hand.",
+    "until_line": 1
+  },
+  {
+    "text": "datetime dot now gives you the current moment, with year, month, day, and time all accessible.",
+    "until_line": 4
+  },
+  {
+    "text": "[chuckle] strftime formats a date into any string layout you like, using percent codes for each piece.",
+    "until_line": 7
+  },
+  {
+    "text": "Here we produce a clean year-month-day and hour-minute stamp.",
+    "until_line": 7
+  },
+  {
+    "text": "[sniff] timedelta represents a span of time, and you can add it to a date to move forward or backward.",
+    "until_line": 11
+  },
+  {
+    "text": "Adding seven days to today lands us exactly one week later, with all the calendar math handled for you.",
+    "until_line": 11
+  },
+  {
+    "text": "[sigh] Subtracting two dates gives you a timedelta back, telling you the gap between them.",
+    "until_line": 15
+  },
+  {
+    "text": "So we instantly learn how many days remain until the end of the year.",
+    "until_line": 15
+  },
+  {
+    "text": "[groan] Never do date math with raw numbers — datetime handles leap years, month lengths, and time zones correctly.",
+    "until_line": 16
+  },
+  {
+    "text": "Video 61 tackles JSON. Which one do you already use? Comment below.",
+    "until_line": 16
+  }
+]

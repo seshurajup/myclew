@@ -1,0 +1,15 @@
+@ id: mse08
+@ order: 3170
+@ title: 5 Conclusion
+@ subtitle: MetaSkill-Evolve: Recursive Self-Improvement of LLM Agents §5
+@ source: docs/papers/paper-2607-05297/paper-2607-05297.md
+
+--- note
+## 5 Conclusion
+**Paper:** MetaSkill-Evolve: Recursive Self-Improvement of LLM Agents · §5 · pages 9–9 · equations (none) · 0 figures.
+
+**What to keep.** Same-representation closure is the cheap trick that makes
+recursion free; meta-productivity is the metric that makes an improver comparable; a persistent DAG beats a
+beam because it keeps options; and the three-term frontier score is a compact answer to "which parent
+next". All four transfer to our fleet directly — see `msez1`.
+

@@ -1,0 +1,21 @@
+[
+  {
+    "after_line": 8,
+    "text": ">>> 13\n>>> 7\n>>> 30\n>>> 3.333...\n>>> 3\n>>> 1\n>>> 1000",
+    "caption": "7 operators, one line each"
+  },
+  {
+    "after_line": 12,
+    "text": ">>> 7\n>>> 3.14\n>>> 10 3",
+    "caption": "abs(), round(), max()/min()"
+  },
+  {
+    "after_line": 15,
+    "text": ">>> 5.0\n>>> <class 'float'>",
+    "caption": "/ always returns a float"
+  },
+  {
+    "after_line": 19,
+    "image": "artifacts/terminal.png"
+  }
+]

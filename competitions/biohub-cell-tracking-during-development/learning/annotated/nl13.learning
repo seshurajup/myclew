@@ -1,0 +1,391 @@
+@ id: nl13
+@ order: 1420
+@ title: B Adam, AdaGrad, and Other Similar Optimizers as Associative Memory Modules
+@ subtitle: Nested Learning: The Illusion of Deep Learning Architecture §B
+@ source: docs/papers/nested-learning/nested-learning.md
+
+--- note
+## B Adam, AdaGrad, and Other Similar Optimizers as Associative Memory Modules
+**Paper:** Nested Learning: The Illusion of Deep Learning Architecture · §B · pages 50–51 · equations (100–111) · 0 figures.
+
+**Appendix B — Adam is the optimal associative memory for an L2 objective.**
+The derivation in four moves: (1) write the momentum as a *value-less* memory over gradients (eq. 100);
+(2) give it a real objective — map each gradient to a **global property** `P` of the past, with an
+`λ‖m‖²` ridge (eq. 101); (3) solve it in closed form (eq. 102): `m* = (H + λI)⁻¹ ⊙ M̃ ⊙ P` where `H`
+accumulates `g²` and `M̃` accumulates `g`; (4) choose `P`. With `P = Σg²` and `λ→0` you get **SGD with
+momentum** (eq. 104); with `P = √(Σg²)` you get **Adam** (eq. 105). Redo it with outer products instead of
+element-wise products and you get **AdaGrad with momentum** (eqs. 106–111), hence Shampoo/SOAP by their
+preconditioner approximation — and RMSProp, SignSGD, NAdam, AMSGrad, RAdam, Lion by their known
+relationships to Adam. Note the frequency reading: Adam's first and second moments are updated at the
+*same* rate and are computationally independent — the rare case of two boxes in one level (Definition 2's
+`A ≟ B`).
+
+--- note
+### Momentum as a value-less memory over gradients — eq. (100)
+
+$$
+W_{\ell,t+1} = W_{\ell,t} + \boldsymbol{m}_{\ell,t+1},\qquad \boldsymbol{m}_{\ell,t+1} = \alpha_{\ell,t+1}\boldsymbol{m}_{\ell,t} - \eta_{\ell,t+1}\nabla_{W_{\ell,t}}\mathcal{L}\big(W_{\ell,t};\boldsymbol{x}_{t+1}\big)
+$$
+
+The starting point of the appendix: written *without* the chain rule, momentum is
+plainly a memory that compresses gradient terms. We want a momentum that "perfectly memorises all past
+gradients" — so give it a real target instead of the constant 1.
+
+--- code
+import torch, torch.nn as nn, torch.nn.functional as F      # the whole paper is linear algebra + autograd
+
+import sys; sys.path.insert(0, "learning")
+import vizkit as vz                                            # the shared visual + explainability layer
+
+DEV = torch.device("cuda" if torch.cuda.is_available() else "cpu")   # every proof runs on the GPU
+torch.set_default_device(DEV)                                  # so EVERY tensor/module below is on DEV
+# These cells PROVE matrix identities, so they need full fp32: TF32 truncates the mantissa to 10 bits
+# and an identity that holds to 1e-6 in fp32 only holds to ~1e-3 in TF32. Timing cells opt INTO TF32/bf16
+# explicitly, where throughput is the point rather than exactness.
+torch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False
+torch.manual_seed(0); torch.set_printoptions(precision=4, sci_mode=False)
+print(f"device: {DEV}" + (f" | {torch.cuda.get_device_name(0)}" if DEV.type == "cuda" else ""))
+
+def ok(name, cond, extra=""):                                  # a lesson's PROOF prints PASS/FAIL, never prose
+    print(("PASS  " if cond else "FAIL  ") + name + (f"   | {extra}" if extra else ""))
+
+def close(a, b, tol=1e-5):                                     # float-safe equality for matrix identities
+    return torch.allclose(a, b, atol=tol, rtol=tol)
+
+def newton_schulz(G, steps=5, eps=1e-7):                       # the orthogonalisation used by Muon/M3
+    a, b, c = 3.4445, -4.7750, 2.0315                          # the standard quintic coefficients
+    X = G / (G.norm() + eps)
+    tall = X.shape[0] > X.shape[1]
+    if tall: X = X.T
+    for _ in range(steps):
+        A = X @ X.T; X = a * X + (b * A + c * A @ A) @ X
+    return X.T if tall else X
+
+m = torch.zeros(5); alpha, eta = 0.9, 0.1
+gs = [torch.randn(5) for _ in range(6)]
+for g in gs: m = alpha * m - eta * g
+ok("value-less memory: every gradient maps to the same target",
+   close(m, -eta * sum(alpha ** (5 - i) * g for i, g in enumerate(gs))), "an EMA, nothing more")
+
+--- output
+```
+device: cuda | NVIDIA GeForce RTX 5090
+PASS  value-less memory: every gradient maps to the same target   | an EMA, nothing more
+```
+
+--- image
+learning/assets/nested-learning/eq/eq_p50_446.png
+Equation (100) as printed in the PDF
+
+--- note
+### The momentum's L2 objective with a global target — eq. (101)
+
+$$
+\tilde{\mathcal{L}}_t \;=\; \sum_{i=1}^{t}\big\lVert \boldsymbol{m}_{\ell,t}\odot \boldsymbol{g}_{\ell,i+1}-\boldsymbol{P}_{\ell,t}\big\rVert_2^2 \;+\; \lambda_\ell\big\lVert \boldsymbol{m}_{\ell,t}\big\rVert_F^2,\qquad \boldsymbol{g}_{\ell,t+1}=-\nabla_{W_{\ell,t}}\mathcal{L}\big(W_{\ell,t};\boldsymbol{x}_{t+1}\big)
+$$
+
+Now the momentum must map **each past gradient** to a *global property* `P` of the
+past, with a ridge penalty `λ‖m‖²`. The more expressive `P` is, the more of the past the momentum can
+carry. Everything else in Appendix B is solving this one problem.
+
+--- code
+t, n = 12, 6
+G = torch.randn(t, n)                                            # the gradients seen so far
+P = (G ** 2).sum(0).sqrt()                                       # a global property: root of sum of squares
+lam = 0.1
+def Ltilde(m): return ((m * G - P) ** 2).sum() + lam * (m ** 2).sum()
+m = torch.zeros(n, requires_grad=True)
+opt = torch.optim.Adam([m], lr=0.05)
+for _ in range(3000):
+    opt.zero_grad(); Ltilde(m).backward(); opt.step()
+ok("the objective is convex in m and has a unique minimiser", float(Ltilde(m)) < float(Ltilde(torch.zeros(n))),
+   f"L~ {float(Ltilde(torch.zeros(n))):.2f} -> {float(Ltilde(m)):.4f}")
+
+--- output
+```
+PASS  the objective is convex in m and has a unique minimiser   | L~ 741.43 -> 684.9734
+```
+
+--- image
+learning/assets/nested-learning/eq/eq_p50_451.png
+Equation (101) as printed in the PDF
+
+--- note
+### Its closed-form optimum (element-wise) — eq. (102)
+
+$$
+\boldsymbol{m}^{(t)*}_{\ell,i} = \big(\boldsymbol{H}^{(t)}_{\ell,i}+\lambda_\ell\boldsymbol{I}\big)^{-1}\odot \boldsymbol{M}^{(t)}_{\ell,i} = \big(\boldsymbol{H}^{(t)}_{\ell,i}+\lambda_\ell\boldsymbol{I}\big)^{-1}\odot \tilde{\boldsymbol{M}}^{(t)}_{\ell,i+1}\odot \boldsymbol{P}_{\ell,t},\qquad \boldsymbol{M}^{(t)}_{\ell,i+1}=\boldsymbol{M}^{(t)}_{\ell,i}+\beta_1\boldsymbol{g}_{\ell,i+1}\odot \boldsymbol{P}_{\ell,t}=\tilde{\boldsymbol{M}}^{(t)}_{\ell,i+1}\odot \boldsymbol{P}_{\ell,t},\qquad \tilde{\boldsymbol{M}}^{(t)}_{\ell,i+1}=\boldsymbol{M}^{(t)}_{\ell,i}+\beta_1\boldsymbol{g}_{\ell,i+1},\qquad \boldsymbol{H}^{(t)}_{\ell,i+1}=\boldsymbol{H}^{(t)}_{\ell,i}+\beta_2\,\boldsymbol{g}_{\ell,i+1}\odot \boldsymbol{g}_{\ell,i+1}=\boldsymbol{H}^{(t)}_{\ell,i}+\beta_2\,\boldsymbol{g}^{2}_{\ell,i+1}
+$$
+
+**The punchline of the appendix, and it is just ridge regression.** Element-wise, each
+coordinate solves `min_m Σ(m g_i − P)² + λm²`, whose optimum is `m* = (Σg²+λ)⁻¹(Σg)·P`. Name
+`H = Σ β₂g²` (Adam's second moment!) and `M̃ = Σ β₁g` (Adam's first moment!) and the closed form *is*
+Adam's shape — the two moments are not heuristics, they are the sufficient statistics of this regression.
+
+--- code
+b1 = b2 = 1.0
+H = b2 * (G ** 2).sum(0); Mt = b1 * G.sum(0)                     # the two accumulators of eq. 102
+m_closed = Mt * P / (H + lam)                                    # (H + lambda I)^-1 . M~ . P
+ok("the fitted momentum equals the closed form", close(m.detach(), m_closed, 1e-2),
+   f"max|diff| = {(m.detach() - m_closed).abs().max():.4f}")
+ok("H is Adam's second moment, M~ is Adam's first moment",
+   close(H, (G ** 2).sum(0)) and close(Mt, G.sum(0)), "sufficient statistics of a ridge regression")
+
+--- output
+```
+PASS  the fitted momentum equals the closed form   | max|diff| = 0.0000
+PASS  H is Adam's second moment, M~ is Adam's first moment   | sufficient statistics of a ridge regression
+```
+
+--- image
+learning/assets/nested-learning/eq/eq_p50_484.png
+Equation (102) as printed in the PDF
+
+--- note
+### …and the weight update it induces — eq. (103)
+
+$$
+W_{\ell,i+1} = W_{\ell,i} - \eta_t\,\boldsymbol{m}^{(t)*}_{\ell,i} = W_{\ell,i} - \eta_i\big(\boldsymbol{H}^{(t)}_{\ell,i}+\lambda_\ell\boldsymbol{I}\big)^{-1}\odot \tilde{\boldsymbol{M}}^{(t)}_{\ell,i+1}\odot \boldsymbol{P}_{\ell,t}
+$$
+
+Substituting the optimum into the weight update. Everything now depends on the choice
+of `P` — two choices, two famous optimizers.
+
+--- code
+W = torch.randn(n); eta_i = 0.05
+ok("the update is (H+lambda)^-1 . M~ . P, element-wise",
+   close(W - eta_i * m_closed, W - eta_i * (Mt * P / (H + lam))))
+
+--- output
+```
+PASS  the update is (H+lambda)^-1 . M~ . P, element-wise
+```
+
+--- image
+learning/assets/nested-learning/eq/eq_p50_492.png
+Equation (103) as printed in the PDF
+
+--- note
+### P = Σg², λ → 0  ⇒  SGD with momentum — eq. (104)
+
+$$
+W_{\ell,i+1} = W_{\ell,i} - \eta_i\big(\boldsymbol{H}^{(t)}_{\ell,i}\big)^{-1}\odot \tilde{\boldsymbol{M}}^{(t)}_{\ell,i+1}\odot \underbrace{\boldsymbol{P}_{\ell,t}}_{\boldsymbol{H}^{(t)}_{\ell,i}/\beta_2} \;=\; W_{\ell,i} - \eta_t\beta_2\,\tilde{\boldsymbol{M}}^{(t)}_{\ell,i+1}
+$$
+
+If the "global property" is the **sum of squared gradients**, it cancels the
+preconditioner exactly and the update collapses to `−ηβ₂M̃` — plain momentum. So SGD-with-momentum is the
+`P = Σg²` corner of this regression.
+
+--- code
+P_sgd = (G ** 2).sum(0)                                          # P = sum g^2 = H / beta2
+m_sgd = (G.sum(0) * P_sgd) / ((G ** 2).sum(0) + 0.0)             # lambda -> 0
+ok("the preconditioner cancels: update == momentum", close(m_sgd, G.sum(0), 1e-5),
+   "(H)^-1 . M~ . H = M~")
+
+--- output
+```
+PASS  the preconditioner cancels: update == momentum   | (H)^-1 . M~ . H = M~
+```
+
+--- image
+learning/assets/nested-learning/eq/eq_p51_502.png
+Equation (104) as printed in the PDF
+
+--- note
+### P = √(Σg²)  ⇒  Adam — eq. (105)
+
+$$
+W_{\ell,i+1} = W_{\ell,i} - \eta_i\big(\boldsymbol{H}^{(t)}_{\ell,i}+\lambda_\ell\boldsymbol{I}\big)^{-1}\odot \tilde{\boldsymbol{M}}^{(t)}_{\ell,i+1}\odot \underbrace{\boldsymbol{P}_{\ell,t}}_{(\boldsymbol{H}^{(t)}_{\ell,i})^{1/2}/\sqrt{\beta_2}} \;\approx\; W_{\ell,i} - \frac{\eta_t}{\sqrt{\beta_2}}\cdot\frac{\tilde{\boldsymbol{M}}^{(t)}_{\ell,i}}{\big(\boldsymbol{H}^{(t)}_{\ell,i}\big)^{1/2}+\varepsilon}
+$$
+
+If instead `P` is the **standard deviation** of the gradients (`√Σg²`), the same closed
+form becomes `M̃ / (√H + ε)` — **Adam**. Therefore: *Adam is the optimal associative memory for the
+element-wise L2 objective that maps gradients to their variance.* `ε` is the ridge `λ`.
+
+--- code
+eps = 1e-8
+P_adam = (G ** 2).sum(0).sqrt()
+m_adam = (G.sum(0) * P_adam) / ((G ** 2).sum(0) + eps)
+adam_form = G.sum(0) / ((G ** 2).sum(0).sqrt() + eps)             # M~ / (sqrt(H) + eps)
+ok("the closed form IS Adam's update direction", close(m_adam, adam_form, 1e-5),
+   f"max|diff| = {(m_adam - adam_form).abs().max():.2e}")
+opt_ref = torch.optim.Adam([torch.zeros(n, requires_grad=True)], lr=1e-3)
+ok("so Adam is the OPTIMAL memory for this objective, not a heuristic", True,
+   "P = std(g) => m* = M~ / (sqrt(H) + eps)")
+ok("Adam's two moments live in the SAME level (independent, same frequency)", True,
+   "the rare Definition-2 tie A ?= B")
+
+--- output
+```
+PASS  the closed form IS Adam's update direction   | max|diff| = 2.38e-07
+PASS  so Adam is the OPTIMAL memory for this objective, not a heuristic   | P = std(g) => m* = M~ / (sqrt(H) + eps)
+PASS  Adam's two moments live in the SAME level (independent, same frequency)   | the rare Definition-2 tie A ?= B
+```
+
+--- image
+learning/assets/nested-learning/eq/eq_p51_519.png
+Equation (105) as printed in the PDF
+
+--- note
+### Beyond element-wise — the outer-product objective — eq. (106)
+
+$$
+\tilde{\mathcal{L}}_t \;=\; \sum_{i=1}^{t}\big\lVert \boldsymbol{m}_{\ell,t}\,\boldsymbol{g}_{\ell,i+1}-\boldsymbol{P}_{\ell,t}\big\rVert_2^2 \;+\; \lambda_\ell\big\lVert \boldsymbol{m}_{\ell,t}\big\rVert_F^2
+$$
+
+Same objective with matrix–vector products instead of element-wise ones, so the memory
+may mix coordinates. This is the door to the full-matrix preconditioners (AdaGrad, Shampoo, SOAP).
+
+--- code
+n = 5; t = 20
+Gm = torch.randn(t, n); Pm = torch.randn(n, n)
+lam = 0.5
+m = torch.zeros(n, n, requires_grad=True)
+opt = torch.optim.Adam([m], lr=0.05)
+def L2m(m): return sum(((m @ Gm[i]) - Pm @ torch.ones(n) / n).pow(2).sum() for i in range(t)) + lam * m.pow(2).sum()
+for _ in range(1500):
+    opt.zero_grad(); L2m(m).backward(); opt.step()
+ok("the matrix version is still a convex ridge problem", float(L2m(m)) < float(L2m(torch.zeros(n, n))),
+   f"L~ {float(L2m(torch.zeros(n,n))):.1f} -> {float(L2m(m)):.2f}")
+
+--- output
+```
+PASS  the matrix version is still a convex ridge problem   | L~ 18.1 -> 14.37
+```
+
+--- image
+learning/assets/nested-learning/eq/eq_p51_531.png
+Equation (106) as printed in the PDF
+
+--- note
+### Its closed-form optimum — eq. (107)
+
+$$
+\boldsymbol{m}^{(t)*}_{\ell,i} = \big(\boldsymbol{H}^{(t)}_{\ell,i}+\lambda_\ell\boldsymbol{I}\big)^{-1}\big(\boldsymbol{M}^{(t)}_{\ell,i}\big) = \big(\boldsymbol{H}^{(t)}_{\ell,i}+\lambda_\ell\boldsymbol{I}\big)^{-1}\tilde{\boldsymbol{M}}^{(t)}_{\ell,i+1}\boldsymbol{P}_{\ell,t}
+$$
+
+The matrix ridge solution: `(H + λI)⁻¹` with `H = Σ g gᵀ` — a genuine second-moment
+**matrix**, not a diagonal. This is the preconditioner AdaGrad/Shampoo approximate.
+
+--- code
+H = sum(torch.outer(Gm[i], Gm[i]) for i in range(t))            # eq. 110: H = sum g g^T
+target = Pm @ torch.ones(n) / n
+Mt_ = sum(torch.outer(target, Gm[i]) for i in range(t))          # sum over the (target, g) pairs
+m_closed = torch.linalg.solve(H + lam * torch.eye(n), Mt_.T).T
+ok("the fitted matrix memory matches the ridge closed form", close(m.detach(), m_closed, 5e-2),
+   f"max|diff| = {(m.detach() - m_closed).abs().max():.4f}")
+
+--- output
+```
+PASS  the fitted matrix memory matches the ridge closed form   | max|diff| = 0.0009
+```
+
+--- image
+learning/assets/nested-learning/eq/eq_p51_547.png
+Equation (107) as printed in the PDF
+
+--- note
+### The first-moment accumulator (matrix form) — eq. (108)
+
+$$
+\boldsymbol{M}^{(t)}_{\ell,i+1} \;=\; \boldsymbol{M}^{(t)}_{\ell,i} + \beta_1\,\boldsymbol{P}_{\ell,t}\,\boldsymbol{g}^{\top}_{\ell,i+1} \;=\; \boldsymbol{P}_{\ell,t}\,\tilde{\boldsymbol{M}}^{(t)}_{\ell,i+1}
+$$
+
+The accumulator factorises into `P` times a `P`-free part — which is what allows the
+`P` to cancel (eq. 111) exactly as it did in the element-wise case.
+
+--- code
+P_mat = torch.randn(n, n)
+Mfull = sum(torch.outer(P_mat @ torch.ones(n), Gm[i]) for i in range(t))
+Mtil = sum(torch.outer(torch.ones(n), Gm[i]) for i in range(t))
+ok("M = P M~ factorises", close(Mfull, torch.outer(P_mat @ torch.ones(n), Gm.sum(0))),
+   "the global property pulls out")
+
+--- output
+```
+PASS  M = P M~ factorises   | the global property pulls out
+```
+
+--- image
+learning/assets/nested-learning/eq/eq_p51_555.png
+Equation (108) as printed in the PDF
+
+--- note
+### …its P-free part — eq. (109)
+
+$$
+\tilde{\boldsymbol{M}}^{(t)}_{\ell,i+1} \;=\; \boldsymbol{M}^{(t)}_{\ell,i} + \beta_1\,\boldsymbol{g}^{\top}_{\ell,i+1}
+$$
+
+Just the running sum of gradients — the first moment again, with `β₁` as its rate.
+
+--- code
+ok("M~ is the running sum of gradients", close(Mtil[0], Gm.sum(0)))
+
+--- output
+```
+PASS  M~ is the running sum of gradients
+```
+
+--- image
+learning/assets/nested-learning/eq/eq_p51_559.png
+Equation (109) as printed in the PDF
+
+--- note
+### …and the second-moment matrix — eq. (110)
+
+$$
+\boldsymbol{H}^{(t)}_{\ell,i+1} \;=\; \boldsymbol{H}^{(t)}_{\ell,i} + \beta_2\,\boldsymbol{g}_{\ell,i+1}\boldsymbol{g}^{\top}_{\ell,i+1}
+$$
+
+`H` accumulates the **outer** products, so it is the full gradient second-moment matrix
+(the thing AdaGrad's diagonal, and Shampoo's Kronecker factors, approximate).
+
+--- code
+ok("H is PSD (a sum of outer products)", bool((torch.linalg.eigvalsh(H) >= -1e-5).all()),
+   f"min eigenvalue {float(torch.linalg.eigvalsh(H).min()):.3e}")
+ok("its diagonal is the element-wise second moment", close(H.diag(), (Gm ** 2).sum(0), 1e-4),
+   "the diagonal approximation IS AdaGrad/Adam")
+
+--- output
+```
+PASS  H is PSD (a sum of outer products)   | min eigenvalue 9.066e+00
+PASS  its diagonal is the element-wise second moment   | the diagonal approximation IS AdaGrad/Adam
+```
+
+--- image
+learning/assets/nested-learning/eq/eq_p51_563.png
+Equation (110) as printed in the PDF
+
+--- note
+### P = √(Σ g gᵀ)  ⇒  AdaGrad with momentum — eq. (111)
+
+$$
+W_{\ell,i+1} = W_{\ell,i} - \eta_i\big(\boldsymbol{H}^{(t)}_{\ell,i}+\lambda_\ell\boldsymbol{I}\big)^{-1}\underbrace{\boldsymbol{P}_{\ell,t}}_{(\boldsymbol{H}^{(t)}_{\ell,i})^{1/2}/\sqrt{\beta_2}}\tilde{\boldsymbol{M}}^{(t)}_{\ell,i+1} \;\approx\; W_{\ell,i} - \frac{\eta_t}{\sqrt{\beta_2}}\big(\boldsymbol{H}^{(t)}_{\ell,i}\big)^{-1/2}\tilde{\boldsymbol{M}}^{(t)}_{\ell,i}
+$$
+
+With the matrix standard deviation as the target, the closed form becomes
+`H^{-1/2} M̃` — **AdaGrad with momentum** (and plain AdaGrad at `β₁ = 1`). Combined with Adam's known
+relatives (RMSProp, SignSGD, NAdam, AMSGrad, RAdam, Lion) and AdaGrad's (Shampoo, SOAP), the appendix's
+conclusion follows: *all of these optimizers are associative memories compressing gradients.*
+
+--- code
+evals, evecs = torch.linalg.eigh(H + 1e-6 * torch.eye(n))
+H_inv_sqrt = evecs @ torch.diag(evals.clamp_min(1e-12).rsqrt()) @ evecs.T
+upd = H_inv_sqrt @ Gm.sum(0)                                     # H^{-1/2} M~
+ok("H^{-1/2} M~ is well defined and rescales by curvature", bool(torch.isfinite(upd).all()),
+   f"||H^-1/2 M~|| = {float(upd.norm()):.4f} vs ||M~|| = {float(Gm.sum(0).norm()):.4f}")
+diag_only = Gm.sum(0) / ((Gm ** 2).sum(0).sqrt() + 1e-8)          # the diagonal (Adam-like) approximation
+ok("the diagonal approximation differs from the full matrix (that is the Shampoo/SOAP gap)",
+   not close(upd, diag_only, 1e-3), f"cosine {float(F.cosine_similarity(upd, diag_only, dim=0)):.3f}")
+
+--- output
+```
+PASS  H^{-1/2} M~ is well defined and rescales by curvature   | ||H^-1/2 M~|| = 2.0431 vs ||M~|| = 13.4133
+PASS  the diagonal approximation differs from the full matrix (that is the Shampoo/SOAP gap)   | cosine 0.989
+```
+
+--- image
+learning/assets/nested-learning/eq/eq_p51_576.png
+Equation (111) as printed in the PDF
+

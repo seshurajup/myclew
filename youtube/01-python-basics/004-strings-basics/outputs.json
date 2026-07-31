@@ -1,0 +1,26 @@
+[
+  {
+    "after_line": 8,
+    "text": ">>> Python\n>>> Hello, Python\n>>> HaHaHa\n>>> 6",
+    "caption": "concat + / len()"
+  },
+  {
+    "after_line": 11,
+    "text": ">>> PYTHON\n>>> python\n>>> Hey, Python",
+    "caption": "strings return new strings"
+  },
+  {
+    "after_line": 14,
+    "text": ">>> welcome",
+    "caption": ".strip() cleans whitespace"
+  },
+  {
+    "after_line": 17,
+    "text": ">>> ['learn', 'python', 'fast']",
+    "caption": ".split() → list of words"
+  },
+  {
+    "after_line": 21,
+    "image": "artifacts/terminal.png"
+  }
+]

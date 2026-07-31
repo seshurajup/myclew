@@ -1,0 +1,42 @@
+[
+  {
+    "text": "An assert statement is a sanity check — it declares something you believe must be true at that point.",
+    "until_line": 2
+  },
+  {
+    "text": "If the condition holds, execution continues silently; if it fails, Python raises an AssertionError.",
+    "until_line": 2
+  },
+  {
+    "text": "Here we assert the list isn't empty before averaging, guarding against a divide-by-zero crash.",
+    "until_line": 2
+  },
+  {
+    "text": "[chuckle] The optional message after the comma explains what went wrong, making failures easy to diagnose.",
+    "until_line": 2
+  },
+  {
+    "text": "[sniff] Asserts are perfect for catching broken assumptions early, close to where the bug actually is.",
+    "until_line": 10
+  },
+  {
+    "text": "This one insists a discount percent stays between zero and a hundred, before doing any math.",
+    "until_line": 10
+  },
+  {
+    "text": "A valid discount passes right through and computes normally.",
+    "until_line": 12
+  },
+  {
+    "text": "[sigh] But an impossible percent trips the assertion, and we catch it with the exact offending value.",
+    "until_line": 17
+  },
+  {
+    "text": "[groan] One caution — asserts can be disabled with an optimization flag, so use them for debugging, not for validating real user input.",
+    "until_line": 17
+  },
+  {
+    "text": "Video 71 tackles unittest. Tell me in the comments if this clicked.",
+    "until_line": 17
+  }
+]

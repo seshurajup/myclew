@@ -1,0 +1,15 @@
+@ id: hpe10
+@ order: 3290
+@ title: 10 The Encoding Loop
+@ subtitle: Hilbert Operator for Progressive Encoding (HOPE) §10
+@ source: docs/papers/hope-hilbert/hope-hilbert.md
+
+--- note
+## 10 The Encoding Loop
+**Paper:** Hilbert Operator for Progressive Encoding (HOPE) · §10 · pages 19–19 · equations (none) · 0 figures.
+
+**The loop.** Precompute all capacities and pairwise cross-capacities; scan for
+the minimal-DR action; execute; recompute only the touched neighbourhood; repeat until the budget is met.
+Greedy, local, and entirely driven by the one criterion of §9 — the advanced lesson runs this loop for real
+against magnitude pruning.
+

@@ -1,0 +1,21 @@
+[
+  {
+    "after_line": 5,
+    "text": ">>> 4.0",
+    "caption": "assert guards assumptions"
+  },
+  {
+    "after_line": 12,
+    "text": ">>> 80.0",
+    "caption": "valid input passes through"
+  },
+  {
+    "after_line": 17,
+    "text": ">>> caught: bad percent: 150",
+    "caption": "AssertionError on broken assumption"
+  },
+  {
+    "after_line": 17,
+    "image": "artifacts/terminal.png"
+  }
+]

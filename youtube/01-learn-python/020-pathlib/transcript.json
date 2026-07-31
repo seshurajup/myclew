@@ -1,0 +1,58 @@
+[
+  {
+    "text": "Pathlib replaces string juggling with real path objects.",
+    "until_line": 1
+  },
+  {
+    "text": "We import Path, the one class you'll use ninety percent of the time.",
+    "until_line": 1
+  },
+  {
+    "text": "Every one of these paths is an object with methods, not a fragile string.",
+    "until_line": 1
+  },
+  {
+    "text": "The forward slash is overloaded to join paths, and it's correct on every operating system.",
+    "until_line": 3
+  },
+  {
+    "text": "No backslashes, no os dot path dot join, no separators to get wrong.",
+    "until_line": 3
+  },
+  {
+    "text": "Path objects also compare, sort and work as dictionary keys.",
+    "until_line": 3
+  },
+  {
+    "text": "Dot name gives the final component, report dot txt.",
+    "until_line": 5
+  },
+  {
+    "text": "Dot suffix is just the extension, dot txt.",
+    "until_line": 6
+  },
+  {
+    "text": "Dot stem is the name without it, report.",
+    "until_line": 7
+  },
+  {
+    "text": "Dot parent walks up one level, to data.",
+    "until_line": 8
+  },
+  {
+    "text": "And with suffix swaps the extension cleanly, giving report dot md.",
+    "until_line": 9
+  },
+  {
+    "text": "And with suffix returns a new path, it never mutates the one you had.",
+    "until_line": 9
+  },
+  {
+    "text": "Read text, write text and exists hang off the same object when you need them.",
+    "until_line": 9
+  },
+  {
+    "text": "That's the Learn Python series. Start back at Fibonacci and work through them all. Comment which one you want expanded.",
+    "until_line": 9
+  }
+]

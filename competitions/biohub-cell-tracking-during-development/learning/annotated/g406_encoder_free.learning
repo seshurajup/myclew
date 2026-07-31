@@ -1,0 +1,43 @@
+@ id: g406
+@ order: 406
+@ title: Encoder-free multimodal architecture (12B)
+@ subtitle: project raw audio chunks and image patches straight into the LLM — no separate encoders
+@ source: arxiv 2607.02770
+
+--- note
+## The idea
+Every other Gemma 4 size uses **separate, frozen vision and audio encoders** that turn pixels/audio
+into embeddings before the LLM sees them (g407). The **12B** breaks that pattern: it is **trained from
+scratch** on a **unified, encoder-free** paradigm that replaces the encoders with **lightweight
+projection modules**, feeding raw patches and audio chunks directly into the LLM embedding space.
+The report's stated benefit is that it **reduces memory fragmentation** (no separate encoder stack to
+allocate and shuttle activations through).
+
+--- note
+## Vision: a single large matmul instead of a 550M ViT
+For images, the 12B takes **48×48×3 RGB patches** and, instead of a **550M vision encoder**, applies a
+**single large matmul of just 35M parameters** to project each patch. Spatial awareness is preserved by
+**adding 2D coordinate-based positional embeddings** directly to the patch representations, followed by
+a final **LayerNorm** (Ba et al., 2016). So a ~15× smaller projection replaces the whole ViT.
+
+--- note
+## Audio: discard the conformer, project 40 ms chunks directly
+For audio, the **305M USM-based conformer encoder is entirely discarded**. Raw audio is segmented into
+**40 ms chunks at 16 kHz**, giving a **640-dimensional vector per chunk**, which is **projected directly
+into the LLM embedding space**. Because audio is already a **temporal sequence**, it needs **no
+additional positional encoding** — order is implicit.
+
+--- image
+learning/assets/gemma4/page_03.png
+Page 3, §2.3 — the encoder-free architecture description (left column): 48×48×3 RGB patches → 35M matmul + 2D positional embeddings + LayerNorm for vision; raw 40 ms / 16 kHz → 640-dim → direct projection for audio. Figure 1 (MTP) and Table 3 (memory) also appear on this page.
+
+--- note
+## Does dropping the audio encoder cost quality? (Table 8)
+This is the key honesty check, and the report answers it directly: the 12B, **with no dedicated audio
+encoder**, still reaches **competitive audio-text performance** — Table 8 shows strong FLEURS ASR
+(e.g. en WER 0.063) and CoVoST translation (e.g. de→en 41.9 BLEU) — "demonstrating that competitive
+audio-text performance can be achieved without a dedicated audio encoder."
+
+--- image
+learning/assets/gemma4/t08_audio12b.png
+Table 8 — audio performance of the encoder-free 12B on supported languages (FLEURS ASR WER/CER, CoVoST XX→EN BLEU). The point of the table is that these numbers are competitive *despite* the 305M audio conformer being removed entirely.

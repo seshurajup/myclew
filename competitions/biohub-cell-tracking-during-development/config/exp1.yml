@@ -1,0 +1,56 @@
+# =====================================================================
+# Experiment 1 — higher-resolution (1,2,2) in-domain detector
+# Run:  bash start_train.sh config/exp1.yml
+# This file is self-describing: WHY we run it, WHERE the code + data are,
+# WHERE to log (MLflow), and WHAT hyperparameters to use.
+# =====================================================================
+name: exp1_unet_ds2
+
+# --- purpose: WHAT this experiment tests and WHY ---
+purpose: >
+  Train an in-domain detector at downsample (1,2,2) instead of the baseline
+  (1,4,4). The current ensemble (neural + DoG + our linking) is capped at
+  ~0.8743 golden CV because ALL available detectors are coarse (1,4,4), which
+  leaves a residual localization error (detections land 7-12um off the GT
+  centroid). A finer (1,2,2) grid should localize better -> more edges inside
+  the 7um gate -> push the ensemble past the 0.875 LB top. Hypothesis: a sharper
+  detector, unioned with DoG and run through our two-pass linker + temporal
+  smoothing, beats 0.8743. Success = golden CV > 0.8743 when this detector
+  replaces/augments the (1,4,4) one in the ensemble.
+
+# --- where the python code + data live (paths relative to repo root) ---
+paths:
+  python:  research/cellmot_venv/bin/python
+  trainer: research/official_repo/scripts/train_unet_transformer.py
+  pythonpath:
+    - research/official_repo/src
+    - research/official_repo/scripts
+    - .
+  data_dir: input/biohub-cell-tracking-during-development/train
+  splits:   research/cellmot_artifacts/extracted/cellmot-baseline-artifacts/repo/our_splits.json
+
+# --- experiment tracking (MLflow experiment + run name come from here) ---
+mlflow:
+  tracking_uri: http://localhost:5000
+  experiment:   kaggle-biohub-detector      # MLflow experiment (groups all detector runs)
+  run_name:     exp1_unet_ds2_1x2x2         # this run's name inside the experiment
+  log_artifacts: false                       # false = don't upload the 8MB weights to MLflow (saved locally in weights/); saves disk
+
+# --- hardware ---
+gpu:
+  power_limit_w: 400        # RTX 5090 thermal cap
+
+# --- training hyperparameters (map 1:1 to train_unet_transformer.py flags) ---
+train:
+  method:          unet_ds2   # output weights -> weights/unet_ds2/split_0/edge_predictor_best.pth
+  split:           0
+  downsample:      "1,2,2"    # finer than the 1,4,4 baseline -> better localization
+  epochs:          40
+  lr:              1e-4
+  batch_size:      2
+  num_workers:     4
+  det_loss_weight: 10.0
+  det_neg_weight:  0.01
+  window_size:     2
+  pool_kernel_um:  5.0
+  # max_iters:     5          # uncomment for a quick smoke run

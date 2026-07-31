@@ -1,0 +1,21 @@
+[
+  {
+    "after_line": 15,
+    "text": ">>> 150",
+    "caption": "controlled access via methods"
+  },
+  {
+    "after_line": 18,
+    "text": ">>> 150",
+    "caption": "_balance reads the same value"
+  },
+  {
+    "after_line": 24,
+    "text": ">>> blocked: ...__pin",
+    "caption": "__double = name-mangled"
+  },
+  {
+    "after_line": 24,
+    "image": "artifacts/terminal.png"
+  }
+]

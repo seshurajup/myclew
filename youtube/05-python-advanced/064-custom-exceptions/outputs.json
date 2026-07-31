@@ -1,0 +1,11 @@
+[
+  {
+    "after_line": 16,
+    "text": ">>> denied: need 150, have 100\\n>>> short by 50",
+    "caption": "custom errors carry rich detail"
+  },
+  {
+    "after_line": 16,
+    "image": "artifacts/terminal.png"
+  }
+]

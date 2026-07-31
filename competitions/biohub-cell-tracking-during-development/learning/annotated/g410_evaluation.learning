@@ -1,0 +1,62 @@
+@ id: g410
+@ order: 410
+@ title: Evaluation & benchmarks
+@ subtitle: human Arena, STEM/coding, vision, audio, and long-context results
+@ source: arxiv 2607.02770
+
+--- note
+## How they evaluate
+The final IT models are evaluated two ways: **human evaluation** (Arena blind side-by-side, Elo) and a
+suite of **automated static benchmarks** across text, vision, audio, and long context. Unless a table
+says otherwise, numbers are **in thinking mode** (g402).
+
+--- note
+## Human evaluation — Arena (Table 4)
+On **Arena Text** (Chiang et al., 2024, human raters, Elo), **Gemma 4 31B is the top open model in the
+dense category** (rank 43, Elo 1451), and **26B-A4B** (rank 61, Elo 1438) also lands among much larger
+open MoE models. The headline: Gemma's small dense/MoE models rival open models with **10–60× more
+parameters** (e.g. GLM 5 744B/40B, DeepSeek V4 1.6T/49B, Kimi K2 1T/32B). The top closed model (Claude
+Fable 5, Elo 1508) is shown in gray only for scale.
+
+--- image
+learning/assets/gemma4/t04_arena.png
+Table 4 — Arena Text leaderboard (as of 2026-06-19). Gemma 4 31B (dense, 31B) at rank 43 and 26B-A4B (MoE, 26B/4B) at rank 61 sit among trillion-parameter MoE models. Gemma 3 27B (rank 157, Elo 1366) shows the generational jump.
+
+--- note
+## Static benchmarks — STEM & coding (Table 5)
+Against Gemma 3 27B, **Gemma 4 31B is significantly better across the board**, and remarkably **E2B
+roughly matches Gemma 3 27B with ~10× fewer parameters**. Standouts: **MMLU Pro** 67.6→85.2, **AIME
+2026** 20.8→89.2, **LiveCodeBench v6** 29.1→80.0, **Codeforces Elo** 110→2150, **GPQA Diamond**
+42.4→84.3.
+
+--- image
+learning/assets/gemma4/t05_static_bench.png
+Table 5 — static benchmarks, Gemma 3 27B vs Gemma 4 sizes (thinking mode). The reasoning-heavy rows show the biggest jumps; agentic rows (Terminal Bench, Tau2) show where even the frontier models are still weak.
+
+--- note
+## Vision (Tables 6 & 12)
+On vision benchmarks at **max resolution (1120 tokens)**, **E4B equals or outperforms Gemma 3 27B on
+all evals**, and the larger models lead by wide margins (e.g. MMMU Pro 49.7 → 76.9 for 31B; MATH-Vision
+46.0 → 85.6). Table 12 (g407) reports the same at a **low 280-token budget**, quantifying the
+resolution/accuracy trade-off.
+
+--- image
+learning/assets/gemma4/t06_vision.png
+Table 6 — vision benchmarks (MMMU Pro, MATH-Vision, MedXPertQA MM, InfographicVQA, OmniDocBench) at max resolution, thinking mode. OmniDocBench is a ↓ metric (lower is better).
+
+--- note
+## Audio (Tables 7 & 8)
+Versus Gemma 3n at matching sizes, Gemma 4 gains **~12% (E2B) / 10% (E4B) relative on translation** and
+**~17% (E2B) / 12% (E4B) relative on transcription** — **despite a 78% smaller audio encoder** (390 MB
+→ 87 MB, g405). Table 8 shows the **encoder-free 12B** stays competitive with no dedicated audio encoder
+(g406).
+
+--- image
+learning/assets/gemma4/t07_audio.png
+Table 7 — audio: CoVoST speech-to-text-translation (BLEU↑, top) and FLEURS ASR (WER↓ / CER↓, bottom) for Gemma 4 vs Gemma 3n E2B/E4B. Better translation and transcription at a fraction of the on-disk footprint.
+
+--- note
+## Long context (Table 9)
+Covered in g403: Gemma 4 shows "a leap on long-context capabilities" over Gemma 3, with **E4B
+outperforming Gemma 3 27B**, and the 31B holding up on RULER to 128k and MTOB/LOFT retrieval to
+128k–256k — evidence the KV-cache optimizations (g403) did not sacrifice long-range quality.

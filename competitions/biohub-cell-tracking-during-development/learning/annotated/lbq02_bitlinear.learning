@@ -1,0 +1,85 @@
+@ id: lbq02
+@ order: 602
+@ title: The mechanism — the BitLinear layer
+@ subtitle: absmean ternary weight quantization, 8-bit activations, the STE, and where LayerNorm goes
+@ source: arxiv 2402.17764
+
+--- note
+## One drop-in replacement: nn.Linear → BitLinear
+BitNet is architecturally an ordinary Transformer with **one substitution**: every `nn.Linear`
+(the parametric projections — Q/K/V, attention output, and the FFN matrices) is replaced by a
+**`BitLinear`** layer. Everything else is left high-precision: the residual connections, the input/
+output token embeddings, and the LayerNorms. The paper justifies this: residuals and norms are
+negligible compute; the embedding must stay precise because the model needs high-precision output
+**probabilities** for sampling; and as the model grows, the linear projections dominate cost — so
+quantizing exactly those is where the savings live.
+
+--- image
+learning/assets/bitnet/bitnet_fig2_bitlinear.png
+Figure 2 (2310.11453). LEFT: the computation flow *inside* BitLinear, bottom-to-top — Input → **LayerNorm** → **Absmax Quantization** of activations → multiply by the **1-bit (here ternary) weights** → **Dequantization** rescaling by the stored scales (β, γ) → Output. RIGHT: a BitNet block is a normal Transformer — multi-head attention + feed-forward — with every matmul (Q, K, V, attention-out, and the two FFN matrices) drawn as a `BitLinear`.
+
+--- note
+## Step 1 — quantize the WEIGHTS to ternary (absmean)
+BitNet b1.58 constrains each weight to {-1, 0, +1} with an **absmean** quantization function. The recipe:
+compute the **mean absolute value** of the whole weight matrix, use it as a scale γ, divide every weight
+by that scale, and **round to the nearest integer, clipped to [-1, +1]**:
+
+- **γ = (1/nm) · Σ|W_ij|** — the average magnitude of the matrix (n·m entries).
+- **W̃ = RoundClip( W / (γ + ε), −1, 1 )**, where **RoundClip(x, a, b) = max(a, min(b, round(x)))**.
+
+Weights near zero round to **0** (the new ternary state); larger-magnitude weights round to **±1**. The
+single scalar γ (plus a small ε for stability) captures the matrix's overall magnitude so the ternary
+weights only have to encode the **sign-and-presence** pattern.
+
+--- image
+learning/assets/bitnet/b158_absmean_eqs.png
+The absmean weight-quantization equations, verbatim from §2 of 2402.17764: Eq (1) W̃ = RoundClip(W/(γ+ε), −1, 1); Eq (2) RoundClip(x,a,b) = max(a, min(b, round(x))); Eq (3) γ = (1/nm) Σ|W_ij|. Note this differs from the *original* BitNet (2310.11453), whose weights were binary via W̃ = Sign(W − α) — b1.58's contribution is the ternary absmean rule that admits the value 0.
+
+--- note
+## Step 2 — quantize the ACTIVATIONS to 8-bit (absmax)
+Weights are ternary, but the **activations** flowing between layers are quantized to **8-bit**. The
+original BitNet uses **absmax** quantization: scale activations into the range [−Qb, Qb] (with
+Qb = 2^(b−1), so Qb = 128 for b = 8) by dividing by the per-tensor maximum absolute value γ = ‖x‖∞ and
+multiplying by Qb, then clip. b1.58 simplifies one detail from the original: it scales **all** activations
+to **[−Qb, Qb] per token** and drops the special "shift to [0, Qb] before non-linearities" step, which
+**removes the zero-point** — simpler for implementation and system-level optimization, with negligible
+effect on quality. The paper notes activation quantization is done **per-tensor during training** (for
+efficiency) but **per-token during inference** (for accuracy). This is a **W1.58A8** scheme: ~1.58-bit
+weights, 8-bit activations.
+
+--- note
+## Step 3 — the STE: how gradients flow through a non-differentiable round
+`round`, `clip`, and `sign` are **flat or undefined** almost everywhere — their derivative is 0, which
+would kill training. BitNet trains through them with the **Straight-Through Estimator (STE)** (Bengio et
+al., 2013): in the **forward** pass you quantize (round/clip) as above; in the **backward** pass you
+**pretend the quantizer was the identity** and pass the gradient straight through, unchanged. This lets
+gradients reach the underlying real-valued weights even though the forward pass only ever used the
+ternary versions. The STE is the single most important trick that makes low-bit **training** possible —
+and it is exactly what our `lowbit-qat` fleet agent implements.
+
+--- note
+## Step 4 — mixed precision & the "latent" weights
+The quantization is a **forward-pass simulation** — the model does not literally store ternary weights
+during training. Following the original BitNet: a **high-precision "latent" weight** is kept for every
+parameter, and the **gradients and optimizer states stay in high precision** too (for stability). Each
+forward pass **quantizes the latent weight on the fly** to ternary; the update is accumulated on the
+high-precision latent copy. Only at **inference** are the weights frozen to ternary — the latent copy is
+"never used for the inference process." This is what "quantization-**aware** training" means concretely:
+the network learns *with* the rounding in the loop, but keeps a smooth parameter to descend on.
+
+--- note
+## Step 5 — LayerNorm placement (SubLN) keeps the variance sane
+Quantizing activations changes their variance, which can destabilize training. The original BitNet fixes
+this by inserting a **LayerNorm before the activation quantization** (its "SubLN" placement, shown at the
+bottom of the BitLinear flow above), chosen so the **output variance stays ≈ 1** — matching what a
+full-precision layer with standard (Kaiming/Xavier) initialization would produce. The full BitLinear
+forward is then `y = W̃ · Quant(LN(x)) · (βγ / Qb)`, where the output is **dequantized** by rescaling with
+the stored scales β (the weight scale, (1/nm)‖W‖₁) and γ (the activation scale). The ablation in lbq06
+shows SubLN beats the Pre-LN and BMT alternatives.
+
+--- note
+## LLaMA-alike components (so it drops into real stacks)
+To be usable in the open-source ecosystem, BitNet b1.58 adopts the **LLaMA** component set around the
+BitLinear layers: **RMSNorm**, **SwiGLU** activations, **rotary position embeddings (RoPE)**, and it
+**removes all biases**. The paper states this lets it integrate into HuggingFace, vLLM, and llama.cpp
+"with minimal efforts."

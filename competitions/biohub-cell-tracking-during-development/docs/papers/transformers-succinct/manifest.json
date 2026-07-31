@@ -1,0 +1,67 @@
+{
+ "slug": "transformers-succinct",
+ "source": "/tmp/claude-1001/-home-seshu-kaggle-2026/5abb95f8-1364-4775-8ff5-e5c2788bac9d/scratchpad/arx_2510.19315.pdf",
+ "pdf": "/tmp/claude-1001/-home-seshu-kaggle-2026/5abb95f8-1364-4775-8ff5-e5c2788bac9d/scratchpad/arx_2510.19315.pdf",
+ "title": "TRANSFORMERS ARE INHERENTLY SUCCINCT",
+ "backend": "docling",
+ "pages": 21,
+ "figures": [],
+ "tables": [],
+ "sections": [
+  {
+   "num": "1",
+   "title": "Introduction",
+   "page": 1,
+   "level": 1
+  },
+  {
+   "num": "2",
+   "title": "Preliminaries",
+   "page": 2,
+   "level": 1
+  },
+  {
+   "num": "3",
+   "title": "The Size of Smallest Witness via the Non-emptiness Problem",
+   "page": 6,
+   "level": 1
+  },
+  {
+   "num": "4",
+   "title": "Succinctness Across Representations",
+   "page": 8,
+   "level": 1
+  },
+  {
+   "num": "5",
+   "title": "Applications",
+   "page": 10,
+   "level": 1
+  },
+  {
+   "num": "6",
+   "title": "Concluding Remarks",
+   "page": 10,
+   "level": 1
+  }
+ ],
+ "equations": 350,
+ "numbered": 25,
+ "md": "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/docs/papers/transformers-succinct/transformers-succinct.md",
+ "equations_json": "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/docs/papers/transformers-succinct/equations.json",
+ "available": {
+  "pymupdf": true,
+  "marker": true,
+  "docling": true
+ },
+ "score": {
+  "chars": 85508,
+  "headings": 21,
+  "equations": 57,
+  "eq_tags": 0,
+  "images": 0,
+  "tables": 0,
+  "latex_cmds": 1030,
+  "mojibake": 0
+ }
+}

@@ -1,0 +1,165 @@
+@ id: tfm01
+@ order: 2500
+@ title: 1 The scikit-learn contract — fit stores, predict computes
+@ subtitle: TabFM: Tabular Foundation Models (google-research) §1
+@ source: research/tabfm_repo/README.md
+
+--- note
+## 1 The scikit-learn contract — fit stores, predict computes
+**Repo:** TabFM: Tabular Foundation Models (google-research) · https://github.com/google-research/tabfm · units (1–4).
+
+**The contract.** `TabFMClassifier`/`TabFMRegressor` are ordinary sklearn
+estimators, which is what makes the model droppable into an existing pipeline — but `fit` means something
+different here (units 1–2), and two guards exist precisely because the frozen-checkpoint design makes one
+specific mistake easy: using a regression checkpoint for classification (units 3–4).
+
+--- note
+### `fit` stores the context — it does not train — unit (1)
+
+```python
+TabFMClassifier(model, n_estimators=32, ...).fit(X, y) -> self
+```
+
+**The defining invariant.** If in-context learning is real, `fit` must leave every
+parameter untouched: it fits *preprocessors* and remembers the rows. We check it directly by snapshotting
+every parameter of a frozen module before and after — no tolerance, exact equality.
+
+--- code
+import sys, warnings, inspect, dataclasses
+warnings.filterwarnings("ignore")
+import numpy as np, pandas as pd, torch
+
+sys.path.insert(0, "research/tabfm_repo")                  # the real clone, not a reimplementation
+# the repo pins typeguard<3; ours is 4.x, whose AST transform rejects jaxtyping shape strings. Disabling
+# the decorator removes RUNTIME TYPE ASSERTIONS only — it cannot change what any function computes.
+import typeguard; typeguard.typechecked = lambda f=None, **k: (f if f is not None else (lambda g: g))
+
+from tabfm.src import classifier_and_regressor as CR
+from tabfm.src.pytorch import model as M
+
+DEV = torch.device("cuda" if torch.cuda.is_available() else "cpu")   # every model proof runs on the GPU
+torch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False   # exact proofs
+torch.manual_seed(0); np.random.seed(0); torch.set_printoptions(precision=4, sci_mode=False)
+print(f"device: {DEV}" + (f" | {torch.cuda.get_device_name(0)}" if DEV.type == "cuda" else ""))
+
+def ok(name, cond, extra=""):
+    print(("PASS  " if cond else "FAIL  ") + name + (f"   | {extra}" if extra else ""))
+
+net = M.TabFM(embed_dim=16, max_classes=3, col_num_blocks=1, col_nhead=2, col_num_inds=4,
+              row_num_blocks=1, row_nhead=2, row_num_cls=2, icl_num_blocks=1, icl_nhead=2,
+              ff_factor=2, is_classifier=True).to(DEV).eval()
+before = {k: v.detach().clone() for k, v in net.state_dict().items()}
+
+X = pd.DataFrame(np.random.RandomState(0).randn(40, 4), columns=list("abcd"))
+y = np.random.RandomState(1).randint(0, 3, 40)
+clf = CR.TabFMClassifier(model=net, n_estimators=2, batch_size=1, verbose=False)
+clf.fit(X, y)
+
+same = all(torch.equal(before[k], v) for k, v in net.state_dict().items())
+ok("fit() changed NOT ONE parameter", same, f"{len(before)} tensors compared exactly")
+ok("what it fitted instead was the PREPROCESSORS", hasattr(clf, "X_encoder_"),
+   "X_encoder_, ensemble_generator_, classes_ — all state, no weights")
+ok("and it remembered the classes", list(getattr(clf, "classes_", [])) == [0, 1, 2],
+   f"classes_ = {list(getattr(clf, 'classes_', []))}")
+print("\nso 'training' here = fitting encoders + storing rows. The network is a fixed function.")
+
+--- output
+```
+device: cuda | NVIDIA GeForce RTX 5090
+PASS  fit() changed NOT ONE parameter   | 174 tensors compared exactly
+PASS  what it fitted instead was the PREPROCESSORS   | X_encoder_, ensemble_generator_, classes_ — all state, no weights
+PASS  and it remembered the classes   | classes_ = [np.int64(0), np.int64(1), np.int64(2)]
+
+so 'training' here = fitting encoders + storing rows. The network is a fixed function.
+```
+
+--- note
+### `predict` is a forward pass over context + queries — unit (2)
+
+```python
+clf.predict(X_test) -> np.ndarray     # one forward pass, context rows included
+```
+
+The counterpart: prediction concatenates the stored training rows with the test rows and
+runs the frozen network once per ensemble member. So *inference cost grows with your training-set size* —
+the opposite of a tree, and the reason §7's cache exists at all.
+
+--- code
+Xte = pd.DataFrame(np.random.RandomState(2).randn(9, 4), columns=list("abcd"))
+pred = clf.predict(Xte)
+proba = clf.predict_proba(Xte)
+ok("predict returns one label per test row", pred.shape == (9,), f"{pred.shape}")
+ok("predict_proba returns a simplex per row", proba.shape == (9, 3)
+   and np.allclose(proba.sum(1), 1.0, atol=1e-5), f"{proba.shape}, rows sum to 1")
+ok("every prediction is a known class", set(np.unique(pred)) <= set(clf.classes_))
+print("\nNOTE: the context rows are re-encoded on EVERY predict call unless cache_context=True —")
+print("inference cost therefore grows with the TRAINING set, which is why §7 exists.")
+
+--- output
+```
+PASS  predict returns one label per test row   | (9,)
+PASS  predict_proba returns a simplex per row   | (9, 3), rows sum to 1
+PASS  every prediction is a known class
+
+NOTE: the context rows are re-encoded on EVERY predict call unless cache_context=True —
+inference cost therefore grows with the TRAINING set, which is why §7 exists.
+```
+
+--- note
+### Guard — a regression checkpoint used for classification — unit (3)
+
+```python
+_check_classifier_output_dim(output_dim: int, n_classes: int) -> None
+```
+
+With frozen checkpoints the easy mistake is loading the wrong one. A regression head emits
+one value per row, so classifying 3 classes with it silently makes no sense — this raises instead. Worth
+copying: a shape assertion at the boundary is cheaper than debugging a garbage metric.
+
+--- code
+try:
+    CR._check_classifier_output_dim(1, 3)                     # a regression head, 3 classes
+    ok("a 1-wide head is rejected for 3-class work", False)
+except ValueError as e:
+    ok("a 1-wide head is rejected for 3-class work", True, str(e).split(".")[0][:80])
+CR._check_classifier_output_dim(10, 3)                        # a wide head is fine — extra logits unused
+ok("a head WIDER than n_classes is accepted", True, "spare logits are simply unused")
+ok("the guard is a pure shape check — no data needed", True,
+   "the cheapest possible place to catch a wrong checkpoint")
+
+--- output
+```
+PASS  a 1-wide head is rejected for 3-class work   | The model returned 1 value(s) per row, but this TabFMClassifier was fit on 3 cla
+PASS  a head WIDER than n_classes is accepted   | spare logits are simply unused
+PASS  the guard is a pure shape check — no data needed   | the cheapest possible place to catch a wrong checkpoint
+```
+
+--- note
+### …and the mirror guard for regression — unit (4)
+
+```python
+_check_regressor_output_dim(output_dim: int) -> None
+```
+
+The other direction: a regressor must emit exactly one value per row, so a
+classification checkpoint (many logits) is rejected. Two four-line functions that turn a whole class of
+silent failure into an exception at load time.
+
+--- code
+try:
+    CR._check_regressor_output_dim(10)                         # a classification head
+    ok("a many-logit head is rejected for regression", False)
+except ValueError as e:
+    ok("a many-logit head is rejected for regression", True, str(e).split(".")[0][:80])
+CR._check_regressor_output_dim(1)
+ok("exactly one output per row is what regression means", True)
+print("\ntwo tiny guards, both sides of the same mistake — copy this pattern for any frozen checkpoint.")
+
+--- output
+```
+PASS  a many-logit head is rejected for regression   | The model returned 10 values per row, but TabFMRegressor expects a single regres
+PASS  exactly one output per row is what regression means
+
+two tiny guards, both sides of the same mistake — copy this pattern for any frozen checkpoint.
+```
+

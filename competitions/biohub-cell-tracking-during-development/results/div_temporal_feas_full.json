@@ -1,0 +1,92 @@
+{
+  "mode": "full",
+  "n_samples": 2146,
+  "n_pos": 146,
+  "n_neg": 2000,
+  "n_hard_inv": 76,
+  "crop": [
+    8,
+    30,
+    30
+  ],
+  "temporal_window": 2,
+  "_why_crop": "XY half=30vox=ceil(12.0\u00b5m/0.40625\u00b5m-per-vox); Z half=8=ceil(12.0/1.625) \u2014 box must contain any 2nd cell within the 12.0\u00b5m confuser radius",
+  "_why_tw": "\u00b12 frames \u2014 daughters appear at t+1, pre-mitotic rounding at t-1..t-2 (edge \u0394t=1)",
+  "_why_single_frame": "single-frame uses t+1 (both cells present) = the HARDEST frame where a real division and two touching cells look identical -> the ~0.671 ceiling",
+  "ceiling": 0.671,
+  "by_pool": {
+    "gap": {
+      "single": 0.617,
+      "temporal": 0.622
+    },
+    "gmp": {
+      "single": 0.595,
+      "temporal": 0.613
+    },
+    "gstd": {
+      "single": 0.618,
+      "temporal": 0.608
+    },
+    "count": {
+      "single": 0.497,
+      "temporal": 0.629
+    }
+  },
+  "probe": "frozen_detector_multipool",
+  "detector_ckpt": "results/zebrahub_detector/detector.pt",
+  "_why_multipool": "avg+max+std pools of the frozen encoder bottleneck + the detector heatmap local-maxima COUNT (=#cells/frame) \u2014 max/count pools see the '1-blob->2-blob' split that GAP averages away; per-pool AUC shows which signal separates",
+  "overall": {
+    "single": 0.596,
+    "temporal": 0.627
+  },
+  "by_embryo": {
+    "44b6": {
+      "n_pos": 25,
+      "single": 0.496,
+      "temporal": 0.614
+    },
+    "6bba": {
+      "n_pos": 121,
+      "single": 0.598,
+      "temporal": 0.617
+    }
+  },
+  "by_stage": {
+    "S0": {
+      "n_pos": 8,
+      "dens_mean": 2.0,
+      "single": 0.538,
+      "temporal": 0.6
+    },
+    "S1": {
+      "n_pos": 26,
+      "dens_mean": 3.5,
+      "single": 0.585,
+      "temporal": 0.604
+    },
+    "S2": {
+      "n_pos": 25,
+      "dens_mean": 6.3,
+      "single": 0.688,
+      "temporal": 0.651
+    },
+    "S3": {
+      "n_pos": 37,
+      "dens_mean": 8.9,
+      "single": 0.519,
+      "temporal": 0.562
+    },
+    "S4": {
+      "n_pos": 50,
+      "dens_mean": 14.4,
+      "single": 0.552,
+      "temporal": 0.626
+    }
+  },
+  "hard_invisible": {
+    "n_pos": 76,
+    "single": 0.644,
+    "temporal": 0.639
+  },
+  "sec": 32.5
+}

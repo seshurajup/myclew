@@ -1,0 +1,12 @@
+@ id: gm13
+@ order: 2320
+@ title: C Accelerating Double Backwards Through Attention
+@ subtitle: GradMem: Learning to Write Context into Memory §C
+@ source: docs/papers/gradmem/gradmem.md
+
+--- note
+## C Accelerating Double Backwards Through Attention
+**Paper:** GradMem: Learning to Write Context into Memory · §C · pages 17–17 · equations (none) · 0 figures.
+
+> TODO(author): the *why* of §C in 3–5 lines.
+

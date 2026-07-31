@@ -1,0 +1,42 @@
+[
+  {
+    "text": "Most real loops follow a handful of timeless patterns — learn these and you'll recognize them everywhere.",
+    "until_line": 5
+  },
+  {
+    "text": "The accumulator pattern starts with a running total and adds to it each pass through the loop.",
+    "until_line": 5
+  },
+  {
+    "text": "[chuckle] The search pattern uses a flag — a boolean that starts false and flips true when you find what you want.",
+    "until_line": 13
+  },
+  {
+    "text": "And break bails out early the moment the match is found, so you don't waste time searching further.",
+    "until_line": 13
+  },
+  {
+    "text": "[sniff] Python has a special for-else that trips people up — the else runs only if the loop finished without a break.",
+    "until_line": 22
+  },
+  {
+    "text": "So if no even number is found, the else block declares them all odd.",
+    "until_line": 22
+  },
+  {
+    "text": "[sigh] The collector pattern builds a fresh list, appending one result at a time as you loop.",
+    "until_line": 27
+  },
+  {
+    "text": "You'll often replace this exact pattern later with a comprehension, but it's vital to understand the long form first.",
+    "until_line": 27
+  },
+  {
+    "text": "[groan] Accumulate, search, flag, collect — spot these four patterns and most loops suddenly look familiar.",
+    "until_line": 27
+  },
+  {
+    "text": "Up next, classes. Comment the topic you want after that.",
+    "until_line": 27
+  }
+]

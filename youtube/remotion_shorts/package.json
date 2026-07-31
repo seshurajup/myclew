@@ -1,0 +1,22 @@
+{
+  "name": "remotion-shorts",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Fleet code-typing YouTube Shorts renderer — Remotion composition styled with facebook/astryx neutral theme tokens; driven by fleet_agents/shorts_builder.py via props.json",
+  "scripts": {
+    "studio": "remotion studio",
+    "render": "remotion render src/index.ts CodeShort"
+  },
+  "dependencies": {
+    "@remotion/cli": "4.0.245",
+    "prismjs": "1.29.0",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "remotion": "4.0.245"
+  },
+  "devDependencies": {
+    "@types/prismjs": "1.26.4",
+    "@types/react": "18.3.3",
+    "typescript": "5.5.4"
+  }
+}

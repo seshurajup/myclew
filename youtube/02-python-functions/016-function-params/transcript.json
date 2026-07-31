@@ -1,0 +1,46 @@
+[
+  {
+    "text": "Parameters are how you pass data into a function — the names you list inside the parentheses when you define it.",
+    "until_line": 2
+  },
+  {
+    "text": "Here greet takes two parameters, first and last, and combines them into a friendly message.",
+    "until_line": 2
+  },
+  {
+    "text": "When you call the function, the values you pass in are called arguments — Alice and Smith fill in first and last by position.",
+    "until_line": 5
+  },
+  {
+    "text": "Parameters can have default values too, like species defaulting to dog.",
+    "until_line": 5
+  },
+  {
+    "text": "[chuckle] So you can call describe_pet with just a name, and Python fills in the default for you.",
+    "until_line": 9
+  },
+  {
+    "text": "Or override the default by passing a second argument, like parrot here.",
+    "until_line": 10
+  },
+  {
+    "text": "[sigh] You can also name your arguments explicitly — these are keyword arguments, and they can come in any order you like.",
+    "until_line": 13
+  },
+  {
+    "text": "That makes your calls much easier to read, especially when a function takes several values.",
+    "until_line": 13
+  },
+  {
+    "text": "One rule to remember: positional arguments always come before keyword arguments — Python needs the positions settled first.",
+    "until_line": 19
+  },
+  {
+    "text": "[groan] Mix them wisely, and your functions stay both flexible and crystal clear to anyone reading the call.",
+    "until_line": 19
+  },
+  {
+    "text": "Next video: args and kwargs. Tell me in the comments if this clicked.",
+    "until_line": 19
+  }
+]

@@ -1,0 +1,50 @@
+# loeo_aug_uncap60 — (B) the REAL aug-at-convergence test + Step-D#2 ensemble member.
+# WHY: loeo_129ep (no-aug + max_iters=150 cap) OVERFITS 6bba (val 0.921) and fails cross-embryo 44b6 (0.61);
+# 129ep < 50ep proved it. Root cause = no augmentation + data-starved epochs. This run fixes BOTH:
+#   (1) augment = crop_scale DENSITY-UP (zoom-out s in [0.5,1.0], densify sparse 6bba toward dense 44b6) + flip_xy
+#   (2) max_iters REMOVED (uncapped = full epochs, not 150 windows/epoch) — trainer default None = uncapped
+#   (3) epochs 60 (aug regularizes, so 50-80 not 129; avoids the overfit tail)
+# HYPOTHESIS: fixes the overfit -> adjJ_44b6 toward pilk's ~0.87. YES -> a DIVERSE Step-D#2 ensemble member
+# (pilk + ours, heatmap-logit-avg K=2). NO -> we cap at pilk+postproc, aug-at-convergence learning logged.
+# Same FROZEN fold0 (fleet_loeo_mini, 6bba-only 128 -> test 44b6 71); READ-ONLY split. NO Kaggle.
+name: loeo_aug_uncap60
+paths:
+  python:  research/cellmot_venv/bin/python
+  trainer: research/official_repo/scripts/train_unet_transformer.py
+  pythonpath:
+    - research/official_repo/src
+    - research/official_repo/scripts
+    - .
+  data_dir: input/biohub-cell-tracking-during-development/train
+  splits:   learning/ensemble_work/finetune/fleet_loeo_mini.json
+  cache_dir: research/cache/ds1x4x4
+mlflow:
+  tracking_uri: http://localhost:5000
+  experiment:   kaggle-biohub-stagebridge
+  run_name:     loeo_aug_uncap60
+  log_artifacts: false
+gpu:
+  power_limit_w: 400
+train:
+  method:          loeo_aug_uncap60
+  split:           0
+  downsample:      "1,4,4"
+  epochs:          60          # aug regularizes -> 50-80ep uncapped, NOT 129 (avoids the overfit tail)
+  lr:              1e-4
+  batch_size:      8
+  num_workers:     6
+  det_loss_weight: 10.0
+  det_neg_weight:  0.01
+  window_size:     2
+  pool_kernel_um:  5.0
+  seed:            1234
+  # max_iters OMITTED on purpose -> no --max-iters flag -> trainer default None = UNCAPPED full epochs
+augment:
+  - name: crop_scale        # DENSITY-UP (zoom-out only): densify sparse 6bba toward dense 44b6
+    p: 0.5
+    smin: 0.5
+    smax: 1.0
+  - name: flip_xy           # in-plane mirror symmetry (cheap, label-preserving)
+    pz: 0.0
+    py: 0.5
+    px: 0.5

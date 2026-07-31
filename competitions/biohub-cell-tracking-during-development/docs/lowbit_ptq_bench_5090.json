@@ -1,0 +1,141 @@
+{
+  "note": "MEASURED on RTX 5090 \u2014 real algorithm implementations (HQQ = real lib), same toy char-LM. These rows are PROOF, not literature. Merge with docs/lowbit_method_bench.json for the full set.",
+  "device": "cuda",
+  "gpu": "NVIDIA GeForce RTX 5090",
+  "amp_dtype": "bf16",
+  "fp_source_val_ppl": 4.841,
+  "entropy_floor_ppl": 4.64,
+  "target_linear_weights": 221184,
+  "ptq_real": {
+    "gptq": {
+      "val_ppl": 4.778,
+      "bits_per_weight": 4.125,
+      "weight_bytes": 114048
+    },
+    "awq": {
+      "val_ppl": 4.809,
+      "bits_per_weight": 4.125,
+      "weight_bytes": 114048
+    },
+    "hqq": {
+      "val_ppl": 4.787,
+      "bits_per_weight": 4.25,
+      "weight_bytes": 117504
+    },
+    "fp4_ptq": {
+      "val_ppl": 4.798,
+      "bits_per_weight": 4.5,
+      "weight_bytes": 124416
+    },
+    "int2_ptq": {
+      "val_ppl": 18.062,
+      "bits_per_weight": 2.125,
+      "weight_bytes": 58752
+    }
+  },
+  "qat_real": {
+    "int3 STE": {
+      "val_ppl": 4.832,
+      "bits_per_weight": 3.0,
+      "weight_bytes": 82944,
+      "it_s": 41.7
+    },
+    "int2 STE": {
+      "val_ppl": 4.958,
+      "bits_per_weight": 2.0,
+      "weight_bytes": 55296,
+      "it_s": 47.2
+    },
+    "FP4(E2M1) STE": {
+      "val_ppl": 4.834,
+      "bits_per_weight": 4.5,
+      "weight_bytes": 124416,
+      "train_s": 9.9
+    }
+  },
+  "table": [
+    {
+      "method": "FP (bf16 master)",
+      "kind": "baseline",
+      "bits_per_weight": 16.0,
+      "val_ppl": 4.841,
+      "weight_bytes": 442368,
+      "shrink_vs_fp16": 1.0,
+      "delta_pct_vs_fp": 0.0
+    },
+    {
+      "method": "GPTQ int4 (real, 5090)",
+      "kind": "PTQ-noretrain",
+      "bits_per_weight": 4.125,
+      "val_ppl": 4.778,
+      "weight_bytes": 114048,
+      "shrink_vs_fp16": 3.88,
+      "delta_pct_vs_fp": -1.3
+    },
+    {
+      "method": "HQQ int4 (real lib, 5090)",
+      "kind": "PTQ-noretrain",
+      "bits_per_weight": 4.25,
+      "val_ppl": 4.787,
+      "weight_bytes": 117504,
+      "shrink_vs_fp16": 3.76,
+      "delta_pct_vs_fp": -1.12
+    },
+    {
+      "method": "FP4 E2M1 PTQ (5090)",
+      "kind": "PTQ-noretrain",
+      "bits_per_weight": 4.5,
+      "val_ppl": 4.798,
+      "weight_bytes": 124416,
+      "shrink_vs_fp16": 3.56,
+      "delta_pct_vs_fp": -0.89
+    },
+    {
+      "method": "AWQ int4 (real, 5090)",
+      "kind": "PTQ-noretrain",
+      "bits_per_weight": 4.125,
+      "val_ppl": 4.809,
+      "weight_bytes": 114048,
+      "shrink_vs_fp16": 3.88,
+      "delta_pct_vs_fp": -0.66
+    },
+    {
+      "method": "int3 STE QAT (lowbit-qat)",
+      "kind": "QAT-retrain",
+      "bits_per_weight": 3.0,
+      "val_ppl": 4.832,
+      "weight_bytes": 82944,
+      "shrink_vs_fp16": 5.33,
+      "delta_pct_vs_fp": -0.19
+    },
+    {
+      "method": "FP4 E2M1 STE QAT (5090)",
+      "kind": "QAT-retrain",
+      "bits_per_weight": 4.5,
+      "val_ppl": 4.834,
+      "weight_bytes": 124416,
+      "shrink_vs_fp16": 3.56,
+      "delta_pct_vs_fp": -0.15
+    },
+    {
+      "method": "int2 STE QAT (lowbit-qat)",
+      "kind": "QAT-retrain",
+      "bits_per_weight": 2.0,
+      "val_ppl": 4.958,
+      "weight_bytes": 55296,
+      "shrink_vs_fp16": 8.0,
+      "delta_pct_vs_fp": 2.41
+    },
+    {
+      "method": "int2 PTQ RTN (5090)",
+      "kind": "PTQ-noretrain",
+      "bits_per_weight": 2.125,
+      "val_ppl": 18.062,
+      "weight_bytes": 58752,
+      "shrink_vs_fp16": 7.53,
+      "delta_pct_vs_fp": 273.09
+    }
+  ],
+  "fp4_hardware_honesty": "FP4 (E2M1) QUALITY measured via faithful fake-quant on the 5090. True NVFP4 tensor-core THROUGHPUT needs Blackwell + TransformerEngine (not installed) and gives ZERO benefit on a Kaggle T4 (Turing, no FP4 cores) \u2014 so FP4's value for us is quality-vs-size, which is what this measures.",
+  "verdict_measured": "On the 5090, best no-retrain W4 PTQ = GPTQ int4 (real, 5090) (4.778 ppl, \u0394-1.3% vs FP 4.84); GPTQ/AWQ/HQQ all near-lossless at int4. int2 PTQ RTN collapses (18.062) but int2 STE QAT recovers (4.958) \u2014 QAT beats PTQ at <=2 bits, measured. FP4 PTQ=4.798, FP4 STE QAT=4.834."
+}

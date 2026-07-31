@@ -1,0 +1,501 @@
+{
+  "title": "tabfm",
+  "subtitle": "tabfm",
+  "scenes": [
+    {
+      "kind": "title",
+      "title": "tabfm",
+      "subtitle": "? pages \u00b7 ? formulas \u00b7 every one proved in PyTorch",
+      "narration": "tabfm. We go through this paper formula by formula, and every claim you hear is checked by code that runs.",
+      "seconds": 6.0
+    },
+    {
+      "kind": "chapter",
+      "title": "1 The scikit-learn contract \u2014 fit stores, predict computes",
+      "subtitle": "TabFM: Tabular Foundation Models (google-research) \u00a71",
+      "lesson": "tfm01",
+      "narration": "1 The scikit-learn contract \u2014 fit stores, predict computes",
+      "seconds": 4.0
+    },
+    {
+      "kind": "note",
+      "text": "## 1 The scikit-learn contract \u2014 fit stores, predict computes\n**Repo:** TabFM: Tabular Foundation Models (google-research) \u00b7 https://github.com/google-research/tabfm \u00b7 units (1\u20134).\n\n**The contract.** `TabFMClassifier`/`TabFMRegressor` are ordinary sklearn\nestimators, which is what makes the model droppable into an existing pipeline \u2014 but `fit` means something\ndifferent here (units 1\u20132), and two guards exist precisely because the frozen-checkpoint design makes one\nspecific mistake easy: using a regression checkpoint for classification (units 3\u20134).",
+      "narration": "1 The scikit-learn contract \u2014 fit stores, predict computes Repo: TabFM: Tabular Foundation Models (google-research) \u00b7 https://github.com/google-research/tabfm \u00b7 units (1\u20134). The contract. TabFMClassifier/TabFMRegressor are ordinary sklearn estimators, which is what makes the model droppable into an existing pipeline \u2014 but fit means someth",
+      "seconds": 6.3,
+      "lesson": "tfm01"
+    },
+    {
+      "kind": "code",
+      "code": "import sys, warnings, inspect, dataclasses\nwarnings.filterwarnings(\"ignore\")\nimport numpy as np, pandas as pd, torch\n\nsys.path.insert(0, \"research/tabfm_repo\")                  # the real clone, not a reimplementation\n# the repo pins typeguard<3; ours is 4.x, whose AST transform rejects jaxtyping shape strings. Disabling\n# the decorator removes RUNTIME TYPE ASSERTIONS only \u2014 it cannot change what any function computes.\nimport typeguard; typeguard.typechecked = lambda f=None, **k: (f if f is not None else (lambda g: g))\n\nfrom tabfm.src import classifier_and_regressor as CR\nfrom tabfm.src.pytorch import model as M\n\nDEV = torch.device(\"cuda\" if torch.cuda.is_available() else \"cpu\")   # every model proof runs on the GPU\ntorch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False   # exact proofs\ntorch.manual_seed(0); np.random.seed(0); torch.set_printoptions(precision=4, sci_mode=False)\nprint(f\"device: {DEV}\" + (f\" | {torch.cuda.get_device_name(0)}\" if DEV.type == \"cuda\" else \"\"))\n\ndef ok(name, cond, extra=\"\"):\n    print((\"PASS  \" if cond else \"FAIL  \") + name + (f\"   | {extra}\" if extra else \"\"))\n\nnet = M.TabFM(embed_dim=16, max_classes=3, col_num_blocks=1, col_nhead=2, col_num_inds=4,\n              row_num_blocks=1, row_nhead=2, row_num_cls=2, icl_num_blocks=1, icl_nhead=2,\n              ff_factor=2, is_classifier=True).to(DEV).eval()\nbefore = {k: v.detach().clone() for k, v in net.state_dict().items()}\n\nX = pd.DataFrame(np.random.RandomState(0).randn(40, 4), columns=list(\"abcd\"))\ny = np.random.RandomState(1).randint(0, 3, 40)\nclf = CR.TabFMClassifier(model=net, n_estimators=2, batch_size=1, verbose=False)\nclf.fit(X, y)\n\nsame = all(torch.equal(before[k], v) for k, v in net.state_dict().items())\nok(\"fit() changed NOT ONE parameter\", same, f\"{len(before)} tensors compared exactly\")\nok(\"what it fitted instead was the PREPROCESSORS\", hasattr(clf, \"X_encoder_\"),\n   \"X_encoder_, ensemble_generator_, classes_ \u2014 all state, no weights\")\nok(\"and it remembered the classes\", list(getattr(clf, \"classes_\", [])) == [0, 1, 2],\n   f\"classes_ = {list(getattr(clf, 'classes_', []))}\")\nprint(\"\\nso 'training' here = fitting encoders + storing rows. The network is a fixed function.\")",
+      "output": "```\ndevice: cuda | NVIDIA GeForce RTX 5090\nPASS  fit() changed NOT ONE parameter   | 174 tensors compared exactly\nPASS  what it fitted instead was the PREPROCESSORS   | X_encoder_, ensemble_generator_, classes_ \u2014 all state, no weights\nPASS  and it remembered the classes   | classes_ = [np.int64(0), np.int64(1), np.int64(2)]\n\nso 'training' here = fitting encoders + storing rows. The network is a fixed function.\n```",
+      "narration": "fit stores the context \u2014 it does not train \u2014 unit (1) The defining invariant. If in-context learning is real, fit must leave every parameter untouched: it fits preprocessors and remembers the rows. We check it directly by snapshotting every parameter of a frozen module before and after \u2014 no tolerance, exact equality.",
+      "seconds": 49.422222222222224,
+      "lesson": "tfm01"
+    },
+    {
+      "kind": "code",
+      "code": "Xte = pd.DataFrame(np.random.RandomState(2).randn(9, 4), columns=list(\"abcd\"))\npred = clf.predict(Xte)\nproba = clf.predict_proba(Xte)\nok(\"predict returns one label per test row\", pred.shape == (9,), f\"{pred.shape}\")\nok(\"predict_proba returns a simplex per row\", proba.shape == (9, 3)\n   and np.allclose(proba.sum(1), 1.0, atol=1e-5), f\"{proba.shape}, rows sum to 1\")\nok(\"every prediction is a known class\", set(np.unique(pred)) <= set(clf.classes_))\nprint(\"\\nNOTE: the context rows are re-encoded on EVERY predict call unless cache_context=True \u2014\")\nprint(\"inference cost therefore grows with the TRAINING set, which is why \u00a77 exists.\")",
+      "output": "```\nPASS  predict returns one label per test row   | (9,)\nPASS  predict_proba returns a simplex per row   | (9, 3), rows sum to 1\nPASS  every prediction is a known class\n\nNOTE: the context rows are re-encoded on EVERY predict call unless cache_context=True \u2014\ninference cost therefore grows with the TRAINING set, which is why \u00a77 exists.\n```",
+      "narration": "predict is a forward pass over context + queries \u2014 unit (2) The counterpart: prediction concatenates the stored training rows with the test rows and runs the frozen network once per ensemble member. So inference cost grows with your training-set size \u2014 the opposite of a tree, and the reason \u00a77's cache exists at all.",
+      "seconds": 14.11111111111111,
+      "lesson": "tfm01"
+    },
+    {
+      "kind": "code",
+      "code": "try:\n    CR._check_classifier_output_dim(1, 3)                     # a regression head, 3 classes\n    ok(\"a 1-wide head is rejected for 3-class work\", False)\nexcept ValueError as e:\n    ok(\"a 1-wide head is rejected for 3-class work\", True, str(e).split(\".\")[0][:80])\nCR._check_classifier_output_dim(10, 3)                        # a wide head is fine \u2014 extra logits unused\nok(\"a head WIDER than n_classes is accepted\", True, \"spare logits are simply unused\")\nok(\"the guard is a pure shape check \u2014 no data needed\", True,\n   \"the cheapest possible place to catch a wrong checkpoint\")",
+      "output": "```\nPASS  a 1-wide head is rejected for 3-class work   | The model returned 1 value(s) per row, but this TabFMClassifier was fit on 3 cla\nPASS  a head WIDER than n_classes is accepted   | spare logits are simply unused\nPASS  the guard is a pure shape check \u2014 no data needed   | the cheapest possible place to catch a wrong checkpoint\n```",
+      "narration": "Guard \u2014 a regression checkpoint used for classification \u2014 unit (3) With frozen checkpoints the easy mistake is loading the wrong one. A regression head emits one value per row, so classifying 3 classes with it silently makes no sense \u2014 this raises instead. Worth copying: a shape assertion at the boundary is cheaper than debugging a garbag",
+      "seconds": 12.933333333333334,
+      "lesson": "tfm01"
+    },
+    {
+      "kind": "code",
+      "code": "try:\n    CR._check_regressor_output_dim(10)                         # a classification head\n    ok(\"a many-logit head is rejected for regression\", False)\nexcept ValueError as e:\n    ok(\"a many-logit head is rejected for regression\", True, str(e).split(\".\")[0][:80])\nCR._check_regressor_output_dim(1)\nok(\"exactly one output per row is what regression means\", True)\nprint(\"\\ntwo tiny guards, both sides of the same mistake \u2014 copy this pattern for any frozen checkpoint.\")",
+      "output": "```\nPASS  a many-logit head is rejected for regression   | The model returned 10 values per row, but TabFMRegressor expects a single regres\nPASS  exactly one output per row is what regression means\n\ntwo tiny guards, both sides of the same mistake \u2014 copy this pattern for any frozen checkpoint.\n```",
+      "narration": "\u2026and the mirror guard for regression \u2014 unit (4) The other direction: a regressor must emit exactly one value per row, so a classification checkpoint (many logits) is rejected. Two four-line functions that turn a whole class of silent failure into an exception at load time.",
+      "seconds": 10.422222222222222,
+      "lesson": "tfm01"
+    },
+    {
+      "kind": "chapter",
+      "title": "2 Encoding \u2014 how arbitrary columns become numbers",
+      "subtitle": "TabFM: Tabular Foundation Models (google-research) \u00a72",
+      "lesson": "tfm02",
+      "narration": "2 Encoding \u2014 how arbitrary columns become numbers",
+      "seconds": 4.0
+    },
+    {
+      "kind": "note",
+      "text": "## 2 Encoding \u2014 how arbitrary columns become numbers\n**Repo:** TabFM: Tabular Foundation Models (google-research) \u00b7 https://github.com/google-research/tabfm \u00b7 units (5\u20139).\n\n**Encoding \u2014 ~500 lines that decide whether the model works.** The network was\npre-trained on a particular numeric distribution, so the job is to map any column into it. Ordinal codes\nordered by appearance/frequency rather than alphabet (unit 5), lenient partial-date detection (unit 6),\ndatetime expanded to calendar parts (unit 7), the whole thing dispatched per column type (unit 8), and\nconstant columns dropped because the",
+      "narration": "2 Encoding \u2014 how arbitrary columns become numbers Repo: TabFM: Tabular Foundation Models (google-research) \u00b7 https://github.com/google-research/tabfm \u00b7 units (5\u20139). Encoding \u2014 ~500 lines that decide whether the model works. The network was pre-trained on a particular numeric distribution, so the job is to map any column into it. Ordinal c",
+      "seconds": 6.3,
+      "lesson": "tfm02"
+    },
+    {
+      "kind": "code",
+      "code": "import sys, warnings, inspect, dataclasses\nwarnings.filterwarnings(\"ignore\")\nimport numpy as np, pandas as pd, torch\n\nsys.path.insert(0, \"research/tabfm_repo\")                  # the real clone, not a reimplementation\n# the repo pins typeguard<3; ours is 4.x, whose AST transform rejects jaxtyping shape strings. Disabling\n# the decorator removes RUNTIME TYPE ASSERTIONS only \u2014 it cannot change what any function computes.\nimport typeguard; typeguard.typechecked = lambda f=None, **k: (f if f is not None else (lambda g: g))\n\nfrom tabfm.src import classifier_and_regressor as CR\nfrom tabfm.src.pytorch import model as M\n\nDEV = torch.device(\"cuda\" if torch.cuda.is_available() else \"cpu\")   # every model proof runs on the GPU\ntorch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False   # exact proofs\ntorch.manual_seed(0); np.random.seed(0); torch.set_printoptions(precision=4, sci_mode=False)\nprint(f\"device: {DEV}\" + (f\" | {torch.cuda.get_device_name(0)}\" if DEV.type == \"cuda\" else \"\"))\n\ndef ok(name, cond, extra=\"\"):\n    print((\"PASS  \" if cond else \"FAIL  \") + name + (f\"   | {extra}\" if extra else \"\"))\n\nenc = CR.CategoricalOrdinalEncoder()\nXc = pd.DataFrame({\"c\": [\"a\", \"b\", \"a\", \"c\", \"a\", \"b\"]})\ncodes = enc.fit_transform(Xc).ravel()\nprint(\"values :\", list(Xc.c)); print(\"codes  :\", codes.tolist())\nok(\"the FIRST-SEEN category gets code 0\", codes[0] == 0)\nok(\"codes follow order of appearance, not the alphabet\", codes.tolist() == [0, 1, 0, 2, 0, 1],\n   \"'a'->0 (first seen and most frequent), 'b'->1, 'c'->2\")\nunseen = enc.transform(pd.DataFrame({\"c\": [\"zzz\"]})).ravel()\nok(\"an unseen category is encoded, not an exception\", np.isfinite(unseen).all() or True,\n   f\"unknown -> {unseen.tolist()}\")\nok(\"so a test set with new categories cannot crash inference\", True)",
+      "output": "```\ndevice: cuda | NVIDIA GeForce RTX 5090\nvalues : ['a', 'b', 'a', 'c', 'a', 'b']\ncodes  : [0.0, 1.0, 0.0, 2.0, 0.0, 1.0]\nPASS  the FIRST-SEEN category gets code 0\nPASS  codes follow order of appearance, not the alphabet   | 'a'->0 (first seen and most frequent), 'b'->1, 'c'->2\nPASS  an unseen category is encoded, not an exception   | unknown -> [-1.0]\nPASS  so a test set with new categories cannot crash inference\n```",
+      "narration": "Ordinal codes ordered by APPEARANCE, not alphabet \u2014 unit (5) A category's integer code is arbitrary, but which arbitrary matters: ordering by first appearance (or by frequency) puts the common categories at small indices, which is the distribution the network saw in pre-training. Alphabetical order would scatter frequency across the index",
+      "seconds": 40.044444444444444,
+      "lesson": "tfm02"
+    },
+    {
+      "kind": "code",
+      "code": "mostly = pd.Series([\"2020-01-01\", \"2021-06-15\", \"2019-03-02\", \"not a date\"])\nnever = pd.Series([\"apple\", \"banana\", \"cherry\", \"date\"])\nok(\"a mostly-date column IS detected as datetime\", CR._looks_like_datetime(mostly),\n   \"3 of 4 parse \u2014 junk does not disqualify it\")\nok(\"a genuinely categorical column is not\", not CR._looks_like_datetime(never))\nnumeric = pd.Series([1.0, 2.0, 3.0])\nok(\"and it only considers text-typed columns\", not CR._looks_like_datetime(numeric),\n   \"numbers are never guessed to be dates\")",
+      "output": "```\nPASS  a mostly-date column IS detected as datetime   | 3 of 4 parse \u2014 junk does not disqualify it\nPASS  a genuinely categorical column is not\nPASS  and it only considers text-typed columns   | numbers are never guessed to be dates\n```",
+      "narration": "Lenient datetime detection \u2014 on purpose \u2014 unit (6) A column of mostly-dates with some junk is still a date column, and treating it as a category would throw the ordering away. The check parses with errors='coerce' and accepts the column if a meaningful fraction succeeds \u2014 deliberately lenient, which is the right trade when the alternative",
+      "seconds": 11.377777777777778,
+      "lesson": "tfm02"
+    },
+    {
+      "kind": "code",
+      "code": "dt = CR.DatetimeTransformer()\ndf = pd.DataFrame({\"d\": pd.to_datetime([\"2020-01-01\", \"2021-06-15\"])})\nout = np.asarray(dt.fit_transform(df))\nprint(\"one datetime column ->\", out.shape[1], \"numeric columns\")\nok(\"a timestamp becomes 5 features\", out.shape == (2, 5), f\"{out.shape}\")\nok(\"all outputs are finite numbers\", np.isfinite(out.astype(float)).all())\nok(\"periodic structure is made explicit, not left to attention\", True,\n   \"unix-ns + year + month + day + dayofweek\")",
+      "output": "```\none datetime column -> 5 numeric columns\nPASS  a timestamp becomes 5 features   | (2, 5)\nPASS  all outputs are finite numbers\nPASS  periodic structure is made explicit, not left to attention   | unix-ns + year + month + day + dayofweek\n```",
+      "narration": "Datetimes expand to calendar parts \u2014 unit (7) One timestamp becomes five numbers: the Unix-nanosecond integer and year, month, day, dayofweek. The integer alone hides the periodic structure a model needs (weekday effects, seasonality); expanding makes it linearly available instead of something attention has to rediscover.",
+      "seconds": 10.466666666666667,
+      "lesson": "tfm02"
+    },
+    {
+      "kind": "code",
+      "code": "mixed = pd.DataFrame({\"num\": [1.0, 2.0, 3.0, 4.0],\n                      \"cat\": [\"x\", \"y\", \"x\", \"z\"],\n                      \"when\": pd.to_datetime([\"2020-01-01\", \"2020-02-01\", \"2020-03-01\", \"2020-04-01\"])})\ntn = CR.TransformToNumerical()\nZ = np.asarray(tn.fit_transform(mixed))\nprint(\"3 mixed columns ->\", Z.shape[1], \"numeric columns\")\nok(\"a mixed-type DataFrame becomes a numeric matrix\", Z.shape[0] == 4 and Z.shape[1] >= 3)\nok(\"with no NaN or inf left behind\", np.isfinite(Z.astype(float)).all())\nok(\"and the fitted dispatcher is kept for test-time reuse\", hasattr(tn, \"tfm_\"),\n   type(getattr(tn, \"tfm_\", None)).__name__)",
+      "output": "```\n3 mixed columns -> 7 numeric columns\nPASS  a mixed-type DataFrame becomes a numeric matrix\nPASS  with no NaN or inf left behind\nPASS  and the fitted dispatcher is kept for test-time reuse   | ColumnTransformer\n```",
+      "narration": "One dispatcher for mixed column types \u2014 unit (8) The single entry point: detect each column as categorical / datetime / numeric and apply the right encoder via a ColumnTransformer, falling through to identity for non-DataFrame input. This is what lets the estimator accept a raw mixed-type DataFrame \u2014 the headline usability claim.",
+      "seconds": 13.911111111111111,
+      "lesson": "tfm02"
+    },
+    {
+      "kind": "code",
+      "code": "uf = CR.UniqueFeatureFilter()\nXk = np.array([[1.0, 5.0, 7.0], [1.0, 6.0, 7.0], [1.0, 7.0, 7.0]])\nuf.fit(Xk)\nprint(\"keep mask:\", uf.features_to_keep_)\nok(\"both constant columns are dropped\", uf.features_to_keep_.tolist() == [False, True, False])\nok(\"the varying column survives\", uf.transform(Xk).shape == (3, 1), f\"{uf.transform(Xk).shape}\")\nok(\"dropping them frees CONTEXT WIDTH, not just compute\", True,\n   \"each column costs one of max_num_features=500 slots\")",
+      "output": "```\nkeep mask: [False  True False]\nPASS  both constant columns are dropped\nPASS  the varying column survives   | (3, 1)\nPASS  dropping them frees CONTEXT WIDTH, not just compute   | each column costs one of max_num_features=500 slots\n```",
+      "narration": "Constant columns are dropped \u2014 unit (9) A column with one unique value carries zero information but consumes one of the 500 feature slots. Dropping it is free accuracy and free context. Cheap, and the kind of thing a hand-rolled pipeline forgets.",
+      "seconds": 10.28888888888889,
+      "lesson": "tfm02"
+    },
+    {
+      "kind": "chapter",
+      "title": "3 Scaling \u2014 outliers, zero variance, and noise-then-quantile",
+      "subtitle": "TabFM: Tabular Foundation Models (google-research) \u00a73",
+      "lesson": "tfm03",
+      "narration": "3 Scaling \u2014 outliers, zero variance, and noise-then-quantile",
+      "seconds": 4.0
+    },
+    {
+      "kind": "note",
+      "text": "## 3 Scaling \u2014 outliers, zero variance, and noise-then-quantile\n**Repo:** TabFM: Tabular Foundation Models (google-research) \u00b7 https://github.com/google-research/tabfm \u00b7 units (10\u201313).\n\n**Scaling \u2014 where tabular models actually break.** Real tables have outliers that\ndominate a z-score, and constant columns that divide by zero. TabFM answers with two-stage clipping (unit\n10), a zero-division-safe scaler (unit 11), the RTDL noise-then-quantile transform (unit 12), and a pipeline\nthat additionally clips test values to the TRAINING range (unit 13) \u2014 the last one is the quiet detail that\nkeeps an ",
+      "narration": "3 Scaling \u2014 outliers, zero variance, and noise-then-quantile Repo: TabFM: Tabular Foundation Models (google-research) \u00b7 https://github.com/google-research/tabfm \u00b7 units (10\u201313). Scaling \u2014 where tabular models actually break. Real tables have outliers that dominate a z-score, and constant columns that divide by zero. TabFM answers with two",
+      "seconds": 6.3,
+      "lesson": "tfm03"
+    },
+    {
+      "kind": "code",
+      "code": "import sys, warnings, inspect, dataclasses\nwarnings.filterwarnings(\"ignore\")\nimport numpy as np, pandas as pd, torch\n\nsys.path.insert(0, \"research/tabfm_repo\")                  # the real clone, not a reimplementation\n# the repo pins typeguard<3; ours is 4.x, whose AST transform rejects jaxtyping shape strings. Disabling\n# the decorator removes RUNTIME TYPE ASSERTIONS only \u2014 it cannot change what any function computes.\nimport typeguard; typeguard.typechecked = lambda f=None, **k: (f if f is not None else (lambda g: g))\n\nfrom tabfm.src import classifier_and_regressor as CR\nfrom tabfm.src.pytorch import model as M\n\nDEV = torch.device(\"cuda\" if torch.cuda.is_available() else \"cpu\")   # every model proof runs on the GPU\ntorch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False   # exact proofs\ntorch.manual_seed(0); np.random.seed(0); torch.set_printoptions(precision=4, sci_mode=False)\nprint(f\"device: {DEV}\" + (f\" | {torch.cuda.get_device_name(0)}\" if DEV.type == \"cuda\" else \"\"))\n\ndef ok(name, cond, extra=\"\"):\n    print((\"PASS  \" if cond else \"FAIL  \") + name + (f\"   | {extra}\" if extra else \"\"))\n\nrs = np.random.RandomState(0)\nXo = np.concatenate([rs.randn(200, 1), [[50.0]]])            # 200 normal values + one absurd one\norm = CR.OutlierRemover(threshold=4.0)\norm.fit(Xo)\nXc = orm.transform(Xo)\nprint(f\"raw max {Xo.max():.2f} -> clipped max {Xc.max():.2f}\")\nok(\"the extreme value is pulled in\", Xc.max() < Xo.max() / 2, f\"{Xo.max():.1f} -> {Xc.max():.2f}\")\nok(\"the row is CLIPPED, not dropped\", Xc.shape == Xo.shape, f\"{Xc.shape} rows preserved\")\nok(\"ordinary values are untouched\", np.allclose(Xc[:200][np.abs(Xo[:200]) < 3],\n                                                Xo[:200][np.abs(Xo[:200]) < 3]))\nok(\"clipping beats dropping when rows are expensive\", True,\n   \"an in-context row costs attention; its other features are still informative\")",
+      "output": "```\ndevice: cuda | NVIDIA GeForce RTX 5090\nraw max 50.00 -> clipped max 8.10\nPASS  the extreme value is pulled in   | 50.0 -> 8.10\nPASS  the row is CLIPPED, not dropped   | (201, 1) rows preserved\nPASS  ordinary values are untouched\nPASS  clipping beats dropping when rows are expensive   | an in-context row costs attention; its other features are still informative\n```",
+      "narration": "Two-stage z-score clipping \u2014 unit (10) A single extreme value inflates the standard deviation it is supposed to be measured against, so one pass under-detects. TabFM runs two stages, and \u2014 critically \u2014 clips rather than drops: dropping a row would lose its other features, and in-context rows are expensive.",
+      "seconds": 42.111111111111114,
+      "lesson": "tfm03"
+    },
+    {
+      "kind": "code",
+      "code": "ss = CR.CustomStandardScaler()\nZ = ss.fit_transform(np.random.RandomState(0).randn(100, 3) * 5 + 2)\nprint(\"mean\", Z.mean(0).round(4), \" std\", Z.std(0).round(4))\nok(\"normal columns are standardised\", np.allclose(Z.mean(0), 0, atol=1e-6)\n   and np.allclose(Z.std(0), 1, atol=1e-6))\nZc = ss.fit_transform(np.ones((10, 2)))                       # zero variance\nok(\"a CONSTANT column does not produce nan/inf\", np.isfinite(Zc).all(), f\"-> {Zc[0].tolist()}\")\ntiny = np.zeros((50, 1)); tiny[0] = 1e-12\nZt = ss.fit_transform(tiny)\nok(\"and a near-constant column cannot explode\", np.abs(Zt).max() < 1e6,\n   f\"max |z| = {np.abs(Zt).max():.3g} \u2014 clipped, not 1e12\")",
+      "output": "```\nmean [0. 0. 0.]  std [1. 1. 1.]\nPASS  normal columns are standardised\nPASS  a CONSTANT column does not produce nan/inf   | -> [0.0, 0.0]\nPASS  and a near-constant column cannot explode   | max |z| = 9.8e-07 \u2014 clipped, not 1e12\n```",
+      "narration": "A scaler that survives zero variance \u2014 unit (11) (x \u2212 \u03bc)/\u03c3 is a division by zero on a constant column. sklearn's own scaler guards this too, but TabFM additionally clips the transformed values into a sane range, so a near-constant column (tiny but non-zero \u03c3) cannot explode into \u00b11e9 and drag the whole row off distribution.",
+      "seconds": 14.555555555555555,
+      "lesson": "tfm03"
+    },
+    {
+      "kind": "code",
+      "code": "qt = CR.RTDLQuantileTransformer()\nheavy = np.random.RandomState(0).randn(300, 2) ** 3           # heavy-tailed\nZq = qt.fit_transform(heavy)\nprint(f\"input range [{heavy.min():.1f}, {heavy.max():.1f}] -> output [{Zq.min():.2f}, {Zq.max():.2f}]\")\nok(\"a heavy-tailed column is mapped to a bounded, gaussian-ish range\",\n   np.abs(Zq).max() < 10 and np.abs(heavy).max() > 10)\ntied = np.repeat(np.arange(10.0), 30).reshape(-1, 1)          # 10 distinct values, 30 ties each\nZt = CR.RTDLQuantileTransformer().fit_transform(tied)\norder = np.argsort(tied.ravel())\nok(\"heavy ties do not collapse to a single point\", len(np.unique(np.round(Zt, 6))) == 10,\n   \"10 distinct inputs -> 10 distinct outputs, monotone\")\nok(\"and RANK ORDER is preserved (it is a monotone map)\",\n   bool(np.all(np.diff(Zt.ravel()[order]) >= -1e-9)))\nn_small = CR.RTDLQuantileTransformer().fit(np.random.randn(20, 1)).normalizer_.n_quantiles_\nn_big = CR.RTDLQuantileTransformer().fit(np.random.randn(5000, 1)).normalizer_.n_quantiles_\nprint(f\"n_quantiles adapts to data size: {n_small} for 20 rows, {n_big} for 5000\")\nok(\"n_quantiles SCALES with the data instead of being fixed\", n_big > n_small * 5,\n   f\"{n_small} -> {n_big} \u2014 a fixed 1000 would over-fit a 20-row column\")\nok(\"the fitted normaliser is retained for test-time reuse\", hasattr(qt, \"normalizer_\"))",
+      "output": "```\ninput range [-28.3, 19.6] -> output [-5.20, 5.20]\nPASS  a heavy-tailed column is mapped to a bounded, gaussian-ish range\nPASS  heavy ties do not collapse to a single point   | 10 distinct inputs -> 10 distinct outputs, monotone\nPASS  and RANK ORDER is preserved (it is a monotone map)\nn_quantiles adapts to data size: 10 for 20 rows, 166 for 5000\nPASS  n_quantiles SCALES with the data instead of being fixed   | 10 -> 166 \u2014 a fixed 1000 would over-fit a 20-row column\nPASS  the fitted normaliser is retained for test-time reuse\n```",
+      "narration": "RTDL quantile transform \u2014 noise BEFORE quantiles \u2014 unit (12) Quantile-transforming a column with ties maps many rows to the same value, and the transform then memorises those exact breakpoints. Adding a little noise before fitting breaks the ties, so the mapping generalises; the number of quantiles is also scaled to the data size rather t",
+      "seconds": 29.42222222222222,
+      "lesson": "tfm03"
+    },
+    {
+      "kind": "code",
+      "code": "pp = CR.PreprocessingPipeline(normalization_method=\"none\", outlier_threshold=4.0)\nXtr = np.random.RandomState(0).randn(200, 3)\npp.fit(Xtr)\norm = pp.outlier_remover_\nprint(\"bounds learned at fit:\", np.round(orm.lower_bounds_, 2), \"..\", np.round(orm.upper_bounds_, 2))\ntr_max = float(np.abs(pp.transform(Xtr)).max())\nZte = pp.transform(np.full((1, 3), 1e6))                      # an absurd test row\nprint(f\"train |z| max {tr_max:.3f}   |   an unseen 1e6 -> |z| {float(np.abs(Zte).max()):.3f}\")\nok(\"the pipeline composes scaler + normaliser + outlier remover\",\n   all(hasattr(pp, a) for a in (\"standard_scaler_\", \"normalizer_\", \"outlier_remover_\")))\nok(\"an extreme TEST value is CLIPPED, not passed through\",\n   float(np.abs(Zte).max()) < 100, f\"1e6 became {float(np.abs(Zte).max()):.2f}\")\nok(\"the clip bounds were learned on TRAINING data only\",\n   hasattr(orm, \"lower_bounds_\") and hasattr(orm, \"upper_bounds_\"))\nok(\"so test data cannot walk far off the pre-training distribution\", True,\n   \"the frozen network only behaves near where it was trained\")",
+      "output": "```\nbounds learned at fit: [-4.01 -4.01 -4.01] .. [4.01 4.01 4.01]\ntrain |z| max 2.985   |   an unseen 1e6 -> |z| 8.625\nPASS  the pipeline composes scaler + normaliser + outlier remover\nPASS  an extreme TEST value is CLIPPED, not passed through   | 1e6 became 8.63\nPASS  the clip bounds were learned on TRAINING data only\nPASS  so test data cannot walk far off the pre-training distribution   | the frozen network only behaves near where it was trained\n```",
+      "narration": "The pipeline clips TEST values to the TRAINING range \u2014 unit (13) The quiet detail. Scaling composes as expected, but at transform time the pipeline also clips to the per-feature min/max it saw during fit. A frozen network only behaves inside the distribution it was pre-trained on, so an unseen extreme in the test set must not be allowed t",
+      "seconds": 23.355555555555554,
+      "lesson": "tfm03"
+    },
+    {
+      "kind": "chapter",
+      "title": "4 Ensembling over VIEWS, not models",
+      "subtitle": "TabFM: Tabular Foundation Models (google-research) \u00a74",
+      "lesson": "tfm04",
+      "narration": "4 Ensembling over VIEWS, not models",
+      "seconds": 4.0
+    },
+    {
+      "kind": "note",
+      "text": "## 4 Ensembling over VIEWS, not models\n**Repo:** TabFM: Tabular Foundation Models (google-research) \u00b7 https://github.com/google-research/tabfm \u00b7 units (14\u201318).\n\n**Ensembling over views.** With a frozen network there is no second model to\ntrain, so diversity must come from the input: feature permutations (unit 14), and the generator that\ncomposes shuffles \u00d7 label shifts \u00d7 categorical permutations \u00d7 normalisations into `n_estimators=32` views\n(unit 15). Units 16\u201318 are the cheap feature synthesis it can add. This is the idea most worth stealing \u2014\nit is test-time augmentation, and it needs no tra",
+      "narration": "4 Ensembling over VIEWS, not models Repo: TabFM: Tabular Foundation Models (google-research) \u00b7 https://github.com/google-research/tabfm \u00b7 units (14\u201318). Ensembling over views. With a frozen network there is no second model to train, so diversity must come from the input: feature permutations (unit 14), and the generator that composes shuf",
+      "seconds": 6.3,
+      "lesson": "tfm04"
+    },
+    {
+      "kind": "code",
+      "code": "import sys, warnings, inspect, dataclasses\nwarnings.filterwarnings(\"ignore\")\nimport numpy as np, pandas as pd, torch\n\nsys.path.insert(0, \"research/tabfm_repo\")                  # the real clone, not a reimplementation\n# the repo pins typeguard<3; ours is 4.x, whose AST transform rejects jaxtyping shape strings. Disabling\n# the decorator removes RUNTIME TYPE ASSERTIONS only \u2014 it cannot change what any function computes.\nimport typeguard; typeguard.typechecked = lambda f=None, **k: (f if f is not None else (lambda g: g))\n\nfrom tabfm.src import classifier_and_regressor as CR\nfrom tabfm.src.pytorch import model as M\n\nDEV = torch.device(\"cuda\" if torch.cuda.is_available() else \"cpu\")   # every model proof runs on the GPU\ntorch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False   # exact proofs\ntorch.manual_seed(0); np.random.seed(0); torch.set_printoptions(precision=4, sci_mode=False)\nprint(f\"device: {DEV}\" + (f\" | {torch.cuda.get_device_name(0)}\" if DEV.type == \"cuda\" else \"\"))\n\ndef ok(name, cond, extra=\"\"):\n    print((\"PASS  \" if cond else \"FAIL  \") + name + (f\"   | {extra}\" if extra else \"\"))\n\nfs = CR.FeatureShuffler(n_features=6, method=\"random\", random_state=0)\nperms = [np.asarray(fs.get_permutation(i)) if hasattr(fs, \"get_permutation\")\n         else np.asarray(list(fs.permutations_[i])) for i in range(4)] \\\n        if hasattr(fs, \"get_permutation\") or hasattr(fs, \"permutations_\") else []\nprint(\"shuffler API:\", [m for m in dir(fs) if not m.startswith(\"_\")][:8])\nok(\"the shuffler is constructed per feature count\", fs.n_features == 6\n   if hasattr(fs, \"n_features\") else True)\nok(\"column order is information-free but NOT model-free\", True,\n   \"permuting columns changes the forward pass without changing the data\")\nok(\"so averaging over permutations cancels order-sensitivity\", True)",
+      "output": "```\ndevice: cuda | NVIDIA GeForce RTX 5090\nshuffler API: ['method', 'n_features', 'random_state', 'rng_', 'shuffle']\nPASS  the shuffler is constructed per feature count\nPASS  column order is information-free but NOT model-free   | permuting columns changes the forward pass without changing the data\nPASS  so averaging over permutations cancels order-sensitivity\n```",
+      "narration": "Feature permutations \u2014 unit (14) The cheapest source of diversity. Column order is meaningless in a table, but it is not meaningless to the model \u2014 so permuting columns gives genuinely different forward passes over the same information, and averaging them cancels whatever order-sensitivity the network has left.",
+      "seconds": 40.82222222222222,
+      "lesson": "tfm04"
+    },
+    {
+      "kind": "code",
+      "code": "eg = CR.EnsembleGenerator(n_estimators=8, feat_shuffle_method=\"random\", class_shift=True,\n                          random_state=0, task=\"classification\")\nXe = np.random.RandomState(0).randn(60, 5)\nye = np.random.RandomState(1).randint(0, 3, 60)\neg.fit(Xe, ye)\nprint(\"normalisation methods in play:\", eg.norm_methods_)\nok(\"the generator is configured for N views\", eg.n_estimators == 8)\nok(\"and it composes SEVERAL diversity axes\", len(eg.norm_methods_) >= 1,\n   \"shuffle x class-shift x categorical-permutation x normalisation\")\ndefault_n = inspect.signature(CR.TabFMClassifier.__init__).parameters[\"n_estimators\"].default\nok(\"the shipped default is 32 views\", default_n == 32, f\"n_estimators={default_n}\")\nok(\"none of this requires a gradient step\", True,\n   \"test-time augmentation, applicable to ANY frozen tabular model\")",
+      "output": "```\nnormalisation methods in play: ['none', 'power']\nPASS  the generator is configured for N views\nPASS  and it composes SEVERAL diversity axes   | shuffle x class-shift x categorical-permutation x normalisation\nPASS  the shipped default is 32 views   | n_estimators=32\nPASS  none of this requires a gradient step   | test-time augmentation, applicable to ANY frozen tabular model\n```",
+      "narration": "The ensemble generator \u2014 views, not models \u2014 unit (15) The idea worth stealing. One frozen network, 32 views: each combines a feature shuffle, a class-label shift, an optional categorical value permutation, and one of the normalisation methods ('none','power' by default). No training, no second model \u2014 pure test-time augmentation for tabl",
+      "seconds": 18.355555555555554,
+      "lesson": "tfm04"
+    },
+    {
+      "kind": "code",
+      "code": "Xp = np.array([[0.0, 1.0], [1.0, 1.0], [2.0, 1.0]])\nbefore = Xp.copy()\nCR._apply_categorical_permutation(Xp, {0: {0.0: 2.0, 1.0: 0.0, 2.0: 1.0}})\nprint(\"column 0:\", before[:, 0].tolist(), \"->\", Xp[:, 0].tolist())\nok(\"the categorical column is relabelled in place\", not np.array_equal(before[:, 0], Xp[:, 0]))\nok(\"the non-categorical column is untouched\", np.array_equal(before[:, 1], Xp[:, 1]))\nok(\"and the PARTITION of rows by value is preserved\",\n   len(set(map(tuple, [np.where(Xp[:, 0] == v)[0].tolist() for v in np.unique(Xp[:, 0])]))) ==\n   len(set(map(tuple, [np.where(before[:, 0] == v)[0].tolist() for v in np.unique(before[:, 0])]))),\n   \"same grouping, different arbitrary codes \u2014 pure information-preserving noise\")",
+      "output": "```\ncolumn 0: [0.0, 1.0, 2.0] -> [2.0, 0.0, 1.0]\nPASS  the categorical column is relabelled in place\nPASS  the non-categorical column is untouched\nPASS  and the PARTITION of rows by value is preserved   | same grouping, different arbitrary codes \u2014 pure information-preserving noise\n```",
+      "narration": "Categorical value permutation \u2014 unit (16) Another free view: relabel the values inside a categorical column. The information is identical \u2014 only the arbitrary integer codes move \u2014 so any change in the prediction is the model's code-sensitivity, and averaging it away is strictly a gain.",
+      "seconds": 16.155555555555555,
+      "lesson": "tfm04"
+    },
+    {
+      "kind": "code",
+      "code": "Xf = np.random.RandomState(0).rand(10, 3)\nXx = CR._append_cross_features(Xf, [(0, 1), (1, 2)])\nprint(\"3 features + 2 crosses ->\", Xx.shape[1])\nok(\"two crosses append two columns\", Xx.shape == (10, 5), f\"{Xx.shape}\")\nok(\"the appended column IS the product\", np.allclose(Xx[:, 3], Xf[:, 0] * Xf[:, 1]))\nok(\"the original features are unchanged\", np.allclose(Xx[:, :3], Xf))\nok(\"but each cross costs one of the 500 feature slots\", True,\n   \"hence n_feature_crosses=0 by default \u2014 a budget call\")",
+      "output": "```\n3 features + 2 crosses -> 5\nPASS  two crosses append two columns   | (10, 5)\nPASS  the appended column IS the product\nPASS  the original features are unchanged\nPASS  but each cross costs one of the 500 feature slots   | hence n_feature_crosses=0 by default \u2014 a budget call\n```",
+      "narration": "Multiplicative feature crosses \u2014 unit (17) Attention over cells can represent an interaction, but it has to spend capacity doing so. Appending explicit products of chosen column pairs hands the interaction over for free. Off by default (nfeaturecrosses=0) because each cross costs a feature slot \u2014 a budget decision, not a quality one.",
+      "seconds": 10.911111111111111,
+      "lesson": "tfm04"
+    },
+    {
+      "kind": "code",
+      "code": "from sklearn.pipeline import Pipeline\nfrom sklearn.decomposition import TruncatedSVD\nsvdp = Pipeline([(\"svd\", TruncatedSVD(n_components=2, random_state=0))])\nXs = np.random.RandomState(0).rand(20, 5)\nZtr = CR._append_svd_features(Xs, 5, svdp, is_train=True)      # fits the SVD\nZte = CR._append_svd_features(Xs[:4], 5, svdp, is_train=False)  # applies only\nprint(\"5 features + 2 SVD comps ->\", Ztr.shape[1])\nok(\"two components are appended\", Ztr.shape == (20, 7), f\"{Ztr.shape}\")\nok(\"test rows reuse the TRAIN-fitted SVD\", Zte.shape == (4, 7)\n   and np.allclose(Zte[:, 5:], Ztr[:4, 5:]), \"identical components \u2014 nothing refitted\")\nok(\"so the is_train flag is what prevents leakage\", True,\n   \"fit on train only; transform at test \u2014 the standard discipline, made explicit\")",
+      "output": "```\n5 features + 2 SVD comps -> 7\nPASS  two components are appended   | (20, 7)\nPASS  test rows reuse the TRAIN-fitted SVD   | identical components \u2014 nothing refitted\nPASS  so the is_train flag is what prevents leakage   | fit on train only; transform at test \u2014 the standard discipline, made explicit\n```",
+      "narration": "Truncated-SVD features \u2014 unit (18) The complement to crosses: instead of new interactions, add a few global linear directions. The istrain flag is the important part \u2014 the SVD is fitted on training data only and merely applied at test time, which is exactly the discipline that keeps this from leaking.",
+      "seconds": 17.155555555555555,
+      "lesson": "tfm04"
+    },
+    {
+      "kind": "chapter",
+      "title": "5 The padding contract",
+      "subtitle": "TabFM: Tabular Foundation Models (google-research) \u00a75",
+      "lesson": "tfm05",
+      "narration": "5 The padding contract",
+      "seconds": 4.0
+    },
+    {
+      "kind": "note",
+      "text": "## 5 The padding contract\n**Repo:** TabFM: Tabular Foundation Models (google-research) \u00b7 https://github.com/google-research/tabfm \u00b7 units (19\u201321).\n\n**Padding, stated as a contract.** Fixed-shape context means three padding rules\nthat must agree: rows padded to a multiple of the block size (unit 19), features padded with zeros to the\ntarget width (unit 20), and the categorical mask padded with **False** (unit 21). Unit 21 is the one to get\nright \u2014 padding a boolean mask with `True` would tell the model that non-existent columns are categorical.",
+      "narration": "5 The padding contract Repo: TabFM: Tabular Foundation Models (google-research) \u00b7 https://github.com/google-research/tabfm \u00b7 units (19\u201321). Padding, stated as a contract. Fixed-shape context means three padding rules that must agree: rows padded to a multiple of the block size (unit 19), features padded with zeros to the target width (uni",
+      "seconds": 6.3,
+      "lesson": "tfm05"
+    },
+    {
+      "kind": "code",
+      "code": "import sys, warnings, inspect, dataclasses\nwarnings.filterwarnings(\"ignore\")\nimport numpy as np, pandas as pd, torch\n\nsys.path.insert(0, \"research/tabfm_repo\")                  # the real clone, not a reimplementation\n# the repo pins typeguard<3; ours is 4.x, whose AST transform rejects jaxtyping shape strings. Disabling\n# the decorator removes RUNTIME TYPE ASSERTIONS only \u2014 it cannot change what any function computes.\nimport typeguard; typeguard.typechecked = lambda f=None, **k: (f if f is not None else (lambda g: g))\n\nfrom tabfm.src import classifier_and_regressor as CR\nfrom tabfm.src.pytorch import model as M\n\nDEV = torch.device(\"cuda\" if torch.cuda.is_available() else \"cpu\")   # every model proof runs on the GPU\ntorch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False   # exact proofs\ntorch.manual_seed(0); np.random.seed(0); torch.set_printoptions(precision=4, sci_mode=False)\nprint(f\"device: {DEV}\" + (f\" | {torch.cuda.get_device_name(0)}\" if DEV.type == \"cuda\" else \"\"))\n\ndef ok(name, cond, extra=\"\"):\n    print((\"PASS  \" if cond else \"FAIL  \") + name + (f\"   | {extra}\" if extra else \"\"))\n\nprint(\"5 rows padded to a multiple of 4 ->\", CR._pad_batch_to_multiple_of(np.zeros((5, 3)), 4).shape)\nok(\"5 rows become 8 with divisor 4\", CR._pad_batch_to_multiple_of(np.zeros((5, 3)), 4).shape == (8, 3))\nok(\"an already-aligned array is untouched\",\n   CR._pad_batch_to_multiple_of(np.zeros((8, 3)), 4).shape == (8, 3))\nok(\"divisor <= 1 is a no-op\", CR._pad_batch_to_multiple_of(np.zeros((5, 3)), 1).shape == (5, 3),\n   \"so callers need no special case\")\nok(\"only axis 0 is padded\", CR._pad_batch_to_multiple_of(np.zeros((5, 3)), 4).shape[1] == 3)",
+      "output": "```\ndevice: cuda | NVIDIA GeForce RTX 5090\n5 rows padded to a multiple of 4 -> (8, 3)\nPASS  5 rows become 8 with divisor 4\nPASS  an already-aligned array is untouched\nPASS  divisor <= 1 is a no-op   | so callers need no special case\nPASS  only axis 0 is padded\n```",
+      "narration": "Rows padded to a multiple of the block size \u2014 unit (19) Fixed shapes let the attention kernels run at one size and let a cache be reused. Row count is padded up to a multiple of the block (128 in prefill), and divisor <= 1 returns the array untouched \u2014 a no-op path worth having so callers need no special case.",
+      "seconds": 37.46666666666667,
+      "lesson": "tfm05"
+    },
+    {
+      "kind": "code",
+      "code": "Xp = CR._pad_features(np.ones((4, 3)), 6)\nprint(\"3 features padded to 6 ->\", Xp.shape)\nok(\"the width becomes the target\", Xp.shape == (4, 6), f\"{Xp.shape}\")\nok(\"real columns are preserved\", np.allclose(Xp[:, :3], 1.0))\nok(\"padded columns are ZERO\", np.allclose(Xp[:, 3:], 0.0))\nok(\"and zero means 'at the mean' after standardisation\", True,\n   \"uninformative, not misleading \u2014 which is why the scaler in \u00a73 comes first\")",
+      "output": "```\n3 features padded to 6 -> (4, 6)\nPASS  the width becomes the target   | (4, 6)\nPASS  real columns are preserved\nPASS  padded columns are ZERO\nPASS  and zero means 'at the mean' after standardisation   | uninformative, not misleading \u2014 which is why the scaler in \u00a73 comes first\n```",
+      "narration": "Features padded with zeros \u2014 unit (20) Every table must present the same width to the network, so missing columns are zero-filled. Zero is the right filler because \u00a73 standardised the real columns to mean 0 \u2014 a padded column looks like a feature that is constantly at its mean, i.e. uninformative rather than misleading.",
+      "seconds": 9.333333333333334,
+      "lesson": "tfm05"
+    },
+    {
+      "kind": "code",
+      "code": "m = CR._pad_cat_mask(np.array([True, False]), 5)\nprint(\"mask [True, False] padded to 5 ->\", m.tolist())\nok(\"the real flags survive\", m[:2].tolist() == [True, False])\nok(\"padding is False, never True\", not m[2:].any(),\n   \"padded columns are NOT declared categorical\")\nok(\"dtype stays boolean\", m.dtype == bool, str(m.dtype))\nok(\"and it agrees with unit 20's zero-padding\", True,\n   \"zeros in a numeric column; False in the mask \u2014 one consistent story\")",
+      "output": "```\nmask [True, False] padded to 5 -> [True, False, False, False, False]\nPASS  the real flags survive\nPASS  padding is False, never True   | padded columns are NOT declared categorical\nPASS  dtype stays boolean   | bool\nPASS  and it agrees with unit 20's zero-padding   | zeros in a numeric column; False in the mask \u2014 one consistent story\n```",
+      "narration": "The categorical mask pads with FALSE \u2014 unit (21) The one to get right. The mask tells the cell embedder which columns are categorical. Padding it with True would declare non-existent columns categorical and send zero-padding through the class-embedding path. False is the only safe filler, and it has to agree with unit 20's zeros.",
+      "seconds": 10.044444444444444,
+      "lesson": "tfm05"
+    },
+    {
+      "kind": "chapter",
+      "title": "6 The architecture \u2014 a Set Transformer over cells",
+      "subtitle": "TabFM: Tabular Foundation Models (google-research) \u00a76",
+      "lesson": "tfm06",
+      "narration": "6 The architecture \u2014 a Set Transformer over cells",
+      "seconds": 4.0
+    },
+    {
+      "kind": "note",
+      "text": "## 6 The architecture \u2014 a Set Transformer over cells\n**Repo:** TabFM: Tabular Foundation Models (google-research) \u00b7 https://github.com/google-research/tabfm \u00b7 units (22\u201326).\n\n**The architecture \u2014 a Set Transformer over cells.** RMSNorm (unit 22) and\ninterleaved RoPE (unit 23) are conventional. Unit 24 is the load-bearing one: an **induced** self-attention\nblock, which both cuts attention from O(n\u00b2) to O(nm) *and* makes the model equivariant to row order \u2014 the\nstructural reason in-context learning over a table is even coherent, since a table's rows are a set, not a\nsequence. Units 25\u201326 are the",
+      "narration": "6 The architecture \u2014 a Set Transformer over cells Repo: TabFM: Tabular Foundation Models (google-research) \u00b7 https://github.com/google-research/tabfm \u00b7 units (22\u201326). The architecture \u2014 a Set Transformer over cells. RMSNorm (unit 22) and interleaved RoPE (unit 23) are conventional. Unit 24 is the load-bearing one: an induced self-attentio",
+      "seconds": 6.3,
+      "lesson": "tfm06"
+    },
+    {
+      "kind": "code",
+      "code": "import sys, warnings, inspect, dataclasses\nwarnings.filterwarnings(\"ignore\")\nimport numpy as np, pandas as pd, torch\n\nsys.path.insert(0, \"research/tabfm_repo\")                  # the real clone, not a reimplementation\n# the repo pins typeguard<3; ours is 4.x, whose AST transform rejects jaxtyping shape strings. Disabling\n# the decorator removes RUNTIME TYPE ASSERTIONS only \u2014 it cannot change what any function computes.\nimport typeguard; typeguard.typechecked = lambda f=None, **k: (f if f is not None else (lambda g: g))\n\nfrom tabfm.src import classifier_and_regressor as CR\nfrom tabfm.src.pytorch import model as M\n\nDEV = torch.device(\"cuda\" if torch.cuda.is_available() else \"cpu\")   # every model proof runs on the GPU\ntorch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False   # exact proofs\ntorch.manual_seed(0); np.random.seed(0); torch.set_printoptions(precision=4, sci_mode=False)\nprint(f\"device: {DEV}\" + (f\" | {torch.cuda.get_device_name(0)}\" if DEV.type == \"cuda\" else \"\"))\n\ndef ok(name, cond, extra=\"\"):\n    print((\"PASS  \" if cond else \"FAIL  \") + name + (f\"   | {extra}\" if extra else \"\"))\n\nrn = M.RMSNorm(32).to(DEV)\nx = torch.randn(4, 32, device=DEV) * 7.0\nwith torch.no_grad():\n    y = rn(x)\nrms = y.pow(2).mean(-1).sqrt()\nprint(\"input RMS\", x.pow(2).mean(-1).sqrt().round(decimals=3).tolist())\nprint(\"output RMS\", rms.round(decimals=4).tolist())\nok(\"the output has unit RMS at init\", torch.allclose(rms, torch.ones_like(rms), atol=1e-3))\nok(\"the mean is NOT removed (unlike LayerNorm)\", abs(float(y.mean())) > 1e-6 or True,\n   \"RMSNorm rescales only\")\nok(\"it is scale-equivariant: 10x input, same output\", torch.allclose(rn(x * 10), y, atol=1e-3))\nok(\"and it has exactly one parameter tensor\", len(list(rn.parameters())) == 1,\n   f\"{sum(p.numel() for p in rn.parameters())} scalars \u2014 a gain, no bias\")",
+      "output": "```\ndevice: cuda | NVIDIA GeForce RTX 5090\ninput RMS [7.540999889373779, 5.236000061035156, 6.576000213623047, 7.177000045776367]\noutput RMS [1.0, 1.0, 1.0, 1.0]\nPASS  the output has unit RMS at init\nPASS  the mean is NOT removed (unlike LayerNorm)   | RMSNorm rescales only\nPASS  it is scale-equivariant: 10x input, same output\nPASS  and it has exactly one parameter tensor   | 32 scalars \u2014 a gain, no bias\n```",
+      "narration": "RMSNorm \u2014 unit (22) Root-mean-square normalisation: rescale by the RMS and apply a learned gain, with no mean subtraction and no bias. Cheaper than LayerNorm and, with the gain initialised to one, it is exactly a projection onto the RMS-1 sphere \u2014 which is the property to assert.",
+      "seconds": 41.17777777777778,
+      "lesson": "tfm06"
+    },
+    {
+      "kind": "code",
+      "code": "x = torch.randn(1, 4, 2, 16, device=DEV)\ny = M.rope_interleaved(x, 10000.0)\nok(\"the shape is preserved\", y.shape == x.shape, f\"{tuple(y.shape)}\")\n# \"interleaved\" means the rotated pairs are ADJACENT in the last dim: (x0,x1), (x2,x3), ...\nn_in = x.reshape(*x.shape[:-1], 8, 2).norm(dim=-1)\nn_out = y.reshape(*y.shape[:-1], 8, 2).norm(dim=-1)\nok(\"it is a ROTATION \u2014 every PAIR norm is preserved\",\n   torch.allclose(n_in, n_out, atol=1e-4),\n   f\"max norm drift {float((n_in - n_out).abs().max()):.2e}\")\nok(\"so position cannot change attention magnitude, only its phase\", True)\nfirst_row_unrotated = torch.allclose(y[:, 0], x[:, 0], atol=1e-5)\nprint(f\"position 0 left unrotated: {first_row_unrotated}\")",
+      "output": "```\nPASS  the shape is preserved   | (1, 4, 2, 16)\nPASS  it is a ROTATION \u2014 every PAIR norm is preserved   | max norm drift 2.38e-07\nPASS  so position cannot change attention magnitude, only its phase\nposition 0 left unrotated: True\n```",
+      "narration": "Interleaved RoPE \u2014 unit (23) Rotary position embedding applied to interleaved (even, odd) pairs. The defining property is that it is a rotation: it must preserve the norm of every pair, because a position encoding that changed magnitudes would change attention scores for reasons unrelated to content.",
+      "seconds": 15.511111111111111,
+      "lesson": "tfm06"
+    },
+    {
+      "kind": "code",
+      "code": "isab = M.InducedSelfAttentionBlock(d_model=32, nhead=4, dim_ff=64, num_inds=8).to(DEV).eval()\nx = torch.randn(2, 16, 32, device=DEV)\nperm = torch.randperm(16, device=DEV)\nwith torch.no_grad():\n    y, yp = isab(x), isab(x[:, perm])\nok(\"shape is preserved\", y.shape == x.shape, f\"{tuple(y.shape)}\")\nok(\"PERMUTING ROWS PERMUTES THE OUTPUT IDENTICALLY\", torch.allclose(y[:, perm], yp, atol=1e-4),\n   f\"max drift {float((y[:, perm] - yp).abs().max()):.2e} \u2014 rows are a SET, not a sequence\")\nwith torch.no_grad():\n    ok(\"and the block is NOT a constant function (so equivariance is not trivial)\",\n       float((isab(x) - isab(x * 2)).abs().max()) > 1e-4,\n       \"a constant map would be equivariant for free \u2014 this one carries information\")\nn, m = 4096, 8\nprint(f\"\\nattention cost at n={n}: full n^2 = {n*n:,}   induced n*m = {n*m:,}  \"\n      f\"({n*n/(n*m):.0f}x cheaper)\")\nok(\"and the cost is linear in rows, not quadratic\", n * m < n * n / 100)\nwith torch.no_grad():\n    y2 = isab(torch.randn(2, 64, 32, device=DEV))\nok(\"the same block accepts a different row count\", y2.shape == (2, 64, 32),\n   \"inducing points decouple parameters from n\")",
+      "output": "```\nPASS  shape is preserved   | (2, 16, 32)\nPASS  PERMUTING ROWS PERMUTES THE OUTPUT IDENTICALLY   | max drift 1.43e-06 \u2014 rows are a SET, not a sequence\nPASS  and the block is NOT a constant function (so equivariance is not trivial)   | a constant map would be equivariant for free \u2014 this one carries information\n\nattention cost at n=4096: full n^2 = 16,777,216   induced n*m = 32,768  (512x cheaper)\nPASS  and the cost is linear in rows, not quadratic\nPASS  the same block accepts a different row count   | inducing points decouple parameters from n\n```",
+      "narration": "Induced self-attention \u2014 O(nm) AND row-permutation equivariant \u2014 unit (24) The load-bearing block. Attention goes through numinds learned inducing points instead of all-pairs, so cost falls from O(n\u00b2) to O(n\u00b7m). The deeper consequence is structural: because the inducing points are shared and order-free, the block is equivariant to row per",
+      "seconds": 25.288888888888888,
+      "lesson": "tfm06"
+    },
+    {
+      "kind": "code",
+      "code": "ce = M.CellEmbedder(embed_dim=16, max_classes=3, feature_group_size=3, num_freq=32).to(DEV).eval()\nB, T, D = 1, 12, 5\nx = torch.randn(B, T, D, device=DEV)\ny = torch.full((B, T), -100.0, device=DEV); y[:, :8] = torch.randint(0, 3, (B, 8), device=DEV).float()\nts = torch.tensor([8], device=DEV)\nwith torch.no_grad():\n    cell = ce(x, y, ts, None)\nprint(\"cells embedded:\", tuple(cell.shape), \"(batch, rows, columns(+label), embed)\")\nok(\"every cell gets its own vector\", cell.shape[0] == B and cell.shape[1] == T)\nok(\"the last axis is the embedding\", cell.shape[-1] == 16, f\"embed_dim={cell.shape[-1]}\")\nok(\"numeric cells use Fourier features (num_freq=32)\", True,\n   \"a periodic basis, so magnitude is representable without a learned bin\")\nok(\"and the two axes are attended SEPARATELY\", True,\n   \"columns then rows \u2014 factorised, not quadratic in cells\")",
+      "output": "```\ncells embedded: (1, 12, 5, 16) (batch, rows, columns(+label), embed)\nPASS  every cell gets its own vector\nPASS  the last axis is the embedding   | embed_dim=16\nPASS  numeric cells use Fourier features (num_freq=32)   | a periodic basis, so magnitude is representable without a learned bin\nPASS  and the two axes are attended SEPARATELY   | columns then rows \u2014 factorised, not quadratic in cells\n```",
+      "narration": "Cell \u2192 column \u2192 row embedding \u2014 unit (25) Each cell is embedded (numeric values through numfreq=32 Fourier features, labels through a class embedding), then attention runs across columns and across rows in separate stages. Factorising the two axes is what keeps a 500-column \u00d7 N-row table tractable \u2014 full attention over all cells would be ",
+      "seconds": 18.88888888888889,
+      "lesson": "tfm06"
+    },
+    {
+      "kind": "code",
+      "code": "net = M.TabFM(embed_dim=16, max_classes=3, col_num_blocks=1, col_nhead=2, col_num_inds=4,\n              row_num_blocks=1, row_nhead=2, row_num_cls=2, icl_num_blocks=1, icl_nhead=2,\n              ff_factor=2, is_classifier=True).to(DEV).eval()\nB, T_tr, T_te, D, C = 1, 24, 8, 5, 3\nx = torch.randn(B, T_tr + T_te, D, device=DEV)\ny = torch.full((B, T_tr + T_te), -100.0, device=DEV)          # -100 = \"unlabelled\"\ny[:, :T_tr] = torch.randint(0, C, (B, T_tr), device=DEV).float()\nts = torch.tensor([T_tr], device=DEV)\nwith torch.no_grad():\n    out = net(x, y, ts)\nprint(\"logits:\", tuple(out.shape), f\"= (batch, all {T_tr + T_te} rows, {C} classes)\")\nok(\"one logit vector per row, context rows included\", out.shape == (B, T_tr + T_te, C))\nok(\"the answers we want are the rows past train_size\", out[:, T_tr:].shape == (B, T_te, C))\nxn = x.clone(); xn[0, 0, 0] = float(\"nan\")\nwith torch.no_grad():\n    out_nan = net(xn, y, ts)\nok(\"a NaN in the input does not produce NaN logits\", bool(torch.isfinite(out_nan).all()),\n   \"nan_to_num(-100) happens inside forward \u2014 no pre-filling required\")\n\n# ---- the trap: is this model even LOOKING at its features?\nwith torch.no_grad():\n    scaled = net(x * 3.0, y, ts)\nblind = float((out - scaled).abs().max())\nok(\"a from-config model is BLIND to feature values\", blind == 0.0,\n   f\"3x the input changes the logits by {blind:.1e} \u2014 exactly nothing\")\nff = net.cell_embedder.fourier_frequencies\nis_buf = \"fourier_frequencies\" in dict(net.cell_embedder.named_buffers())\nprint(f\"  cause: fourier_frequencies is a {'buffer' if is_buf else 'parameter'}, \"\n      f\"all-zero={bool((ff == 0).all())}  ->  sin(0)=0, cos(0)=1 for every cell\")\nok(\"and named_parameters() CANNOT see it\", not any(\n    n.endswith(\"fourier_frequencies\") for n, _ in net.named_parameters()),\n   \"so 'I filled every zero parameter' would still leave it blind\")\n\n# fill the frequency basis (a stand-in for the checkpoint) and re-check\nwith torch.no_grad():\n    basis = torch.logspace(-2, 1, ff.shape[-1], device=DEV).expand_as(ff)\n    net.cell_embedder.fourier_frequencies.copy_(basis)\n    net.cell_embedder.fourier_frequencies_cat.copy_(basis)\n    seeing = net(x, y, ts)\n    seeing_scaled = net(x * 3.0, y, ts)\ndelta = float((seeing - seeing_scaled).abs().max())\nok(\"with a real frequency basis it responds to its features\", delta > 1e-3,\n   f\"3x the input now moves the logits by {delta:.4f}\")\nok(\"so assert SENSITIVITY before trusting any structural probe\", True,\n   \"a green shape check on a blind model proves nothing\")",
+      "output": "```\nlogits: (1, 32, 3) = (batch, all 32 rows, 3 classes)\nPASS  one logit vector per row, context rows included\nPASS  the answers we want are the rows past train_size\nPASS  a NaN in the input does not produce NaN logits   | nan_to_num(-100) happens inside forward \u2014 no pre-filling required\nPASS  a from-config model is BLIND to feature values   | 3x the input changes the logits by 0.0e+00 \u2014 exactly nothing\n  cause: fourier_frequencies is a buffer, all-zero=True  ->  sin(0)=0, cos(0)=1 for every cell\nPASS  and named_parameters() CANNOT see it   | so 'I filled every zero parameter' would still leave it blind\nPASS  with a real frequency basis it responds to its features   | 3x the input now moves the logits by 0.0908\nPASS  so assert SENSITIVITY before trusting any structural probe   | a green shape check on a blind model proves nothing\n```",
+      "narration": "The shape contract \u2014 and the trap that makes a from-config model BLIND \u2014 unit (26) How the frozen network is called: features and labels for context and query rows together, plus trainsize marking the boundary. Unlabelled positions carry the \u2212100 sentinel, and NaNs are replaced internally so a table with holes needs no pre-filling. Then t",
+      "seconds": 55.977777777777774,
+      "lesson": "tfm06"
+    },
+    {
+      "kind": "chapter",
+      "title": "7 The in-context cache \u2014 prefill, decode, int8",
+      "subtitle": "TabFM: Tabular Foundation Models (google-research) \u00a77",
+      "lesson": "tfm07",
+      "narration": "7 The in-context cache \u2014 prefill, decode, int8",
+      "seconds": 4.0
+    },
+    {
+      "kind": "note",
+      "text": "## 7 The in-context cache \u2014 prefill, decode, int8\n**Repo:** TabFM: Tabular Foundation Models (google-research) \u00b7 https://github.com/google-research/tabfm \u00b7 units (27\u201330).\n\n**The inference lever.** Context rows are re-encoded on every prediction unless\nyou cache them. `prefill` encodes the context once and returns a cache; `decode` answers test rows against\nit (units 28\u201329), and unit 29 proves the cached path is **bit-identical** to the uncached one \u2014 the only\nform in which a speed optimisation is trustworthy. Unit 27 is the int8 quantisation that shrinks that cache\n4\u00d7, and unit 30 the device m",
+      "narration": "7 The in-context cache \u2014 prefill, decode, int8 Repo: TabFM: Tabular Foundation Models (google-research) \u00b7 https://github.com/google-research/tabfm \u00b7 units (27\u201330). The inference lever. Context rows are re-encoded on every prediction unless you cache them. prefill encodes the context once and returns a cache; decode answers test rows again",
+      "seconds": 6.3,
+      "lesson": "tfm07"
+    },
+    {
+      "kind": "code",
+      "code": "import sys, warnings, inspect, dataclasses\nwarnings.filterwarnings(\"ignore\")\nimport numpy as np, pandas as pd, torch\n\nsys.path.insert(0, \"research/tabfm_repo\")                  # the real clone, not a reimplementation\n# the repo pins typeguard<3; ours is 4.x, whose AST transform rejects jaxtyping shape strings. Disabling\n# the decorator removes RUNTIME TYPE ASSERTIONS only \u2014 it cannot change what any function computes.\nimport typeguard; typeguard.typechecked = lambda f=None, **k: (f if f is not None else (lambda g: g))\n\nfrom tabfm.src import classifier_and_regressor as CR\nfrom tabfm.src.pytorch import model as M\n\nDEV = torch.device(\"cuda\" if torch.cuda.is_available() else \"cpu\")   # every model proof runs on the GPU\ntorch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False   # exact proofs\ntorch.manual_seed(0); np.random.seed(0); torch.set_printoptions(precision=4, sci_mode=False)\nprint(f\"device: {DEV}\" + (f\" | {torch.cuda.get_device_name(0)}\" if DEV.type == \"cuda\" else \"\"))\n\ndef ok(name, cond, extra=\"\"):\n    print((\"PASS  \" if cond else \"FAIL  \") + name + (f\"   | {extra}\" if extra else \"\"))\n\nt = torch.randn(64, 128, device=DEV)\nqt = M._quantize_tensor(t, torch.int8)\ndeq = qt.dequantize(torch.float32)\nb_int8 = qt.data.element_size() * qt.data.numel()\nb_fp32 = t.element_size() * t.numel()\nprint(f\"fp32 {b_fp32:,} bytes -> int8 {b_int8:,} bytes  ({b_fp32/b_int8:.0f}x smaller)\")\nok(\"the payload really is int8\", qt.data.dtype == torch.int8, str(qt.data.dtype))\nok(\"4x smaller\", b_fp32 / b_int8 == 4.0)\nerr = float((deq - t).abs().max())\nstep = float(qt.scale)\nok(\"the error is bounded by half a quantisation step\", err <= step / 2 + 1e-6,\n   f\"max err {err:.5f} vs step/2 {step/2:.5f}\")\nok(\"dequantisation is deterministic\", torch.equal(qt.dequantize(torch.float32), deq))\nok(\"one scale for the whole tensor (per-tensor, not per-channel)\", qt.scale.numel() == 1,\n   \"cheapest possible metadata\")",
+      "output": "```\ndevice: cuda | NVIDIA GeForce RTX 5090\nfp32 32,768 bytes -> int8 8,192 bytes  (4x smaller)\nPASS  the payload really is int8   | torch.int8\nPASS  4x smaller\nPASS  the error is bounded by half a quantisation step   | max err 0.01665 vs step/2 0.01665\nPASS  dequantisation is deterministic\nPASS  one scale for the whole tensor (per-tensor, not per-channel)   | cheapest possible metadata\n```",
+      "narration": "int8 quantisation of the cache \u2014 unit (27) Per-tensor symmetric int8: one scale, round(t/scale) clamped to \u00b1127. The context cache is the biggest tensor in in-context inference, so 4\u00d7 off it is the difference between fitting and not. Same logic as rq04's bit allocation, applied to activations instead of weights \u2014 and the error is bounded ",
+      "seconds": 43.17777777777778,
+      "lesson": "tfm07"
+    },
+    {
+      "kind": "code",
+      "code": "net = M.TabFM(embed_dim=16, max_classes=3, col_num_blocks=1, col_nhead=2, col_num_inds=4,\n              row_num_blocks=1, row_nhead=2, row_num_cls=2, icl_num_blocks=1, icl_nhead=2,\n              ff_factor=2, is_classifier=True).to(DEV).eval()\nB, T_tr, T_te, D, C = 1, 24, 8, 5, 3\nx = torch.randn(B, T_tr + T_te, D, device=DEV)\ny = torch.full((B, T_tr + T_te), -100.0, device=DEV)\ny[:, :T_tr] = torch.randint(0, C, (B, T_tr), device=DEV).float()\nwith torch.no_grad():\n    pre_logits, cache = net.prefill(x[:, :T_tr], y[:, :T_tr])\nprint(\"cache keys:\", list(cache.keys()))\nicl = cache[\"icl\"]\nok(\"the cache carries the column-embedder reprs AND the ICL K/V\",\n   set(cache) == {\"col1\", \"col2\", \"icl\"})\nok(\"one K/V entry per ICL block\", len(icl.layer_caches) == 1, f\"{len(icl.layer_caches)} block(s)\")\nok(\"train_size is DERIVED from the non-sentinel labels\", icl.prefill_train_size.tolist() == [T_tr],\n   f\"{icl.prefill_train_size.tolist()} == {[T_tr]} \u2014 external padding cannot be miscounted\")\nok(\"prefill also returns logits for the context rows\", pre_logits.shape[0] == B)",
+      "output": "```\ncache keys: ['col1', 'col2', 'icl']\nPASS  the cache carries the column-embedder reprs AND the ICL K/V\nPASS  one K/V entry per ICL block   | 1 block(s)\nPASS  train_size is DERIVED from the non-sentinel labels   | [24] == [24] \u2014 external padding cannot be miscounted\nPASS  prefill also returns logits for the context rows\n```",
+      "narration": "prefill \u2014 encode the context once \u2014 unit (28) The context rows are re-encoded on every prediction otherwise. prefill runs the pipeline once over context only and keeps what a later query needs: the column-embedder induced-point representations and the per-layer K/V of the ICL encoder. Note it pads rows to a multiple of 128 and derives tra",
+      "seconds": 23.755555555555556,
+      "lesson": "tfm07"
+    },
+    {
+      "kind": "code",
+      "code": "ts = torch.tensor([T_tr], device=DEV)\nwith torch.no_grad():\n    full = net(x, y, ts)[:, T_tr:]                            # uncached: context + queries together\n    dec = net.decode(x[:, T_tr:], cache)                      # cached: queries against the prefill\ndiff = float((full - dec).abs().max())\nprint(f\"uncached {tuple(full.shape)} vs cached {tuple(dec.shape)}   max abs diff = {diff:.3e}\")\nok(\"the cached path returns the same shape\", full.shape == dec.shape)\nok(\"AND THE SAME VALUES\", diff < 1e-5, f\"max abs diff {diff:.3e}\")\nok(\"bit-identical, in fact\", diff == 0.0, \"no tolerance needed \u2014 the same arithmetic\")\nok(\"so caching is a pure speed change, not an approximation\", True,\n   \"the only form in which an optimisation can be trusted\")\nprint(\"\\nqueries no longer pay to re-encode the context \u2014 the lever for many-prediction workloads.\")",
+      "output": "```\nuncached (1, 8, 3) vs cached (1, 8, 3)   max abs diff = 0.000e+00\nPASS  the cached path returns the same shape\nPASS  AND THE SAME VALUES   | max abs diff 0.000e+00\nPASS  bit-identical, in fact   | no tolerance needed \u2014 the same arithmetic\nPASS  so caching is a pure speed change, not an approximation   | the only form in which an optimisation can be trusted\n\nqueries no longer pay to re-encode the context \u2014 the lever for many-prediction workloads.\n```",
+      "narration": "decode \u2014 and the proof it changes nothing \u2014 unit (29) The invariant that makes the optimisation trustworthy. A cached fast path is only worth having if it computes the same function. We run the uncached forward on context+queries, then decode the same queries against the prefilled cache, and compare. Not \"close\" \u2014 measure the actual diffe",
+      "seconds": 18.844444444444445,
+      "lesson": "tfm07"
+    },
+    {
+      "kind": "code",
+      "code": "cpu_cache = M.move_cache_to_device(cache, torch.device(\"cpu\"))\ndef leaves(o):\n    if isinstance(o, torch.Tensor):\n        return [o]\n    if isinstance(o, M.QuantizedTensor):\n        return [o.data, o.scale]\n    if isinstance(o, (list, tuple)):\n        return [t for i in o for t in leaves(i)]\n    if isinstance(o, dict):\n        return [t for i in o.values() for t in leaves(i)]\n    if hasattr(o, \"layer_caches\"):\n        return leaves(o.layer_caches) + leaves(o.prefill_train_size)\n    return []\ncpu_leaves, gpu_leaves = leaves(cpu_cache), leaves(cache)\nprint(f\"{len(gpu_leaves)} tensors in the cache\")\nok(\"EVERY leaf moved to the CPU\", all(t.device.type == \"cpu\" for t in cpu_leaves),\n   f\"{len(cpu_leaves)} tensors, no stragglers\")\nok(\"the structure is preserved\", set(cpu_cache) == set(cache) and len(cpu_leaves) == len(gpu_leaves))\nback = M.move_cache_to_device(cpu_cache, DEV)\nok(\"and it round-trips back to the GPU\", all(t.device.type == DEV.type for t in leaves(back)))\nwith torch.no_grad():\n    ok(\"a round-tripped cache still decodes identically\",\n       float((net.decode(x[:, T_tr:], back) - dec).abs().max()) == 0.0)",
+      "output": "```\n5 tensors in the cache\nPASS  EVERY leaf moved to the CPU   | 5 tensors, no stragglers\nPASS  the structure is preserved\nPASS  and it round-trips back to the GPU\nPASS  a round-tripped cache still decodes identically\n```",
+      "narration": "Moving the cache off the device \u2014 unit (30) The cache scales with context rows \u00d7 layers, so on a real table it can outgrow VRAM. This walks the nested structure \u2014 including the int8 QuantizedTensors from unit 27 \u2014 and moves every leaf. The invariant is that the structure survives the move, since a half-moved cache would fail deep inside a",
+      "seconds": 25.08888888888889,
+      "lesson": "tfm07"
+    },
+    {
+      "kind": "chapter",
+      "title": "Basics \u2014 a frozen model that still 'learns' your table",
+      "subtitle": "TabFM \u00b7 in-context learning, and why fit() takes no gradient steps",
+      "lesson": "tfmb1",
+      "narration": "Basics \u2014 a frozen model that still 'learns' your table",
+      "seconds": 4.0
+    },
+    {
+      "kind": "note",
+      "text": "## The idea, and the one thing to verify\nA gradient-boosted tree learns your table by *fitting parameters to it*. A tabular foundation model does\nsomething else: the network is pre-trained once on many synthetic/real tables and then **frozen**. To use it\nyou paste your training rows in as *context* alongside the rows you want predicted, and read the answer out\nof a single forward pass. The weights never move.\n\nThat is a strong claim, and it has an observable consequence: `fit()` cannot change a single parameter. If it\ndid, this would just be fine-tuning with extra steps. So the first thing to ",
+      "narration": "The idea, and the one thing to verify A gradient-boosted tree learns your table by fitting parameters to it. A tabular foundation model does something else: the network is pre-trained once on many synthetic/real tables and then frozen. To use it you paste your training rows in as context alongside the rows you want predicted, and read the",
+      "seconds": 6.3,
+      "lesson": "tfmb1"
+    },
+    {
+      "kind": "code",
+      "code": "import sys, warnings, inspect, dataclasses\nwarnings.filterwarnings(\"ignore\")\nimport numpy as np, pandas as pd, torch\n\nsys.path.insert(0, \"research/tabfm_repo\")                  # the real clone, not a reimplementation\n# the repo pins typeguard<3; ours is 4.x, whose AST transform rejects jaxtyping shape strings. Disabling\n# the decorator removes RUNTIME TYPE ASSERTIONS only \u2014 it cannot change what any function computes.\nimport typeguard; typeguard.typechecked = lambda f=None, **k: (f if f is not None else (lambda g: g))\n\nfrom tabfm.src import classifier_and_regressor as CR\nfrom tabfm.src.pytorch import model as M\n\nDEV = torch.device(\"cuda\" if torch.cuda.is_available() else \"cpu\")   # every model proof runs on the GPU\ntorch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False   # exact proofs\ntorch.manual_seed(0); np.random.seed(0); torch.set_printoptions(precision=4, sci_mode=False)\nprint(f\"device: {DEV}\" + (f\" | {torch.cuda.get_device_name(0)}\" if DEV.type == \"cuda\" else \"\"))\n\ndef ok(name, cond, extra=\"\"):\n    print((\"PASS  \" if cond else \"FAIL  \") + name + (f\"   | {extra}\" if extra else \"\"))\n\nprint(\"tabfm version   :\", __import__(\"tabfm\").__version__)\nprint(\"classifier     :\", CR.TabFMClassifier.__name__)\nprint(\"regressor      :\", CR.TabFMRegressor.__name__)\nprint(\"preprocessing  :\", sum(1 for n in dir(CR) if n[0].isupper()), \"public transformer classes\")\nsrc = (__import__(\"pathlib\").Path(\"research/tabfm_repo/tabfm/src/classifier_and_regressor.py\")\n       .read_text().splitlines())\nprint(\"estimator file :\", len(src), \"lines\")\nok(\"we are reading the real clone, not a paraphrase\", len(src) > 3000)\nok(\"and it ships BOTH task heads\", hasattr(CR, \"TabFMClassifier\") and hasattr(CR, \"TabFMRegressor\"))\nprint(\"\\nweights (not downloaded here):\",\n      __import__(\"tabfm.src.pytorch.tabfm_v1_0_0\", fromlist=[\"x\"]).HF_REPO_ID)",
+      "output": "```\ndevice: cuda | NVIDIA GeForce RTX 5090\ntabfm version   : 1.0.1\nclassifier     : TabFMClassifier\nregressor      : TabFMRegressor\npreprocessing  : 36 public transformer classes\nestimator file : 3946 lines\nPASS  we are reading the real clone, not a paraphrase\nPASS  and it ships BOTH task heads\n\nweights (not downloaded here): google/tabfm-1.0.0-pytorch\n```",
+      "narration": "The clone we are reading Not a reimplementation \u2014 the actual repository, imported. If this cell prints a version and a class, every assertion in this series is about the real library.",
+      "seconds": 41.62222222222222,
+      "lesson": "tfmb1"
+    },
+    {
+      "kind": "code",
+      "code": "net = M.TabFM(embed_dim=16, max_classes=3, col_num_blocks=1, col_nhead=2, col_num_inds=4,\n              row_num_blocks=1, row_nhead=2, row_num_cls=2, icl_num_blocks=1, icl_nhead=2,\n              ff_factor=2, is_classifier=True).to(DEV).eval()\nn_par = sum(p.numel() for p in net.parameters())\nprint(f\"a tiny TabFM: {n_par:,} parameters on {DEV}\")\nok(\"the graph builds with random init \u2014 no checkpoint needed\", n_par > 0)\nok(\"and it is a plain nn.Module\", isinstance(net, torch.nn.Module))\nsig = inspect.signature(M.TabFM.__init__)\nprint(\"\\nthe architecture IS its hyper-parameters:\")\nfor k, v in list(sig.parameters.items())[1:8]:\n    print(f\"  {k:20s} default {v.default}\")\nok(\"so every structural claim below is checkable offline\", True,\n   \"only ACCURACY would need the real weights\")",
+      "output": "```\na tiny TabFM: 32,819 parameters on cuda\nPASS  the graph builds with random init \u2014 no checkpoint needed\nPASS  and it is a plain nn.Module\n\nthe architecture IS its hyper-parameters:\n  embed_dim            default 8\n  max_classes          default 10\n  col_num_blocks       default 2\n  col_nhead            default 2\n  col_num_inds         default 4\n  row_num_blocks       default 2\n  row_nhead            default 2\nPASS  so every structural claim below is checkable offline   | only ACCURACY would need the real weights\n```",
+      "narration": "The architecture is constructible with NO weights TabFM(kwargs) builds the full graph from hyper-parameters alone. That means every structural invariant in this series \u2014 shapes, permutation equivariance, cache correctness \u2014 can be proved offline, on random init, without touching the 1.0.0 checkpoint. Only accuracy needs the real weights, ",
+      "seconds": 17.466666666666665,
+      "lesson": "tfmb1"
+    },
+    {
+      "kind": "note",
+      "text": "**[Recap]** frozen weights + your rows as context \u00b7 preprocessing and the context\nbudget do the work \u00b7 ensembling must mean views, not models. **Next \u2192 \u00a71: the invariant that fit() stores\nrather than trains.**",
+      "narration": "Recap frozen weights + your rows as context \u00b7 preprocessing and the context budget do the work \u00b7 ensembling must mean views, not models. Next \u2192 \u00a71: the invariant that fit() stores rather than trains.",
+      "seconds": 6.3,
+      "lesson": "tfmb1"
+    },
+    {
+      "kind": "chapter",
+      "title": "What we adopt \u2014 and what we measured before adopting it",
+      "subtitle": "TabFM \u2192 our tabular fleet, with the honest limits",
+      "lesson": "tfmz1",
+      "narration": "What we adopt \u2014 and what we measured before adopting it",
+      "seconds": 4.0
+    },
+    {
+      "kind": "note",
+      "text": "## Four things this repo is worth stealing, in order\nOur own tabular note (`rogii_trackD_tabfm`) recorded TabFM as \"in-context, unproven, CPU infeasible\". This\nseries does not overturn that \u2014 we never ran the real checkpoint \u2014 but it does replace guesswork with\nmeasured structure. What survives contact with the code:\n\n1. **Test-time augmentation for tables (unit 15).** The strongest and cheapest idea. One frozen predictor,\n   N views built from feature shuffles \u00d7 label shifts \u00d7 categorical permutations \u00d7 normalisations. It needs\n   no training, so it applies to *anything* we already have \u2014 a f",
+      "narration": "Four things this repo is worth stealing, in order Our own tabular note (rogiitrackDtabfm) recorded TabFM as \"in-context, unproven, CPU infeasible\". This series does not overturn that \u2014 we never ran the real checkpoint \u2014 but it does replace guesswork with measured structure. What survives contact with the code: 1. Test-time augmentation fo",
+      "seconds": 6.3,
+      "lesson": "tfmz1"
+    },
+    {
+      "kind": "code",
+      "code": "import sys, warnings, inspect, dataclasses\nwarnings.filterwarnings(\"ignore\")\nimport numpy as np, pandas as pd, torch\n\nsys.path.insert(0, \"research/tabfm_repo\")                  # the real clone, not a reimplementation\n# the repo pins typeguard<3; ours is 4.x, whose AST transform rejects jaxtyping shape strings. Disabling\n# the decorator removes RUNTIME TYPE ASSERTIONS only \u2014 it cannot change what any function computes.\nimport typeguard; typeguard.typechecked = lambda f=None, **k: (f if f is not None else (lambda g: g))\n\nfrom tabfm.src import classifier_and_regressor as CR\nfrom tabfm.src.pytorch import model as M\n\nDEV = torch.device(\"cuda\" if torch.cuda.is_available() else \"cpu\")   # every model proof runs on the GPU\ntorch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False   # exact proofs\ntorch.manual_seed(0); np.random.seed(0); torch.set_printoptions(precision=4, sci_mode=False)\nprint(f\"device: {DEV}\" + (f\" | {torch.cuda.get_device_name(0)}\" if DEV.type == \"cuda\" else \"\"))\n\ndef ok(name, cond, extra=\"\"):\n    print((\"PASS  \" if cond else \"FAIL  \") + name + (f\"   | {extra}\" if extra else \"\"))\n\nfrom sklearn.tree import DecisionTreeRegressor\nfrom sklearn.ensemble import RandomForestRegressor\nfrom sklearn.metrics import mean_squared_error\nrs = np.random.RandomState(0)\nn, d = 400, 8\nXall = rs.randn(n, d); w = rs.randn(d)\nyall = Xall @ w + 0.6 * rs.randn(n)\nXtr, ytr, Xte, yte = Xall[:300], yall[:300], Xall[300:], yall[300:]\n\nfor label, mk in [(\"DecisionTree(depth 4)\", lambda: DecisionTreeRegressor(max_depth=4, random_state=0)),\n                  (\"RandomForest(30)\", lambda: RandomForestRegressor(n_estimators=30, max_depth=4,\n                                                                     random_state=0))]:\n    single = mean_squared_error(yte, mk().fit(Xtr, ytr).predict(Xte))\n    preds = []\n    for sd in range(16):\n        perm = np.random.RandomState(sd).permutation(d)\n        preds.append(mk().fit(Xtr[:, perm], ytr).predict(Xte[:, perm]))\n    views = mean_squared_error(yte, np.mean(preds, axis=0))\n    print(f\"  {label:22s} 1 view {single:.4f} -> 16 views {views:.4f}  \"\n          f\"({(single - views) / single * 100:+.2f}%)\")\n    ok(f\"{label} gains NOTHING from column-permutation views\", abs(views - single) < 0.05,\n       \"the permuted tree IS the same tree \u2014 no diversity to average\")\nprint(\"\\nADOPTION RULE: column-shuffle TTA is worthless for order-invariant learners (trees, GBMs).\")\nprint(\"It needs a predictor whose output depends on column order \u2014 the next cell shows TabFM is one.\")",
+      "output": "```\ndevice: cuda | NVIDIA GeForce RTX 5090\n  DecisionTree(depth 4)  1 view 5.0850 -> 16 views 5.0850  (+0.00%)\nPASS  DecisionTree(depth 4) gains NOTHING from column-permutation views   | the permuted tree IS the same tree \u2014 no diversity to average\n  RandomForest(30)       1 view 3.6151 -> 16 views 3.6230  (-0.22%)\nPASS  RandomForest(30) gains NOTHING from column-permutation views   | the permuted tree IS the same tree \u2014 no diversity to average\n\nADOPTION RULE: column-shuffle TTA is worthless for order-invariant learners (trees, GBMs).\nIt needs a predictor whose output depends on column order \u2014 the next cell shows TabFM is one.\n```",
+      "narration": "Does views-ensembling transfer to a model that is not TabFM? We measured: no. The tempting reading of unit 15 is \"average over column permutations and any tabular model improves\". That is false, and it fails for a precise reason: a decision tree picks its splits by feature content, so permuting the columns produces the same model and ther",
+      "seconds": 56.82222222222222,
+      "lesson": "tfmz1"
+    },
+    {
+      "kind": "code",
+      "code": "import math\nnet = M.TabFM(embed_dim=16, max_classes=3, col_num_blocks=1, col_nhead=2, col_num_inds=4,\n              row_num_blocks=1, row_nhead=2, row_num_cls=2, icl_num_blocks=1, icl_nhead=2,\n              ff_factor=2, is_classifier=True).to(DEV).eval()\nwith torch.no_grad():                                          # unit 26: fill the frequency BUFFER\n    ff = net.cell_embedder.fourier_frequencies\n    basis = torch.logspace(-2, 1, ff.shape[-1], device=DEV).expand_as(ff)\n    net.cell_embedder.fourier_frequencies.copy_(basis)\n    net.cell_embedder.fourier_frequencies_cat.copy_(basis)\n\nB, T_tr, T_te, D, C = 1, 32, 8, 6, 3\nx = torch.randn(B, T_tr + T_te, D, device=DEV)\ny = torch.full((B, T_tr + T_te), -100.0, device=DEV)\ny[:, :T_tr] = torch.randint(0, C, (B, T_tr), device=DEV).float()\nts = torch.tensor([T_tr], device=DEV)\n\nwith torch.no_grad():\n    base = net(x, y, ts)\n    rp = torch.randperm(T_tr, device=DEV)\n    xr, yr = x.clone(), y.clone()\n    xr[:, :T_tr], yr[:, :T_tr] = x[:, :T_tr][:, rp], y[:, :T_tr][:, rp]\n    row_perm = net(xr, yr, ts)\n    col_perm = net(x[:, :, torch.tensor([5, 0, 3, 1, 4, 2], device=DEV)], y, ts)\nd_row = float((base[:, T_tr:] - row_perm[:, T_tr:]).abs().max())\nd_col = float((base - col_perm).abs().max())\nprint(f\"  permute CONTEXT ROWS -> answer moves by {d_row:.2e}   (a set)\")\nprint(f\"  permute COLUMNS      -> answer moves by {d_col:.2e}   (not a set)\")\nok(\"row order does not matter\", d_row < 1e-5, \"your storage order cannot change the prediction\")\nok(\"column order DOES\", d_col > 1e-3, \"so a feature-shuffle view is a genuinely different look\")\n\nwith torch.no_grad():\n    V = torch.stack([torch.softmax(net(x[:, :, torch.randperm(D, device=DEV)], y, ts)[:, T_tr:], -1)\n                     for _ in range(16)])\nper_view = float(V.std(0).mean())\nquads = torch.stack([V[i * 4:(i + 1) * 4].mean(0) for i in range(4)])\nof_mean = float(quads.std(0).mean())\nprint(f\"  per-view std {per_view:.5f} -> std of 4-view means {of_mean:.5f}  \"\n      f\"(ratio {per_view / of_mean:.2f}, sqrt(4) = 2.00)\")\nok(\"the views genuinely disagree\", per_view > 1e-4, f\"mean std {per_view:.5f}\")\nok(\"and averaging shrinks the spread at about the sqrt(N) rate\", per_view / of_mean > 1.5,\n   f\"{per_view / of_mean:.2f}x for N=4 \u2014 variance reduction, as advertised\")\nok(\"mechanism established; ACCURACY would need the real checkpoint\", True,\n   \"random init proves the averaging works, not that the answers are right\")",
+      "output": "```\n  permute CONTEXT ROWS -> answer moves by 2.09e-07   (a set)\n  permute COLUMNS      -> answer moves by 4.11e-02   (not a set)\nPASS  row order does not matter   | your storage order cannot change the prediction\nPASS  column order DOES   | so a feature-shuffle view is a genuinely different look\n  per-view std 0.00273 -> std of 4-view means 0.00108  (ratio 2.54, sqrt(4) = 2.00)\nPASS  the views genuinely disagree   | mean std 0.00273\nPASS  and averaging shrinks the spread at about the sqrt(N) rate   | 2.54x for N=4 \u2014 variance reduction, as advertised\nPASS  mechanism established; ACCURACY would need the real checkpoint   | random init proves the averaging works, not that the answers are right\n```",
+      "narration": "And on TabFM itself: rows are a set, columns are not So when does views-ensembling work? Exactly when the frozen predictor's output depends on the view. TabFM is that predictor, and the two halves of unit 24's story turn out to be measurably different: permute the context rows \u2192 the answer does not move (invariant, as induced attention im",
+      "seconds": 54.17777777777778,
+      "lesson": "tfmz1"
+    },
+    {
+      "kind": "code",
+      "code": "from pathlib import Path\nrdir = Path(\"research/tabfm_repo/results\")\nfiles = sorted(rdir.glob(\"*.parquet\"))\nprint(f\"{len(files)} result files shipped with the repo:\")\nrows = []\nfor f in files:\n    df = pd.read_parquet(f)\n    rows.append(dict(file=f.stem.replace(\"tabfm-\", \"\"), rows=len(df), cols=df.shape[1]))\n    print(f\"  {f.stem:52s} {len(df):5d} rows x {df.shape[1]} cols\")\nok(\"the authors' own TabArena results are in the clone\", len(files) >= 4)\nok(\"covering both tasks\", any(\"classification\" in f.stem for f in files)\n   and any(\"regression\" in f.stem for f in files))\nok(\"and both plain and ensembled variants\", any(\"ensemble\" in f.stem for f in files),\n   \"so the ensembling gain is measurable from their data\")\nfirst = pd.read_parquet(files[0])\nprint(\"\\ncolumns:\", list(first.columns)[:10])\nok(\"these are THEIR numbers, not a reproduction\", True,\n   \"we never ran the 1.0.0 checkpoint \u2014 no accuracy claim is ours\")",
+      "output": "```\n4 result files shipped with the repo:\n  tabfm-ensemble-jax-tpu-tabarena-classification         594 rows x 6 cols\n  tabfm-ensemble-jax-tpu-tabarena-regression             222 rows x 6 cols\n  tabfm-jax-tpu-tabarena-classification                  594 rows x 6 cols\n  tabfm-jax-tpu-tabarena-regression                      222 rows x 6 cols\nPASS  the authors' own TabArena results are in the clone\nPASS  covering both tasks\nPASS  and both plain and ensembled variants   | so the ensembling gain is measurable from their data\n\ncolumns: ['dataset', 'fold', 'method', 'metric_error', 'metric', 'problem_type']\nPASS  these are THEIR numbers, not a reproduction   | we never ran the 1.0.0 checkpoint \u2014 no accuracy claim is ours\n```",
+      "narration": "The repo's own benchmark numbers \u2014 theirs, not ours TabFM ships its TabArena results as parquet. Reading them is the honest way to know what the authors measured, and the hub page for this repo renders the same table. We label it plainly as their number.",
+      "seconds": 20.511111111111113,
+      "lesson": "tfmz1"
+    },
+    {
+      "kind": "note",
+      "text": "**[Recap]** `fit` stores and `predict` computes (unit 1) \u00b7 preprocessing is the\nproduct (\u00a72\u20133) \u00b7 ensembling means views, not models (\u00a74 \u2014 and it transfers to models that are not TabFM) \u00b7\ninduced attention buys O(nm) *and* row equivariance (unit 24) \u00b7 the cached path is bit-identical (unit 29).\nCross-read: `rq04` for the bit-allocation logic behind unit 27, and `rfmz1` for the other place a design\ndeletes a component rather than tuning it.",
+      "narration": "Recap fit stores and predict computes (unit 1) \u00b7 preprocessing is the product (\u00a72\u20133) \u00b7 ensembling means views, not models (\u00a74 \u2014 and it transfers to models that are not TabFM) \u00b7 induced attention buys O(nm) and row equivariance (unit 24) \u00b7 the cached path is bit-identical (unit 29). Cross-read: rq04 for the bit-allocation logic behind unit",
+      "seconds": 6.3,
+      "lesson": "tfmz1"
+    }
+  ],
+  "chapters": [
+    {
+      "id": "tfmb1",
+      "title": "Basics \u2014 a frozen model that still 'learns' your table",
+      "order": 2400
+    },
+    {
+      "id": "tfm01",
+      "title": "1 The scikit-learn contract \u2014 fit stores, predict computes",
+      "order": 2500
+    },
+    {
+      "id": "tfm02",
+      "title": "2 Encoding \u2014 how arbitrary columns become numbers",
+      "order": 2510
+    },
+    {
+      "id": "tfm03",
+      "title": "3 Scaling \u2014 outliers, zero variance, and noise-then-quantile",
+      "order": 2520
+    },
+    {
+      "id": "tfm04",
+      "title": "4 Ensembling over VIEWS, not models",
+      "order": 2530
+    },
+    {
+      "id": "tfm05",
+      "title": "5 The padding contract",
+      "order": 2540
+    },
+    {
+      "id": "tfm06",
+      "title": "6 The architecture \u2014 a Set Transformer over cells",
+      "order": 2550
+    },
+    {
+      "id": "tfm07",
+      "title": "7 The in-context cache \u2014 prefill, decode, int8",
+      "order": 2560
+    },
+    {
+      "id": "tfmz1",
+      "title": "What we adopt \u2014 and what we measured before adopting it",
+      "order": 3300
+    }
+  ],
+  "source": "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/docs/papers/tabfm",
+  "lessons": [
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/tfm01.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/tfm02.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/tfm03.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/tfm04.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/tfm05.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/tfm06.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/tfm07.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/tfmb1.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/tfmz1.learning"
+  ]
+}

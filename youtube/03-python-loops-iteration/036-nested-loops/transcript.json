@@ -1,0 +1,42 @@
+[
+  {
+    "text": "A nested loop is simply a loop inside another loop — and it's how you work with grids and pairs.",
+    "until_line": 5
+  },
+  {
+    "text": "For every single pass of the outer loop, the inner loop runs all the way through.",
+    "until_line": 5
+  },
+  {
+    "text": "So three rows times three columns produces a full multiplication table, printed grid-style.",
+    "until_line": 5
+  },
+  {
+    "text": "[chuckle] Nesting two lists gives you every possible combination of their items.",
+    "until_line": 12
+  },
+  {
+    "text": "Each color pairs with each size, producing red-small, red-large, blue-small, blue-large.",
+    "until_line": 12
+  },
+  {
+    "text": "[sniff] Here's a subtle but crucial rule about break inside nested loops.",
+    "until_line": 19
+  },
+  {
+    "text": "break only exits the loop it lives in — the inner one — not the outer loop around it.",
+    "until_line": 19
+  },
+  {
+    "text": "So the outer loop keeps going, and the inner loop restarts fresh each time.",
+    "until_line": 19
+  },
+  {
+    "text": "[groan] Nested loops are powerful, but keep them shallow — more than two or three levels gets hard to follow fast.",
+    "until_line": 19
+  },
+  {
+    "text": "Next video: loop patterns. Which one do you already use? Comment below.",
+    "until_line": 19
+  }
+]

@@ -1,0 +1,16 @@
+[
+  {
+    "after_line": 12,
+    "text": ">>> Rex\\n>>> 3\\n>>> Rex says woof!",
+    "caption": "__init__ sets up, methods act"
+  },
+  {
+    "after_line": 16,
+    "text": ">>> Bella says woof!",
+    "caption": "each object is independent"
+  },
+  {
+    "after_line": 16,
+    "image": "artifacts/terminal.png"
+  }
+]

@@ -1,0 +1,21 @@
+[
+  {
+    "after_line": 7,
+    "text": ">>> 12586269025",
+    "caption": "lru_cache makes recursion instant"
+  },
+  {
+    "after_line": 15,
+    "text": ">>> 25",
+    "caption": "partial pre-fills arguments"
+  },
+  {
+    "after_line": 17,
+    "text": ">>> 24",
+    "caption": "reduce folds to one value"
+  },
+  {
+    "after_line": 17,
+    "image": "artifacts/terminal.png"
+  }
+]

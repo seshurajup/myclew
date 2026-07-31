@@ -1,0 +1,67 @@
+@ id: lb03
+@ order: 42
+@ title: The model explanation — XGBoost + TreeSHAP on the labels
+@ subtitle: what separates the 1%, and why it barely does (and what that means for our score)
+@ source: fleet_agents/xai.py
+
+--- note
+## Ask a model: can you tell the labeled 1% apart?
+The `xai` agent (`family="label"`) trains an **XGBoost** classifier to separate GT-labeled from unlabeled cells
+on five Cellpose per-cell features, then explains it with **exact TreeSHAP** (XGBoost's native `pred_contribs`
+— no `shap` install, no numpy-ABI risk). XGBoost + TreeSHAP beats a small MLP + permutation here: it handles the
+7k-vs-263k imbalance and gives **directional**, per-instance attributions robust to correlated features.
+
+--- note
+### The result: weak-but-real separability (AUC ≈ 0.72)
+The classifier reaches only **AUC 0.736 (44b6) / 0.716 (6bba)** — clearly above chance, but nowhere near
+determined. That is itself the finding: the labels are **not** strongly a function of any per-cell feature,
+consistent with a **random mosaic subset** plus a light curation bias. The features that do carry signal:
+**radial position** (44b6 — labeled cells more central) and **local density** (6bba — labeled cells less
+crowded).
+--- image
+learning/label_figs/label_feature_importance.png
+Global importance = mean |SHAP|. AUC in the legend. No single feature dominates → labels are near-random mosaic.
+
+--- note
+### Direction — which way each feature pushes
+TreeSHAP is signed, so we can read *how* a feature moves a cell toward "labeled". Both embryos agree: a cell is
+more likely labeled when it is in a **lower-density**, **more central** neighbourhood — the geometric fingerprint
+of a sparsely-labeled, cleanly-trackable cell.
+--- image
+learning/label_figs/label_shap_direction.png
+Mean SHAP per feature. Left = pushes toward UNLABELED, right = toward LABELED.
+
+--- note
+### The distribution behind it
+The single clearest separator is isolation / local density. Labeled cells sit measurably farther from their
+neighbours than unlabeled ones — but note both distributions overlap heavily past the 7 µm match gate, which is
+why the classifier is only AUC ≈ 0.72.
+--- image
+learning/label_figs/label_isolation_dist.png
+Labeled vs unlabeled nearest-neighbour distance, per embryo, with the 7 µm matching gate marked.
+
+--- note
+### Fraction shrinks with stage
+Because sparse-labeled cells are a fixed mosaic fraction while total cells explode with development, the **labeled
+%** falls as movies get denser — dense late-stage crops can have **1 label per ~1000 cells**.
+--- image
+learning/label_figs/label_fraction_vs_stage.png
+Per-movie labeled fraction vs density (log x). Denser = later stage = smaller labeled fraction.
+
+--- note
+### What it means for our score
+Three consequences, all pointing the same way:
+- **Detection is the whole game.** Labeled cells are representative random nuclei → we must detect *every*
+  nucleus; the sparse GT never rewards a special "trackable-cell detector".
+- **CV over-credits easy cells.** Curation kept *"green-overlapping, easier-to-track"* cells → our CV recall is
+  measured on easier-than-average cells, so real dense-frame recall is likely **lower** than CV suggests. Don't
+  over-trust CV on dense stages.
+- **The division term is thin.** The GT under-annotates divisions → the +0.1 term has little headroom; spend
+  effort on node recall, not division heroics.
+--- shape
+detect ALL nuclei<br>CV over-credits easy cells<br>div term = thin<br><b>→ recall is the lever</b>
+
+--- note
+Everything here is reproducible and cached: figures in `learning/label_figs/`, verdicts in
+`results/label_selection/paper_verify.{parquet,json}`, per-cell features in `cells_cellpose_diverse.parquet`.
+Agents: `research-search` (read the papers), `paper-verify` (prove vs data), `xai` (explain the model).

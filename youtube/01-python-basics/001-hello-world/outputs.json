@@ -1,0 +1,26 @@
+[
+  {
+    "after_line": 1,
+    "text": ">>> Hello, World!",
+    "caption": "you typed it, Python printed it"
+  },
+  {
+    "after_line": 3,
+    "image": "artifacts/var_box.png",
+    "caption": "name now holds 'Python'"
+  },
+  {
+    "after_line": 4,
+    "image": "artifacts/fstring.png",
+    "caption": "{name} is replaced, not printed literally"
+  },
+  {
+    "after_line": 9,
+    "image": "artifacts/fstring_num.png",
+    "caption": "same swap works for a number"
+  },
+  {
+    "after_line": 10,
+    "image": "artifacts/terminal.png"
+  }
+]

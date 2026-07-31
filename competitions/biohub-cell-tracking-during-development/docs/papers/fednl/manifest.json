@@ -1,0 +1,240 @@
+{
+  "slug": "fednl",
+  "source": "https://arxiv.org/pdf/2605.16350",
+  "pdf": "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/docs/papers/fednl/source.pdf",
+  "title": "Federated Nested Learning: Collaborative Training of",
+  "backend": "docling+pymupdf-assets",
+  "pages": 16,
+  "figures": [
+    {
+      "page": 5,
+      "path": "assets/fig/p05_0.png",
+      "y0": 86.10040283203125,
+      "y1": 153.92901611328125,
+      "caption": "",
+      "label": "",
+      "w": 630,
+      "h": 445
+    },
+    {
+      "page": 5,
+      "path": "assets/fig/p05_1.png",
+      "y0": 105.32038116455078,
+      "y1": 122.36134338378906,
+      "caption": "",
+      "label": "",
+      "w": 112,
+      "h": 112
+    },
+    {
+      "page": 5,
+      "path": "assets/fig/p05_2.png",
+      "y0": 147.0567626953125,
+      "y1": 162.42156982421875,
+      "caption": "",
+      "label": "",
+      "w": 101,
+      "h": 101
+    },
+    {
+      "page": 5,
+      "path": "assets/fig/p05_3.png",
+      "y0": 191.6076202392578,
+      "y1": 202.90074157714844,
+      "caption": "",
+      "label": "",
+      "w": 77,
+      "h": 77
+    },
+    {
+      "page": 5,
+      "path": "assets/fig/p05_4.png",
+      "y0": 189.83299255371094,
+      "y1": 201.28744506835938,
+      "caption": "",
+      "label": "",
+      "w": 78,
+      "h": 78
+    },
+    {
+      "page": 5,
+      "path": "assets/fig/p05_5.png",
+      "y0": 257.9143981933594,
+      "y1": 269.20751953125,
+      "caption": "Figure 1: The three-level nested optimization framework of FedNL. L2: Memory state St up- dated via the Delta Rule for test-time adaptation. L1: Meta-parameters \u03b8 (LoRA adapters) trained with frozen backbone. L0: Server aggregates rules \u03b8, not private memory. Red: parameter flow; Blue: meta-gradient flow.",
+      "label": "Figure 1",
+      "w": 77,
+      "h": 77
+    },
+    {
+      "page": 5,
+      "path": "assets/fig/p05_6.png",
+      "y0": 257.9143981933594,
+      "y1": 269.20751953125,
+      "caption": "Figure 2: Unrolled computation graph of FedNL. L2: Token-level memory updates st = st\u22121 \u2212 \u2207Lsurp via Delta Rule. L1: Meta-gradients \u2207\u03b8 backpropagated through memory trajectory. L0: M3 aggregation of global meta-rules \u03b8. Memory states remain strictly local.",
+      "label": "Figure 2",
+      "w": 78,
+      "h": 77
+    },
+    {
+      "page": 9,
+      "path": "assets/fig/p09_0.png",
+      "y0": 74.78866577148438,
+      "y1": 163.3999786376953,
+      "caption": "Figure 4: NIAH accuracy by target insertion depth, averaged over the seven needle clients.",
+      "label": "Figure 4",
+      "w": 828,
+      "h": 829
+    }
+  ],
+  "tables": [
+    {
+      "page": 5,
+      "rows": 3,
+      "cols": 6,
+      "image": "assets/tab/p05_0.png"
+    },
+    {
+      "page": 8,
+      "rows": 2,
+      "cols": 2,
+      "image": "assets/tab/p08_2.png"
+    },
+    {
+      "page": 8,
+      "rows": 5,
+      "cols": 2,
+      "image": "assets/tab/p08_3.png"
+    },
+    {
+      "page": 9,
+      "rows": 7,
+      "cols": 6,
+      "image": "assets/tab/p09_0.png"
+    },
+    {
+      "page": 9,
+      "rows": 14,
+      "cols": 15,
+      "image": "assets/tab/p09_1.png"
+    },
+    {
+      "page": 9,
+      "rows": 7,
+      "cols": 6,
+      "image": "assets/tab/p09_2.png"
+    }
+  ],
+  "sections": [
+    {
+      "level": 1,
+      "page": 1,
+      "num": "",
+      "title": "Self-Referential Memories for Test-Time Adaptation",
+      "heading": "Self-Referential Memories for Test-Time Adaptation"
+    },
+    {
+      "level": 1,
+      "page": 1,
+      "num": "",
+      "title": "Abstract",
+      "heading": "Abstract"
+    },
+    {
+      "level": 1,
+      "page": 1,
+      "num": "1",
+      "title": "Introduction",
+      "heading": "1 Introduction"
+    },
+    {
+      "level": 1,
+      "page": 3,
+      "num": "2",
+      "title": "Methodology",
+      "heading": "2 Methodology"
+    },
+    {
+      "level": 1,
+      "page": 7,
+      "num": "3",
+      "title": "Experiments",
+      "heading": "3 Experiments"
+    },
+    {
+      "level": 1,
+      "page": 10,
+      "num": "4",
+      "title": "Conclusion",
+      "heading": "4 Conclusion"
+    },
+    {
+      "level": 1,
+      "page": 10,
+      "num": "5",
+      "title": "Limitations",
+      "heading": "5 Limitations"
+    },
+    {
+      "level": 1,
+      "page": 10,
+      "num": "",
+      "title": "References",
+      "heading": "References"
+    },
+    {
+      "level": 1,
+      "page": 12,
+      "num": "A",
+      "title": "Related Work",
+      "heading": "A Related Work"
+    },
+    {
+      "level": 1,
+      "page": 12,
+      "num": "B",
+      "title": "Derivations and Implementation Details",
+      "heading": "B Derivations and Implementation Details"
+    },
+    {
+      "level": 1,
+      "page": 14,
+      "num": "C",
+      "title": "Benchmark Data Format",
+      "heading": "C Benchmark Data Format"
+    },
+    {
+      "level": 1,
+      "page": 15,
+      "num": "D",
+      "title": "Broader Impacts",
+      "heading": "D Broader Impacts"
+    },
+    {
+      "level": 1,
+      "page": 16,
+      "num": "E",
+      "title": "Asset Licenses and Terms of Use",
+      "heading": "E Asset Licenses and Terms of Use"
+    }
+  ],
+  "equations": 73,
+  "numbered": 9,
+  "md": "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/docs/papers/fednl/fednl.md",
+  "equations_json": "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/docs/papers/fednl/equations.json",
+  "available": {
+    "pymupdf": true,
+    "marker": true,
+    "docling": true
+  },
+  "score": {
+    "chars": 61433,
+    "headings": 38,
+    "equations": 17,
+    "eq_tags": 0,
+    "images": 17,
+    "tables": 41,
+    "latex_cmds": 170,
+    "mojibake": 0
+  }
+}

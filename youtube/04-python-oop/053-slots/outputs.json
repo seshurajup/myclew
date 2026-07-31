@@ -1,0 +1,21 @@
+[
+  {
+    "after_line": 9,
+    "text": ">>> 1 2",
+    "caption": "__slots__ = fixed attributes"
+  },
+  {
+    "after_line": 15,
+    "text": ">>> blocked: 'Point' object has no attribute 'z'",
+    "caption": "blocks typos + new attrs"
+  },
+  {
+    "after_line": 18,
+    "text": ">>> False",
+    "caption": "no per-instance __dict__ = less memory"
+  },
+  {
+    "after_line": 18,
+    "image": "artifacts/terminal.png"
+  }
+]

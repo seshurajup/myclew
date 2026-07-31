@@ -1,0 +1,42 @@
+[
+  {
+    "text": "For loops repeat a block of code, walking through a sequence one item at a time.",
+    "until_line": 2
+  },
+  {
+    "text": "Range creates a sequence of numbers on demand — range of five gives you zero through four.",
+    "until_line": 2
+  },
+  {
+    "text": "Notice it stops before five, just like slicing — the end value is never included.",
+    "until_line": 2
+  },
+  {
+    "text": "You can also loop straight over a list, [cough] pulling out each fruit in turn.",
+    "until_line": 6
+  },
+  {
+    "text": "Give range two arguments and it starts and stops where you say — one to four builds a little count.",
+    "until_line": 9
+  },
+  {
+    "text": "Need the position along with the value? Enumerate hands you both the index and the item together.",
+    "until_line": 12
+  },
+  {
+    "text": "[sniff] Range takes a third argument too, a step — here we count up by twos.",
+    "until_line": 15
+  },
+  {
+    "text": "And loops can nest inside each other — an inner loop runs completely for every single pass of the outer one.",
+    "until_line": 24
+  },
+  {
+    "text": "[laugh] That nesting is exactly how you'd walk through a grid, row by row and column by column.",
+    "until_line": 24
+  },
+  {
+    "text": "Next video: while loops. Comment PYTHON if you want the cheat sheet.",
+    "until_line": 24
+  }
+]

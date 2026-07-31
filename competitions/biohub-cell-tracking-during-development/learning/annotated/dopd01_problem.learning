@@ -1,0 +1,55 @@
+@ id: dopd01
+@ order: 620
+@ title: Direct-OPD — weak-to-strong, and why standard distillation imports the weak ceiling
+@ subtitle: transfer the DIRECTION a weak RL teacher learned, not its endpoint
+@ source: arXiv 2607.05394 + tools/researchpapers/research_refs/direct-opd
+
+--- note
+## Why this is in our learning hub (honest framing)
+This lesson set is **not about biohub cell-tracking**. It walks *Weak-to-Strong Generalization via Direct
+On-Policy Distillation* (Feng et al., ByteDance-Tsinghua SIA, arXiv **2607.05394**), whose code we cloned to
+`tools/researchpapers/research_refs/direct-opd` (a patched **verl** RL-training tree). It lives here for the
+same reason the Gemma-4 and BitNet lessons do: it is **LLM-RL infrastructure background** that feeds a fleet
+capability (distillation-mode selection), and we hold ourselves to the same bar — **explain every part AND
+MEASURE the core mechanism on our own GPU** (see dopd06), never just cite. Read it as post-training method,
+not a tracking technique.
+
+--- note
+## The problem: a strong student, a weak RL teacher
+You have a **weak** model that was improved by RL on some task (it discovered a useful behaviour — e.g. a
+reasoning credit-assignment). You also have a **stronger** base model (better pretrained) that has **not**
+been RL'd on this task. You want the strong student to benefit from what the weak teacher learned.
+
+The obvious move — **standard knowledge distillation** — trains the student to **match the teacher's final
+output distribution** (minimise KL(student ‖ πT_postRL)). That has a fatal flaw here: the teacher is **weak**.
+Matching its endpoint **pulls the strong student down to the weak teacher's level** — it **imports the weak
+teacher's capacity ceiling**. The student can never end up better than the endpoint you told it to copy.
+
+--- note
+## The idea: transfer the DIRECTION, not the destination
+Direct-OPD's insight: the valuable thing the weak teacher produced during RL is not its *endpoint*, it is the
+**shift** — the direction in which RL moved its policy (which tokens it learned to up-weight / down-weight).
+That direction is often **correct even where the teacher's absolute policy is mediocre**.
+
+So instead of copying the endpoint, Direct-OPD reads the teacher's RL-induced change as a **reward signal**
+and lets the **stronger student** move in that same direction **from its own, better starting point**. Applying
+a good direction to a better base lands **past the weak teacher's ceiling** — the "weak-to-strong" effect.
+
+--- image
+learning/assets/direct-opd/dopd_schematic.png
+The mechanism. RED track: the weak teacher's RL moves πT_ref → πT (its ceiling); the learned change is Δ_T =
+log πT − log πT_ref. GREY dashed arrow: standard *endpoint* distillation drags the strong student DOWN to that
+ceiling. GREEN track: Direct-OPD transfers the *direction* Δ_T on-policy from the student's higher base, so the
+student ends up ABOVE the weak teacher. (Our measured version of exactly this picture is dopd06.)
+
+--- note
+## The four claims (from the repo README highlights)
+1. **Weak RL teachers can improve stronger students** by transferring the RL-learned direction.
+2. **Direct-OPD avoids matching the post-RL teacher endpoint**, which would import the weak teacher's ceiling.
+3. **Small-model RL then Direct-OPD** reduces the need to re-discover credit assignment on the larger model
+   (do the expensive RL credit-assignment once, cheaply, on the small model; transfer the direction up).
+4. **Policy shifts from different RL processes can be applied sequentially** to the same student (stackable).
+
+The reference experiment is **JustRL-DeepSeek-1.5B (weak teacher) → Qwen3-1.7B (stronger student)** on math
+reasoning (AIME/HMMT), built on verl + vLLM/SGLang. dopd02 unpacks the mechanism, dopd03 the exact objective
+we confirmed **from the code**, dopd04 the claims/setup, dopd05 the fleet mapping, dopd06 our measured proof.

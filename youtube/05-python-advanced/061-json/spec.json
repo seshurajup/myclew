@@ -1,0 +1,14 @@
+{
+  "language": "python",
+  "title": "json.py",
+  "hook": "Move Python data in and out as JSON",
+  "playlist": "Learn Python",
+  "target_seconds": 90,
+  "max_seconds": 120,
+  "tts_engine": "chatterbox",
+  "music_prompt": "structured, portable, connected",
+  "code_path": "code.py",
+  "transcript_path": "transcript.json",
+  "outputs_path": "outputs.json",
+  "accent": "rose"
+}

@@ -1,0 +1,42 @@
+[
+  {
+    "text": "Pytest is the most popular testing tool in Python, loved for how little ceremony it needs.",
+    "until_line": 4
+  },
+  {
+    "text": "A test is simply a function whose name starts with test — no class or special base required.",
+    "until_line": 7
+  },
+  {
+    "text": "[chuckle] And you just use plain assert, with no special methods to memorize — pytest makes the output readable for you.",
+    "until_line": 7
+  },
+  {
+    "text": "So checking that add of two and three equals five is one clean, obvious line.",
+    "until_line": 10
+  },
+  {
+    "text": "[sniff] To test that code raises an error, you use pytest dot raises inside a with block.",
+    "until_line": 16
+  },
+  {
+    "text": "The test passes only if the expected exception actually happens, catching missing error handling.",
+    "until_line": 16
+  },
+  {
+    "text": "[sigh] The real magic is parametrize — it runs the same test across many sets of inputs automatically.",
+    "until_line": 21
+  },
+  {
+    "text": "One test function, three input rows, becomes three separate checks, keeping your tests compact.",
+    "until_line": 21
+  },
+  {
+    "text": "[groan] pytest's simplicity means you'll actually write tests — and well-tested code is code you can trust and change.",
+    "until_line": 21
+  },
+  {
+    "text": "Up next, pytest fixtures. Which one do you already use? Comment below.",
+    "until_line": 21
+  }
+]

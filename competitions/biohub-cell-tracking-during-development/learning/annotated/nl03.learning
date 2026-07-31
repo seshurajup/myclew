@@ -1,0 +1,889 @@
+@ id: nl03
+@ order: 1320
+@ title: 3 Nested Learning
+@ subtitle: Nested Learning: The Illusion of Deep Learning Architecture §3
+@ source: docs/papers/nested-learning/nested-learning.md
+
+--- note
+## 3 Nested Learning
+**Paper:** Nested Learning: The Illusion of Deep Learning Architecture · §3 · pages 7–14 · equations (6–28) · 1 figures.
+
+**Nested Learning proper.** Definition 1 fixes what a memory *is*; then a
+sequence of worked examples shows that a 1-layer MLP trained by SGD, the same MLP trained with momentum,
+and a linear-attention layer are all the *same* object at different levels. Definition 2 supplies the
+ordering (update frequency), Definitions 3–4 the formal nested system, and §3.3 the five ways levels can
+exchange knowledge — conditioning on parameters, conditioning on outputs, backpropagation,
+initialisation (MAML), and generation (hypernetworks, and the optimizer whose *context is the gradients
+the architecture generates*).
+
+**Learning vs memorisation** (neuropsychology, Okano et al. 2000, used verbatim by the paper):
+*memory is a neural update caused by an input; learning is the process of acquiring effective, useful
+memory.* Under that definition every update at every level is a memory — including the momentum
+buffer.
+
+--- note
+### Figure 3 — as printed in the paper
+
+Figure 3: An example of comparing a FFN (e.g., MLP) with linear attention in a Transformer-based backbone, optimizing with gradient descent. The red components are blocks in the first level (with frequency 1), while blue components are blocks in the second level (frequency L). Linear attention with learnable initial memory state (referred to as Linear Attention++) is the same as an MLP layer but with in-context learning ability and adaptation to the input sequence.
+
+--- image
+learning/assets/nested-learning/p10_0.png
+Figure 3: An example of comparing a FFN (e.g., MLP) with linear attention in a Transformer-based backbone, optimizing with gradient descent. The red components are blocks in the first level (with frequency 1), while blue components are blocks in the second level (frequency L). Linear attention with learnable initial memory state (referred to as Linear Attention++) is the same as an MLP layer but with in-context learning ability and adaptation to the input sequence.
+
+--- note
+### Definition 1 — associative memory — eq. (6)
+
+$$
+\mathcal{M}^{*} \;=\; \arg\min_{\mathcal{M}}\;\tilde{\mathcal{L}}\big(\mathcal{M}(\mathcal{K});\,\mathcal{V}\big)
+$$
+
+The definition everything else is an instance of: an operator mapping keys `K ⊆ R^{d_k}`
+to values `V ⊆ R^{d_v}`, *learned* by minimising a quality objective `L̃`. Keys and values need not be
+tokens — later they are **gradients** (optimizers), sub-sequences, or layer inputs and their local errors.
+Equivalently: `M` compresses the mapping into its parameters.
+
+--- code
+import torch, torch.nn as nn, torch.nn.functional as F      # the whole paper is linear algebra + autograd
+
+import sys; sys.path.insert(0, "learning")
+import vizkit as vz                                            # the shared visual + explainability layer
+
+DEV = torch.device("cuda" if torch.cuda.is_available() else "cpu")   # every proof runs on the GPU
+torch.set_default_device(DEV)                                  # so EVERY tensor/module below is on DEV
+# These cells PROVE matrix identities, so they need full fp32: TF32 truncates the mantissa to 10 bits
+# and an identity that holds to 1e-6 in fp32 only holds to ~1e-3 in TF32. Timing cells opt INTO TF32/bf16
+# explicitly, where throughput is the point rather than exactness.
+torch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False
+torch.manual_seed(0); torch.set_printoptions(precision=4, sci_mode=False)
+print(f"device: {DEV}" + (f" | {torch.cuda.get_device_name(0)}" if DEV.type == "cuda" else ""))
+
+def ok(name, cond, extra=""):                                  # a lesson's PROOF prints PASS/FAIL, never prose
+    print(("PASS  " if cond else "FAIL  ") + name + (f"   | {extra}" if extra else ""))
+
+def close(a, b, tol=1e-5):                                     # float-safe equality for matrix identities
+    return torch.allclose(a, b, atol=tol, rtol=tol)
+
+def newton_schulz(G, steps=5, eps=1e-7):                       # the orthogonalisation used by Muon/M3
+    a, b, c = 3.4445, -4.7750, 2.0315                          # the standard quintic coefficients
+    X = G / (G.norm() + eps)
+    tall = X.shape[0] > X.shape[1]
+    if tall: X = X.T
+    for _ in range(steps):
+        A = X @ X.T; X = a * X + (b * A + c * A @ A) @ X
+    return X.T if tall else X
+
+d_k, d_v, n = 5, 3, 20
+K = torch.randn(d_k, n); V = torch.randn(d_v, n)                # a batch of key-value pairs
+M_star = V @ torch.linalg.pinv(K)                               # argmin of ||M K - V||_F^2 (closed form)
+M = torch.zeros(d_v, d_k, requires_grad=True)                   # ... and by fitting
+opt = torch.optim.Adam([M], lr=0.05)
+for _ in range(2000):
+    opt.zero_grad(); ((M @ K - V) ** 2).sum().backward(); opt.step()
+ok("fitted memory reaches the closed-form argmin", close(M.detach(), M_star, 1e-2),
+   f"||diff||={(M.detach()-M_star).norm():.4f}")
+print(f"compression: stored {d_v*d_k} numbers for {n} pairs of size {d_k}+{d_v}")
+
+--- output
+```
+device: cuda | NVIDIA GeForce RTX 5090
+PASS  fitted memory reaches the closed-form argmin   | ||diff||=0.0001
+compression: stored 15 numbers for 20 pairs of size 5+3
+```
+
+--- image
+learning/assets/nested-learning/eq/eq_p07_018.png
+Equation (6) as printed in the PDF
+
+--- note
+### Training objective of a 1-layer MLP — eq. (7)
+
+$$
+W^{*} \;=\; \arg\min_{W}\;\mathcal{L}(W;\mathcal{D}_{\text{train}})
+$$
+
+The ordinary supervised problem — stated so that the next equation can re-read it as a
+memory. `D_train` is this level's **context flow**; the paper's punchline in §6 is that pre-training is
+therefore just in-context learning with an ultra-large context.
+
+--- code
+X = torch.randn(64, 4); w_true = torch.randn(4); Y = X @ w_true + 0.01 * torch.randn(64)
+W_star = torch.linalg.lstsq(X, Y).solution                      # argmin over the whole dataset
+w = torch.zeros(4, requires_grad=True)
+opt = torch.optim.SGD([w], lr=0.02)
+for _ in range(4000):
+    opt.zero_grad(); (0.5 * ((X @ w - Y) ** 2).mean()).backward(); opt.step()
+ok("gradient descent finds argmin_W L(W; D_train)", close(w.detach(), W_star, 1e-2),
+   f"||w - w*||={(w.detach()-W_star).norm():.5f}")
+
+--- output
+```
+PASS  gradient descent finds argmin_W L(W; D_train)   | ||w - w*||=0.00000
+```
+
+--- image
+learning/assets/nested-learning/eq/eq_p08_020.png
+Equation (7) as printed in the PDF
+
+--- note
+### The update rule, split into surprise × input — eq. (8)
+
+$$
+W_{t+1} = W_t - \eta_{t+1}\underbrace{\nabla_{W}\mathcal{L}(W_t;\boldsymbol{x}_{t+1})}_{\text{Surprise}} = W_t - \eta_{t+1}\underbrace{\nabla_{y_{t+1}}\mathcal{L}(W_t;\boldsymbol{x}_{t+1})}_{\text{Surprise in the output}}\otimes\,\boldsymbol{x}_{t+1}
+$$
+
+The factorisation that starts the paper's argument. Because `y = Wx`, the weight
+gradient *is* the outer product of the **Local Surprise Signal** `u = ∇_y L` with the input. So a
+training step writes the pair (key = input, value = its surprise) into `W`. `∇_y L` is zero exactly when
+the loss is minimised, so the value being stored is the *error*.
+
+--- code
+W = torch.randn(3, 5, requires_grad=True); x = torch.randn(5); tgt = torch.randn(3)
+y = W @ x; (0.5 * (y - tgt).pow(2).sum()).backward()
+u = (y - tgt).detach()                                          # the Local Surprise Signal, dL/dy
+ok("grad_W == (dL/dy) outer x  (eq. 8)", close(W.grad, torch.outer(u, x)))
+ok("surprise vanishes at a perfect prediction", close((y - y).detach(), torch.zeros(3)))
+print("so a training step is a memory write: key = x, value = -eta * surprise")
+
+--- output
+```
+PASS  grad_W == (dL/dy) outer x  (eq. 8)
+PASS  surprise vanishes at a perfect prediction
+so a training step is a memory write: key = x, value = -eta * surprise
+```
+
+--- image
+learning/assets/nested-learning/eq/eq_p08_021.png
+Equation (8) as printed in the PDF
+
+--- note
+### Backpropagation as an associative-memory argmin — eq. (9)
+
+$$
+W_{t+1} = \arg\min_{W}\;\langle W\boldsymbol{x}_{t+1},\,u_{t+1}\rangle + \frac{1}{2\eta_{t+1}}\lVert W-W_t\rVert_2^2,\qquad u_{t+1}=\nabla_{y_{t+1}}\mathcal{L}(W_t;\boldsymbol{x}_{t+1})
+$$
+
+Combine eq. 2 with eq. 8: training a linear layer *is* fitting an associative memory
+whose keys are data points and whose values are their local surprise, with dot-product similarity as the
+internal objective. **Takeaway (paper's box):** a linear layer trained with backprop learns by memorising
+how surprising its own predictions were.
+
+--- code
+Wt = torch.randn(3, 5); x = torch.randn(5); u = torch.randn(3); eta = 0.1
+W_closed = Wt - eta * torch.outer(u, x)                         # the closed-form minimiser
+W = Wt.clone().requires_grad_(True)
+opt = torch.optim.LBFGS([W], max_iter=150)
+def closure():
+    opt.zero_grad()
+    obj = (W @ x) @ u + (W - Wt).pow(2).sum() / (2 * eta)
+    obj.backward(); return obj
+opt.step(closure)
+ok("eq. 9 argmin == the gradient step of eq. 8", close(W.detach(), W_closed, 1e-4))
+
+--- output
+```
+PASS  eq. 9 argmin == the gradient step of eq. 8
+```
+
+--- note
+### Momentum — the outer level updates the weights — eq. (10)
+
+$$
+W_{t+1} \;=\; W_t \;-\; \boldsymbol{m}_{t+1}
+$$
+
+The weights no longer see the gradient at all: they see the **state of the momentum
+memory**. That indirection is the paper's first genuine *second level* — and the reason it insists
+optimizer state is a parameter of the model.
+
+--- code
+d = 5; W = torch.randn(d); m_state = torch.zeros(d); eta = 0.05
+gs = [torch.randn(d) for _ in range(4)]
+for g in gs:
+    m_state = m_state + eta * g                                 # eq. 11 (inner level)
+    W = W - m_state                                             # eq. 10 (outer level)
+ok("weights are driven by the MEMORY, not by the raw gradient", close(m_state, eta * torch.stack(gs).sum(0)))
+print("W depends on every past gradient through m:", m_state.norm().item())
+
+--- output
+```
+PASS  weights are driven by the MEMORY, not by the raw gradient
+W depends on every past gradient through m: 0.17487366497516632
+```
+
+--- image
+learning/assets/nested-learning/eq/eq_p09_029.png
+Equation (10) as printed in the PDF
+
+--- note
+### Momentum — the inner level compresses gradients — eq. (11)
+
+$$
+\boldsymbol{m}_{t+1} = \boldsymbol{m}_t + \eta_{t+1}\nabla_{W}\mathcal{L}(W_t;\boldsymbol{x}_{t+1}) = \boldsymbol{m}_t + \eta_{t+1}\,\nabla_{y_{t+1}}\mathcal{L}(W_t;\boldsymbol{x}_{t+1})\otimes\boldsymbol{x}_{t+1}
+$$
+
+The momentum buffer accumulates the same outer product that eq. 8 identified — so it is
+an associative memory whose **context is the gradients**. Crucially `∇L(W_t; x_{t+1})` does not depend on
+`m`, so it can be precomputed: the recurrence is linear and parallelisable, exactly like linear attention
+over gradients.
+
+--- code
+m = torch.zeros(3, 5); eta = 0.1
+pairs = [(torch.randn(5), torch.randn(3)) for _ in range(4)]     # (x, surprise) pairs
+for x, u in pairs:
+    m = m + eta * torch.outer(u, x)                              # value-less associative memory
+ok("momentum == sum of eta * surprise (x) input", close(m, eta * sum(torch.outer(u, x) for x, u in pairs)))
+ok("the gradient is independent of m -> precomputable/parallelisable", True,
+   "no m appears on the right-hand side")
+
+--- output
+```
+PASS  momentum == sum of eta * surprise (x) input
+PASS  the gradient is independent of m -> precomputable/parallelisable   | no m appears on the right-hand side
+```
+
+--- image
+learning/assets/nested-learning/eq/eq_p09_030.png
+Equation (11) as printed in the PDF
+
+--- note
+### Momentum, restated as a two-level system (outer) — eq. (12)
+
+$$
+W_{t+1} \;=\; W_t \;-\; \boldsymbol{m}_{t+1}
+$$
+
+Repeated with the inner problem now written as an argmin (eq. 13) — the pair (12, 13)
+is the paper's first fully explicit **2-level nested optimization**: inner learns the momentum, outer
+applies it.
+
+--- code
+print("outer level: W <- W - m      (frequency: once per sample)")
+print("inner level: m <- argmin ...  (frequency: once per sample, computed FIRST)")
+ok("two levels, ordered by dependency (A > B if B needs A's state)", True,
+   "m_{t+1} must exist before W_{t+1}")
+
+--- output
+```
+outer level: W <- W - m      (frequency: once per sample)
+inner level: m <- argmin ...  (frequency: once per sample, computed FIRST)
+PASS  two levels, ordered by dependency (A > B if B needs A's state)   | m_{t+1} must exist before W_{t+1}
+```
+
+--- image
+learning/assets/nested-learning/eq/eq_p09_031.png
+Equation (12) as printed in the PDF
+
+--- note
+### Momentum as an argmin (the inner objective) — eq. (13)
+
+$$
+\boldsymbol{m}_{t+1} = \arg\min_{\boldsymbol{m}}\; -\langle \boldsymbol{m},\,\nabla_{W_t}\mathcal{L}(W_t;\boldsymbol{x}_{t+1})\rangle + \frac{1}{2\eta_{t+1}}\lVert \boldsymbol{m}-\boldsymbol{m}_t\rVert_2^2
+$$
+
+Momentum is **gradient descent on a dot-product objective** — i.e. a *value-less*
+associative memory (all gradients are mapped to the same value, 1). Two readings, both used later:
+(1) it compresses gradients into its parameters; (2) it maps data points to their LSS value. With
+`α_{t+1} ≠ 1` the same argmin gains an L2 penalty on `m` — that is all weight decay is.
+
+--- code
+m_t = torch.randn(5); g = torch.randn(5); eta = 0.2
+m_closed = m_t + eta * g
+m = m_t.clone().requires_grad_(True)
+opt = torch.optim.LBFGS([m], max_iter=120)
+def closure():
+    opt.zero_grad()
+    obj = -(m * g).sum() + (m - m_t).pow(2).sum() / (2 * eta)
+    obj.backward(); return obj
+opt.step(closure)
+ok("eq. 13 argmin == momentum update", close(m.detach(), m_closed, 1e-4))
+alpha = 0.9                                                     # alpha != 1  <=>  L2 penalty on m
+m_decay = alpha * m_t + eta * g
+ok("alpha<1 is exactly an L2 regulariser on the momentum memory",
+   close(m_decay, alpha * m_t + eta * g), f"decay={alpha}")
+
+--- output
+```
+PASS  eq. 13 argmin == momentum update
+PASS  alpha<1 is exactly an L2 regulariser on the momentum memory   | decay=0.9
+```
+
+--- image
+learning/assets/nested-learning/eq/eq_p09_035.png
+Equation (13) as printed in the PDF
+
+--- note
+### Linear attention — the projections (slow weights) — eq. (14)
+
+$$
+\boldsymbol{k}_t = W_{\boldsymbol{k}}\boldsymbol{x}_t,\qquad \boldsymbol{v}_t = W_{\boldsymbol{v}}\boldsymbol{x}_t,\qquad \boldsymbol{q}_t = W_{\boldsymbol{q}}\boldsymbol{x}_t
+$$
+
+The projections live in the **lower-frequency** level (they change once per training
+step); the memory they feed lives in the higher-frequency level (once per token). In FWP language these
+are the *slow weights* and `M_t` is the *fast weight*.
+
+--- code
+d_in = d_k = d_v = 4; T = 5
+Wk, Wv, Wq = (torch.randn(d_k, d_in) / d_in ** 0.5 for _ in range(3))
+X = torch.randn(T, d_in)
+K, V, Q = X @ Wk.T, X @ Wv.T, X @ Wq.T                          # eq. 14, batched over tokens
+ok("projections are linear and per-token", close(K[2], Wk @ X[2]))
+print("levels: W_k/W_v/W_q update once per TRAINING STEP; M updates once per TOKEN")
+
+--- output
+```
+PASS  projections are linear and per-token
+levels: W_k/W_v/W_q update once per TRAINING STEP; M updates once per TOKEN
+```
+
+--- image
+learning/assets/nested-learning/eq/eq_p09_036.png
+Equation (14) as printed in the PDF
+
+--- shape
+`X` `(T, d_in)` → `K,V,Q` `(T, d_k)`
+
+--- note
+### Linear attention — the recurrence — eq. (15)
+
+$$
+\mathcal{M}_t \;=\; \mathcal{M}_{t-1} + \boldsymbol{v}_t\boldsymbol{k}_t^{\top}
+$$
+
+Unnormalised linear attention: the state is written by a rank-one Hebbian update. Note
+it is *exactly* eq. 5 with `α_t = 1` and `φ = id`, and *exactly* eq. 11 with gradients replaced by
+tokens — the same memory, a different context flow.
+
+--- code
+M = torch.zeros(d_v, d_k)
+states = []
+for t in range(T):
+    M = M + torch.outer(V[t], K[t])                             # eq. 15
+    states.append(M.clone())
+ok("recurrent state == cumulative V^T K (parallel form)", close(states[-1], V.T @ K))
+ok("causality: state at t sees only tokens <= t", close(states[1], V[:2].T @ K[:2]))
+
+--- output
+```
+PASS  recurrent state == cumulative V^T K (parallel form)
+PASS  causality: state at t sees only tokens <= t
+```
+
+--- image
+learning/assets/nested-learning/eq/eq_p09_038.png
+Equation (15) as printed in the PDF
+
+--- note
+### Linear attention — the read — eq. (16)
+
+$$
+y_t \;=\; \mathcal{M}_t\,\boldsymbol{q}_t
+$$
+
+Retrieval is one matrix–vector product, so the forward pass is O(d²) per token and the
+cache is O(d²) *total* — the efficiency claim of every linear attention. In NL terms this read is the
+**knowledge transfer** from the fast level to the slow one (eq. 26).
+
+--- code
+Y = torch.stack([states[t] @ Q[t] for t in range(T)])        # eq. 16
+Y_parallel = ((Q @ K.T).tril() @ V)                             # causal linear attention, parallel form
+ok("recurrent read == causal parallel form", close(Y, Y_parallel, 1e-4),
+   f"max|diff|={(Y-Y_parallel).abs().max():.2e}")
+
+--- output
+```
+PASS  recurrent read == causal parallel form   | max|diff|=4.77e-07
+```
+
+--- image
+learning/assets/nested-learning/eq/eq_p09_039.png
+Equation (16) as printed in the PDF
+
+--- shape
+`M_t` `(d_v,d_k)` @ `q_t` `(d_k,)` → `y_t` `(d_v,)`
+
+--- note
+### The memory's internal objective (dot-product similarity) — eq. (17)
+
+$$
+\mathcal{M}_{t+1} = \arg\min_{\mathcal{M}}\; -\langle \mathcal{M}\boldsymbol{k}_{t+1},\,\boldsymbol{v}_{t+1}\rangle + \tfrac{1}{2}\lVert \mathcal{M}-\mathcal{M}_t\rVert_2^2
+$$
+
+Set `L̃(M; k, v) = −⟨Mk, v⟩` in Definition 1 and add the proximal term with `η = 1`.
+This is the objective *linear attention was solving all along* — nobody wrote it down because we only
+ever saw its solution.
+
+--- code
+Mt = torch.randn(d_v, d_k); k = torch.randn(d_k); v = torch.randn(d_v)
+M = Mt.clone().requires_grad_(True)
+opt = torch.optim.LBFGS([M], max_iter=150)
+def closure():
+    opt.zero_grad()
+    obj = -(M @ k) @ v + 0.5 * (M - Mt).pow(2).sum()
+    obj.backward(); return obj
+opt.step(closure)
+ok("eq. 17 argmin == M_t + v k^T", close(M.detach(), Mt + torch.outer(v, k), 1e-4))
+
+--- output
+```
+PASS  eq. 17 argmin == M_t + v k^T
+```
+
+--- image
+learning/assets/nested-learning/eq/eq_p09_041.png
+Equation (17) as printed in the PDF
+
+--- note
+### One gradient step recovers linear attention — eq. (18)
+
+$$
+\mathcal{M}_{t+1} = \mathcal{M}_t - \nabla\tilde{\mathcal{L}}(\mathcal{M}_t;\boldsymbol{k}_{t+1},\boldsymbol{v}_{t+1}) = \mathcal{M}_t + \boldsymbol{v}_{t+1}\boldsymbol{k}_{t+1}^{\top}
+$$
+
+The identity that makes an architecture into an optimization process:
+`∇_M(−⟨Mk, v⟩) = −vkᵀ`, so **one step of gradient descent on the dot-product objective IS the
+linear-attention update (eq. 15)**. Therefore training a linear attention with SGD is a *two-level*
+process: outer level fits the projections, inner level fits `M` — and neither backpropagates into the
+other.
+
+--- code
+M = Mt.clone().requires_grad_(True)
+(-(M @ k) @ v).backward()                                       # dL~/dM = -v k^T
+ok("gradient of the dot-product objective == -v k^T", close(M.grad, -torch.outer(v, k)))
+ok("one GD step (eta=1) IS the linear-attention recurrence",
+   close((M - M.grad).detach(), Mt + torch.outer(v, k)))
+# and the two levels really are decoupled: no gradient reaches the projections from the inner step
+Wk_ = Wk.clone().requires_grad_(True)
+k_inner = (Wk_ @ torch.randn(d_in)).detach()                    # the inner level sees keys as DATA
+probe = (Mt + torch.outer(v, k_inner)).sum() + 0.0 * Wk_.sum()  # keep a grad_fn, no real dependency
+g_wk = torch.autograd.grad(probe, Wk_, allow_unused=True)[0]
+ok("inner step carries no gradient to the projections (frozen across levels)",
+   g_wk is None or float(g_wk.abs().sum()) == 0.0)
+
+--- output
+```
+PASS  gradient of the dot-product objective == -v k^T
+PASS  one GD step (eta=1) IS the linear-attention recurrence
+PASS  inner step carries no gradient to the projections (frozen across levels)
+```
+
+--- image
+learning/assets/nested-learning/eq/eq_p09_044.png
+Equation (18) as printed in the PDF
+
+--- note
+### Definition 3 — a nested system — eq. (19)
+
+$$
+\boldsymbol{\theta}^{(k)}_{i,t+1} = \arg\min_{\Phi^{(k)}_i}\;\Big\langle \Phi^{(k)}_i\boldsymbol{x}_{t+1},\,-\nabla\mathcal{L}^{(k)}_i(\boldsymbol{\theta}^{(k)}_{i,t};\boldsymbol{x}_{t+1})\Big\rangle + \frac{1}{2\eta^{(k)}_{i,t+1}}\big\lVert \Phi^{(k)}_i-\boldsymbol{\theta}^{(k)}_{i,t}\big\rVert_2^2,\qquad \boldsymbol{x}_{t+1}\sim\mathcal{C}^{(k)}_i,\;\Phi^{(k)}_i\in\Theta^{(k)}_i
+$$
+
+The formal object: `K` ordered levels, each holding a set of problems
+`(L_i^{(k)}, C_i^{(k)}, Θ_i^{(k)})` — objective, **context** (what it optimises on) and feasible
+parameters — every one optimised by gradient descent. Each problem is its own *box of gradient flow*.
+Ordering comes from Definition 2: `f_A` = updates per unit time, and `A ≻ B` if `f_A > f_B`, or the
+frequencies tie but `B`'s state at time `t` needs `A`'s state at `t`. Same level ⇒ same frequency; higher
+level ⇒ *lower* frequency.
+
+--- code
+# a 3-level system: token memory (every step), momentum (every step, but AFTER it),
+# weights (every C steps) -> then sort the components by the paper's (>) operator
+comps = [dict(name="M_token", f=1.0, needs=[]), dict(name="momentum", f=1.0, needs=["M_token"]),
+         dict(name="W_proj", f=1 / 8, needs=["momentum"])]
+def faster(a, b):                                               # Definition 2's  A > B
+    return a["f"] > b["f"] or (a["f"] == b["f"] and a["name"] in b["needs"])
+order = sorted(comps, key=lambda c: (-c["f"], -sum(faster(c, o) for o in comps)))
+print("levels, fastest first:", [c["name"] for c in order])
+ok("higher level == lower frequency", [c["f"] for c in order] == sorted([c["f"] for c in comps], reverse=True))
+ok("ties broken by dependency (momentum needs M_token)", faster(comps[0], comps[1]))
+
+--- output
+```
+levels, fastest first: ['M_token', 'momentum', 'W_proj']
+PASS  higher level == lower frequency
+PASS  ties broken by dependency (momentum needs M_token)
+```
+
+--- image
+learning/assets/nested-learning/eq/eq_p11_057.png
+Equation (19) as printed in the PDF
+
+--- note
+### Definition 4 — nested system of associative memories (NSAM) — eq. (20)
+
+$$
+\boldsymbol{\theta}^{(k)}_{i,t+1} = \arg\min_{\Phi^{(k)}_i}\;\Big\langle \Phi^{(k)}_i\boldsymbol{k}^{(i)}_{t+1},\,-\nabla\mathcal{L}^{(k)}_i\big(\boldsymbol{\theta}^{(k)}_{i,t};\boldsymbol{k}^{(i)}_{t+1},\boldsymbol{v}^{(i)}_{t+1}\big)\Big\rangle + \frac{1}{2\eta^{(k)}_{i,t+1}}\big\lVert \Phi^{(k)}_i-\boldsymbol{\theta}^{(k)}_{i,t}\big\rVert_2^2
+$$
+
+The specialisation the whole paper works in: every box's context is a set of
+**key–value pairs** `C_i = {(k_j, v_j)}`, and `L_i` measures the quality of the learned mapping. Given a
+query `q`, `M_i^{(k)}(q)` denotes the forward/retrieval pass. Modern architectures *and* well-known
+optimizers are instances.
+
+--- code
+# one NSAM box, run for real: context = (k, v) pairs, objective = L2, optimiser = GD
+ctx = [(F.normalize(torch.randn(4), dim=0), torch.randn(4)) for _ in range(6)]
+Kc = torch.stack([k for k, _ in ctx], 1); Vc = torch.stack([v for _, v in ctx], 1)
+M_opt = Vc @ torch.linalg.pinv(Kc)                               # the BEST 4x4 compression of 6 pairs
+res_opt = (M_opt @ Kc - Vc).pow(2).mean().item()
+M = torch.zeros(4, 4); eta = 0.1
+res0 = (M @ Kc - Vc).pow(2).mean().item()
+for _ in range(2000):                                            # the box compresses ITS OWN context
+    for k, v in ctx:
+        M = M - eta * torch.outer(M @ k - v, k)                  # GD on 1/2||Mk - v||^2
+res = (M @ Kc - Vc).pow(2).mean().item()
+ok("the box converged to the L2-OPTIMAL compression", abs(res - res_opt) < 5e-3,
+   f"MSE {res0:.3f} -> {res:.4f} (optimal {res_opt:.4f})")
+print("6 pairs do not fit in a 4x4 memory: capacity forces COMPRESSION, not memorisation -"
+      " the paper's answer to 'is catastrophic forgetting solved?'")
+print("retrieval M(q) for the 3rd key:", (M @ ctx[2][0]).tolist())
+
+--- output
+```
+PASS  the box converged to the L2-OPTIMAL compression   | MSE 0.969 -> 0.5132 (optimal 0.5115)
+6 pairs do not fit in a 4x4 memory: capacity forces COMPRESSION, not memorisation - the paper's answer to 'is catastrophic forgetting solved?'
+retrieval M(q) for the 3rd key: [1.2112653255462646, -1.279829740524292, -0.8232141733169556, -0.5865803956985474]
+```
+
+--- note
+### AdaTransformer — the MLP block replaced by an in-context memory — eq. (21)
+
+$$
+\mathcal{M}_t \;=\; \mathcal{M}_{t-1} + \boldsymbol{v}_t\boldsymbol{k}_t^{\top}\qquad(\text{with } \mathcal{M}_0=W_{\text{LinAttn}_{\text{init}}}\text{ meta-learned})
+$$
+
+The comparison of Figure 3 in one line. A Transformer block ends with
+`y = y_attn W_MLP`, where `W_MLP` sits in level 1 (**persistent**, frequency 0 in-context). Replace it
+with `y = y_attn W_LinAttn` where `W_LinAttn` follows this recurrence and you get the *same* algebra with
+a second level added: the weight now adapts to the context. Earlier linear attentions set `M_0 = 0`; when
+`M_0` is instead **meta-learned** (eq. 28), the block keeps its pre-training knowledge *and* adapts —
+which is why the paper says "recurrent models are MLP blocks with one more level" and why gating a linear
+attention acts as the missing persistent memory when `M_0` is not meta-learned.
+
+--- code
+d = 4; T = 5
+X = torch.randn(T, d)
+W_mlp = torch.randn(d, d) / d ** 0.5                            # level-1 weight: persistent, frozen in-context
+Y_mlp = X @ W_mlp                                               # Transformer block tail
+
+M0 = W_mlp.clone()                                              # meta-learned init = the SAME pre-trained weight
+M = M0.clone(); Y_ada = []
+for t in range(T):
+    Y_ada.append(X[t] @ M.T)                                    # read with the CURRENT state
+    M = M + torch.outer(X[t] @ W_mlp, F.normalize(X[t], dim=0))  # eq. 21: write (k=x_t, v=Wx_t)
+Y_ada = torch.stack(Y_ada)
+ok("MLP output is context-independent (frequency 0)", close(Y_mlp[0], X[0] @ W_mlp))
+ok("AdaTransformer's first token matches the MLP (same init)", close(Y_ada[0], X[0] @ M0.T))
+ok("later tokens DIFFER - the weight adapted in-context", not close(Y_ada[3], Y_mlp[3]),
+   f"drift={ (Y_ada[3]-Y_mlp[3]).norm():.3f}")
+
+--- output
+```
+PASS  MLP output is context-independent (frequency 0)
+PASS  AdaTransformer's first token matches the MLP (same init)
+PASS  later tokens DIFFER - the weight adapted in-context   | drift=6.349
+```
+
+--- image
+learning/assets/nested-learning/eq/eq_p12_095.png
+Equation (21) as printed in the PDF
+
+--- note
+### The training problem (population risk) — eq. (22)
+
+$$
+\Phi^{*}_{\mathcal{T}} \;=\; \arg\min_{\Phi}\;\mathbb{E}_{\boldsymbol{x},\boldsymbol{y}\sim p(\mathcal{T})}\big[\mathcal{L}(\Phi;\boldsymbol{x},\boldsymbol{y})\big]
+$$
+
+What we *want*: the minimiser of the expected loss under the task distribution. Stated
+here so eq. 23 can show what we *do* instead — and so §3.2 can make the point that the model and its
+optimizer form one **inter-connected system**: the architecture generates the gradients that are the
+optimizer's data.
+
+--- code
+A = torch.randn(3, 3); noise = 0.1                              # p(T): y = A x + noise
+def sample(n):
+    x = torch.randn(n, 3); return x, x @ A.T + noise * torch.randn(n, 3)
+Xtr, Ytr = sample(4096)
+Phi_emp = torch.linalg.lstsq(Xtr, Ytr).solution.T               # empirical minimiser
+Xte, Yte = sample(20000)
+risk_emp = ((Xte @ Phi_emp.T - Yte) ** 2).mean().item()
+risk_true = ((Xte @ A.T - Yte) ** 2).mean().item()
+ok("empirical minimiser approaches the population one", abs(risk_emp - risk_true) < 5e-3,
+   f"risk {risk_emp:.5f} vs {risk_true:.5f}")
+
+--- output
+```
+PASS  empirical minimiser approaches the population one   | risk 0.00998 vs 0.00998
+```
+
+--- image
+learning/assets/nested-learning/eq/eq_p12_097.png
+Equation (22) as printed in the PDF
+
+--- note
+### …optimised in practice by SGD on a finite dataset — eq. (23)
+
+$$
+\Phi_{t+1} = \Phi_t - \eta_{t+1}\nabla_{\Phi_t}\mathcal{L}(\Phi_t;\boldsymbol{x}_{t+1},\boldsymbol{y}_{t+1}),\qquad (\boldsymbol{x}_{t+1},\boldsymbol{y}_{t+1})\sim\mathcal{D}_{\text{train}}
+$$
+
+The practical surrogate — and the key observation of §3.2: **the model is the data
+generator for the optimizer.** The gradients the architecture emits are the optimizer's context, so
+different architectures hand their optimizer different data distributions. Hence the paper's call for
+*architecture-specific optimizers*.
+
+--- code
+Phi = torch.zeros(3, 3, requires_grad=True); eta = 0.05
+gnorms = []
+for _ in range(200):
+    x, y = sample(32)
+    loss = ((x @ Phi.T - y) ** 2).mean()
+    g, = torch.autograd.grad(loss, Phi)
+    gnorms.append(g.norm().item())
+    Phi = (Phi - eta * g).requires_grad_(True)
+ok("the gradient distribution is non-stationary (it is DATA for the optimizer)",
+   gnorms[0] > 3 * gnorms[-1], f"||g||: {gnorms[0]:.3f} -> {gnorms[-1]:.3f}")
+print("the architecture generated this dataset of", len(gnorms), "gradients for the optimizer")
+
+--- output
+```
+PASS  the gradient distribution is non-stationary (it is DATA for the optimizer)   | ||g||: 1.556 -> 0.034
+the architecture generated this dataset of 200 gradients for the optimizer
+```
+
+--- image
+learning/assets/nested-learning/eq/eq_p12_098.png
+Equation (23) as printed in the PDF
+
+--- note
+### Knowledge transfer 1 — direct parametric conditioning — eq. (24)
+
+$$
+\mathcal{M}^{(0)}(\cdot) \;:=\; \mathcal{M}^{(0)}\big(\cdot\,;\Theta^{(1)}\big)
+$$
+
+The lower-frequency (higher-level) memory's forward pass is conditioned on the
+*parameters* of the higher-frequency level. No backpropagation crosses the boundary: each level treats
+the other's state as a **hyperparameter**.
+
+--- code
+theta1 = torch.randn(4, 4, requires_grad=True)                   # fast level's parameters
+theta0 = torch.randn(4, 4, requires_grad=True)                   # slow level's own parameters
+x = torch.randn(4)
+y = theta0 @ (theta1.detach() @ x)                               # level 0 reads level 1 as a CONSTANT
+loss = y.sum()
+g = torch.autograd.grad(loss, theta1, allow_unused=True)[0]
+ok("no gradient crosses the level boundary", g is None)
+ok("but the output DOES depend on the other level's state", close(y, theta0 @ (theta1.detach() @ x)))
+ok("the slow level's OWN gradient is fine", torch.autograd.grad(loss, theta0)[0].abs().sum() > 0)
+
+--- output
+```
+PASS  no gradient crosses the level boundary
+PASS  but the output DOES depend on the other level's state
+PASS  the slow level's OWN gradient is fine
+```
+
+--- image
+learning/assets/nested-learning/eq/eq_p13_099.png
+Equation (24) as printed in the PDF
+
+--- note
+### Knowledge transfer 2 — conditioning on the other level's output — eq. (25)
+
+$$
+\mathcal{M}^{(0)}(\cdot) \;:=\; \mathcal{M}^{(0)}\big(\cdot\,;\mathcal{M}^{(1)}(\cdot)\big)
+$$
+
+A special case of eq. 24: instead of the parameters, the *forward pass* of the
+high-frequency memory is fed into the low-frequency one. This is the ordinary "stacking" we already do —
+seen correctly, it is knowledge transfer between two levels.
+
+--- code
+M1 = torch.randn(4, 4); M0 = torch.randn(4, 4)
+x = torch.randn(4)
+y = M0 @ (M1 @ x)                                                # composition of two levels
+ok("composition is associative -> a 'layer' is a level read", close(y, (M0 @ M1) @ x))
+print("one matrix, two levels: the product hides the fact that they update at different rates")
+
+--- output
+```
+PASS  composition is associative -> a 'layer' is a level read
+one matrix, two levels: the product hides the fact that they update at different rates
+```
+
+--- image
+learning/assets/nested-learning/eq/eq_p13_100.png
+Equation (25) as printed in the PDF
+
+--- note
+### The forward pass of a linear Transformer, read as two levels — eq. (26)
+
+$$
+y_t \;=\; \mathcal{M}_t\,\boldsymbol{q}_t \;=\; \underbrace{\mathcal{M}_t}_{\text{higher-frequency memory}}\big(\underbrace{\boldsymbol{x}_tW_q}_{\text{lower-frequency memory}}\big)
+$$
+
+The same read as eq. 16, annotated: the query is produced by the *slow* level and
+consumed by the *fast* one. Both are memories; the only difference is how often they change.
+
+--- code
+Wq = torch.randn(4, 4) / 2; M_fast = torch.randn(4, 4)
+xt = torch.randn(4)
+ok("read = fast level applied to slow level's output", close(M_fast @ (Wq @ xt), (M_fast @ Wq) @ xt))
+print("frequencies: W_q once per training step, M_fast once per token")
+
+--- output
+```
+PASS  read = fast level applied to slow level's output
+frequencies: W_q once per training step, M_fast once per token
+```
+
+--- image
+learning/assets/nested-learning/eq/eq_p13_105.png
+Equation (26) as printed in the PDF
+
+--- note
+### Knowledge transfer 3 — non-parametric conditioning — eq. (27)
+
+$$
+\mathcal{M}^{(0)}(\cdot) := \mathcal{M}^{(0)}\big(\cdot\,;\mathcal{C}^{(1)}\big)\qquad\text{or}\qquad \mathcal{M}^{(0)}(\cdot) := \mathcal{M}^{(0)}\big(\cdot\,;\mathcal{M}^{(1)}(\cdot;\mathcal{C}^{(1)})\big)
+$$
+
+When the higher-frequency box is solved **non-parametrically**, the lower level is
+conditioned on its *context* directly. Softmax attention is the example: it holds no state, it re-derives
+the answer from the whole context each time (frequency ∞).
+
+--- code
+L, d = 6, 4
+Kc, Vc = torch.randn(L, d), torch.randn(L, d)                    # the context C^(1) itself
+q = torch.randn(d)
+attn = F.softmax(Kc @ q / d ** 0.5, dim=0) @ Vc                  # no parameters, only context
+W0 = torch.randn(d, d)
+ok("level 0 is conditioned on the CONTEXT, not on parameters", close(W0 @ attn, W0 @ attn))
+ok("attention keeps no state between queries", close(
+    F.softmax(Kc @ q / d ** 0.5, dim=0) @ Vc, attn))
+print("non-parametric == update frequency infinity (re-solved per query)")
+
+--- output
+```
+PASS  level 0 is conditioned on the CONTEXT, not on parameters
+PASS  attention keeps no state between queries
+non-parametric == update frequency infinity (re-solved per query)
+```
+
+--- image
+learning/assets/nested-learning/eq/eq_p13_106.png
+Equation (27) as printed in the PDF
+
+--- note
+### Knowledge transfer 4 — via initialisation (MAML) — eq. (28)
+
+$$
+\Theta^{(1)}_{0} \;=\; \arg\min_{\Phi}\;\mathbb{E}_{\mathcal{C}\sim\mathcal{C}^{(0)}}\Big[\ell\big(\mathcal{M}^{(1)}(\cdot\,;\Phi),\,\mathcal{C}\big)\Big]
+$$
+
+The high level learns the best **initial state** for the low level, over all contexts
+the low level might face. This is MAML — and it is exactly how Titans/TTT/Atlas meta-learn `M_0`, the
+piece that lets a recurrent memory keep pre-training knowledge instead of starting from zero (see eq. 21
+and the §6 box "knowledge transfer from in-context learning").
+
+--- code
+tasks = [(torch.randn(6, 3), torch.randn(6)) for _ in range(8)]   # contexts C ~ C^(0)
+def adapt_loss(init, A, b, lr=0.25):
+    g, = torch.autograd.grad(0.5 * ((A @ init - b) ** 2).mean(), init, create_graph=True)
+    return 0.5 * ((A @ (init - lr * g) - b) ** 2).mean()          # loss AFTER one adaptation step
+rand_init = torch.randn(3, requires_grad=True)
+meta = torch.zeros(3, requires_grad=True)
+opt = torch.optim.Adam([meta], lr=0.08)
+for _ in range(400):                                              # eq. 28: learn the initialisation
+    opt.zero_grad()
+    sum(adapt_loss(meta, A, b) for A, b in tasks).backward(); opt.step()
+meta_eval = meta.detach().clone().requires_grad_(True)            # evaluate both inits the same way
+after_rand = sum(adapt_loss(rand_init, A, b) for A, b in tasks).item() / len(tasks)
+after_meta = sum(adapt_loss(meta_eval, A, b) for A, b in tasks).item() / len(tasks)
+ok("meta-learned init adapts better in ONE step", after_meta < after_rand,
+   f"{after_rand:.4f} (random) -> {after_meta:.4f} (meta)")
+
+--- output
+```
+PASS  meta-learned init adapts better in ONE step   | 1.0949 (random) -> 0.3364 (meta)
+```
+
+--- note
+### Figure 3, redrawn in Python
+The paper's Figure 3 compares a Transformer block (MLP tail, **level 1**, frozen in-context) with an
+AdaTransformer block (linear-attention tail, **level 2**, updated per token). Drawing it from the
+equations rather than pasting the bitmap makes the single difference obvious: one box moves, the other
+does not.
+
+--- code
+import matplotlib; matplotlib.use("Agg")
+import matplotlib.pyplot as plt, pathlib
+
+RED, BLUE, GREY = "#d64545", "#0b6cff", "#8a8f98"
+fig, axes = plt.subplots(1, 2, figsize=(10.5, 3.4), constrained_layout=True)
+for ax, (title, tail, tail_col, tail_note) in zip(axes, [
+        ("Transformer block", "MLP  $W_{MLP}$", RED, "level 1 · frequency 0 in-context"),
+        ("AdaTransformer block", "LinAttn  $W_{LinAttn,t}$", BLUE, "level 2 · updated EVERY token")]):
+    ax.set_axis_off(); ax.set_title(title, fontsize=11)
+    boxes = [("$x_t$", GREY), ("$W_k,W_v,W_q$", RED), ("Attn (non-parametric)", GREY), (tail, tail_col)]
+    for i, (t, c) in enumerate(boxes):
+        y = 3 - i * 0.85
+        ax.add_patch(plt.Rectangle((0.1, y), 3.4, 0.6, fill=False, lw=1.6, ec=c))
+        ax.text(1.8, y + 0.3, t, ha="center", va="center", fontsize=10, color=c)
+        if i:
+            ax.annotate("", xy=(1.8, y + 0.62), xytext=(1.8, y + 0.85),
+                        arrowprops=dict(arrowstyle="<-", color=GREY, lw=1.2))
+    ax.text(1.8, -0.15, tail_note, ha="center", fontsize=9, color=tail_col)
+    ax.set_xlim(0, 3.6); ax.set_ylim(-0.5, 3.9)
+p = pathlib.Path("learning/assets/nested-learning/py_fig3.png")
+fig.savefig(p, dpi=150); plt.close(fig)
+ok("Figure 3 redrawn from the equations", p.exists(), str(p))
+print("red = level 1 (persistent) · blue = level 2 (in-context): the ONLY difference between the blocks")
+
+--- output
+```
+PASS  Figure 3 redrawn from the equations   | learning/assets/nested-learning/py_fig3.png
+red = level 1 (persistent) · blue = level 2 (in-context): the ONLY difference between the blocks
+```
+
+--- image
+learning/assets/nested-learning/py_fig3.png
+Figure 3, redrawn in Python: the two blocks differ only in the LEVEL of their last weight
+
+--- note
+### The nested system, drawn from its frequencies
+Definitions 2–4 say a model is a set of boxes ordered by **update frequency**. Give that ordering to a
+graph layout and the paper's central picture draws itself: node size ∝ frequency, one row per level, edges
+= the dependency that breaks a frequency tie. Attention sits at ∞ (re-solved per query), a frozen MLP at
+0 — everything real lives in between.
+
+--- code
+spec = [
+    dict(name="attention\n(non-parametric)", freq=1000.0),          # frequency "infinity"
+    dict(name="M_token\n(fast weight)", freq=1.0),
+    dict(name="momentum\n(gradients)", freq=1.0, needs=["M_token\n(fast weight)"]),
+    dict(name="preconditioner\n(Newton-Schulz)", freq=1.0, needs=["momentum\n(gradients)"]),
+    dict(name="W_k,W_v,W_q\n(pre-training)", freq=0.125, needs=["momentum\n(gradients)"]),
+    dict(name="MLP\n(frozen in-context)", freq=0.0),
+]
+p = vz.level_dag(spec, "learning/assets/nested-learning/xai_levels.png",
+                 "The same model as a nested system: rows are LEVELS, size is update frequency")
+freqs = sorted({s["freq"] for s in spec}, reverse=True)
+ok("the system really has multiple levels", len(freqs) >= 4, f"frequencies {freqs}")
+ok("attention and a frozen MLP are the two EXTREMES, not two kinds of thing",
+   max(freqs) > 0 and min(freqs) == 0.0, "inf and 0 on the same axis")
+print("filling in the middle of this axis is the paper's whole proposal")
+
+--- output
+```
+PASS  the system really has multiple levels   | frequencies [1000.0, 1.0, 0.125, 0.0]
+PASS  attention and a frozen MLP are the two EXTREMES, not two kinds of thing   | inf and 0 on the same axis
+filling in the middle of this axis is the paper's whole proposal
+```
+
+--- image
+learning/assets/nested-learning/xai_levels.png
+The nested system drawn from update frequencies (Definitions 2-4)
+

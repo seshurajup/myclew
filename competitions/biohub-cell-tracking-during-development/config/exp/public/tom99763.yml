@@ -1,0 +1,10 @@
+# PUBLIC notebook config — **tom99763** / tracksdata tutorial
+name: pub_tom99763
+source: **tom99763** / tracksdata tutorial
+family: other
+base: unknown
+lb: None
+golden_cv: None
+mined_params: ""
+run: manual
+score: golden-12 (adj_edge_J + 0.1*div_J), by_embryo

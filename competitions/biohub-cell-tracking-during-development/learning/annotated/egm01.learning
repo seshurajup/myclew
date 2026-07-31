@@ -1,0 +1,33 @@
+@ id: egm01
+@ order: 3000
+@ title: 1 Introduction
+@ subtitle: EmbeddingGemma: Powerful and Lightweight Text Representations §1
+@ source: docs/papers/embeddinggemma/embeddinggemma.md
+
+--- note
+## 1 Introduction
+**Paper:** EmbeddingGemma: Powerful and Lightweight Text Representations · §1 · pages 1–2 · equations (none) · 3 figures.
+
+**The claim.** A 300M encoder — initialized from Gemma 3, mean-pooled, trained
+with NCE + spread-out + distillation under Matryoshka structure and QAT — that leads its size class on
+MTEB and stays usable truncated and quantized on-device. The recipe is five equations; everything else is
+engineering around them.
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/embeddinggemma/p01_0.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/embeddinggemma/p02_0.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/embeddinggemma/p02_1.png
+

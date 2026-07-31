@@ -1,0 +1,59 @@
+@ id: lbq01
+@ order: 601
+@ title: BitNet b1.58 — the 1.58-bit idea
+@ subtitle: every weight is ternary {-1, 0, +1}, and why the paper calls it "the era of 1-bit LLMs"
+@ source: arxiv 2402.17764
+
+--- note
+## Why this is in our learning hub (honest framing)
+This lesson set is **not about biohub cell-tracking**. It walks two Microsoft Research papers —
+*BitNet: Scaling 1-bit Transformers for Large Language Models* (Wang et al., arXiv **2310.11453**,
+Oct 2023) and *The Era of 1-bit LLMs: All Large Language Models are in 1.58 Bits* (Ma et al., arXiv
+**2402.17764**, Feb 2024). It lives here because our fleet ships a `lowbit-qat` agent whose training
+algorithm (ternary weights + straight-through estimator) is grounded **directly** in these papers.
+Read it as **LLM-infra background** — the thing that feeds our low-bit training primitive and any
+future LLM competition — not as a cell-tracking method.
+
+--- note
+## The one-sentence claim
+BitNet b1.58 is a Transformer LLM in which **every single weight is ternary** — it takes one of three
+values **{-1, 0, +1}**. The paper's headline result: at the **same model size and the same number of
+training tokens**, this ternary model **matches a full-precision (FP16/BF16) LLaMA baseline** in both
+perplexity and end-task accuracy **starting from the 3B size**, while being dramatically cheaper in
+latency, memory, throughput, and energy. It is a **Pareto improvement**: same performance, much lower
+cost.
+
+--- note
+## Where "1.58 bits" comes from
+A value that can be one of **three** states carries **log2(3) ≈ 1.58 bits** of information. So a
+ternary weight is a "1.58-bit" weight — hence the name **b1.58**. It is the direct successor of the
+**original BitNet** (2310.11453), whose weights were strictly **1-bit** (binary, {-1, +1}). BitNet
+b1.58 **adds the value 0** to the vocabulary of allowed weights, moving from 1 bit → 1.58 bits.
+
+That extra `0` is not a rounding detail — the paper calls out two concrete advantages it buys:
+
+1. **Stronger modeling capability.** A weight of exactly `0` performs **explicit feature filtering**
+   (it switches a connection off), which a binary {-1,+1} weight cannot do. This is credited with
+   closing the gap to full precision.
+2. **It keeps the "no-multiplication" computation paradigm** of the original 1-bit BitNet, so it
+   inherits the same energy profile while modeling better.
+
+The paper frames this as "**the era of 1-bit LLMs**": the trend has been to push weights from 16 bits
+down (4-bit variants, etc.); BitNet b1.58 argues the endpoint is a ternary regime that redefines the
+cost/quality scaling law for LLMs.
+
+--- image
+learning/assets/bitnet/b158_fig1_pareto.png
+Figure 1 (2402.17764). TOP: the Pareto picture — BitNet b1.58 (a ternary {-1,0,1} weight matrix, left) sits at the same *Performance* level as a 16-bit FP16/BF16 Transformer (right) but at far lower *Cost*. BOTTOM: the computation change. Y = f(W, X). For FP16, each output is a sum of **floating-point multiply-then-add** terms (0.2961·x0 − 0.0495·x1 − 0.0924·x2 − …) → runs on GPU. For 1.58-bit, the weights are {-1,0,+1}, so the same output collapses to **pure additions/subtractions** (x0 − x1 − x2 + x3) with **no multiplications** → motivates new hardware.
+
+--- note
+## Why "no multiplications" is the whole point
+In a vanilla LLM the bulk of the compute is **matrix multiplication**, and each element of that product
+is a floating-point **multiply** followed by an **add**. Multiplies are the expensive operation, in both
+energy and silicon area. If every weight is in {-1, 0, +1}, then multiplying an activation `x` by a
+weight is trivial: it is just `+x`, `0`, or `-x`. The matmul becomes a sum of **integer additions and
+subtractions** — the multiply disappears. That is the source of BitNet's order-of-magnitude energy and
+latency wins (quantified in lbq04/lbq05), and why the authors "call for actions to design new hardware"
+specialized for 1-bit LLMs. The lessons that follow unpack the mechanism (lbq02), why it must be
+*trained* rather than *post-quantized* (lbq03), the measured results (lbq04), the hardware/fleet mapping
+(lbq05), and the original-BitNet lineage + ablations (lbq06).

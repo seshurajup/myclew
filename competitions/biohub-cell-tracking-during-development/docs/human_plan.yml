@@ -1,0 +1,20 @@
+# YOUR plan for the Python fleet — works with NO super-leader.
+# Edit + save; the fleet ingests this each cycle and runs everything (train -> score -> journal -> analysis).
+# Every item runs ONCE (deduped by 'name'). Add more by appending and saving.
+
+experiments:
+  - name: h_contrast_strong                 # unique name -> becomes the method + journal row
+    base: config/aug_ablation/00_no_aug.yml  # config to clone (optional; default = no-aug baseline)
+    augment:                                 # the ONE change: an aug list ...
+      - {name: contrast, p: 0.5, range: 0.3}
+    split: splits_screen_matched.json        # which split (optional; default = screen_matched)
+    note: contrast at higher strength
+
+  - name: h_recall_tilt
+    params: {det_neg_weight: 0.05}           # ... OR a param change instead of an aug
+    split: splits_screen_matched.json
+
+splits:                                      # optional: splits to build first (leak-checked)
+  - {kind: embryo_disjoint, out: my_embryo_disjoint.json}   # kind: embryo_disjoint | stagebridge | stage_matched
+
+direction: "after these, focus on the division term (div_J=0)"   # free-text -> shown to the super-agents

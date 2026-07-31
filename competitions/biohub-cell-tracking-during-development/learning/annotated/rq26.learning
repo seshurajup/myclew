@@ -1,0 +1,12 @@
+@ id: rq26
+@ order: 2350
+@ title: Q Downstream Task Details
+@ subtitle: RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory §Q
+@ source: docs/papers/ratequant/ratequant.md
+
+--- note
+## Q Downstream Task Details
+**Paper:** RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory · §Q · pages 21–21 · equations (none) · 0 figures.
+
+> TODO(author): the *why* of §Q in 3–5 lines.
+

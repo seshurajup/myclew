@@ -1,0 +1,317 @@
+{
+  "slug": "ai-formal-proof",
+  "source": "/tmp/claude-1001/-home-seshu-kaggle-2026/5abb95f8-1364-4775-8ff5-e5c2788bac9d/scratchpad/arx_2605.22763v1.pdf",
+  "pdf": "/tmp/claude-1001/-home-seshu-kaggle-2026/5abb95f8-1364-4775-8ff5-e5c2788bac9d/scratchpad/arx_2605.22763v1.pdf",
+  "title": "Advancing Mathematics Research with AI-Driven Formal Proof Search",
+  "backend": "docling",
+  "pages": 59,
+  "figures": [
+    {
+      "page": 1,
+      "path": "assets/fig/p01_0.png",
+      "y0": 48.733646392822266,
+      "y1": 60.781005859375,
+      "caption": "",
+      "label": "",
+      "w": 3810,
+      "h": 512
+    },
+    {
+      "page": 3,
+      "path": "assets/fig/p03_0.png",
+      "y0": 284.88287353515625,
+      "y1": 302.3453369140625,
+      "caption": "",
+      "label": "",
+      "w": 148,
+      "h": 148
+    },
+    {
+      "page": 3,
+      "path": "assets/fig/p03_1.png",
+      "y0": 534.1119995117188,
+      "y1": 553.5144653320312,
+      "caption": "",
+      "label": "",
+      "w": 148,
+      "h": 148
+    },
+    {
+      "page": 3,
+      "path": "assets/fig/p03_2.png",
+      "y0": 533.6422119140625,
+      "y1": 551.1044921875,
+      "caption": "",
+      "label": "",
+      "w": 140,
+      "h": 140
+    },
+    {
+      "page": 5,
+      "path": "assets/fig/p05_0.png",
+      "y0": 161.97125244140625,
+      "y1": 183.9824676513672,
+      "caption": "",
+      "label": "",
+      "w": 400,
+      "h": 400
+    },
+    {
+      "page": 5,
+      "path": "assets/fig/p05_1.png",
+      "y0": 322.4906311035156,
+      "y1": 337.0546875,
+      "caption": "",
+      "label": "",
+      "w": 944,
+      "h": 1024
+    },
+    {
+      "page": 5,
+      "path": "assets/fig/p05_2.png",
+      "y0": 359.9111328125,
+      "y1": 382.9033203125,
+      "caption": "",
+      "label": "",
+      "w": 400,
+      "h": 400
+    },
+    {
+      "page": 5,
+      "path": "assets/fig/p05_3.png",
+      "y0": 414.902587890625,
+      "y1": 432.3138122558594,
+      "caption": "",
+      "label": "",
+      "w": 1024,
+      "h": 810
+    },
+    {
+      "page": 5,
+      "path": "assets/fig/p05_4.png",
+      "y0": 279.3583679199219,
+      "y1": 299.5592956542969,
+      "caption": "",
+      "label": "",
+      "w": 766,
+      "h": 608
+    },
+    {
+      "page": 5,
+      "path": "assets/fig/p05_5.png",
+      "y0": 278.4151306152344,
+      "y1": 300.50286865234375,
+      "caption": "",
+      "label": "",
+      "w": 2048,
+      "h": 2040
+    },
+    {
+      "page": 5,
+      "path": "assets/fig/p05_6.png",
+      "y0": 367.2826232910156,
+      "y1": 379.4300537109375,
+      "caption": "",
+      "label": "",
+      "w": 2048,
+      "h": 1853
+    },
+    {
+      "page": 5,
+      "path": "assets/fig/p05_7.png",
+      "y0": 367.082763671875,
+      "y1": 379.63006591796875,
+      "caption": "",
+      "label": "",
+      "w": 1820,
+      "h": 2048
+    },
+    {
+      "page": 5,
+      "path": "assets/fig/p05_8.png",
+      "y0": 367.5276184082031,
+      "y1": 379.18505859375,
+      "caption": "",
+      "label": "",
+      "w": 1959,
+      "h": 2048
+    }
+  ],
+  "tables": [
+    {
+      "page": 3,
+      "rows": 31,
+      "cols": 5,
+      "image": "assets/tab/p03_1.png"
+    },
+    {
+      "page": 5,
+      "rows": 2,
+      "cols": 2,
+      "image": "assets/tab/p05_0.png"
+    },
+    {
+      "page": 5,
+      "rows": 4,
+      "cols": 3,
+      "image": "assets/tab/p05_1.png"
+    },
+    {
+      "page": 5,
+      "rows": 2,
+      "cols": 2,
+      "image": "assets/tab/p05_2.png"
+    },
+    {
+      "page": 5,
+      "rows": 2,
+      "cols": 2,
+      "image": "assets/tab/p05_4.png"
+    },
+    {
+      "page": 5,
+      "rows": 2,
+      "cols": 2,
+      "image": "assets/tab/p05_5.png"
+    },
+    {
+      "page": 9,
+      "rows": 7,
+      "cols": 7,
+      "image": "assets/tab/p09_1.png"
+    },
+    {
+      "page": 9,
+      "rows": 7,
+      "cols": 9,
+      "image": "assets/tab/p09_2.png"
+    },
+    {
+      "page": 9,
+      "rows": 7,
+      "cols": 4,
+      "image": "assets/tab/p09_3.png"
+    },
+    {
+      "page": 9,
+      "rows": 6,
+      "cols": 7,
+      "image": "assets/tab/p09_4.png"
+    },
+    {
+      "page": 9,
+      "rows": 6,
+      "cols": 6,
+      "image": "assets/tab/p09_5.png"
+    },
+    {
+      "page": 9,
+      "rows": 6,
+      "cols": 5,
+      "image": "assets/tab/p09_6.png"
+    },
+    {
+      "page": 27,
+      "rows": 12,
+      "cols": 22,
+      "image": "assets/tab/p27_0.png"
+    },
+    {
+      "page": 29,
+      "rows": 12,
+      "cols": 15,
+      "image": "assets/tab/p29_0.png"
+    }
+  ],
+  "sections": [
+    {
+      "level": 1,
+      "page": 1,
+      "num": "1",
+      "title": "Introduction",
+      "heading": "1. Introduction"
+    },
+    {
+      "level": 1,
+      "page": 2,
+      "num": "2",
+      "title": "AlphaProof Nexus",
+      "heading": "2. AlphaProof Nexus"
+    },
+    {
+      "level": 1,
+      "page": 4,
+      "num": "3",
+      "title": "Systematic Evaluation on Open Problems",
+      "heading": "3. Systematic Evaluation on Open Problems"
+    },
+    {
+      "level": 1,
+      "page": 6,
+      "num": "4",
+      "title": "Deployment in Mathematics Research",
+      "heading": "4. Deployment in Mathematics Research"
+    },
+    {
+      "level": 1,
+      "page": 8,
+      "num": "5",
+      "title": "Impact of Agent Architecture and Model",
+      "heading": "5. Impact of Agent Architecture and Model"
+    },
+    {
+      "level": 1,
+      "page": 10,
+      "num": "6",
+      "title": "Discussion",
+      "heading": "6. Discussion"
+    },
+    {
+      "level": 1,
+      "page": 11,
+      "num": "",
+      "title": "References",
+      "heading": "References"
+    },
+    {
+      "level": 1,
+      "page": 16,
+      "num": "",
+      "title": "Acknowledgments",
+      "heading": "Acknowledgments"
+    },
+    {
+      "level": 1,
+      "page": 18,
+      "num": "A",
+      "title": "Materials and Methods",
+      "heading": "A. Materials and Methods"
+    },
+    {
+      "level": 1,
+      "page": 22,
+      "num": "B",
+      "title": "Supplementary Text",
+      "heading": "B. Supplementary Text"
+    }
+  ],
+  "equations": 370,
+  "numbered": 34,
+  "md": "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/docs/papers/ai-formal-proof/ai-formal-proof.md",
+  "equations_json": "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/docs/papers/ai-formal-proof/equations.json",
+  "available": {
+    "pymupdf": true,
+    "marker": true,
+    "docling": true
+  },
+  "score": {
+    "chars": 204094,
+    "headings": 31,
+    "equations": 159,
+    "eq_tags": 0,
+    "images": 0,
+    "tables": 11,
+    "latex_cmds": 3568,
+    "mojibake": 3
+  }
+}

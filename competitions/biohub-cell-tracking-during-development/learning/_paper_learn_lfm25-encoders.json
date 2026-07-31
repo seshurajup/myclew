@@ -1,0 +1,38 @@
+{
+  "slug": "lfm25-encoders",
+  "lessons": 7,
+  "ids": [
+    "lfmb1",
+    "lfm01",
+    "lfm02",
+    "lfm03",
+    "lfm04",
+    "lfm05",
+    "lfmz1"
+  ],
+  "coverage": {
+    "total": 18,
+    "placed": 18,
+    "missing": [],
+    "taught": 18,
+    "untaught": [],
+    "proven": 18,
+    "unproven": [],
+    "cropped": 18,
+    "figures": 0,
+    "figures_placed": 0,
+    "lessons": 5
+  },
+  "curriculum": {
+    "appended": true,
+    "section": "LFM2.5-Encoders (2026) \u2014 why replacing attention beats optimising it",
+    "lessons": 7
+  },
+  "pruned": [],
+  "code_cells": 21,
+  "cells_with_output": 21,
+  "silent_lessons": [],
+  "out_dir": "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated",
+  "assets": "learning/assets/lfm25-encoders",
+  "python": "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/research/cellmot_venv/bin/python"
+}

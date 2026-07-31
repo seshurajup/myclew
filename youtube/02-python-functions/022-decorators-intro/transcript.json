@@ -1,0 +1,42 @@
+[
+  {
+    "text": "A decorator is a function that wraps another function to add behavior, without changing the original's code.",
+    "until_line": 4
+  },
+  {
+    "text": "Shout takes a function, and defines an inner wrapper that calls it and shouts the result in uppercase.",
+    "until_line": 4
+  },
+  {
+    "text": "It returns that wrapper, so the wrapper takes the place of the original function.",
+    "until_line": 4
+  },
+  {
+    "text": "[chuckle] The at-sign syntax is the magic — at-shout above greet means greet gets wrapped automatically.",
+    "until_line": 8
+  },
+  {
+    "text": "So calling greet now returns the upper-cased version, even though greet itself never mentions uppercase.",
+    "until_line": 10
+  },
+  {
+    "text": "[sigh] Real decorators use star-args and double-star kwargs in the wrapper, so they work on any function.",
+    "until_line": 20
+  },
+  {
+    "text": "This timing decorator records the start, runs the wrapped function, and prints how long it took.",
+    "until_line": 20
+  },
+  {
+    "text": "Stack the at-timed above slow_add, and every call is measured for free.",
+    "until_line": 26
+  },
+  {
+    "text": "[groan] Decorators are how Python adds logging, caching, and access checks cleanly — you'll see them everywhere in real frameworks.",
+    "until_line": 27
+  },
+  {
+    "text": "Up next, closures. Tell me in the comments if this clicked.",
+    "until_line": 27
+  }
+]

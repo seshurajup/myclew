@@ -1,0 +1,21 @@
+[
+  {
+    "after_line": 4,
+    "text": ">>> 0 apple\\n>>> 1 banana\\n>>> 2 cherry",
+    "caption": "enumerate() → (index, value)"
+  },
+  {
+    "after_line": 8,
+    "text": ">>> 1. apple\\n>>> 2. banana\\n>>> 3. cherry",
+    "caption": "start=1 for natural numbering"
+  },
+  {
+    "after_line": 14,
+    "text": ">>> item 2 needs review",
+    "caption": "cleaner than a manual counter"
+  },
+  {
+    "after_line": 14,
+    "image": "artifacts/terminal.png"
+  }
+]

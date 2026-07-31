@@ -1,0 +1,26 @@
+[
+  {
+    "after_line": 5,
+    "text": ">>> 60",
+    "caption": "accumulator pattern"
+  },
+  {
+    "after_line": 13,
+    "text": ">>> True",
+    "caption": "search with a flag + break"
+  },
+  {
+    "after_line": 22,
+    "text": ">>> all odd",
+    "caption": "for-else: else runs if no break"
+  },
+  {
+    "after_line": 27,
+    "text": ">>> [1, 4, 9, 16]",
+    "caption": "collector pattern"
+  },
+  {
+    "after_line": 27,
+    "image": "artifacts/terminal.png"
+  }
+]

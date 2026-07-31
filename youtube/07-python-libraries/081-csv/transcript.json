@@ -1,0 +1,42 @@
+[
+  {
+    "text": "CSV, comma-separated values, is the universal format for spreadsheets and tabular data — and Python handles it natively.",
+    "until_line": 1
+  },
+  {
+    "text": "The csv module writes rows safely, correctly handling commas and quotes inside your data.",
+    "until_line": 6
+  },
+  {
+    "text": "You create a writer and hand it a list for each row — first a header, then the data.",
+    "until_line": 9
+  },
+  {
+    "text": "[chuckle] It formats everything into proper CSV text, ready to save or open in any spreadsheet program.",
+    "until_line": 10
+  },
+  {
+    "text": "[sniff] Reading is just as easy, and DictReader is the star — it turns each row into a dictionary.",
+    "until_line": 14
+  },
+  {
+    "text": "It uses the header row as the keys, so you access columns by name instead of by fragile numeric position.",
+    "until_line": 14
+  },
+  {
+    "text": "So you read row dot name and row dot score clearly, instead of guessing which column is which.",
+    "until_line": 16
+  },
+  {
+    "text": "[sigh] That makes your data-processing code readable and robust, even if columns get reordered.",
+    "until_line": 16
+  },
+  {
+    "text": "[groan] Whenever you deal with exported data or reports, the csv module is the reliable, correct way to read and write it.",
+    "until_line": 16
+  },
+  {
+    "text": "And that's the whole Python series, all eighty-one videos. Start back at number one and binge it. Comment what I should build next.",
+    "until_line": 16
+  }
+]

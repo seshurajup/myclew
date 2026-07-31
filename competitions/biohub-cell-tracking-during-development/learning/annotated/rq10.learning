@@ -1,0 +1,12 @@
+@ id: rq10
+@ order: 2190
+@ title: A Related Work Comparison Table
+@ subtitle: RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory §A
+@ source: docs/papers/ratequant/ratequant.md
+
+--- note
+## A Related Work Comparison Table
+**Paper:** RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory · §A · pages 13–13 · equations (none) · 0 figures.
+
+> TODO(author): the *why* of §A in 3–5 lines.
+

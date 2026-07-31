@@ -1,0 +1,14 @@
+@ id: tsc06
+@ order: 2850
+@ title: 6 Concluding Remarks
+@ subtitle: TRANSFORMERS ARE INHERENTLY SUCCINCT §6
+@ source: docs/papers/transformers-succinct/transformers-succinct.md
+
+--- note
+## 6 Concluding Remarks
+**Paper:** TRANSFORMERS ARE INHERENTLY SUCCINCT · §6 · pages 10–21 · equations (none) · 0 figures.
+
+**Closing.** The result sits in a line of work tying hard-attention transformers
+to temporal logic; its contribution is the SIZE dimension: transformers are the succinct end of that
+correspondence, with the audit bill attached.
+

@@ -1,0 +1,49 @@
+@ id: dopd05
+@ order: 624
+@ title: How it maps to our fleet — endpoint vs direction, and self-improvement
+@ subtitle: our distill.py copies the endpoint; Direct-OPD transfers the direction
+@ source: fleet_agents/distill.py + harness_opt_gate.py + prompt-optimize triad
+
+--- note
+## Our distill.py IS endpoint distillation
+The fleet's `distill.py` (the biohub cell-detection distiller) is a textbook **endpoint** distiller: a heavy
+teacher (Cellpose-SAM / micro-SAM / StarDist3D) runs offline once to produce **pseudo-labels**, and a fast
+one-pass 3D-UNet **student is trained to reproduce those labels**. The student is pulled to the teacher's
+**endpoint** — exactly the mode Direct-OPD contrasts itself against. That is the *right* choice for us: our
+teacher is **stronger** than the student (we distill to get its recall into a T4-fast net), so importing its
+endpoint is the goal, not a hazard. Direct-OPD only wins when the teacher is **weaker** than the student and you
+want its *direction*, not its level — the opposite regime.
+
+--- note
+## The one-line contrast
+- **Endpoint distillation (our distill.py):** student → teacher's outputs. Ceiling = the teacher. Use when the
+  teacher is the stronger model.
+- **Direct-OPD (direction transfer):** student → moves along the teacher's RL shift Δ_T from its own base,
+  on-policy, KL-leashed to itself. Ceiling = the student's own capacity. Use when the teacher is **weaker** but
+  learned a useful *direction* via RL.
+
+We encoded this decision as a small **pure** helper on `distill.py` — `direction_transfer_worth(teacher_pre,
+teacher_post, student_ref)` — so the fleet can *decide* endpoint-vs-direction from measured numbers. It does
+**not** implement RL (that needs verl/vLLM infra we don't carry); it is the planning gate, grounded in dopd06.
+
+--- note
+## The agentic self-improvement connection
+Direct-OPD is one instance of a pattern the fleet already runs on its **prompt/harness** surfaces: **transfer
+the improvement, gate on eval.**
+- **`harness_opt_gate`** — our port of deepagents' *better-harness* keep-if-improves rule: a change to a
+  PROMPT / HARNESS is accepted only if it beats the incumbent on a blind holdout. Same shape as Direct-OPD's
+  KL-leashed, reward-gated step: move only where the signal is real; anchor to your prior self.
+- **the prompt-optimize triad** (`prompt_metric` / `prompt_dataset` / `dspy_prompt_pack` + `prompt_agent_author`
+  / `skill_build`) — self-evolving prompts: propose a shift, score it, keep it if it improves. That IS
+  "replicate the shift, gate on eval," at the text level rather than the token-logit level.
+- **`gm_repo_distill`** — the self-improving loop that scans a GM winner repo for techniques the fleet lacks;
+  Direct-OPD's "do the expensive discovery once, transfer the direction" is the same economics.
+
+--- note
+## Honest framing (say it plainly)
+Direct-OPD is **LLM-RL post-training infrastructure**, not a cell-tracking method and not a biohub lever. It
+enters the hub as (a) background that sharpens how we think about our *own* distillation (endpoint vs
+direction), and (b) a **candidate** capability for a future **LLM-RL competition**. What we actually added to the
+fleet now is cheap and honest: the endpoint-vs-direction **decision helper** + its test (dopd06 / part 4). The
+full Direct-OPD **trainer** (verl + vLLM rollouts + frozen teacher log-ratios) is **flagged, not built** — we
+build it only when a real reward-aligned LLM-RL comp needs it, exactly as we flagged the NVFP4/AWQ trainers.

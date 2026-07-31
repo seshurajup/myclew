@@ -1,0 +1,207 @@
+@ id: gmz1
+@ order: 3000
+@ title: What we take from GradMem — the break-even, and one honest caveat
+@ subtitle: GradMem · when writing beats caching
+@ source: docs/papers/gradmem/gradmem.md
+
+--- note
+## Two transferable pieces
+1. **The break-even inequality (eq. 13) is a design tool.** Any time we consider compressing a context —
+   a long document, a replay buffer, a well's history — the question "how many queries will we ask of it?"
+   decides the answer, and eq. 13 answers it in closed form. Same shape of diagnostic as RateQuant's AM/GM.
+2. **A memory is the argmin of an inspectable objective.** `L_write` is self-supervised on the context
+   itself, so it can be run against a frozen model with no labels and no fine-tuning — which is exactly
+   the situation we are in on a Kaggle box with someone else's checkpoint.
+
+**Honest caveat:** the paper's evidence is LLM long-context benchmarks under context removal. Everything
+proved here is either an identity, a closed-form cost comparison, or a small controlled optimisation
+against a frozen linear model. The mechanism transfers; the benchmark numbers are not reproduced.
+
+--- note
+### The break-even, plotted for our own regime
+Fill in the numbers for a setting we actually run and read off whether writing is worth it.
+
+--- code
+import torch, torch.nn as nn, torch.nn.functional as F      # a memory is the argmin of a write loss
+import sys; sys.path.insert(0, "learning")
+import vizkit as vz
+
+DEV = torch.device("cuda" if torch.cuda.is_available() else "cpu")   # every proof runs on the GPU
+torch.set_default_device(DEV)
+torch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False   # exact proofs
+torch.manual_seed(0); torch.set_printoptions(precision=4, sci_mode=False)
+print(f"device: {DEV}" + (f" | {torch.cuda.get_device_name(0)}" if DEV.type == "cuda" else ""))
+
+def ok(name, cond, extra=""):
+    print(("PASS  " if cond else "FAIL  ") + name + (f"   | {extra}" if extra else ""))
+
+def close(a, b, tol=1e-5):
+    return torch.allclose(a, b, atol=tol, rtol=tol)
+
+import pandas as pd
+def breakeven(c, m, q, R, K):
+    return (c ** 2 * (R * K - 1) + (1 + R * K) * m ** 2 + 2 * c * m * R * K) / (q * (c - m))
+rows = []
+for c_ in (2048, 8192, 32768):
+    for RK in ((1, 2), (4, 8)):
+        rows.append(dict(context=c_, R=RK[0], K=RK[1], memory=256,
+                         breakeven_queries=round(breakeven(c_, 256, 64, RK[0], RK[1]))))
+df = pd.DataFrame(rows)
+print(df.to_string(index=False))
+ok("a longer context RAISES the break-even (writing costs more up front)",
+   df[df.R == 4].breakeven_queries.is_monotonic_increasing,
+   "so writing pays off soonest for medium contexts asked many questions")
+ok("cheaper writes (small R*K) always lower the break-even",
+   bool((df[df.R == 1].breakeven_queries.values < df[df.R == 4].breakeven_queries.values).all()))
+vz.table(df, "GradMem break-even (eq. 13)", "queries needed before writing beats caching",
+         heat_cols=["breakeven_queries"], lower_better=["breakeven_queries"])
+
+--- output
+```
+device: cuda | NVIDIA GeForce RTX 5090
+ context  R  K  memory  breakeven_queries
+    2048  1  2     256                 57
+    2048  4  8     256               1445
+    8192  1  2     256                149
+    8192  4  8     256               4365
+   32768  1  2     256                532
+   32768  4  8     256              16256
+PASS  a longer context RAISES the break-even (writing costs more up front)   | so writing pays off soonest for medium contexts asked many questions
+PASS  cheaper writes (small R*K) always lower the break-even
+```
+<div id="xeberxvzdi" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>
+#xeberxvzdi table {
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
+          -webkit-font-smoothing: antialiased;
+          -moz-osx-font-smoothing: grayscale;
+        }
+
+#xeberxvzdi thead, tbody, tfoot, tr, td, th { border-style: none; }
+ tr { background-color: transparent; }
+#xeberxvzdi p { margin: 0; padding: 0; }
+ #xeberxvzdi .gt_table { display: table; border-collapse: collapse; line-height: normal; margin-left: auto; margin-right: auto; color: #333333; font-size: 16px; font-weight: normal; font-style: normal; background-color: #FFFFFF; width: auto; border-top-style: solid; border-top-width: 2px; border-top-color: #A8A8A8; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #A8A8A8; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; }
+ #xeberxvzdi .gt_caption { padding-top: 4px; padding-bottom: 4px; }
+ #xeberxvzdi .gt_title { color: #333333; font-size: 125%; font-weight: initial; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; border-bottom-color: #FFFFFF; border-bottom-width: 0; }
+ #xeberxvzdi .gt_subtitle { color: #333333; font-size: 85%; font-weight: initial; padding-top: 3px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; border-top-color: #FFFFFF; border-top-width: 0; }
+ #xeberxvzdi .gt_heading { background-color: #FFFFFF; text-align: center; border-bottom-color: #FFFFFF; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
+ #xeberxvzdi .gt_bottom_border { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D3D3D3; }
+ #xeberxvzdi .gt_col_headings { border-top-style: solid; border-top-width: 2px; border-top-color: #D3D3D3; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
+ #xeberxvzdi .gt_col_heading { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: normal; text-transform: inherit; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; overflow-x: hidden; }
+ #xeberxvzdi .gt_column_spanner_outer { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: normal; text-transform: inherit; padding-top: 0; padding-bottom: 0; padding-left: 4px; padding-right: 4px; }
+ #xeberxvzdi .gt_column_spanner_outer:first-child { padding-left: 0; }
+ #xeberxvzdi .gt_column_spanner_outer:last-child { padding-right: 0; }
+ #xeberxvzdi .gt_column_spanner { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D3D3D3; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; overflow-x: hidden; display: inline-block; width: 100%; }
+ #xeberxvzdi .gt_spanner_row { border-bottom-style: hidden; }
+ #xeberxvzdi .gt_group_heading { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-top-style: solid; border-top-width: 2px; border-top-color: #D3D3D3; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: middle; text-align: left; }
+ #xeberxvzdi .gt_empty_group_heading { padding: 0.5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; border-top-style: solid; border-top-width: 2px; border-top-color: #D3D3D3; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D3D3D3; vertical-align: middle; }
+ #xeberxvzdi .gt_from_md> :first-child { margin-top: 0; }
+ #xeberxvzdi .gt_from_md> :last-child { margin-bottom: 0; }
+ #xeberxvzdi .gt_row { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; margin: 10px; border-top-style: solid; border-top-width: 1px; border-top-color: #D3D3D3; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: middle; overflow-x: hidden; }
+ #xeberxvzdi .gt_stub { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #D3D3D3; padding-left: 5px; padding-right: 5px; }
+ #xeberxvzdi .gt_indent_1 { text-indent: 5px; }
+ #xeberxvzdi .gt_indent_2 { text-indent: calc(5px * 2); }
+ #xeberxvzdi .gt_indent_3 { text-indent: calc(5px * 3); }
+ #xeberxvzdi .gt_indent_4 { text-indent: calc(5px * 4); }
+ #xeberxvzdi .gt_indent_5 { text-indent: calc(5px * 5); }
+ #xeberxvzdi .gt_stub_row_group { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #D3D3D3; padding-left: 5px; padding-right: 5px; vertical-align: top; }
+ #xeberxvzdi .gt_row_group_first td { border-top-width: 2px; }
+ #xeberxvzdi .gt_row_group_first th { border-top-width: 2px; }
+ #xeberxvzdi .gt_striped { color: #333333; background-color: #F4F4F4; }
+ #xeberxvzdi .gt_table_body { border-top-style: solid; border-top-width: 2px; border-top-color: #D3D3D3; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D3D3D3; }
+ #xeberxvzdi .gt_summary_row { color: #333333; background-color: #FFFFFF; text-transform: inherit; padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; }
+ #xeberxvzdi .gt_first_summary_row { border-top-style: solid; border-top-width: 2px; border-top-color: #D3D3D3; }
+ #xeberxvzdi .gt_last_summary_row_top { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D3D3D3; }
+ #xeberxvzdi .gt_grand_summary_row { color: #333333; background-color: #FFFFFF; text-transform: inherit; padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; }
+ #xeberxvzdi .gt_first_grand_summary_row_bottom { border-top-style: double; border-top-width: 6px; border-top-color: #D3D3D3; }
+ #xeberxvzdi .gt_last_grand_summary_row_top { border-bottom-style: double; border-bottom-width: 6px; border-bottom-color: #D3D3D3; }
+ #xeberxvzdi .gt_sourcenotes { color: #333333; background-color: #FFFFFF; border-bottom-style: none; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; }
+ #xeberxvzdi .gt_sourcenote { font-size: 90%; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; text-align: left; }
+ #xeberxvzdi .gt_left { text-align: left; }
+ #xeberxvzdi .gt_center { text-align: center; }
+ #xeberxvzdi .gt_right { text-align: right; font-variant-numeric: tabular-nums; }
+ #xeberxvzdi .gt_font_normal { font-weight: normal; }
+ #xeberxvzdi .gt_font_bold { font-weight: bold; }
+ #xeberxvzdi .gt_font_italic { font-style: italic; }
+ #xeberxvzdi .gt_super { font-size: 65%; }
+ #xeberxvzdi .gt_footnotes { color: font-color(#FFFFFF); background-color: #FFFFFF; border-bottom-style: none; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; }
+ #xeberxvzdi .gt_footnote { margin: 0px; font-size: 90%; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; }
+ #xeberxvzdi .gt_sourcenotes { color: #333333; background-color: #FFFFFF; border-bottom-style: none; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; }
+ #xeberxvzdi .gt_sourcenote { font-size: 90%; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; text-align: left; }
+ #xeberxvzdi .gt_footnote_marks { font-size: 75%; vertical-align: 0.4em; position: initial; }
+ #xeberxvzdi .gt_asterisk { font-size: 100%; vertical-align: 0; }
+ 
+</style>
+<table class="gt_table" data-quarto-disable-processing="false" data-quarto-bootstrap="false">
+<thead>
+
+  <tr class="gt_heading">
+    <td colspan="5" class="gt_heading gt_title gt_font_normal">GradMem break-even (eq. 13)</td>
+  </tr>
+  <tr class="gt_heading">
+    <td colspan="5" class="gt_heading gt_subtitle gt_font_normal gt_bottom_border">queries needed before writing beats caching</td>
+  </tr>
+<tr class="gt_col_headings">
+  <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" scope="col" id="context">context</th>
+  <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" scope="col" id="R">R</th>
+  <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" scope="col" id="K">K</th>
+  <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" scope="col" id="memory">memory</th>
+  <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" scope="col" id="breakeven_queries">breakeven_queries</th>
+</tr>
+</thead>
+<tbody class="gt_table_body">
+  <tr>
+    <td class="gt_row gt_right">2048</td>
+    <td class="gt_row gt_right">1</td>
+    <td class="gt_row gt_right">2</td>
+    <td class="gt_row gt_right">256</td>
+    <td style="color: #000000; background-color: #0b6cff;" class="gt_row gt_right">57</td>
+  </tr>
+  <tr>
+    <td class="gt_row gt_right">2048</td>
+    <td class="gt_row gt_right">4</td>
+    <td class="gt_row gt_right">8</td>
+    <td class="gt_row gt_right">256</td>
+    <td style="color: #000000; background-color: #1e77ff;" class="gt_row gt_right">1445</td>
+  </tr>
+  <tr>
+    <td class="gt_row gt_right">8192</td>
+    <td class="gt_row gt_right">1</td>
+    <td class="gt_row gt_right">2</td>
+    <td class="gt_row gt_right">256</td>
+    <td style="color: #000000; background-color: #0c6dff;" class="gt_row gt_right">149</td>
+  </tr>
+  <tr>
+    <td class="gt_row gt_right">8192</td>
+    <td class="gt_row gt_right">4</td>
+    <td class="gt_row gt_right">8</td>
+    <td class="gt_row gt_right">256</td>
+    <td style="color: #000000; background-color: #468fff;" class="gt_row gt_right">4365</td>
+  </tr>
+  <tr>
+    <td class="gt_row gt_right">32768</td>
+    <td class="gt_row gt_right">1</td>
+    <td class="gt_row gt_right">2</td>
+    <td class="gt_row gt_right">256</td>
+    <td style="color: #000000; background-color: #1170ff;" class="gt_row gt_right">532</td>
+  </tr>
+  <tr>
+    <td class="gt_row gt_right">32768</td>
+    <td class="gt_row gt_right">4</td>
+    <td class="gt_row gt_right">8</td>
+    <td class="gt_row gt_right">256</td>
+    <td style="color: #000000; background-color: #e8f1ff;" class="gt_row gt_right">16256</td>
+  </tr>
+</tbody>
+
+</table>
+
+</div>
+
+
+--- note
+**[Recap]** write once, answer many · the write is a self-supervised objective
+descended at test time on a frozen model · state size is constant in context length · and eq. 13 tells you
+in advance whether to bother. Cross-read: `nl06` (test-time training = parametric ICL), `fnl02` (the same
+argmin shape), `rq04` (the same "compute the diagnostic first" discipline).
+

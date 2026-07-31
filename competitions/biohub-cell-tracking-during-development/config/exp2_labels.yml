@@ -1,0 +1,40 @@
+# =====================================================================
+# Experiment 2 (part A) — TEACHER pseudo-label generation config
+# Run:  bash gen_labels.sh config/exp2_labels.yml
+# Generates dense pseudo-labels (geff) for the student, from the STRONG teacher.
+# =====================================================================
+name: exp2_labels_teacher3x
+
+purpose: >
+  Generate DENSE pseudo-labels for student distillation using the STRONGEST
+  teacher (3x TTA), because label quality is the student's ceiling and label
+  generation is one-time (speed doesn't matter here). The deployed student stays
+  1x/fast. Teacher = DoG (wide-refine) UNION neural(3x TTA) -> two-pass linker ->
+  gap-close -> short-track filter -> temporal smoothing = the 0.8743 ensemble.
+  Output: dense geff per TRAIN dataset (~all cells) + REAL geff symlinks for the
+  12 holdout (honest student validation).
+
+paths:
+  python:   research/cellmot_venv/bin/python
+  weights:  research/cellmot_artifacts/extracted/cellmot-baseline-artifacts/weights/unet_transformer/split_0/edge_predictor_best.pth
+  train_dir: input/biohub-cell-tracking-during-development/train
+  splits:    research/cellmot_artifacts/extracted/cellmot-baseline-artifacts/repo/our_splits.json
+  out_dir:   research/student/pseudo_trainset
+  student_splits: research/student/student_splits.json
+
+# --- teacher settings (declarative; the generator READS these, no hardcoding) ---
+teacher:
+  det_tta:        true      # 3x TTA = strongest teacher for LABELS
+  det_threshold:  0.99
+  union_merge_um: 7.0       # DoG union neural, dedup radius
+  link_tight_um:  6.0
+  link_loose_um:  8.0
+  vel_blend:      0.5
+  max_gap:        1
+  gap_dist_um:    6.0
+  filter_len:     7
+  smooth_w:       0.5
+  smooth_iters:   2
+
+run:
+  n: 0                        # 0 = all 187 train datasets; >0 = subset for validation

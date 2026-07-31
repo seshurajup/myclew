@@ -1,0 +1,14 @@
+{
+  "language": "python",
+  "title": "collections.py",
+  "hook": "Four containers better than dict and list",
+  "playlist": "Learn Python",
+  "target_seconds": 90,
+  "max_seconds": 120,
+  "tts_engine": "chatterbox",
+  "music_prompt": "specialized, practical, powerful",
+  "code_path": "code.py",
+  "transcript_path": "transcript.json",
+  "outputs_path": "outputs.json",
+  "accent": "rose"
+}

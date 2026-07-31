@@ -1,0 +1,42 @@
+[
+  {
+    "text": "A closure is a function that remembers values from the place where it was created, even after that place is gone.",
+    "until_line": 4
+  },
+  {
+    "text": "make_multiplier takes a factor, and returns an inner function that multiplies by it.",
+    "until_line": 4
+  },
+  {
+    "text": "The inner function closes over factor — it keeps a private reference to that value.",
+    "until_line": 4
+  },
+  {
+    "text": "[chuckle] So times_three remembers three, and times_five remembers five, completely independently.",
+    "until_line": 7
+  },
+  {
+    "text": "Calling times_three of ten gives thirty, while times_five of ten gives fifty — each carries its own factor.",
+    "until_line": 10
+  },
+  {
+    "text": "[sniff] Closures can even hold state that changes over time, like this counter.",
+    "until_line": 19
+  },
+  {
+    "text": "The nonlocal keyword lets the inner function modify the count from the enclosing function, not just read it.",
+    "until_line": 19
+  },
+  {
+    "text": "So each call to counter bumps the number up and remembers it for next time.",
+    "until_line": 22
+  },
+  {
+    "text": "[groan] That's a closure giving you private, persistent state — the same idea that powers decorators under the hood.",
+    "until_line": 22
+  },
+  {
+    "text": "In the next one we take on generators. Comment PYTHON if you want the cheat sheet.",
+    "until_line": 22
+  }
+]

@@ -1,0 +1,46 @@
+[
+  {
+    "text": "Defaultdict removes the most annoying line you write when grouping data.",
+    "until_line": 1
+  },
+  {
+    "text": "It comes from collections, the same module as Counter.",
+    "until_line": 1
+  },
+  {
+    "text": "We've got pairs of a category and an item, with fruit appearing twice.",
+    "until_line": 3
+  },
+  {
+    "text": "Defaultdict list means any missing key starts life as an empty list.",
+    "until_line": 4
+  },
+  {
+    "text": "That's the whole trick — you hand it a factory, and it calls that factory on a miss.",
+    "until_line": 4
+  },
+  {
+    "text": "Now the loop just appends, with no checking whether the key exists yet.",
+    "until_line": 7
+  },
+  {
+    "text": "With a plain dict, line seven would raise a KeyError the very first time round.",
+    "until_line": 7
+  },
+  {
+    "text": "Fruit collected apple and pear, exactly as they arrived.",
+    "until_line": 9
+  },
+  {
+    "text": "Veg has its own list, created the moment it was first touched.",
+    "until_line": 10
+  },
+  {
+    "text": "And wrapping it in dict gives you back an ordinary dictionary when you're done.",
+    "until_line": 11
+  },
+  {
+    "text": "lambda, map and filter is next, video number 15. Follow so you don't miss it.",
+    "until_line": 11
+  }
+]

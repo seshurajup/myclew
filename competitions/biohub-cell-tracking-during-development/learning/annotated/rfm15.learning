@@ -1,0 +1,12 @@
+@ id: rfm15
+@ order: 2540
+@ title: C Statistical Significance Analysis
+@ subtitle: Routing-Free Mixture-of-Experts §C
+@ source: docs/papers/routing-free-moe/routing-free-moe.md
+
+--- note
+## C Statistical Significance Analysis
+**Paper:** Routing-Free Mixture-of-Experts · §C · pages 20–20 · equations (none) · 0 figures.
+
+> TODO(author): the *why* of §C in 3–5 lines.
+

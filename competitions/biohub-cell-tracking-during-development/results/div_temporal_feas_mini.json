@@ -1,0 +1,71 @@
+{
+  "mode": "mini",
+  "n_samples": 527,
+  "n_pos": 27,
+  "n_neg": 500,
+  "n_hard_inv": 7,
+  "crop": [
+    8,
+    30,
+    30
+  ],
+  "temporal_window": 2,
+  "_why_crop": "XY half=30vox=ceil(12.0\u00b5m/0.40625\u00b5m-per-vox); Z half=8=ceil(12.0/1.625) \u2014 box must contain any 2nd cell within the 12.0\u00b5m confuser radius",
+  "_why_tw": "\u00b12 frames \u2014 daughters appear at t+1, pre-mitotic rounding at t-1..t-2 (edge \u0394t=1)",
+  "_why_single_frame": "single-frame uses t+1 (both cells present) = the HARDEST frame where a real division and two touching cells look identical -> the ~0.671 ceiling",
+  "ceiling": 0.671,
+  "overall": {
+    "single": 0.503,
+    "temporal": 0.52
+  },
+  "by_embryo": {
+    "44b6": {
+      "n_pos": 20,
+      "single": 0.508,
+      "temporal": 0.498
+    },
+    "6bba": {
+      "n_pos": 7,
+      "single": 0.516,
+      "temporal": 0.679
+    }
+  },
+  "by_stage": {
+    "S0": {
+      "n_pos": 6,
+      "dens_mean": 2.1,
+      "single": 0.674,
+      "temporal": 0.591
+    },
+    "S1": {
+      "n_pos": 13,
+      "dens_mean": 3.5,
+      "single": 0.357,
+      "temporal": 0.517
+    },
+    "S2": {
+      "n_pos": 1,
+      "dens_mean": 6.4,
+      "single": null,
+      "temporal": null
+    },
+    "S3": {
+      "n_pos": 4,
+      "dens_mean": 9.0,
+      "single": 0.819,
+      "temporal": 0.614
+    },
+    "S4": {
+      "n_pos": 3,
+      "dens_mean": 12.3,
+      "single": 0.817,
+      "temporal": 0.849
+    }
+  },
+  "hard_invisible": {
+    "n_pos": 7,
+    "single": 0.487,
+    "temporal": 0.595
+  },
+  "sec": 40.3
+}

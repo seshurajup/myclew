@@ -1,0 +1,50 @@
+[
+  {
+    "text": "The walrus operator assigns a value and returns it, in the same breath.",
+    "until_line": 1
+  },
+  {
+    "text": "Before it existed, you had to assign on one line and test on the next.",
+    "until_line": 1
+  },
+  {
+    "text": "We start with six numbers, an empty result list, and an index at zero.",
+    "until_line": 3
+  },
+  {
+    "text": "Now the while condition — and there's a lot packed into this one line.",
+    "until_line": 5
+  },
+  {
+    "text": "Colon equals assigns to n and hands that same value straight to the comparison.",
+    "until_line": 5
+  },
+  {
+    "text": "The conditional expression guards the end of the list, giving None once we run out.",
+    "until_line": 5
+  },
+  {
+    "text": "So n is assigned and tested at once, with no duplicate line above the loop.",
+    "until_line": 5
+  },
+  {
+    "text": "The parentheses around the walrus are required here, and usually a good idea anyway.",
+    "until_line": 5
+  },
+  {
+    "text": "Inside, we keep only the even numbers.",
+    "until_line": 7
+  },
+  {
+    "text": "And we bump the index so the loop actually moves forward.",
+    "until_line": 8
+  },
+  {
+    "text": "Two, four and six come out — the walrus saved us a line and a repeated read.",
+    "until_line": 10
+  },
+  {
+    "text": "Video 11 tackles type hints. Tell me in the comments if this clicked.",
+    "until_line": 10
+  }
+]

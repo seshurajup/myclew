@@ -1,0 +1,31 @@
+[
+  {
+    "after_line": 8,
+    "text": ">>> [1, 2, 3, 4, 5]\n>>> ['apple', 'banana', 'cherry']\n>>> [10, 'hello', 3.14, True]\n>>> 3",
+    "caption": "lists hold any mix of types"
+  },
+  {
+    "after_line": 11,
+    "text": ">>> ['apple', 'banana', 'cherry', 'date']",
+    "caption": ".append() adds to the end"
+  },
+  {
+    "after_line": 14,
+    "text": ">>> ['apple', 'cherry', 'date']",
+    "caption": ".remove() deletes first match"
+  },
+  {
+    "after_line": 18,
+    "text": ">>> True\n>>> [1, 2, 3, 4, 5, 6, 7]",
+    "caption": "in + concatenation"
+  },
+  {
+    "after_line": 21,
+    "text": ">>> [7, 6, 5, 4, 3, 2, 1]",
+    "caption": ".sort() rearranges in place"
+  },
+  {
+    "after_line": 24,
+    "image": "artifacts/terminal.png"
+  }
+]

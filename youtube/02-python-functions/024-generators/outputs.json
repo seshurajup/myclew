@@ -1,0 +1,21 @@
+[
+  {
+    "after_line": 7,
+    "text": ">>> 3\\n>>> 2\\n>>> 1",
+    "caption": "yield produces one value at a time"
+  },
+  {
+    "after_line": 15,
+    "text": ">>> [0, 1, 1, 2, 3, 5, 8, 13]",
+    "caption": "lazy fibonacci, collected"
+  },
+  {
+    "after_line": 20,
+    "text": ">>> 0\\n>>> 1",
+    "caption": "a million squares, computed on demand"
+  },
+  {
+    "after_line": 20,
+    "image": "artifacts/terminal.png"
+  }
+]

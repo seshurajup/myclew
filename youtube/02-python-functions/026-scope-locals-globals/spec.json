@@ -1,0 +1,14 @@
+{
+  "language": "python",
+  "title": "scope_locals_globals.py",
+  "hook": "Why Python says your variable isn't defined",
+  "playlist": "Learn Python",
+  "target_seconds": 90,
+  "max_seconds": 120,
+  "tts_engine": "chatterbox",
+  "music_prompt": "structured, layered, clear",
+  "code_path": "code.py",
+  "transcript_path": "transcript.json",
+  "outputs_path": "outputs.json",
+  "accent": "violet"
+}

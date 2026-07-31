@@ -1,0 +1,30 @@
+@ id: rq29
+@ order: 2380
+@ title: T Distortion Curve Visualization
+@ subtitle: RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory §T
+@ source: docs/papers/ratequant/ratequant.md
+
+--- note
+## T Distortion Curve Visualization
+**Paper:** RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory · §T · pages 22–22 · equations (none) · 2 figures.
+
+> TODO(author): the *why* of §T in 3–5 lines.
+
+--- note
+### Figure 8 — as printed in the paper
+
+Figure 8: Per-head gradient sensitivity for Qwen3-8B (left: Key, right: Value). Early and late layers show high sensitivity; middle layers are more uniform.
+
+--- image
+learning/assets/ratequant/p22_0.png
+Figure 8: Per-head gradient sensitivity for Qwen3-8B (left: Key, right: Value). Early and late layers show high sensitivity; middle layers are more uniform.
+
+--- note
+### Table 19 — as printed in the paper
+
+Table 19: Head sensitivity heterogeneity across models (gradient proxy).
+
+--- image
+learning/assets/ratequant/p22_1.png
+Table 19: Head sensitivity heterogeneity across models (gradient proxy).
+

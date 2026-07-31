@@ -1,0 +1,18 @@
+@ id: afp01
+@ order: 2900
+@ title: 1 Introduction
+@ subtitle: Advancing Mathematics Research with AI-Driven Formal Proof Search §1
+@ source: docs/papers/ai-formal-proof/ai-formal-proof.md
+
+--- note
+## 1 Introduction
+**Repo:** Advancing Mathematics Research with AI-Driven Formal Proof Search · /tmp/claude-1001/-home-seshu-kaggle-2026/5abb95f8-1364-4775-8ff5-e5c2788bac9d/scratchpad/arx_2605.22763v1.pdf · units (none).
+
+> TODO(author): the *why* of §1 in 3–5 lines.
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/ai-formal-proof/p01_0.png
+

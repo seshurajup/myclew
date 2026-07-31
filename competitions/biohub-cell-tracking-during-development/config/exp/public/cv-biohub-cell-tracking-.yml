@@ -1,0 +1,10 @@
+# PUBLIC notebook config — nomannic19/cv-biohub-cell-tracking-temporal-3d-u-net
+name: pub_cv-biohub-cell-tracking-
+source: nomannic19/cv-biohub-cell-tracking-temporal-3d-u-net
+family: other
+base: unknown
+lb: None
+golden_cv: None
+mined_params: "det_threshold=['0.12']"
+run: manual
+score: golden-12 (adj_edge_J + 0.1*div_J), by_embryo

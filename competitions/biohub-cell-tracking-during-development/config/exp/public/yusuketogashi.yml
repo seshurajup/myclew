@@ -1,0 +1,10 @@
+# PUBLIC notebook config — **yusuketogashi** / lb885 micro-safe-div
+name: pub_yusuketogashi
+source: **yusuketogashi** / lb885 micro-safe-div
+family: other
+base: unknown
+lb: 0.885
+golden_cv: 0.8708
+mined_params: ""
+run: manual
+score: golden-12 (adj_edge_J + 0.1*div_J), by_embryo

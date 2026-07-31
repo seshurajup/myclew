@@ -1,0 +1,114 @@
+@ id: k311
+@ order: 1800
+@ title: B Details of Sigmoid Tanh Unit GLU
+@ subtitle: KIMI K3: OPEN FRONTIER INTELLIGENCE §B
+@ source: docs/papers/kimi-k3/kimi-k3.md
+
+--- note
+## B Details of Sigmoid Tanh Unit GLU
+**Paper:** KIMI K3: OPEN FRONTIER INTELLIGENCE · §B · pages 43–43 · equations (20–21) · 0 figures.
+
+**Appendix B — why SiTU-GLU is safe.** Two short results: `β tanh(z/β)` is `z`
+to third order (so the activation is *linear where it matters*), and the gated product is bounded by
+`β₁β₂`. With the published `β₁ = 4.0`, `β₂ = 25.0` that bound is exactly **100** — a hard ceiling on
+activation magnitude, which is what keeps a 2.8T-parameter MoE numerically stable.
+
+--- note
+### Appendix B — the soft clip is linear to third order — eq. (20)
+
+$$
+\beta\tanh\Big(\frac{z}{\beta}\Big) \;=\; z + O\Big(\frac{z^3}{\beta^2}\Big)
+$$
+
+Why the bounded activation does not hurt: near zero it *is* the identity, with the first
+correction cubic and suppressed by `β²`. So the network trains as if it had a linear branch, and the bound
+only bites on outliers.
+
+--- code
+import torch, torch.nn as nn, torch.nn.functional as F      # K3's maths is delta rules + softmax + LP duality
+import json, pathlib
+
+import sys; sys.path.insert(0, "learning")
+import vizkit as vz                                            # the shared visual + explainability layer
+
+DEV = torch.device("cuda" if torch.cuda.is_available() else "cpu")   # every proof runs on the GPU
+torch.set_default_device(DEV)
+# These cells PROVE matrix identities, so they need full fp32: TF32 truncates the mantissa to 10 bits
+# and an identity that holds to 1e-6 in fp32 only holds to ~1e-3 in TF32. Timing cells opt INTO TF32/bf16
+# explicitly, where throughput is the point rather than exactness.
+torch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False
+torch.manual_seed(0); torch.set_printoptions(precision=4, sci_mode=False)
+print(f"device: {DEV}" + (f" | {torch.cuda.get_device_name(0)}" if DEV.type == "cuda" else ""))
+
+def ok(name, cond, extra=""):
+    print(("PASS  " if cond else "FAIL  ") + name + (f"   | {extra}" if extra else ""))
+
+def close(a, b, tol=1e-5):
+    return torch.allclose(a, b, atol=tol, rtol=tol)
+
+def k3cfg():                                                   # the PUBLISHED architecture (no weights)
+    p = pathlib.Path("docs/papers/kimi-k3/models/moonshotai__Kimi-K3.json")
+    c = json.loads(p.read_text()) if p.exists() else {}
+    return {**c.get("text_config", {}), **{k: v for k, v in c.items() if k != "text_config"}}
+
+beta = 4.0
+for z0 in (0.01, 0.1, 0.5):
+    z_ = torch.tensor([z0])
+    exact = beta * torch.tanh(z_ / beta)
+    err = float((exact - z_).abs())
+    pred = z0 ** 3 / (3 * beta ** 2)                               # the leading term of the expansion
+    print(f"  z={z0}: |beta tanh(z/beta) - z| = {err:.3e}, predicted {pred:.3e}")
+z_ = torch.tensor([0.1])
+ok("the error matches the cubic prediction", abs(float((beta * torch.tanh(z_ / beta) - z_).abs())
+                                                 - 0.1 ** 3 / (3 * beta ** 2)) < 1e-6)
+ok("and it shrinks like 1/beta^2",
+   float((8.0 * torch.tanh(z_ / 8.0) - z_).abs()) < float((beta * torch.tanh(z_ / beta) - z_).abs()))
+
+--- output
+```
+device: cuda | NVIDIA GeForce RTX 5090
+  z=0.01: |beta tanh(z/beta) - z| = 2.049e-08, predicted 2.083e-08
+  z=0.1: |beta tanh(z/beta) - z| = 2.082e-05, predicted 2.083e-05
+  z=0.5: |beta tanh(z/beta) - z| = 2.588e-03, predicted 2.604e-03
+PASS  the error matches the cubic prediction
+PASS  and it shrinks like 1/beta^2
+```
+
+--- image
+learning/assets/kimi-k3/eq/eq_p43_256.png
+Equation (20) as printed in the PDF
+
+--- note
+### Appendix B — the activation is bounded by β₁β₂ — eq. (21)
+
+$$
+\big\lVert \mathrm{SiTU\text{-}GLU}(x)\big\rVert_{\infty} \;\le\; \beta_1\beta_2 \;=\; 100
+$$
+
+**[config-verified]** The product of two bounded factors is bounded: the soft clip gives
+`β₁`, the linear branch is clipped at `β₂`, so the activation can never exceed `β₁β₂`. The published config
+sets `β₁ = 4.0` and `β₂ = 25.0` — **exactly 100**, the constant printed in the paper. A hard activation
+ceiling is what keeps a 2.8T MoE numerically stable in bf16.
+
+--- code
+cfg = k3cfg(); b1 = cfg.get("activation_situ_beta") or 4.0; b2 = cfg.get("activation_situ_linear_beta") or 25.0
+def situ_glu_full(z, u, beta1=b1, beta2=b2):
+    gate = beta1 * torch.tanh(z / beta1) * torch.sigmoid(z)        # |gate| <= beta1
+    lin = beta2 * torch.tanh(u / beta2)                            # |lin|  <= beta2
+    return gate * lin
+z = torch.linspace(-1e3, 1e3, 2001); u = torch.linspace(1e3, -1e3, 2001)
+v = situ_glu_full(z, u)
+ok(f"the published betas give the paper's constant beta1*beta2 = {b1*b2:.0f}", abs(b1 * b2 - 100) < 1e-9,
+   f"beta1={b1}, beta2={b2}")
+ok("no input, however extreme, exceeds the bound", float(v.abs().max()) <= b1 * b2 + 1e-4,
+   f"max |activation| = {float(v.abs().max()):.2f} <= {b1*b2:.0f}")
+ok("an unbounded GLU has no such ceiling",
+   float((F.silu(z) * u).abs().max()) > 1e5, f"SiLU-GLU reaches {float((F.silu(z)*u).abs().max()):.1e}")
+
+--- output
+```
+PASS  the published betas give the paper's constant beta1*beta2 = 100   | beta1=4.0, beta2=25.0
+PASS  no input, however extreme, exceeds the bound   | max |activation| = 100.00 <= 100
+PASS  an unbounded GLU has no such ceiling   | SiLU-GLU reaches 1.0e+06
+```
+

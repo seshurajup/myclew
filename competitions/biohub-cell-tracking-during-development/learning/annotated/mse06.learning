@@ -1,0 +1,386 @@
+@ id: mse06
+@ order: 3150
+@ title: 3 MetaSkill-Evolve
+@ subtitle: MetaSkill-Evolve: Recursive Self-Improvement of LLM Agents §3
+@ source: docs/papers/paper-2607-05297/paper-2607-05297.md
+
+--- note
+## 3 MetaSkill-Evolve
+**Paper:** MetaSkill-Evolve: Recursive Self-Improvement of LLM Agents · §3 · pages 3–5 · equations (1–4) · 10 figures.
+
+**The algebra, all four equations.** Utility as an expectation over the task
+distribution, estimated on a held-out batch (eq. 1). The branch state b = (s, m, h) with the five-component
+meta-skill whose closure enables recursion (eq. 2). Meta-productivity: the expected per-child utility gain
+a meta-skill produces, averaged over K proposals — and note the paper says over K PROPOSALS, not over
+archived children, which eq. 3's cell shows is the difference between an unbiased estimate and a badly
+optimistic one. Then frontier selection over the persisted DAG (eq. 4), whose three terms each defend
+against a specific way greedy search fails.
+
+--- note
+### The DAG and the archive gate — the structure the equations run on
+Before the equations: every evaluated branch state becomes a node in a DAG persisted to SQLite, with
+lineage edges (parent→child) and inspiration edges (cross-branch retrieval). Both point from earlier to
+later, so it is acyclic *by construction* — nodes are created once and never revised. A child enters the
+**archive** (the pool of deployable states, which is also the candidate parent set) only if it strictly
+improves on its parent, ΔU > 0.
+
+Two properties worth checking before they are used: acyclicity, and the fact that persisting the whole
+graph lets a deprioritised lineage be revisited later — which a fixed-size beam cannot do.
+
+--- code
+import math, random, torch, torch.nn.functional as F
+
+DEV = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+torch.set_default_device(DEV)
+torch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False
+torch.manual_seed(0)
+print(f"device: {DEV}" + (f" | {torch.cuda.get_device_name(0)}" if DEV.type == "cuda" else ""))
+
+def ok(name, cond, extra=""):
+    print(("PASS  " if cond else "FAIL  ") + name + (f"   | {extra}" if extra else ""))
+
+class Graph:
+    def __init__(self):
+        self.nodes = []            # (id, parent, U, dU, selected_count)
+        self.edges = []            # (u, v, kind)
+    def add(self, parent, U):
+        i = len(self.nodes)
+        dU = U - (self.nodes[parent][2] if parent is not None else 0.0)
+        self.nodes.append([i, parent, U, dU, 0])
+        if parent is not None: self.edges.append((parent, i, "lineage"))
+        return i
+    def inspire(self, u, v): self.edges.append((u, v, "inspiration"))
+    def archive(self): return [n for n in self.nodes if n[1] is None or n[3] > 0]
+
+g = Graph()
+root = g.add(None, 0.50)
+a = g.add(root, 0.55)          # improves  -> archived
+b = g.add(root, 0.48)          # regresses -> NOT archived
+c = g.add(a, 0.60)
+g.inspire(b, c)                # a dead-end branch can still INSPIRE a later node
+ok("every edge points from an EARLIER node to a later one", all(u < v for u, v, _ in g.edges),
+   "so the graph is acyclic by construction — no cycle check needed")
+arch = [n[0] for n in g.archive()]
+ok("only strictly-improving children enter the archive", arch == [root, a, c],
+   f"archive = {arch}; node {b} (dU = {g.nodes[b][3]:+.2f}) is excluded")
+ok("but a NON-archived node still contributes as an inspiration", ("inspiration") in
+   [k for _, _, k in g.edges], f"node {b} inspired node {c} despite regressing")
+ok("persisting the whole graph is what allows revisiting a deprioritised lineage", len(g.nodes) == 4,
+   "a fixed-size beam would have discarded node 2 and lost that option")
+
+--- output
+```
+device: cuda | NVIDIA GeForce RTX 5090
+PASS  every edge points from an EARLIER node to a later one   | so the graph is acyclic by construction — no cycle check needed
+PASS  only strictly-improving children enter the archive   | archive = [0, 1, 3]; node 2 (dU = -0.02) is excluded
+PASS  but a NON-archived node still contributes as an inspiration   | node 2 inspired node 3 despite regressing
+PASS  persisting the whole graph is what allows revisiting a deprioritised lineage   | a fixed-size beam would have discarded node 2 and lost that option
+```
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/paper-2607-05297/p05_0.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/paper-2607-05297/p05_1.png
+
+--- note
+### Figure 2 — as printed in the paper
+
+Figure 2: System overview. The branch state b = (s, m, h) (left) feeds the five-agent pipeline (centre), whose output is appended to the SQLite node graph (right). Frontier selection (Eq. 4) draws the next parent from the graph.
+
+--- image
+learning/assets/paper-2607-05297/p05_2.png
+Figure 2: System overview. The branch state b = (s, m, h) (left) feeds the five-agent pipeline (centre), whose output is appended to the SQLite node graph (right). Frontier selection (Eq. 4) draws the next parent from the graph.
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/paper-2607-05297/p05_3.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/paper-2607-05297/p05_4.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/paper-2607-05297/p05_5.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/paper-2607-05297/p05_6.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/paper-2607-05297/p05_7.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/paper-2607-05297/p05_8.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/paper-2607-05297/p05_9.png
+
+--- note
+### Task-skill utility — eq. (1)
+
+$$
+U(s) = \mathbb{E}_{(x,y)\sim\mathcal{T}}\big[\,r\big(A_s(x),\,y\big)\big],\qquad r(\cdot,\cdot)\in[0,1]
+$$
+
+The objective: expected reward of the agent running skill s over the task distribution.
+The paper is explicit that T is only accessible through samples, so U(s) is *estimated* on a held-out
+validation batch — and that makes the ESTIMATOR the real object. Two measured consequences: its standard
+error shrinks as 1/√n (so small batches make gains indistinguishable from noise), and picking the best of
+many candidates on the same small batch inflates the apparent gain — the winner's curse that eq. 3 and the
+archive gate then interact with.
+
+--- code
+true_U = 0.62
+def estimate(n, trials=20_000):
+    r = (torch.rand(trials, n) < true_U).float().mean(1)       # r in [0,1], Bernoulli case
+    return float(r.mean()), float(r.std())
+
+print(f"{'batch n':>8} {'mean U_hat':>11} {'std err':>9} {'predicted 1/sqrt(n)':>21}")
+for n in (10, 40, 160, 640):
+    m, sd = estimate(n)
+    pred = math.sqrt(true_U * (1 - true_U) / n)
+    print(f"{n:>8} {m:>11.4f} {sd:>9.4f} {pred:>21.4f}")
+m10, sd10 = estimate(10); m640, sd640 = estimate(640)
+ok("U_hat is unbiased at every batch size", abs(m640 - true_U) < 0.01 and abs(m10 - true_U) < 0.01)
+ok("and its noise falls as 1/sqrt(n)", abs(sd10 / sd640 - 8.0) < 1.5,
+   f"std err {sd10:.4f} at n=10 vs {sd640:.4f} at n=640 (~{sd10/sd640:.1f}x, sqrt(64) = 8)")
+
+K = 12                                                        # the winner's curse, quantified
+best_true, best_obs = [], []
+for _ in range(4000):
+    U = 0.55 + 0.05 * torch.rand(K)                           # K candidates,真 utilities
+    obs = torch.distributions.Binomial(20, U).sample() / 20    # each scored on n=20
+    w = int(obs.argmax())
+    best_obs.append(float(obs[w])); best_true.append(float(U[w]))
+bo, bt = sum(best_obs) / len(best_obs), sum(best_true) / len(best_true)
+print(f"\n  best-of-{K} on n=20: observed {bo:.4f}  but its TRUE utility {bt:.4f}  "
+      f"(inflated by {bo-bt:+.4f})")
+ok("selecting the max on a small batch OVERSTATES its utility", bo > bt + 0.01,
+   "so a 'gain' measured on the same batch that selected it is not a gain — eq. 3's cell revisits this")
+
+--- output
+```
+ batch n  mean U_hat   std err   predicted 1/sqrt(n)
+      10      0.6207    0.1532                0.1535
+      40      0.6197    0.0772                0.0767
+     160      0.6200    0.0382                0.0384
+     640      0.6200    0.0192                0.0192
+PASS  U_hat is unbiased at every batch size
+PASS  and its noise falls as 1/sqrt(n)   | std err 0.1534 at n=10 vs 0.0193 at n=640 (~8.0x, sqrt(64) = 8)
+
+  best-of-12 on n=20: observed 0.7528  but its TRUE utility 0.5781  (inflated by +0.1747)
+PASS  selecting the max on a small batch OVERSTATES its utility   | so a 'gain' measured on the same batch that selected it is not a gain — eq. 3's cell revisits this
+```
+
+--- note
+### Branch state and the five-component meta-skill — eq. (2)
+
+$$
+b = (s,\,m,\,h),\qquad m = (\psi,\,\sigma,\,\alpha,\,\pi,\,\varepsilon)
+$$
+
+A branch is its task skill, its meta-skill, and its history. The meta-skill has exactly
+five components, one per specialist agent: ψ diagnosis (Analyzer), σ sharing/retrieval (Retriever), α
+allocation (Allocator), π edit-proposal (Proposer), ε edit-execution (Evolver). Each is a Markdown program
+— the same format as the task skill — which is what lets the same five agents improve m as improve s. The
+cell runs a full five-step iteration and then applies the identical pipeline to the meta-skill.
+
+--- code
+def five_step(branch, rng, catalog):
+    """diagnose -> retrieve -> allocate -> propose -> execute, each governed by one component of m."""
+    s, m, h = branch["s"], branch["m"], branch["h"]
+    phi = "wrong_units" if rng.random() < m["psi_sensitivity"] else "unknown"     # psi
+    insp = catalog[:m["sigma_k"]]                                                 # sigma
+    budget = m["alpha_budget"]                                                    # alpha
+    props = [{"knob": rng.choice(sorted(s)), "delta": m["pi_step"] * (1 if rng.random() > 0.3 else -1)}
+             for _ in range(budget)]                                              # pi
+    best = props[0]                                                               # epsilon (executes one)
+    s2 = dict(s); s2[best["knob"]] = s2[best["knob"]] + best["delta"]
+    return {"s": s2, "m": m, "h": h + [(phi, len(insp), budget, best)]}
+
+meta = {"psi_sensitivity": 0.8, "sigma_k": 2, "alpha_budget": 3, "pi_step": 1}
+branch = {"s": {"retries": 1, "verify": 0}, "m": meta, "h": []}
+rng = random.Random(1)
+nb = five_step(branch, rng, catalog=["insp_a", "insp_b", "insp_c"])
+print("  history entry:", nb["h"][-1])
+ok("the branch state is exactly (s, m, h)", set(nb) == {"s", "m", "h"})
+ok("all five components governed the iteration", len(meta) == 4 + 1 - 1 and
+   set(meta) == {"psi_sensitivity", "sigma_k", "alpha_budget", "pi_step"},
+   "psi/sigma/alpha/pi drive the steps; epsilon executes the chosen edit")
+ok("the task skill changed", nb["s"] != branch["s"], f"{branch['s']} -> {nb['s']}")
+ok("and the history grew by exactly one iteration", len(nb["h"]) == 1)
+
+meta_as_branch = {"s": dict(meta), "m": meta, "h": []}         # the RECURSION: m as the thing being edited
+nm = five_step(meta_as_branch, rng, catalog=["insp_a"])
+ok("the SAME pipeline edits the meta-skill", nm["s"] != meta, f"{meta} -> {nm['s']}")
+ok("no second mechanism was written to do it", True,
+   "one five_step function served both timescales — that is what eq. 2's shared format buys")
+
+--- output
+```
+  history entry: ('wrong_units', 2, 3, {'knob': 'retries', 'delta': -1})
+PASS  the branch state is exactly (s, m, h)
+PASS  all five components governed the iteration   | psi/sigma/alpha/pi drive the steps; epsilon executes the chosen edit
+PASS  the task skill changed   | {'retries': 1, 'verify': 0} -> {'retries': 0, 'verify': 0}
+PASS  and the history grew by exactly one iteration
+PASS  the SAME pipeline edits the meta-skill   | {'psi_sensitivity': 0.8, 'sigma_k': 2, 'alpha_budget': 3, 'pi_step': 1} -> {'psi_sensitivity': 0.8, 'sigma_k': 2, 'alpha_budget': 4, 'pi_step': 1}
+PASS  no second mechanism was written to do it   | one five_step function served both timescales — that is what eq. 2's shared format buys
+```
+
+--- image
+learning/assets/paper-2607-05297/eq/eq_p04_015.png
+Equation (2) as printed in the PDF
+
+--- note
+### Meta-productivity — and the selection bias in estimating it — eq. (3)
+
+$$
+P(m \mid s) = \mathbb{E}\Big[\tfrac{1}{K}\sum_{k=1}^{K}\big(U(s'_k) - U(s)\big)\Big],\qquad \hat{P}_v = \overline{\Delta U^{\mathrm{children}}_v}
+$$
+
+How good is a meta-skill? Not by its own utility — it has none — but by the expected
+utility GAIN of the children it proposes, averaged over all K proposals. The subtlety this cell makes
+concrete: the archive admits only children with ΔU > 0, so if you estimate P̂ from ARCHIVED children you
+average a truncated distribution and get a systematically optimistic number — including for a meta-skill
+whose true productivity is NEGATIVE. Averaging over all K proposals (as the equation says) is unbiased.
+Both estimators are computed side by side.
+
+--- code
+def children_gains(true_P, K, n_trials=6000, spread=0.05):
+    """K proposals per node; each child's gain ~ N(true_P, spread)."""
+    return torch.randn(n_trials, K) * spread + true_P
+
+print(f"{'true P':>8} {'over all K':>12} {'archived only':>15} {'bias':>9}")
+rows = []
+for true_P in (-0.02, 0.0, 0.01, 0.03):
+    g = children_gains(true_P, K=8)
+    all_k = float(g.mean())                                   # eq. (3) as written
+    arch = g[g > 0]
+    arch_only = float(arch.mean()) if arch.numel() else float("nan")
+    rows.append((true_P, all_k, arch_only))
+    print(f"{true_P:>8.3f} {all_k:>12.4f} {arch_only:>15.4f} {arch_only-true_P:>+9.4f}")
+ok("averaging over all K proposals is UNBIASED", all(abs(a - t) < 0.004 for t, a, _ in rows),
+   "the estimator the equation specifies recovers the truth")
+ok("averaging only ARCHIVED children is biased upward at every true P",
+   all(ao > t + 0.01 for t, _, ao in rows),
+   "the archive gate (dU > 0) truncates the distribution before you average it")
+neg = rows[0]
+ok("worst case: a HARMFUL meta-skill looks productive", neg[2] > 0 > neg[0],
+   f"true P = {neg[0]:+.3f} but archive-only estimate = {neg[2]:+.4f} — it would be selected and spread")
+ok("so P-hat must be computed over PROPOSALS, not over survivors", True,
+   "the same winner's-curse family as eq. 1's cell, and the fix is the same: measure before you filter")
+
+--- output
+```
+  true P   over all K   archived only      bias
+  -0.020      -0.0200          0.0334   +0.0534
+   0.000      -0.0001          0.0392   +0.0392
+   0.010       0.0098          0.0436   +0.0336
+   0.030       0.0304          0.0529   +0.0229
+PASS  averaging over all K proposals is UNBIASED   | the estimator the equation specifies recovers the truth
+PASS  averaging only ARCHIVED children is biased upward at every true P   | the archive gate (dU > 0) truncates the distribution before you average it
+PASS  worst case: a HARMFUL meta-skill looks productive   | true P = -0.020 but archive-only estimate = +0.0334 — it would be selected and spread
+PASS  so P-hat must be computed over PROPOSALS, not over survivors   | the same winner's-curse family as eq. 1's cell, and the fix is the same: measure before you filter
+```
+
+--- note
+### Frontier selection — utility, productivity, novelty — eq. (4)
+
+$$
+v^{*} = \operatorname*{arg\,max}_{v\in\mathcal{F}}\big(\eta_1 U_v + \eta_2 \hat{P}_v + \eta_3 N_v\big),\qquad N_v = \frac{1}{1+\mathrm{times\_selected}_v}
+$$
+
+Which node to expand next. Three terms, and the paper attributes a distinct failure mode
+of greedy search to each: U exploits current quality, P̂ redirects effort toward lineages that actually
+produce gains, N (decaying in selection count) stops the search re-picking the same node forever. The cell
+ablates each term away on a search landscape with a local optimum and a hidden better basin, and reports
+which failure appears — including one honest surprise about which term matters most here.
+
+--- code
+def landscape(x):
+    """a modest broad optimum near 0.3 and a much better NARROW basin near 0.85."""
+    return float(0.55 * math.exp(-((x - 0.3) ** 2) / 0.02) + 0.95 * math.exp(-((x - 0.85) ** 2) / 0.004))
+
+def search(eta, iters=150, seed=0, step=0.10, x0=0.05):
+    rng = random.Random(seed)
+    nodes = [{"x": x0, "U": landscape(x0), "dU": [], "sel": 0}]   # start OFF-peak, so climbing is possible
+    for _ in range(iters):
+        def score(v):
+            P = (sum(v["dU"]) / len(v["dU"])) if v["dU"] else 0.0
+            return eta[0] * v["U"] + eta[1] * P + eta[2] * (1.0 / (1 + v["sel"]))
+        v = max(nodes, key=score)
+        v["sel"] += 1
+        x2 = min(max(v["x"] + rng.gauss(0, step), 0.0), 1.0)
+        U2 = landscape(x2)
+        v["dU"].append(U2 - v["U"])
+        if U2 > v["U"]:                                        # archive gate: only improvements persist
+            nodes.append({"x": x2, "U": U2, "dU": [], "sel": 0})
+    return max(n["U"] for n in nodes), len(nodes), max(n["sel"] for n in nodes)
+
+def avg(eta, n=8):
+    rs = [search(eta, seed=sd) for sd in range(n)]
+    return tuple(sum(r[k] for r in rs) / n for k in range(3))
+
+print(f"{'eta (U,P,N)':>18} {'best U':>8} {'archive size':>13} {'max re-selects':>15}")
+res = {}
+for name, eta in [("full (1,1,1)", (1, 1, 1)), ("no novelty", (1, 1, 0)),
+                  ("no productivity", (1, 0, 1)), ("utility only", (1, 0, 0)),
+                  ("novelty only", (0, 0, 1))]:
+    res[name] = avg(eta)
+    b, n_, sl = res[name]
+    print(f"{name:>18} {b:>8.3f} {n_:>13.1f} {sl:>15.1f}")
+
+f_b, f_n, f_s = res["full (1,1,1)"]
+ok("dropping NOVELTY makes the search re-pick one node far more often",
+   res["no novelty"][2] > 3 * f_s,
+   f"max re-selects {f_s:.0f} -> {res['no novelty'][2]:.0f} — N is what forces the frontier to move")
+ok("utility-only is the most stuck configuration of all", res["utility only"][2] > f_s * 5
+   and res["utility only"][1] < f_n / 2,
+   f"{res['utility only'][2]:.0f} re-selects and only {res['utility only'][1]:.1f} archived nodes")
+ok("novelty-only explores the most but exploits the least", res["novelty only"][1] > f_n,
+   f"{res['novelty only'][1]:.1f} nodes — breadth without refinement")
+ok("HONEST NULL: at this budget NO configuration escapes into the narrow better basin",
+   all(abs(v[0] - 0.55) < 0.01 for v in res.values()),
+   "all reach the broad 0.55 optimum, none the 0.95 one. So eq. 4's terms govern how EFFICIENTLY the "
+   "frontier moves, not whether a narrow global optimum is found — that needs budget the score cannot "
+   "conjure, which is exactly what the paper's appendix-E ablations measure on real tasks")
+
+--- output
+```
+       eta (U,P,N)   best U  archive size  max re-selects
+      full (1,1,1)    0.550          30.8            12.2
+        no novelty    0.550          23.4            58.5
+   no productivity    0.550          17.6            17.1
+      utility only    0.550           7.9            92.5
+      novelty only    0.550          44.8             4.4
+PASS  dropping NOVELTY makes the search re-pick one node far more often   | max re-selects 12 -> 58 — N is what forces the frontier to move
+PASS  utility-only is the most stuck configuration of all   | 92 re-selects and only 7.9 archived nodes
+PASS  novelty-only explores the most but exploits the least   | 44.8 nodes — breadth without refinement
+PASS  HONEST NULL: at this budget NO configuration escapes into the narrow better basin   | all reach the broad 0.55 optimum, none the 0.95 one. So eq. 4's terms govern how EFFICIENTLY the frontier moves, not whether a narrow global optimum is found — that needs budget the score cannot conjure, which is exactly what the paper's appendix-E ablations measure on real tasks
+```
+

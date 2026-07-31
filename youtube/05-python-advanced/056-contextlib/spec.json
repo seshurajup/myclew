@@ -1,0 +1,14 @@
+{
+  "language": "python",
+  "title": "contextlib.py",
+  "hook": "Write a context manager in three lines",
+  "playlist": "Learn Python",
+  "target_seconds": 90,
+  "max_seconds": 120,
+  "tts_engine": "chatterbox",
+  "music_prompt": "streamlined, bracketed, clean",
+  "code_path": "code.py",
+  "transcript_path": "transcript.json",
+  "outputs_path": "outputs.json",
+  "accent": "rose"
+}

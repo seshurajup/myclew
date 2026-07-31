@@ -1,0 +1,21 @@
+[
+  {
+    "after_line": 7,
+    "text": ">>> 3.14159... 2.71828...\\n>>> 12.0 120\\n>>> 3 4\\n>>> 12",
+    "caption": "math: constants + functions"
+  },
+  {
+    "after_line": 13,
+    "text": ">>> 6\\n>>> a\\n>>> [2, 48, 18]",
+    "caption": "random: seeded, reproducible"
+  },
+  {
+    "after_line": 16,
+    "text": ">>> [4, 3, 1, 5, 2]",
+    "caption": "shuffle rearranges in place"
+  },
+  {
+    "after_line": 17,
+    "image": "artifacts/terminal.png"
+  }
+]

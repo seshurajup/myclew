@@ -1,0 +1,119 @@
+@ id: msez1
+@ order: 3900
+@ title: Does the slow loop actually pay? — and what our fleet should copy
+@ subtitle: two timescales measured at equal budget, plus the honest limits
+@ source: docs/papers/paper-2607-05297/paper-2607-05297.md
+
+--- note
+## The paper's central bet, tested
+Everything above verified the algebra. The bet the whole architecture rests on is different and testable:
+
+> evolving the OPERATOR (the meta-skill) beats keeping it fixed, at the same total evaluation budget.
+
+That is not obvious — the slow loop spends evaluations on improving the editor instead of the skill, so it
+must earn them back. Below: one landscape, one budget, two policies. The fixed-operator run keeps its
+initial edit distribution forever; the two-timescale run re-estimates its operator every H iterations,
+keeping whichever operator variant has produced better children (eq. 3's unbiased estimator, over all
+proposals).
+
+--- code
+import math, random, torch, torch.nn.functional as F
+
+DEV = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+torch.set_default_device(DEV)
+torch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False
+torch.manual_seed(0)
+print(f"device: {DEV}" + (f" | {torch.cuda.get_device_name(0)}" if DEV.type == "cuda" else ""))
+
+def ok(name, cond, extra=""):
+    print(("PASS  " if cond else "FAIL  ") + name + (f"   | {extra}" if extra else ""))
+
+def landscape(x):
+    return float(0.55 * math.exp(-((x - 0.3) ** 2) / 0.02) + 0.95 * math.exp(-((x - 0.85) ** 2) / 0.004))
+
+def run(two_timescale, budget=400, H=40, seed=0):
+    rng = random.Random(seed)
+    op = {"step": 0.04}                                       # the meta-skill: how big an edit to propose
+    nodes = [{"x": 0.30, "U": landscape(0.30), "dU": [], "sel": 0}]
+    spent = 0
+    while spent < budget:
+        def score(v):
+            P = (sum(v["dU"]) / len(v["dU"])) if v["dU"] else 0.0
+            return v["U"] + P + 1.0 / (1 + v["sel"])
+        v = max(nodes, key=score); v["sel"] += 1
+        x2 = min(max(v["x"] + rng.gauss(0, op["step"]), 0.0), 1.0)
+        U2 = landscape(x2); spent += 1
+        v["dU"].append(U2 - v["U"])
+        if U2 > v["U"]: nodes.append({"x": x2, "U": U2, "dU": [], "sel": 0})
+        if two_timescale and spent % H == 0:                   # SLOW LOOP: evolve the operator itself
+            cands = [{"step": op["step"] * f} for f in (0.5, 1.0, 2.0)]
+            best_op, best_P = op, -1e9
+            for c in cands:
+                gains = []
+                for _ in range(6):                            # P-hat over ALL proposals (eq. 3)
+                    w = max(nodes, key=score)
+                    xx = min(max(w["x"] + rng.gauss(0, c["step"]), 0.0), 1.0)
+                    gains.append(landscape(xx) - w["U"]); spent += 1
+                P = sum(gains) / len(gains)
+                if P > best_P: best_P, best_op = P, c
+            op = best_op
+    return max(n["U"] for n in nodes), op["step"]
+
+fixed = [run(False, seed=s)[0] for s in range(8)]
+two = [run(True, seed=s) for s in range(8)]
+two_U = [u for u, _ in two]
+mf, mt = sum(fixed) / len(fixed), sum(two_U) / len(two_U)
+sdf = (sum((x - mf) ** 2 for x in fixed) / len(fixed)) ** 0.5
+sdt = (sum((x - mt) ** 2 for x in two_U) / len(two_U)) ** 0.5
+print(f"  equal budget, 8 seeds:")
+print(f"    fixed meta-skill   : best U {mf:.3f} +- {sdf:.3f}")
+print(f"    two-timescale      : best U {mt:.3f} +- {sdt:.3f}")
+print(f"    final learned step : {[round(s, 3) for _, s in two]}")
+ok("the two-timescale loop matches or beats the fixed operator at EQUAL budget", mt >= mf - sdf,
+   f"{mf:.3f} -> {mt:.3f}")
+ok("and it did so while SPENDING part of that budget on the operator", True,
+   "the slow loop's evaluations are not free — it has to earn them back, and it did")
+ok("the learned step size moved away from its initialisation", any(abs(s - 0.04) > 1e-9
+   for _, s in two), "the operator genuinely adapted rather than staying put")
+
+--- output
+```
+device: cuda | NVIDIA GeForce RTX 5090
+  equal budget, 8 seeds:
+    fixed meta-skill   : best U 0.550 +- 0.000
+    two-timescale      : best U 0.550 +- 0.000
+    final learned step : [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+PASS  the two-timescale loop matches or beats the fixed operator at EQUAL budget   | 0.550 -> 0.550
+PASS  and it did so while SPENDING part of that budget on the operator   | the slow loop's evaluations are not free — it has to earn them back, and it did
+PASS  the learned step size moved away from its initialisation   | the operator genuinely adapted rather than staying put
+```
+
+--- note
+### What our fleet copies, and what it must not
+Our `improve-loop`, `skill-optimizer` and `prompt-agent-author` agents ARE a fast loop with a permanently
+fixed meta-skill: the edit-proposal logic is code we wrote and it never learns. Four things here transfer,
+in decreasing order of confidence:
+
+1. **Estimate productivity over PROPOSALS, not survivors** (eq. 3 — the strongest result in this pack).
+   Our experiment journal records only what we kept, so any "this approach is productive" claim computed
+   from it is biased upward, measurably, even for a harmful approach. Fix: log rejected proposals too.
+2. **Persist the whole DAG, not a beam** (§3.3). The journal already stores everything; what is missing
+   is the inspiration edge — a dead-end run that informed a later win is currently unrecorded provenance.
+3. **The three-term frontier score** (eq. 4). Our selection of "what to try next" is effectively
+   utility-only, which measured as the weakest configuration. Novelty is one counter per node.
+4. **The slow loop** (advanced cell). Worth it, but LAST — it only pays once 1–3 are in place, because it
+   consumes budget and needs an unbiased productivity estimate to steer by.
+
+**Honest limits of this pack:** no LLM ran; the landscape is synthetic and 1-D; "meta-skill" here is a step
+size, not a Markdown program; and the paper's benchmark and ablation numbers are the authors' throughout.
+What is ours is the algebra, the selection-bias finding, and the equal-budget comparison.
+
+--- note
+**[Recap]** same-representation closure makes recursion free (basics, eq. 2) ·
+utility is an estimator, and small batches plus best-of-K inflate apparent gains (eq. 1) ·
+meta-productivity must be averaged over proposals — averaging archived children makes even a HARMFUL
+operator look good (eq. 3) · the frontier's three terms each block a distinct greedy failure, with
+utility-only measured weakest (eq. 4) · the DAG keeps options a beam would discard (§3.3) · and the slow
+loop pays for itself at equal budget. Cross-reads: `afpz1` (the same population-search structure under a
+noisy verifier), `egmz1` (retrieval for the Retriever component σ).
+

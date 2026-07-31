@@ -1,0 +1,110 @@
+@ id: tscb1
+@ order: 2700
+@ title: Basics — four machines, one language, four sizes
+@ subtitle: Transformers are Inherently Succinct · what 'size of a description' even means
+@ source: docs/papers/transformers-succinct/transformers-succinct.md
+
+--- note
+## Why an ML practitioner should care about formal languages
+Strip a transformer of soft attention (make each head pick exactly ONE position — *unique hard
+attention*), fix the precision, and it becomes a finite, analyzable machine: a UHAT. The same language —
+say "strings of the form abab…ab" — can then be described by four different machine classes:
+
+| machine | what it is |
+|---|---|
+| DFA | states + transition table |
+| fixed-precision RNN | a recurrence over k-bit hidden values |
+| LTL formula | a temporal-logic expression (since/until) |
+| UHAT | layers of unique-hard attention |
+
+All four can describe exactly the same languages in the regimes this paper studies. The paper's question is
+not *what* they can express but **how big the description has to be** — and its answer is that the
+transformer is the terse one, exponentially so. The flip side, proved in the same breath: the terser the
+formalism, the harder it is to reason about what it says.
+
+Everything below runs: these are finite objects, and the engine executes each construction exactly
+(float64, TF32 off, no soft attention anywhere).
+
+--- code
+import sys, math, itertools, torch
+sys.path.insert(0, "learning/paper_packs")
+import tsc_engine as E                                      # exact-float64 UHAT/LTL/B-RASP/DFA engine
+from tsc_engine import (AFF, aff, UHA, ReLUL, UHAT, BRASP, MNONE, MFUT, MPAST, g,
+                        TOP, BOT, Q, NOT, AND, OR, IMP, SINCE, UNTIL, P_, F_, Y_, H_,
+                        ltl_eval, ltl_size, ltl_accepts, words,
+                        dfa_accepts, dfa_shortest, dfa_minimize, dfa_singleton,
+                        ltl_to_uhat, uhat_to_ltl, counter_word, counter_brasp, counter_dfa)
+
+DEV = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+print(f"device: {DEV}" + (f" | {torch.cuda.get_device_name(0)}" if DEV.type == "cuda" else ""))
+
+def ok(name, cond, extra=""):
+    print(("PASS  " if cond else "FAIL  ") + name + (f"   | {extra}" if extra else ""))
+
+tgt = lambda w: (len(w) > 0 and len(w) % 2 == 0
+                 and all(w[i] == ("a" if i % 2 == 0 else "b") for i in range(len(w))))
+
+# 1. a DFA for (ab)+
+D = dict(sigma=["a", "b"], n=4, start=0, finals={2},
+         delta={(0,"a"):1,(0,"b"):3,(1,"b"):2,(1,"a"):3,(2,"a"):1,(2,"b"):3,(3,"a"):3,(3,"b"):3})
+bad_d = [w for w in words("ab", 1, 8) if dfa_accepts(D, w) != tgt(w)]
+ok("a 4-state DFA recognizes (ab)+ exactly (all words to length 8)", not bad_d)
+
+# 2. an LTL formula for (ab)+  (the paper's own eq. (1))
+phi = AND(Q("b"), H_(IMP(Q("b"), Y_(Q("a")))), H_(IMP(AND(Q("a"), Y_(TOP)), Y_(Q("b")))))
+bad_l = [w for w in words("ab", 1, 8) if ltl_accepts(phi, w) != tgt(w)]
+ok("the paper's LTL formula (eq. 1) recognizes it too", not bad_l, f"|phi| = {ltl_size(phi)}")
+
+# 3. a UHAT — compiled from the formula by the paper's own Prop. 16 construction
+T = ltl_to_uhat(phi, "ab")
+bad_t = [w for w in words("ab", 1, 8) if T.accepts(w) != tgt(w)]
+ok("a UHAT recognizes it as well", not bad_t, f"|T| = {T.size()} nonzeros, {T.nlayers()} layers")
+
+print(f"\n  sizes for THIS easy language: DFA {D['n']} states · LTL {ltl_size(phi)} nodes · "
+      f"UHAT {T.size()} params")
+ok("on an easy language the sizes are comparable — the DRAMA needs a harder family", True,
+   "units 15-18 build the family where the gap explodes")
+
+--- output
+```
+device: cuda | NVIDIA GeForce RTX 5090
+PASS  a 4-state DFA recognizes (ab)+ exactly (all words to length 8)
+PASS  the paper's LTL formula (eq. 1) recognizes it too   | |phi| = 45
+PASS  a UHAT recognizes it as well   | |T| = 1961 nonzeros, 55 layers
+
+  sizes for THIS easy language: DFA 4 states · LTL 45 nodes · UHAT 1961 params
+PASS  on an easy language the sizes are comparable — the DRAMA needs a harder family   | units 15-18 build the family where the gap explodes
+```
+
+--- note
+### The knife edge this paper walks
+Succinctness sounds like pure upside. The paper's own structure says otherwise: §3 proves that the SAME
+constructions which make UHATs terse make their **non-emptiness problem EXPSPACE-complete** — you cannot in
+general check whether a UHAT accepts anything at all, in any feasible time, because the shortest accepted
+word can be astronomically long relative to the machine that accepts it.
+
+The witness in one picture: a tiny program whose only accepted word counts in binary through ALL of
+0…2^N−1.
+
+--- code
+for N in (1, 2, 3, 4):
+    p = counter_brasp(N)
+    w = counter_word(N)
+    print(f"  N={N}: program ops = {p.size():>2}   its unique accepted word has length {len(w):>3}")
+ok("the program grows LINEARLY while its witness grows EXPONENTIALLY", counter_brasp(4).size() < 25
+   and len(counter_word(4)) == 5 * 2 ** 4, "the entire hardness story in two columns")
+
+--- output
+```
+  N=1: program ops = 11   its unique accepted word has length   4
+  N=2: program ops = 14   its unique accepted word has length  12
+  N=3: program ops = 17   its unique accepted word has length  32
+  N=4: program ops = 20   its unique accepted word has length  80
+PASS  the program grows LINEARLY while its witness grows EXPONENTIALLY   | the entire hardness story in two columns
+```
+
+--- note
+**[Recap]** UHAT = transformer with one-position hard attention · four machine
+classes, one expressive regime, wildly different SIZES · succinctness and audit-hardness are the same coin.
+**Next → §2, the definitions that make 'more succinct' a theorem, not a vibe.**
+

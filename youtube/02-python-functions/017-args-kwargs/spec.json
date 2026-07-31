@@ -1,0 +1,14 @@
+{
+  "language": "python",
+  "title": "args_kwargs.py",
+  "hook": "What *args and **kwargs actually do",
+  "playlist": "Learn Python",
+  "target_seconds": 90,
+  "max_seconds": 120,
+  "tts_engine": "chatterbox",
+  "music_prompt": "variable, flexible, adaptive",
+  "code_path": "code.py",
+  "transcript_path": "transcript.json",
+  "outputs_path": "outputs.json",
+  "accent": "violet"
+}

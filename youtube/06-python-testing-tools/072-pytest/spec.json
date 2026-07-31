@@ -1,0 +1,21 @@
+{
+  "language": "python",
+  "title": "pytest.py",
+  "hook": "Write real tests without the boilerplate",
+  "playlist": "Learn Python",
+  "target_seconds": 90,
+  "max_seconds": 120,
+  "tts_engine": "chatterbox",
+  "music_prompt": "efficient, expressive, modern",
+  "code_path": "code.py",
+  "transcript_path": "transcript.json",
+  "outputs_path": "outputs.json",
+  "run": [
+    "python",
+    "-m",
+    "pytest",
+    "-q",
+    "code.py"
+  ],
+  "accent": "ember"
+}

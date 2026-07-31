@@ -1,0 +1,61 @@
+@ id: g401
+@ order: 401
+@ title: Gemma 4 — overview & model family
+@ subtitle: an open-weight, natively-multimodal LLM suite built for compute efficiency and reasoning
+@ source: arxiv 2607.02770
+
+--- note
+## Why this is in our learning hub (honest framing)
+This lesson set is **not about biohub cell-tracking**. It walks the *Gemma 4 Technical Report*
+(Google DeepMind, arXiv 2607.02770, 2026-06-19), an open-weight **large language model** suite.
+It lives here because our fleet is driven by LLM agents (the leader / researcher / trainer), and
+because Gemma 4's engineering — MTP speculative decoding, KV-cache sharing, QAT, MoE routing — is
+exactly the **LLM/agent-infra** that Part B of this effort turns into reusable fleet agents. Read it
+as *infra background*, not as a cell-tracking method.
+
+--- note
+## What Gemma 4 is
+Gemma 4 is a new generation of **open-weight, natively multimodal** language models released under an
+**Apache 2.0** license. "Natively multimodal" means one model seamlessly processes **text, images and
+audio** (audio for E2B, E4B and 12B). The suite is designed to run across a range of **on-device
+hardware**, and the report frames its two headline goals as **compute efficiency** and **reasoning**.
+
+The family spans a wide size range and two architecture styles:
+
+- **Dense** models: effective **2.3B (E2B)**, **4.5B (E4B)**, **12B**, and **31B** parameters.
+- **Mixture-of-Experts (MoE)**: **26B-A4B** — ~**3.8B activated** parameters out of **26B total**
+  (only a few experts fire per token, so you pay ~4B of compute for 26B of capacity).
+
+E2B and E4B use **per-layer embeddings** (as in Gemma 3n), which is why they are *2.3B / 4.5B
+effective* out of *5B / 8B total* — most of the extra weight is cheap embedding lookup, not compute.
+
+--- image
+learning/assets/gemma4/page_01.png
+Page 1 of the report: the abstract and the five headline innovations — thinking mode, long-context efficiency, MTP compute efficiency, QAT memory efficiency, and an encoder-free multimodal architecture. Each gets its own lesson (g402–g407).
+
+--- note
+## The five innovations (the rest of the curriculum)
+The report's introduction lists five design choices; each is a lesson below:
+
+1. **Thinking mode** — emit a reasoning trace before the answer → gains on math/coding. → **g402**
+2. **Long-context efficiency** — 5:1 local:global attention (4:1 for E2B), p-RoPE, and KV-cache
+   sharing/reuse that cut the global KV cache by **up to 37.5%**. → **g403**
+3. **Compute efficiency** — an autoregressive **MTP drafter head** for speculative decoding. → **g404**
+4. **Memory efficiency** — **quantization-aware training (QAT)** checkpoints. → **g405**
+5. **Encoder-free architecture** — the 12B projects raw 40 ms audio chunks and image patches directly
+   into the LLM embedding space, no separate encoders. → **g406**
+
+The remaining lessons cover the encoders for the other sizes (**g407**), pre-training (**g408**),
+instruction tuning (**g409**), evaluation (**g410**), architecture fundamentals (**g411**), compute
+infrastructure (**g412**), safety (**g413**), and how it maps back to our fleet (**g414**).
+
+--- image
+learning/assets/gemma4/t01_params.png
+Table 1 — parameter counts per model, split into audio encoder, vision encoder, embedder, "einsums" (the transformer compute weights), and the MTP drafter. The star (26B-A4B) is the MoE: 24,500M total einsum params but only 2,800M active. Vocabulary = 262k entries. See g411 for the architecture reading of this table.
+
+--- note
+## The claim
+The report's bottom line: Gemma 4 is "a leap in performance across STEM, multimodal, and long-context
+benchmarks, and rivals larger, frontier open models in human-rated tasks." The strongest single
+data-point is human preference (Arena): **Gemma 4 31B is the leading *dense* open model** and both 31B
+and 26B-A4B score on par with **much larger** open MoE models. We unpack every benchmark in **g410**.

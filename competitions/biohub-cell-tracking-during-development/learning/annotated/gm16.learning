@@ -1,0 +1,12 @@
+@ id: gm16
+@ order: 2350
+@ title: F Memory Size vs. WRITE Steps (K) vs. Number of KV-pairs
+@ subtitle: GradMem: Learning to Write Context into Memory §F
+@ source: docs/papers/gradmem/gradmem.md
+
+--- note
+## F Memory Size vs. WRITE Steps (K) vs. Number of KV-pairs
+**Paper:** GradMem: Learning to Write Context into Memory · §F · pages 20–20 · equations (none) · 0 figures.
+
+> TODO(author): the *why* of §F in 3–5 lines.
+

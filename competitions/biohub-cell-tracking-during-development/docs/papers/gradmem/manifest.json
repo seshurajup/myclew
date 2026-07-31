@@ -1,0 +1,330 @@
+{
+  "slug": "gradmem",
+  "source": "https://arxiv.org/pdf/2603.13875",
+  "pdf": "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/docs/papers/gradmem/source.pdf",
+  "title": "GradMem: Learning to Write Context into Memory",
+  "backend": "docling+pymupdf-assets",
+  "pages": 24,
+  "figures": [
+    {
+      "page": 1,
+      "path": "assets/fig/p01_0.png",
+      "y0": 190.54998779296875,
+      "y1": 335.7179870605469,
+      "caption": "Figure 1. GradMem learns to write context into memory via",
+      "label": "Figure 1",
+      "w": 1225,
+      "h": 800
+    },
+    {
+      "page": 3,
+      "path": "assets/fig/p03_0.png",
+      "y0": 81.45376586914062,
+      "y1": 239.43402099609375,
+      "caption": "Figure 2. GradMem overview. (a) Each task sample is represented as context C, query Q, and target Y . A context encoder E\u03b8",
+      "label": "Figure 2",
+      "w": 6075,
+      "h": 1975
+    },
+    {
+      "page": 7,
+      "path": "assets/fig/p07_0.png",
+      "y0": 76.97160339355469,
+      "y1": 211.41864013671875,
+      "caption": "Figure 3. Gradient-based memory updates (GradMem) out-",
+      "label": "Figure 3",
+      "w": 60,
+      "h": 1560
+    },
+    {
+      "page": 7,
+      "path": "assets/fig/p07_1.png",
+      "y0": 77.05799865722656,
+      "y1": 118.42631530761719,
+      "caption": "",
+      "label": "",
+      "w": 1921,
+      "h": 480
+    },
+    {
+      "page": 7,
+      "path": "assets/fig/p07_2.png",
+      "y0": 133.939453125,
+      "y1": 175.30776977539062,
+      "caption": "",
+      "label": "",
+      "w": 1921,
+      "h": 480
+    },
+    {
+      "page": 7,
+      "path": "assets/fig/p07_3.png",
+      "y0": 190.82089233398438,
+      "y1": 211.5050506591797,
+      "caption": "Figure 4. More gradient steps at test-time lead to better per-",
+      "label": "Figure 4",
+      "w": 1921,
+      "h": 240
+    }
+  ],
+  "tables": [
+    {
+      "page": 7,
+      "rows": 2,
+      "cols": 8,
+      "image": "assets/tab/p07_0.png"
+    },
+    {
+      "page": 7,
+      "rows": 2,
+      "cols": 8,
+      "image": "assets/tab/p07_1.png"
+    },
+    {
+      "page": 7,
+      "rows": 7,
+      "cols": 6,
+      "image": "assets/tab/p07_3.png"
+    },
+    {
+      "page": 17,
+      "rows": 4,
+      "cols": 24,
+      "image": "assets/tab/p17_1.png"
+    },
+    {
+      "page": 17,
+      "rows": 5,
+      "cols": 27,
+      "image": "assets/tab/p17_2.png"
+    },
+    {
+      "page": 17,
+      "rows": 5,
+      "cols": 25,
+      "image": "assets/tab/p17_3.png"
+    },
+    {
+      "page": 19,
+      "rows": 4,
+      "cols": 3,
+      "image": "assets/tab/p19_0.png"
+    },
+    {
+      "page": 19,
+      "rows": 6,
+      "cols": 20,
+      "image": "assets/tab/p19_1.png"
+    },
+    {
+      "page": 19,
+      "rows": 6,
+      "cols": 22,
+      "image": "assets/tab/p19_2.png"
+    },
+    {
+      "page": 19,
+      "rows": 7,
+      "cols": 21,
+      "image": "assets/tab/p19_3.png"
+    },
+    {
+      "page": 20,
+      "rows": 7,
+      "cols": 3,
+      "image": "assets/tab/p20_0.png"
+    },
+    {
+      "page": 20,
+      "rows": 7,
+      "cols": 2,
+      "image": "assets/tab/p20_1.png"
+    },
+    {
+      "page": 20,
+      "rows": 7,
+      "cols": 4,
+      "image": "assets/tab/p20_2.png"
+    },
+    {
+      "page": 20,
+      "rows": 11,
+      "cols": 6,
+      "image": "assets/tab/p20_3.png"
+    },
+    {
+      "page": 23,
+      "rows": 10,
+      "cols": 23,
+      "image": "assets/tab/p23_0.png"
+    }
+  ],
+  "sections": [
+    {
+      "level": 1,
+      "page": 1,
+      "num": "",
+      "title": "with Test-Time Gradient Descent",
+      "heading": "with Test-Time Gradient Descent"
+    },
+    {
+      "level": 1,
+      "page": 1,
+      "num": "",
+      "title": "Abstract",
+      "heading": "Abstract"
+    },
+    {
+      "level": 1,
+      "page": 1,
+      "num": "1",
+      "title": "Introduction",
+      "heading": "1. Introduction"
+    },
+    {
+      "level": 1,
+      "page": 3,
+      "num": "2",
+      "title": "GradMem",
+      "heading": "2. GradMem"
+    },
+    {
+      "level": 1,
+      "page": 5,
+      "num": "3",
+      "title": "Experiments and Results",
+      "heading": "3. Experiments and Results"
+    },
+    {
+      "level": 1,
+      "page": 8,
+      "num": "4",
+      "title": "Discussion and Conclusions",
+      "heading": "4. Discussion and Conclusions"
+    },
+    {
+      "level": 1,
+      "page": 9,
+      "num": "",
+      "title": "Acknowledgements",
+      "heading": "Acknowledgements"
+    },
+    {
+      "level": 1,
+      "page": 9,
+      "num": "",
+      "title": "References",
+      "heading": "References"
+    },
+    {
+      "level": 1,
+      "page": 9,
+      "num": "",
+      "title": "Impact Statement",
+      "heading": "Impact Statement"
+    },
+    {
+      "level": 1,
+      "page": 13,
+      "num": "",
+      "title": "Appendix Contents",
+      "heading": "Appendix Contents"
+    },
+    {
+      "level": 1,
+      "page": 13,
+      "num": "A",
+      "title": "Related Work",
+      "heading": "A. Related Work"
+    },
+    {
+      "level": 1,
+      "page": 15,
+      "num": "B",
+      "title": "Implementation, Training, and Hyperparameter Details",
+      "heading": "B. Implementation, Training, and Hyperparameter Details"
+    },
+    {
+      "level": 1,
+      "page": 17,
+      "num": "C",
+      "title": "Accelerating Double Backwards Through Attention",
+      "heading": "C. Accelerating Double Backwards Through Attention"
+    },
+    {
+      "level": 1,
+      "page": 18,
+      "num": "D",
+      "title": "Computational Analysis: When GradMem is Compute-Efficient",
+      "heading": "D. Computational Analysis: When GradMem is Compute-Efficient"
+    },
+    {
+      "level": 1,
+      "page": 19,
+      "num": "E",
+      "title": "Relation between Exact Match and Inner Loss",
+      "heading": "E. Relation between Exact Match and Inner Loss"
+    },
+    {
+      "level": 1,
+      "page": 20,
+      "num": "F",
+      "title": "Memory Size vs. WRITE Steps (K) vs. Number of KV-pairs",
+      "heading": "F. Memory Size vs. WRITE Steps (K) vs. Number of KV-pairs"
+    },
+    {
+      "level": 1,
+      "page": 21,
+      "num": "G",
+      "title": "Memory State Size Utilization: GradMem vs. Mamba",
+      "heading": "G. Memory State Size Utilization: GradMem vs. Mamba"
+    },
+    {
+      "level": 1,
+      "page": 21,
+      "num": "H",
+      "title": "KV Retrieval with LaCT and TTT-Linear",
+      "heading": "H. KV Retrieval with LaCT and TTT-Linear"
+    },
+    {
+      "level": 1,
+      "page": 22,
+      "num": "I",
+      "title": "Text Compression with GradMem on Larger Pretrained Models",
+      "heading": "I. Text Compression with GradMem on Larger Pretrained Models"
+    },
+    {
+      "level": 1,
+      "page": 23,
+      "num": "J",
+      "title": "Input-level vs. Per-layer Memory",
+      "heading": "J. Input-level vs. Per-layer Memory"
+    },
+    {
+      "level": 1,
+      "page": 23,
+      "num": "K",
+      "title": "GradMem Algorithm and Minimal Code",
+      "heading": "K. GradMem Algorithm and Minimal Code"
+    }
+  ],
+  "equations": 30,
+  "numbered": 8,
+  "md": "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/docs/papers/gradmem/gradmem.md",
+  "equations_json": "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/docs/papers/gradmem/equations.json",
+  "available": {
+    "pymupdf": true,
+    "marker": true,
+    "docling": true
+  },
+  "score": {
+    "chars": 116543,
+    "headings": 32,
+    "equations": 13,
+    "eq_tags": 4,
+    "images": 14,
+    "tables": 111,
+    "latex_cmds": 72,
+    "mojibake": 0
+  }
+}

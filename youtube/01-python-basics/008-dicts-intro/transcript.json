@@ -1,0 +1,46 @@
+[
+  {
+    "text": "Dictionaries store key-value pairs, like a real dictionary maps words to definitions.",
+    "until_line": 1
+  },
+  {
+    "text": "Access values by their key name, not a number position like lists.",
+    "until_line": 5
+  },
+  {
+    "text": "Since Python 3.7, dictionaries remember the exact order you inserted your keys, which is often really handy.",
+    "until_line": 5
+  },
+  {
+    "text": "Use get instead of brackets if you want a default when a key is missing.",
+    "until_line": 6
+  },
+  {
+    "text": "Len tells you how many key-value pairs are in the dict, three items here.",
+    "until_line": 6
+  },
+  {
+    "text": "Adding a new key is as simple as assigning to it, and updating an existing key works the same way.",
+    "until_line": 11
+  },
+  {
+    "text": "[sigh] Keys, values, and items give you three different views to loop over — keys alone, values alone, or both paired together.",
+    "until_line": 15
+  },
+  {
+    "text": "[groan] Looping over a dictionary walks its keys by default, but items gives you the key and value together each pass.",
+    "until_line": 15
+  },
+  {
+    "text": "Get with a second argument returns that default instead of crashing when the key doesn't exist.",
+    "until_line": 18
+  },
+  {
+    "text": "[shush] And pop removes a key entirely, returning its value on the way out.",
+    "until_line": 23
+  },
+  {
+    "text": "In the next one we take on if and else. Follow so you don't miss it.",
+    "until_line": 23
+  }
+]

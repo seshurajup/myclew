@@ -1,0 +1,31 @@
+[
+  {
+    "after_line": 4,
+    "text": ">>> 0\n>>> 1\n>>> 2\n>>> 3\n>>> 4",
+    "caption": "while loops run until false"
+  },
+  {
+    "after_line": 9,
+    "text": ">>> You entered: quit",
+    "caption": "simulated input-until-quit"
+  },
+  {
+    "after_line": 17,
+    "text": ">>> n is 0\n>>> n is 1\n>>> n is 2",
+    "caption": "break exits immediately"
+  },
+  {
+    "after_line": 24,
+    "text": ">>> odd: 1\n>>> odd: 3\n>>> odd: 5",
+    "caption": "continue skips to next pass"
+  },
+  {
+    "after_line": 30,
+    "text": ">>> loop completed normally",
+    "caption": "while/else: no break = else runs"
+  },
+  {
+    "after_line": 32,
+    "image": "artifacts/terminal.png"
+  }
+]

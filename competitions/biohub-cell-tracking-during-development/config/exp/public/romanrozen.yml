@@ -1,0 +1,10 @@
+# PUBLIC notebook config — **romanrozen** / DoG band-pass
+name: pub_romanrozen
+source: **romanrozen** / DoG band-pass
+family: other
+base: unknown
+lb: 0.73
+golden_cv: None
+mined_params: ""
+run: manual
+score: golden-12 (adj_edge_J + 0.1*div_J), by_embryo

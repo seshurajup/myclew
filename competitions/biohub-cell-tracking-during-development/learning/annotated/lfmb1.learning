@@ -1,0 +1,110 @@
+@ id: lfmb1
+@ order: 2500
+@ title: Basics — the quadratic term, and the two honest ways out
+@ subtitle: LFM2.5-Encoders · what 'fast at long context' has to mean
+@ source: docs/papers/lfm25-encoders/model_card.md
+
+--- note
+## Where the cost actually is
+Self-attention compares every token with every other, so its cost grows with the **square** of the sequence
+length. Double the document and attention gets four times more expensive. Everything marketed as
+"long-context" is, underneath, one of exactly two answers to that:
+
+1. **Make the quadratic term cheaper** — flash kernels, sliding windows, sparsity, low-rank approximations.
+   The structure stays; you pay less per unit of it.
+2. **Have fewer quadratic layers at all** — replace most attention layers with something linear in length,
+   and keep a handful of real attention layers for the global mixing only they can do.
+
+LFM2.5 is firmly the second. Ten of its sixteen layers are short convolutions; six are full attention. So
+before reading one word of the blog post we can predict the shape of its speed curve — and then check it.
+
+The reason this matters *especially* on CPU: a GPU hides quadratic work behind enormous parallelism, so the
+penalty shows up late. A CPU cannot. Removing the work, rather than parallelising it, is what makes a claim
+about CPUs credible.
+
+--- note
+### The two costs, side by side
+Count the multiply-accumulates. Attention is `L²·d` for the score matrix plus `L²·d` to apply it; a
+depthwise convolution of width `k` is `L·d·k`. With `k=3` the ratio is `L/k` — at 8192 tokens that is a
+factor of ~2700 per layer replaced.
+
+--- code
+import json, math, time, warnings
+warnings.filterwarnings("ignore")
+import torch, torch.nn as nn, torch.nn.functional as F
+from pathlib import Path
+
+DEV = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+torch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False   # exact proofs
+torch.manual_seed(0); torch.set_printoptions(precision=4, sci_mode=False)
+print(f"device: {DEV}" + (f" | {torch.cuda.get_device_name(0)}" if DEV.type == "cuda" else ""))
+
+CFG = json.loads(Path("docs/papers/lfm25-encoders/models/LFM2.5-Encoder-350M.config.json").read_text())
+CFG_S = json.loads(Path("docs/papers/lfm25-encoders/models/LFM2.5-Encoder-230M.config.json").read_text())
+
+def ok(name, cond, extra=""):
+    print(("PASS  " if cond else "FAIL  ") + name + (f"   | {extra}" if extra else ""))
+
+d, k = 1024, 3
+def attn_macs(L, d=d):  return 2 * L * L * d            # scores + weighted sum
+def conv_macs(L, d=d, k=k): return L * d * k             # depthwise, width k
+
+print(f"{'length':>8} {'attention':>16} {'short conv':>14} {'ratio':>10}")
+for L in (128, 512, 2048, 8192):
+    a, c = attn_macs(L), conv_macs(L)
+    print(f"{L:>8} {a:>16,} {c:>14,} {a/c:>9.0f}x")
+ok("attention is quadratic in length", attn_macs(2 * 512) / attn_macs(512) == 4.0, "2x length -> 4x cost")
+ok("a short conv is LINEAR in length", conv_macs(2 * 512) / conv_macs(512) == 2.0, "2x length -> 2x cost")
+ok("so the gap grows without bound", attn_macs(8192) / conv_macs(8192) >
+   attn_macs(512) / conv_macs(512))
+print("\nThis is why the answer is 'have fewer quadratic layers', not 'make them faster'.")
+
+--- output
+```
+device: cuda | NVIDIA GeForce RTX 5090
+  length        attention     short conv      ratio
+     128       33,554,432        393,216        85x
+     512      536,870,912      1,572,864       341x
+    2048    8,589,934,592      6,291,456      1365x
+    8192  137,438,953,472     25,165,824      5461x
+PASS  attention is quadratic in length   | 2x length -> 4x cost
+PASS  a short conv is LINEAR in length   | 2x length -> 2x cost
+PASS  so the gap grows without bound
+
+This is why the answer is 'have fewer quadratic layers', not 'make them faster'.
+```
+
+--- note
+### What the published config commits them to
+No interpretation needed — `layer_types` is a list, and we can count it.
+
+--- code
+types = CFG["layer_types"]
+n_attn = sum(1 for t in types if "attention" in t)
+n_conv = sum(1 for t in types if t == "conv")
+print("layer_types:", types)
+print(f"\n{len(types)} layers = {n_conv} conv + {n_attn} full attention")
+ok("only a minority of layers attend", n_attn < n_conv, f"{n_attn} of {len(types)}")
+ok("the convolution is SHORT", CFG["conv_L_cache"] == 3, f"conv_L_cache = {CFG['conv_L_cache']}")
+ok("and attention uses grouped-query KV", CFG["num_key_value_heads"] < CFG["num_attention_heads"],
+   f"{CFG['num_attention_heads']} query heads : {CFG['num_key_value_heads']} KV heads")
+saved = 1 - (n_attn / len(types))
+print(f"\nfraction of depth that never builds an LxL matrix: {saved:.0%}")
+
+--- output
+```
+layer_types: ['conv', 'conv', 'full_attention', 'conv', 'conv', 'full_attention', 'conv', 'conv', 'full_attention', 'conv', 'full_attention', 'conv', 'full_attention', 'conv', 'full_attention', 'conv']
+
+16 layers = 10 conv + 6 full attention
+PASS  only a minority of layers attend   | 6 of 16
+PASS  the convolution is SHORT   | conv_L_cache = 3
+PASS  and attention uses grouped-query KV   | 16 query heads : 8 KV heads
+
+fraction of depth that never builds an LxL matrix: 62%
+```
+
+--- note
+**[Recap]** attention is quadratic, a width-3 conv is linear · LFM2.5 takes the
+"fewer quadratic layers" route: 10 conv + 6 attention · that choice is what makes a CPU claim credible.
+**Next → §1, everything the config settles.**
+

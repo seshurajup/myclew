@@ -1,0 +1,45 @@
+@ id: rs06
+@ order: 35
+@ title: Why ensembling the public detectors is hard
+@ subtitle: redundant detectors + a metric that punishes false positives
+@ source: learning/ensemble_work/05_detection_agreement.py
+
+--- note
+## The obvious idea that doesn't work
+"Combine the top public detectors" sounds easy. We measured it and it fails — and understanding
+*why* is more useful than a cheap gain. Two facts kill the naive ensemble.
+
+--- note
+### Fact 1 — the detectors are redundant
+**[Data — measured]** pilkwang and canqiang agree on **72%** of detections and have **identical**
+node recall (~0.99 on labelled cells). They largely find the *same* cells. There's little unique
+signal to combine.
+--- output
+| metric | value |
+|---|---|
+| detection agreement (pilkwang ∩ canqiang) | 72% |
+| node recall (each) | ~0.99 |
+| union recall gain | +0.03 (tiny) |
+
+--- note
+### Fact 2 — a union floods false positives
+**[Domain]** Taking the **union** of two detectors' points means every disagreement becomes an
+extra detection. Recall is already ~0.99 (nothing to gain), so the union mostly adds **FP edges**
+near GT tracks → edge-precision drops → the score falls. The metric punishes exactly this.
+--- code
+union = merge(pilkwang_points, canqiang_points)   # recall barely moves (already 0.99)
+# but disagreements -> extra edges near GT -> precision DOWN -> score DOWN
+--- shape
+union: recall +0.0<br>precision **down**<br>→ naive ensemble loses
+
+--- note
+### What *would* work
+**[Craft]** The only safe fusion is at the **heat-map** level: average two detectors' probability
+maps *before* peak-finding, so agreement reinforces and lone spurious peaks get suppressed — instead
+of unioning final points. But given the redundancy, the real gains are elsewhere: **divisions**
+(rs04) and **recall via gap2** (rs05).
+--- shape
+point-union → FP flood<br>heat-map average → safe<br>but redundancy caps it
+
+--- note
+**Next → rs07: putting it together — our next approach.**

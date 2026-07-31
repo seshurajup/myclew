@@ -1,0 +1,16 @@
+[
+  {
+    "after_line": 18,
+    "text": ">>> Rex woof\\n>>> Bella meow",
+    "caption": "subclasses override speak()"
+  },
+  {
+    "after_line": 21,
+    "text": ">>> True",
+    "caption": "a Dog is-a Animal"
+  },
+  {
+    "after_line": 21,
+    "image": "artifacts/terminal.png"
+  }
+]

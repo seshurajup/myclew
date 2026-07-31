@@ -1,0 +1,13 @@
+{
+  "language": "python",
+  "title": "variables.py",
+  "hook": "Store anything with a single = sign",
+  "playlist": "Learn Python",
+  "target_seconds": 80,
+  "tts_engine": "chatterbox",
+  "music_prompt": "upbeat, educational, steady lo-fi",
+  "code_path": "code.py",
+  "transcript_path": "transcript.json",
+  "outputs_path": "outputs.json",
+  "accent": "ocean"
+}

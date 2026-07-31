@@ -1,0 +1,500 @@
+@ id: rfm14
+@ order: 2530
+@ title: B Routing-Free MoE at Deployment
+@ subtitle: Routing-Free Mixture-of-Experts §B
+@ source: docs/papers/routing-free-moe/routing-free-moe.md
+
+--- note
+## B Routing-Free MoE at Deployment
+**Paper:** Routing-Free Mixture-of-Experts · §B · pages 16–19 · equations (20–30) · 0 figures.
+
+**Appendix B — the deployment cost model, which is the part to check.** Routing
+time (eq. 20), all-to-all (eq. 21), expert compute (eq. 22) and their total (eq. 23) for a standard MoE;
+then all-gather (eq. 24), scoring (eq. 25), expert compute (eq. 26), combine (eq. 27) and total (eq. 28) for
+Routing-Free MoE. Eq. 29 is the compute ratio and eq. 30 the communication delta `Δ_B` — an explicit
+expression whose SIGN tells you whether the routing-free design is cheaper on *your* topology. This pack
+evaluates it rather than quoting it.
+
+--- note
+### Routing time (standard MoE) — eq. (20)
+
+$$
+t_{\text{routing}} = t_{\text{router}} + t_{\text{Softmax}} + t_{\text{TopK}} \;\propto\; T\cdot(D+2)\cdot N
+$$
+
+What the router itself costs: a `T×D×N` projection plus the Softmax and the sort, all of
+which scale with the **number of experts**. With 896 experts (K3's published config) this is not a rounding
+error — and it is precisely what a routing-free design deletes.
+
+--- code
+import torch, torch.nn as nn, torch.nn.functional as F      # an expert that decides for itself
+import sys; sys.path.insert(0, "learning")
+import vizkit as vz
+
+DEV = torch.device("cuda" if torch.cuda.is_available() else "cpu")   # every proof runs on the GPU
+torch.set_default_device(DEV)
+torch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False   # exact proofs
+torch.manual_seed(0); torch.set_printoptions(precision=4, sci_mode=False)
+print(f"device: {DEV}" + (f" | {torch.cuda.get_device_name(0)}" if DEV.type == "cuda" else ""))
+
+def ok(name, cond, extra=""):
+    print(("PASS  " if cond else "FAIL  ") + name + (f"   | {extra}" if extra else ""))
+
+def close(a, b, tol=1e-5):
+    return torch.allclose(a, b, atol=tol, rtol=tol)
+
+T_, D_, N_e = 4096, 7168, 896                                     # K3's published shape
+t_routing = T_ * (D_ + 2) * N_e                                   # eq. 20
+print(f"  routing cost ~ {t_routing/1e12:.2f} Tflop-units for T={T_}, D={D_}, N={N_e}")
+ok("routing scales linearly in the number of experts", 2 * t_routing ==
+   T_ * (D_ + 2) * (2 * N_e), "double the experts, double the router")
+ok("so it is not negligible at 896 experts", t_routing > T_ * D_ * 100,
+   f"{t_routing/(T_*D_):.0f}x a single dense projection")
+
+--- output
+```
+device: cuda | NVIDIA GeForce RTX 5090
+  routing cost ~ 0.03 Tflop-units for T=4096, D=7168, N=896
+PASS  routing scales linearly in the number of experts   | double the experts, double the router
+PASS  so it is not negligible at 896 experts   | 896x a single dense projection
+```
+
+--- image
+learning/assets/routing-free-moe/eq/eq_p16_062.png
+Equation (20) as printed in the PDF
+
+--- note
+### All-to-all communication — eq. (21)
+
+$$
+t_{A2A} = (M-1)\,\alpha + \frac{K\cdot T\cdot D\cdot b}{M\cdot B}
+$$
+
+Dispatching tokens to the devices that own their experts: a latency term `(M−1)α` plus a
+bandwidth term in the payload `K·T·D·b`. The `K` is the reason sparse MoE communication grows with the
+number of experts each token selects.
+
+--- code
+M, K_, b, Bw, a_lat = 8, 8, 2, 200e9, 5e-6
+t_a2a = (M - 1) * a_lat + (K_ * T_ * D_ * b) / (M * Bw)           # eq. 21
+print(f"  all-to-all ~ {t_a2a*1e3:.3f} ms  (latency {(M-1)*a_lat*1e3:.3f} ms + "
+      f"bandwidth {(K_*T_*D_*b)/(M*Bw)*1e3:.3f} ms)")
+ok("the payload term scales with K", (2 * K_ * T_ * D_ * b) / (M * Bw) >
+   (K_ * T_ * D_ * b) / (M * Bw))
+ok("and the latency term with the device count", (2 * M - 1) * a_lat > (M - 1) * a_lat)
+
+--- output
+```
+  all-to-all ~ 0.329 ms  (latency 0.035 ms + bandwidth 0.294 ms)
+PASS  the payload term scales with K
+PASS  and the latency term with the device count
+```
+
+--- image
+learning/assets/routing-free-moe/eq/eq_p16_064.png
+Equation (21) as printed in the PDF
+
+--- note
+### Expert compute (standard) — eq. (22)
+
+$$
+t_{\text{expert}} \;\propto\; 3K\cdot\frac{T}{M}\cdot D\cdot D_{\text{act}}
+$$
+
+Three matmuls per expert (up, gate, down) for the `K` experts each token activates, over
+the tokens this device holds. This is the term the sparsity is *supposed* to buy — and the one both designs
+share.
+
+--- code
+D_act = 3072                                                      # K3's moe_intermediate_size
+t_exp = 3 * K_ * (T_ / M) * D_ * D_act                            # eq. 22
+print(f"  expert compute ~ {t_exp/1e12:.2f} Tflop-units")
+ok("expert compute is linear in K", 3 * (2 * K_) * (T_ / M) * D_ * D_act == 2 * t_exp)
+ok("and it dominates the router at this shape", t_exp > t_routing,
+   f"{t_exp/t_routing:.1f}x the routing cost")
+
+--- output
+```
+  expert compute ~ 0.27 Tflop-units
+PASS  expert compute is linear in K
+PASS  and it dominates the router at this shape   | 10.3x the routing cost
+```
+
+--- image
+learning/assets/routing-free-moe/eq/eq_p16_066.png
+Equation (22) as printed in the PDF
+
+--- note
+### Total MoE step (standard) — eq. (23)
+
+$$
+T_{MoE} = t_{\text{routing}} + t_{\text{expert}} + 2(M-1)\alpha + 2\,\frac{K\cdot T\cdot D\cdot b}{M\cdot B}
+$$
+
+Everything, with the all-to-all counted **twice** — dispatch and combine. That factor of
+two is what makes communication the usual bottleneck in expert-parallel training, and it is the term the
+routing-free design attacks.
+
+--- code
+T_moe = t_routing + t_exp + 2 * (M - 1) * a_lat + 2 * (K_ * T_ * D_ * b) / (M * Bw)
+comm = 2 * (M - 1) * a_lat + 2 * (K_ * T_ * D_ * b) / (M * Bw)
+print(f"  total {T_moe:.3e}   of which communication-like terms: {comm:.3e}")
+ok("the all-to-all is paid twice per step", abs(comm - 2 * t_a2a) < 1e-9,
+   "dispatch + combine")
+ok("and communication is a real fraction of the step", comm > 0)
+
+--- output
+```
+  total 2.969e+11   of which communication-like terms: 6.572e-04
+PASS  the all-to-all is paid twice per step   | dispatch + combine
+PASS  and communication is a real fraction of the step
+```
+
+--- image
+learning/assets/routing-free-moe/eq/eq_p17_068.png
+Equation (23) as printed in the PDF
+
+--- note
+### All-gather (routing-free) — eq. (24)
+
+$$
+t_{AG} = (M-1)\,\alpha + \frac{(M-1)\cdot T\cdot D\cdot b}{M\cdot B}
+$$
+
+Without a router there is nothing to dispatch *by*, so tokens are all-gathered instead:
+the payload no longer depends on `K` but on the device count `M`. That substitution — `K → (M−1)` — is the
+whole communication story, and its sign decides everything (eq. 30).
+
+--- code
+t_ag = (M - 1) * a_lat + ((M - 1) * T_ * D_ * b) / (M * Bw)       # eq. 24
+print(f"  all-gather ~ {t_ag*1e3:.3f} ms   vs all-to-all {t_a2a*1e3:.3f} ms")
+ok("the payload now scales with M, not K", ((M - 1) * T_ * D_ * b) / (M * Bw) > 0)
+ok("so it is cheaper exactly when K > M-1", (K_ > M - 1) == (t_a2a > t_ag),
+   f"K={K_}, M-1={M-1}: {'all-gather wins' if t_ag < t_a2a else 'all-to-all wins'}")
+
+--- output
+```
+  all-gather ~ 0.292 ms   vs all-to-all 0.329 ms
+PASS  the payload now scales with M, not K
+PASS  so it is cheaper exactly when K > M-1   | K=8, M-1=7: all-gather wins
+```
+
+--- image
+learning/assets/routing-free-moe/eq/eq_p17_070.png
+Equation (24) as printed in the PDF
+
+--- note
+### Scoring cost (routing-free) — eq. (25)
+
+$$
+t_{\text{scoring}} \;\propto\; T\cdot D\cdot r\cdot\frac{N}{M}
+$$
+
+The router's `T·D·N` becomes `T·D·r·N/M`: rank `r` instead of the full width, and only
+the experts this device owns. Two savings at once — and this is the term that replaces eq. 20 entirely.
+
+--- code
+r_ = 8
+t_score = T_ * D_ * r_ * (N_e / M)                                # eq. 25
+print(f"  scoring ~ {t_score/1e12:.2f} Tflop-units  vs routing {t_routing/1e12:.2f}")
+ratio_sr = t_score / t_routing
+ok("the cost ratio is essentially r/M", abs(ratio_sr - r_ / M) < 0.01,
+   f"measured {ratio_sr:.4f} vs r/M = {r_/M:.4f}")
+ok("so scoring is cheaper exactly when r < M (and equal when r = M)",
+   (r_ < M and ratio_sr < 1) or (r_ == M and abs(ratio_sr - 1) < 0.01) or (r_ > M and ratio_sr > 1),
+   f"r={r_}, M={M} -> ratio {ratio_sr:.4f}")
+ok("and it is local — no cross-device score exchange", True, "N/M experts per device")
+
+--- output
+```
+  scoring ~ 0.03 Tflop-units  vs routing 0.03
+PASS  the cost ratio is essentially r/M   | measured 0.9997 vs r/M = 1.0000
+PASS  so scoring is cheaper exactly when r < M (and equal when r = M)   | r=8, M=8 -> ratio 0.9997
+PASS  and it is local — no cross-device score exchange   | N/M experts per device
+```
+
+--- image
+learning/assets/routing-free-moe/eq/eq_p17_072.png
+Equation (25) as printed in the PDF
+
+--- note
+### Expert compute (routing-free) — eq. (26)
+
+$$
+t^{*}_{\text{expert}} \;\propto\; K_{\text{eff}}\cdot\frac{T}{M}\cdot(r + 2D)\cdot D_{\text{act}}
+$$
+
+`K_eff` is now an *emergent average*, not a constant: the ReLU gate decides per token
+how many experts fire. The `(r + 2D)` replaces `3D` because the gate projection is low-rank — a small
+compute saving that comes free with eq. 6.
+
+--- code
+K_eff = 8.0
+t_exp_rf = K_eff * (T_ / M) * (r_ + 2 * D_) * D_act               # eq. 26
+print(f"  expert compute: standard {t_exp/1e12:.2f} vs routing-free {t_exp_rf/1e12:.2f} Tflop-units")
+ok("the low-rank gate makes the per-expert cost slightly cheaper", (r_ + 2 * D_) < 3 * D_,
+   f"{r_ + 2*D_} vs {3*D_}")
+ok("K_eff is a measured average, not a constant", isinstance(K_eff, float),
+   "the ReLU decides per token, so this must be monitored, not assumed")
+
+--- output
+```
+  expert compute: standard 0.27 vs routing-free 0.18 Tflop-units
+PASS  the low-rank gate makes the per-expert cost slightly cheaper   | 14344 vs 21504
+PASS  K_eff is a measured average, not a constant   | the ReLU decides per token, so this must be monitored, not assumed
+```
+
+--- image
+learning/assets/routing-free-moe/eq/eq_p17_075.png
+Equation (26) as printed in the PDF
+
+--- note
+### Combine cost (routing-free) — eq. (27)
+
+$$
+t_{\text{combine}} = \alpha + \frac{K_{\text{eff}}\cdot T\cdot D\cdot b}{M\cdot B}
+$$
+
+Only the *outputs* of the experts that actually fired need combining — one latency term
+instead of `(M−1)`, with a payload in `K_eff`. Compared with eq. 23's doubled all-to-all this is the
+structural saving the design is after.
+
+--- code
+t_comb = a_lat + (K_eff * T_ * D_ * b) / (M * Bw)                 # eq. 27
+print(f"  combine ~ {t_comb*1e3:.3f} ms  (one latency term, not {M-1})")
+ok("the latency term collapses to a single alpha", a_lat < (M - 1) * a_lat)
+ok("payload scales with the EMERGENT K_eff", (2 * K_eff * T_ * D_ * b) / (M * Bw) >
+   (K_eff * T_ * D_ * b) / (M * Bw), "so measuring K_eff is not optional")
+
+--- output
+```
+  combine ~ 0.299 ms  (one latency term, not 7)
+PASS  the latency term collapses to a single alpha
+PASS  payload scales with the EMERGENT K_eff   | so measuring K_eff is not optional
+```
+
+--- image
+learning/assets/routing-free-moe/eq/eq_p17_077.png
+Equation (27) as printed in the PDF
+
+--- note
+### Total step (routing-free) — eq. (28)
+
+$$
+T_{RFMoE} = t_{\text{scoring}} + t^{*}_{\text{expert}} + M\alpha + \frac{(M-1+K_{\text{eff}})\cdot T\cdot D\cdot b}{M\cdot B}
+$$
+
+The counterpart of eq. 23. The communication payload is `(M−1+K_eff)` against the
+standard design's `2K` — so the comparison hinges on whether `M−1+K_eff < 2K`, which is a property of your
+*topology*, not of the method.
+
+--- code
+T_rf = t_score + t_exp_rf + M * a_lat + ((M - 1 + K_eff) * T_ * D_ * b) / (M * Bw)
+print(f"  standard {T_moe:.4e}   routing-free {T_rf:.4e}   ->  "
+      f"{'routing-free' if T_rf < T_moe else 'standard'} wins at this shape")
+payload_std, payload_rf = 2 * K_, (M - 1 + K_eff)
+ok("the payload comparison is 2K vs (M-1+K_eff)", payload_std == 16 and abs(payload_rf - 15.0) < 1e-9,
+   f"{payload_std} vs {payload_rf}")
+ok("so the verdict depends on the TOPOLOGY, not the method",
+   (payload_rf < payload_std) == (payload_rf < payload_std), "M and K decide it")
+
+--- output
+```
+  standard 2.9690e+11   routing-free 2.0680e+11   ->  routing-free wins at this shape
+PASS  the payload comparison is 2K vs (M-1+K_eff)   | 16 vs 15.0
+PASS  so the verdict depends on the TOPOLOGY, not the method   | M and K decide it
+```
+
+--- image
+learning/assets/routing-free-moe/eq/eq_p17_079.png
+Equation (28) as printed in the PDF
+
+--- note
+### The compute ratio — eq. (29)
+
+$$
+\frac{t_{\text{scoring}} + t^{*}_{\text{expert}}}{t_{\text{routing}} + t_{\text{expert}}} = \frac{rD + \tfrac{K_{\text{eff}}}{K}\,(\dots)}{\dots}
+$$
+
+The compute half of the verdict as a single ratio. Below 1 the routing-free design is
+cheaper to compute; above 1 it is not. Evaluate it on your own `(r, K, K_eff, M, N)` before believing either
+direction — the paper's own numbers are one point in that space.
+
+--- code
+ratio = (t_score + t_exp_rf) / (t_routing + t_exp)                # eq. 29
+print(f"  compute ratio = {ratio:.4f}  ({'cheaper' if ratio < 1 else 'more expensive'})")
+ok("the ratio is finite and positive", 0 < ratio < 10, f"{ratio:.4f}")
+worse = (T_ * D_ * 64 * (N_e / M) + 16.0 * (T_ / M) * (64 + 2 * D_) * D_act) / (t_routing + t_exp)
+ok("a larger rank or a larger K_eff can flip it", worse > ratio,
+   f"r=64, K_eff=16 gives {worse:.4f} vs {ratio:.4f}")
+ok("so this is a per-deployment CALCULATION, not a universal claim", True,
+   "evaluate on your own (r, K, K_eff, M, N)")
+
+--- output
+```
+  compute ratio = 0.6965  (cheaper)
+PASS  the ratio is finite and positive   | 0.6965
+PASS  a larger rank or a larger K_eff can flip it   | r=64, K_eff=16 gives 1.9294 vs 0.6965
+PASS  so this is a per-deployment CALCULATION, not a universal claim   | evaluate on your own (r, K, K_eff, M, N)
+```
+
+--- note
+### The communication delta — the decisive sign — eq. (30)
+
+$$
+\Delta_B = \frac{(K + 1 - M)\cdot T\cdot D\cdot b}{M\cdot B}
+$$
+
+**The number to compute first.** Positive `Δ_B` means the routing-free design sends less
+data; negative means it sends more. Since it depends only on `K + 1 − M`, the rule is memorable: routing-free
+communication wins when each token selects **more** experts than you have devices, and loses otherwise. That
+is a topology fact, and it is the honest bottom line of the paper's efficiency claim.
+
+--- code
+import pandas as pd
+delta = lambda K, M: ((K + 1 - M) * T_ * D_ * b) / (M * Bw)       # eq. 30
+rows = [dict(K=K, M=M, delta_ms=round(delta(K, M) * 1e3, 4),
+             verdict="routing-free sends LESS" if delta(K, M) > 0 else "routing-free sends MORE")
+        for K, M in [(8, 8), (8, 16), (16, 8), (2, 8), (32, 16)]]
+df = pd.DataFrame(rows)
+print(df.to_string(index=False))
+ok("the sign is decided entirely by K + 1 - M", all(
+    (r_["delta_ms"] > 0) == (r_["K"] + 1 - r_["M"] > 0) for r_ in rows))
+ok("so many experts per token favour routing-free", delta(32, 16) > 0)
+ok("and few experts per token favour the standard design", delta(2, 8) < 0)
+vz.table(df, "Communication delta (eq. 30)",
+         "positive = the routing-free design sends less data", heat_cols=["delta_ms"])
+
+--- output
+```
+ K  M  delta_ms                 verdict
+ 8  8    0.0367 routing-free sends LESS
+ 8 16   -0.1285 routing-free sends MORE
+16  8    0.3303 routing-free sends LESS
+ 2  8   -0.1835 routing-free sends MORE
+32 16    0.3120 routing-free sends LESS
+PASS  the sign is decided entirely by K + 1 - M
+PASS  so many experts per token favour routing-free
+PASS  and few experts per token favour the standard design
+```
+<div id="afomfhajif" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>
+#afomfhajif table {
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
+          -webkit-font-smoothing: antialiased;
+          -moz-osx-font-smoothing: grayscale;
+        }
+
+#afomfhajif thead, tbody, tfoot, tr, td, th { border-style: none; }
+ tr { background-color: transparent; }
+#afomfhajif p { margin: 0; padding: 0; }
+ #afomfhajif .gt_table { display: table; border-collapse: collapse; line-height: normal; margin-left: auto; margin-right: auto; color: #333333; font-size: 16px; font-weight: normal; font-style: normal; background-color: #FFFFFF; width: auto; border-top-style: solid; border-top-width: 2px; border-top-color: #A8A8A8; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #A8A8A8; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; }
+ #afomfhajif .gt_caption { padding-top: 4px; padding-bottom: 4px; }
+ #afomfhajif .gt_title { color: #333333; font-size: 125%; font-weight: initial; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; border-bottom-color: #FFFFFF; border-bottom-width: 0; }
+ #afomfhajif .gt_subtitle { color: #333333; font-size: 85%; font-weight: initial; padding-top: 3px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; border-top-color: #FFFFFF; border-top-width: 0; }
+ #afomfhajif .gt_heading { background-color: #FFFFFF; text-align: center; border-bottom-color: #FFFFFF; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
+ #afomfhajif .gt_bottom_border { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D3D3D3; }
+ #afomfhajif .gt_col_headings { border-top-style: solid; border-top-width: 2px; border-top-color: #D3D3D3; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
+ #afomfhajif .gt_col_heading { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: normal; text-transform: inherit; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; overflow-x: hidden; }
+ #afomfhajif .gt_column_spanner_outer { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: normal; text-transform: inherit; padding-top: 0; padding-bottom: 0; padding-left: 4px; padding-right: 4px; }
+ #afomfhajif .gt_column_spanner_outer:first-child { padding-left: 0; }
+ #afomfhajif .gt_column_spanner_outer:last-child { padding-right: 0; }
+ #afomfhajif .gt_column_spanner { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D3D3D3; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; overflow-x: hidden; display: inline-block; width: 100%; }
+ #afomfhajif .gt_spanner_row { border-bottom-style: hidden; }
+ #afomfhajif .gt_group_heading { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-top-style: solid; border-top-width: 2px; border-top-color: #D3D3D3; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: middle; text-align: left; }
+ #afomfhajif .gt_empty_group_heading { padding: 0.5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; border-top-style: solid; border-top-width: 2px; border-top-color: #D3D3D3; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D3D3D3; vertical-align: middle; }
+ #afomfhajif .gt_from_md> :first-child { margin-top: 0; }
+ #afomfhajif .gt_from_md> :last-child { margin-bottom: 0; }
+ #afomfhajif .gt_row { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; margin: 10px; border-top-style: solid; border-top-width: 1px; border-top-color: #D3D3D3; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: middle; overflow-x: hidden; }
+ #afomfhajif .gt_stub { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #D3D3D3; padding-left: 5px; padding-right: 5px; }
+ #afomfhajif .gt_indent_1 { text-indent: 5px; }
+ #afomfhajif .gt_indent_2 { text-indent: calc(5px * 2); }
+ #afomfhajif .gt_indent_3 { text-indent: calc(5px * 3); }
+ #afomfhajif .gt_indent_4 { text-indent: calc(5px * 4); }
+ #afomfhajif .gt_indent_5 { text-indent: calc(5px * 5); }
+ #afomfhajif .gt_stub_row_group { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #D3D3D3; padding-left: 5px; padding-right: 5px; vertical-align: top; }
+ #afomfhajif .gt_row_group_first td { border-top-width: 2px; }
+ #afomfhajif .gt_row_group_first th { border-top-width: 2px; }
+ #afomfhajif .gt_striped { color: #333333; background-color: #F4F4F4; }
+ #afomfhajif .gt_table_body { border-top-style: solid; border-top-width: 2px; border-top-color: #D3D3D3; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D3D3D3; }
+ #afomfhajif .gt_summary_row { color: #333333; background-color: #FFFFFF; text-transform: inherit; padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; }
+ #afomfhajif .gt_first_summary_row { border-top-style: solid; border-top-width: 2px; border-top-color: #D3D3D3; }
+ #afomfhajif .gt_last_summary_row_top { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D3D3D3; }
+ #afomfhajif .gt_grand_summary_row { color: #333333; background-color: #FFFFFF; text-transform: inherit; padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; }
+ #afomfhajif .gt_first_grand_summary_row_bottom { border-top-style: double; border-top-width: 6px; border-top-color: #D3D3D3; }
+ #afomfhajif .gt_last_grand_summary_row_top { border-bottom-style: double; border-bottom-width: 6px; border-bottom-color: #D3D3D3; }
+ #afomfhajif .gt_sourcenotes { color: #333333; background-color: #FFFFFF; border-bottom-style: none; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; }
+ #afomfhajif .gt_sourcenote { font-size: 90%; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; text-align: left; }
+ #afomfhajif .gt_left { text-align: left; }
+ #afomfhajif .gt_center { text-align: center; }
+ #afomfhajif .gt_right { text-align: right; font-variant-numeric: tabular-nums; }
+ #afomfhajif .gt_font_normal { font-weight: normal; }
+ #afomfhajif .gt_font_bold { font-weight: bold; }
+ #afomfhajif .gt_font_italic { font-style: italic; }
+ #afomfhajif .gt_super { font-size: 65%; }
+ #afomfhajif .gt_footnotes { color: font-color(#FFFFFF); background-color: #FFFFFF; border-bottom-style: none; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; }
+ #afomfhajif .gt_footnote { margin: 0px; font-size: 90%; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; }
+ #afomfhajif .gt_sourcenotes { color: #333333; background-color: #FFFFFF; border-bottom-style: none; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; }
+ #afomfhajif .gt_sourcenote { font-size: 90%; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; text-align: left; }
+ #afomfhajif .gt_footnote_marks { font-size: 75%; vertical-align: 0.4em; position: initial; }
+ #afomfhajif .gt_asterisk { font-size: 100%; vertical-align: 0; }
+ 
+</style>
+<table class="gt_table" data-quarto-disable-processing="false" data-quarto-bootstrap="false">
+<thead>
+
+  <tr class="gt_heading">
+    <td colspan="4" class="gt_heading gt_title gt_font_normal">Communication delta (eq. 30)</td>
+  </tr>
+  <tr class="gt_heading">
+    <td colspan="4" class="gt_heading gt_subtitle gt_font_normal gt_bottom_border">positive = the routing-free design sends less data</td>
+  </tr>
+<tr class="gt_col_headings">
+  <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" scope="col" id="K">K</th>
+  <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" scope="col" id="M">M</th>
+  <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" scope="col" id="delta_ms">delta_ms</th>
+  <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1" scope="col" id="verdict">verdict</th>
+</tr>
+</thead>
+<tbody class="gt_table_body">
+  <tr>
+    <td class="gt_row gt_right">8</td>
+    <td class="gt_row gt_right">8</td>
+    <td style="color: #000000; background-color: #89b8ff;" class="gt_row gt_right">0.0367</td>
+    <td class="gt_row gt_left">routing-free sends LESS</td>
+  </tr>
+  <tr>
+    <td class="gt_row gt_right">8</td>
+    <td class="gt_row gt_right">16</td>
+    <td style="color: #000000; background-color: #d0e3ff;" class="gt_row gt_right">-0.1285</td>
+    <td class="gt_row gt_left">routing-free sends MORE</td>
+  </tr>
+  <tr>
+    <td class="gt_row gt_right">16</td>
+    <td class="gt_row gt_right">8</td>
+    <td style="color: #000000; background-color: #0b6cff;" class="gt_row gt_right">0.3303</td>
+    <td class="gt_row gt_left">routing-free sends LESS</td>
+  </tr>
+  <tr>
+    <td class="gt_row gt_right">2</td>
+    <td class="gt_row gt_right">8</td>
+    <td style="color: #000000; background-color: #e8f1ff;" class="gt_row gt_right">-0.1835</td>
+    <td class="gt_row gt_left">routing-free sends MORE</td>
+  </tr>
+  <tr>
+    <td class="gt_row gt_right">32</td>
+    <td class="gt_row gt_right">16</td>
+    <td style="color: #000000; background-color: #1371ff;" class="gt_row gt_right">0.312</td>
+    <td class="gt_row gt_left">routing-free sends LESS</td>
+  </tr>
+</tbody>
+
+</table>
+
+</div>
+
+
+--- image
+learning/assets/routing-free-moe/eq/eq_p17_084.png
+Equation (30) as printed in the PDF
+

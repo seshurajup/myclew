@@ -1,0 +1,42 @@
+[
+  {
+    "text": "Zip lets you loop over two or more lists at the same time, in parallel, pairing up their items.",
+    "until_line": 4
+  },
+  {
+    "text": "Each turn of the loop, you get one name and the matching age, lined up by position.",
+    "until_line": 5
+  },
+  {
+    "text": "So the two separate lists read as if they were one list of pairs.",
+    "until_line": 5
+  },
+  {
+    "text": "[chuckle] If the lists are different lengths, zip simply stops at the shortest one, no error.",
+    "until_line": 11
+  },
+  {
+    "text": "So pairing a four-item list with a two-item list gives you just two pairs.",
+    "until_line": 11
+  },
+  {
+    "text": "[sniff] zip pairs beautifully with dict, stitching two lists into a dictionary of keys and values.",
+    "until_line": 15
+  },
+  {
+    "text": "And there's a reverse trick — zip with a star unzips a list of pairs back into separate sequences.",
+    "until_line": 19
+  },
+  {
+    "text": "The numbers land in one tuple, the letters in another, cleanly separated.",
+    "until_line": 19
+  },
+  {
+    "text": "[groan] zip is the tool whenever your data lives in several parallel lists that belong together.",
+    "until_line": 19
+  },
+  {
+    "text": "the range function is next, video number 30. Comment PYTHON if you want the cheat sheet.",
+    "until_line": 19
+  }
+]

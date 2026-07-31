@@ -1,0 +1,54 @@
+[
+  {
+    "text": "Sorted can order anything, as long as you tell it what to sort by.",
+    "until_line": 1
+  },
+  {
+    "text": "We start with four words of different lengths.",
+    "until_line": 1
+  },
+  {
+    "text": "Sorted always returns a new list, leaving the original untouched.",
+    "until_line": 1
+  },
+  {
+    "text": "Key equals len means sort by the length of each word, not alphabetically.",
+    "until_line": 3
+  },
+  {
+    "text": "Notice we pass len itself, not len parentheses — the function, not a call to it.",
+    "until_line": 3
+  },
+  {
+    "text": "So fig, kiwi, apple, banana. Shortest to longest.",
+    "until_line": 4
+  },
+  {
+    "text": "For tuples, a lambda picks which part to sort on.",
+    "until_line": 7
+  },
+  {
+    "text": "p bracket one grabs the age, and reverse equals True flips it to highest first.",
+    "until_line": 7
+  },
+  {
+    "text": "Any function works as a key, so you can sort by anything you can compute.",
+    "until_line": 7
+  },
+  {
+    "text": "Cat at forty, amy at thirty, ben at twenty-five.",
+    "until_line": 8
+  },
+  {
+    "text": "Max takes the very same key argument, and so do most Python functions.",
+    "until_line": 10
+  },
+  {
+    "text": "So the oldest person falls out with no sorting at all.",
+    "until_line": 10
+  },
+  {
+    "text": "pathlib is next, video number 20. Comment the topic you want after that.",
+    "until_line": 10
+  }
+]

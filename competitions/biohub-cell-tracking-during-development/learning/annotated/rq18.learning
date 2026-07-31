@@ -1,0 +1,21 @@
+@ id: rq18
+@ order: 2270
+@ title: I Bit Allocation Visualization
+@ subtitle: RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory §I
+@ source: docs/papers/ratequant/ratequant.md
+
+--- note
+## I Bit Allocation Visualization
+**Paper:** RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory · §I · pages 17–17 · equations (none) · 1 figures.
+
+> TODO(author): the *why* of §I in 3–5 lines.
+
+--- note
+### Figure 6 — as printed in the paper
+
+Figure 6: KIVI per-layer MSE at different bit-widths. Left: Key cache has high distortion with strong per-layer variation. Right: Value cache has ∼4× lower MSE, driving the optimal K/V split (2.85/2.15 at 2.5 bits).
+
+--- image
+learning/assets/ratequant/p17_0.png
+Figure 6: KIVI per-layer MSE at different bit-widths. Left: Key cache has high distortion with strong per-layer variation. Right: Value cache has ∼4× lower MSE, driving the optimal K/V split (2.85/2.15 at 2.5 bits).
+

@@ -1,0 +1,173 @@
+@ id: mc01
+@ order: 22
+@ title: The modeling contract — the math
+@ subtitle: Every equation of the pipeline, tied to the real code (and verified on real coords)
+@ source: research/pilkwang_support_pack/repo/scripts/predict_unet_transformer.py
+
+--- note
+## The contract in one place
+The whole pipeline is a few equations. Here each one is stated, tied to the **real code line** that
+implements it, and where possible **run on real data**. (Equation images are our own — rendered
+from the formulas, not copied.)
+
+--- note
+### 1. Detection field & candidates
+The detector maps a 2-frame volume to a per-voxel probability; candidate cells are **local maxima
+above threshold τ**. In code: `sigmoid(logits)` then the `max_pool3d` local-max test.
+
+--- code
+import torch                                              # tensors
+logit = torch.tensor([3.0, -1.0, 0.5])                      # example real detector logits
+p = torch.sigmoid(logit)                                    # p_t(r) = sigmoid(logit)
+{"prob at logit 3.0": round(p[0].item(), 3),                # confident voxel
+ "prob at logit -1.0": round(p[1].item(), 3),               # background
+ "tau (production)": 0.99}                                  # the real candidate threshold
+
+--- output
+```
+{'prob at logit 3.0': 0.953, 'prob at logit -1.0': 0.269, 'tau (production)': 0.99}
+```
+
+--- image
+learning/assets/eq_detect.png
+p_t(r) — the detection field (real code: torch.sigmoid on the detector logits)
+
+--- note
+### 2. Auxiliary center detector + NMS fusion (the recall path)
+An optional full-frame detector `q_t` on an XY-pooled volume adds centers the backbone missed;
+the two sets are fused with a physical **NMS** and per-frame caps — improving recall without one
+noisy frame flooding the graph.
+
+--- code
+P_pool = 4                                                  # block-mean XY pooling factor
+fuse = dict(rule="D_tilde = NMS_um(D_backbone U C_center)", # union then physical NMS
+            per_frame_cap=True,                             # cap additions so one frame can't dominate
+            purpose="recall")                               # add missed cells, protect precision
+fuse                                                        # the fusion contract
+
+--- output
+```
+{'rule': 'D_tilde = NMS_um(D_backbone U C_center)', 'per_frame_cap': True, 'purpose': 'recall'}
+```
+
+--- image
+learning/assets/eq_aux.png
+q_t and the NMS fusion of backbone + center detections (the ensemble recall path)
+
+--- note
+### 3. Edge scoring
+Each candidate pair (cell@t → cell@t+1) is scored from image features `f_i,f_j` and relative
+geometry `r_i−r_j` by the learned edge model (pt05). Relative position is the key geometric cue.
+
+--- code
+import numpy as np                                        # arrays
+ri = np.array([32, 120, 140]); rj = np.array([33, 118, 145])  # two real-ish cell positions (z,y,x)
+rel = ri - rj                                               # r_i - r_j, the geometry the edge model sees
+{"relative_pos (z,y,x)": rel.tolist()}                      # part of g_phi's input
+
+--- output
+```
+{'relative_pos (z,y,x)': [-1, 2, -5]}
+```
+
+--- image
+learning/assets/eq_edge.png
+s_ij — the learned edge score from features + relative geometry
+
+--- note
+### 4. Motion relinker
+An optional relinker rebuilds a 1-to-1 graph by **constant-velocity prediction**: a node's next
+position is extrapolated from its last step (λ=0.5), then matched by Hungarian (tight 6µm / relaxed
+10µm). Run the real prediction on real successive coords.
+
+--- code
+r_prev = np.array([30, 118, 138]); r_now = np.array([32, 120, 140])  # a cell at t-1 and t
+lam = 0.5                                                   # velocity weight (real value)
+r_pred = r_now + lam * (r_now - r_prev)                     # r_hat = r + lambda*(r - r_prev)
+{"predicted next pos": r_pred.tolist(), "tight gate um": 6.0, "relaxed gate um": 10.0}
+
+--- output
+```
+{'predicted next pos': [33.0, 121.0, 141.0], 'tight gate um': 6.0, 'relaxed gate um': 10.0}
+```
+
+--- image
+learning/assets/eq_motion.png
+Constant-velocity motion prediction (real code: r + 0.5*(r - r_prev))
+
+--- note
+### 5. The ILP objective
+The graph is chosen by an ILP minimising edge costs (`w_e=−edge_prob`, so confident links are
+cheap) plus appearance/disappearance/division event costs. This makes the lineage globally
+consistent, not greedy.
+
+--- code
+def w_e(edge_prob):                                         # the real ILP edge weight
+    return -1.0 * edge_prob                                  # w_e = -edge_prob
+{"cost @prob 0.99": w_e(0.99), "cost @prob 0.3": w_e(0.3),  # confident = cheaper
+ "appear/disappear/division": (0.1, 0.1, 1.0)}              # the real event costs
+
+--- output
+```
+{'cost @prob 0.99': -0.99, 'cost @prob 0.3': -0.3, 'appear/disappear/division': (0.1, 0.1, 1.0)}
+```
+
+--- image
+learning/assets/eq_ilp.png
+The ILP objective: min sum(w_e x_e) + event costs, with w_e = -edge_prob
+
+--- note
+### 6. Physical distance — VERIFIED on real coords
+All post-processing measures **microns**, not voxels (anisotropic: z=1.625, xy=0.40625 µm). Read
+two REAL cells from a real `.geff` and compute the real µm distance between them.
+
+--- code
+import zarr                                               # on-disk reader
+g = f"{TRAIN}/6bba_062c8d37.geff/nodes/props"               # a real embryo's node props
+z = np.asarray(zarr.open(f"{g}/z/values")[:2])              # z of first 2 real cells
+y = np.asarray(zarr.open(f"{g}/y/values")[:2])              # y
+x = np.asarray(zarr.open(f"{g}/x/values")[:2])              # x
+scale = np.array([1.625, 0.40625, 0.40625])                # (z,y,x) micron per voxel
+d = np.sqrt((((np.array([z[0],y[0],x[0]]) - np.array([z[1],y[1],x[1]])) * scale) ** 2).sum())  # d_um
+{"cell0 (z,y,x)": [int(z[0]),int(y[0]),int(x[0])],          # real coords
+ "cell1 (z,y,x)": [int(z[1]),int(y[1]),int(x[1])],
+ "distance_um": round(float(d), 2)}                         # the REAL micron distance
+
+--- output
+```
+{'cell0 (z,y,x)': [12, 221, 98], 'cell1 (z,y,x)': [13, 187, 185], 'distance_um': 37.98}
+```
+
+--- image
+learning/assets/eq_dist.png
+Physical distance in microns (verified above on two real cells from a real .geff)
+
+--- note
+### 7. Gap recovery & safe division (capped repairs)
+A 1-frame gap connects an end@t to a start@t+2 within `2g` (g=6µm), inserting the geometric
+midpoint (refined by a local intensity centroid). A 2-missing-frame bridge (t→t+3) is stricter.
+Safe division adds a 2nd child only if close to parent (≤5µm) and sister (≤8µm). All are **capped**
+per-frame/graph so they can't become node generators.
+
+--- code
+def midpoint(r_t, r_t2):                                    # the real gap-close midpoint
+    return (np.array(r_t) + np.array(r_t2)) / 2             # r_new = (r_t + r_{t+2}) / 2
+gates = {"gap-close um (2g)": 12.0, "gap2 total um": 10.2,  # the real thresholds
+         "div parent um": 5.0, "div sister um": 8.0, "min track len": 4}
+{"midpoint of (30,100,100)&(34,108,120)": midpoint([30,100,100],[34,108,120]).tolist(), **gates}
+
+--- output
+```
+{'midpoint of (30,100,100)&(34,108,120)': [32.0, 104.0, 110.0], 'gap-close um (2g)': 12.0, 'gap2 total um': 10.2, 'div parent um': 5.0, 'div sister um': 8.0, 'min track len': 4}
+```
+
+--- image
+learning/assets/eq_gap.png
+Gap-close gate & midpoint (and the safe-division gates below)
+
+--- note
+**[Recap]** The contract: detect field → NMS candidates (+ optional center-detector
+fusion for recall) → learned edge scores → ILP (or motion relink) → physical-µm gap/division
+repairs, all capped. Every threshold above is the real production value; the distance was verified
+on real cells. **Next → me01: the metric** these tracks are scored by.
+

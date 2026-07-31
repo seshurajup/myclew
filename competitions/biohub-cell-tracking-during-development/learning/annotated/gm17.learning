@@ -1,0 +1,12 @@
+@ id: gm17
+@ order: 2360
+@ title: G Memory State Size Utilization: GradMem vs. Mamba
+@ subtitle: GradMem: Learning to Write Context into Memory §G
+@ source: docs/papers/gradmem/gradmem.md
+
+--- note
+## G Memory State Size Utilization: GradMem vs. Mamba
+**Paper:** GradMem: Learning to Write Context into Memory · §G · pages 21–21 · equations (none) · 0 figures.
+
+> TODO(author): the *why* of §G in 3–5 lines.
+

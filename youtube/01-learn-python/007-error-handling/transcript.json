@@ -1,0 +1,46 @@
+[
+  {
+    "text": "Try, except and finally let you handle failure without your program falling over.",
+    "until_line": 1
+  },
+  {
+    "text": "Safe div takes two numbers and attempts the division inside a try block.",
+    "until_line": 1
+  },
+  {
+    "text": "Everything in the try is protected — if it succeeds, the return happens and we move on.",
+    "until_line": 3
+  },
+  {
+    "text": "Except catches one specific error, ZeroDivisionError, not every error in existence.",
+    "until_line": 4
+  },
+  {
+    "text": "Catching narrowly matters; a bare except would swallow your typos and bugs too.",
+    "until_line": 4
+  },
+  {
+    "text": "When the divide by zero does happen, we return None instead of crashing.",
+    "until_line": 5
+  },
+  {
+    "text": "Finally always runs — success or failure, return or exception, no way around it.",
+    "until_line": 7
+  },
+  {
+    "text": "That's what makes it the right place for cleanup, like closing a file.",
+    "until_line": 7
+  },
+  {
+    "text": "Ten over two gives five, and checked prints alongside it.",
+    "until_line": 10
+  },
+  {
+    "text": "Ten over zero returns None instead of blowing up, and checked still prints.",
+    "until_line": 11
+  },
+  {
+    "text": "Up next, itertools. Comment the topic you want after that.",
+    "until_line": 11
+  }
+]

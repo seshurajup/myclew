@@ -1,0 +1,126 @@
+@ id: nl06
+@ order: 1350
+@ title: 6 Takeaways and Revisiting Common Terms
+@ subtitle: Nested Learning: The Illusion of Deep Learning Architecture §6
+@ source: docs/papers/nested-learning/nested-learning.md
+
+--- note
+## 6 Takeaways and Revisiting Common Terms
+**Paper:** Nested Learning: The Illusion of Deep Learning Architecture · §6 · pages 24–26 · equations (69–69) · 0 figures.
+
+**The vocabulary, corrected.** Six re-readings, each of which changes what you
+would build next:
+
+* **Memory & learning** — memory is *any* input-caused update, at any level; learning is acquiring useful
+  memory. The momentum buffer and an RNN state are memory in exactly the sense a weight is.
+* **Models have more parameters than we knew** — everything that appears in the NL representation
+  (momentum, preconditioner, recurrent state) contributes to computation and expressivity.
+* **In-context learning is not emergent, it is structural** — it is what "having ≥2 levels" *means*.
+  Attention gives *non-parametric* ICL; recurrent memories give *parametric* ICL. Good ICL still needs a
+  well-trained low-frequency level, so the high-frequency level has something to stand on.
+* **Test-time training / test-time memorisation = parametric ICL** whose knowledge dies with the context.
+* **Pre-training is ICL with an ultra-large context**; the train/test boundary is nothing but a *severed
+  knowledge-transfer path* from the fastest level down to the slowest.
+* **Hybrid & looped models** — a "hybrid" is a Transformer whose MLP blocks were given one extra level
+  (eq. 69); Muon's `k` Newton–Schulz steps are `k` extra computations *per neuron*, i.e. computational
+  depth without new layers. And since the architecture *generates* the optimizer's context, optimizers
+  should be architecture-specific.
+
+--- note
+### AdaTransformer block — the MLP weight now has its own level — eq. (69)
+
+$$
+\boldsymbol{y}_{\text{attn},t}=\mathrm{Attn}(\boldsymbol{k}_t,\boldsymbol{v}_t,\boldsymbol{q}_t),\qquad \boldsymbol{y}_{\text{block},t}=\boldsymbol{y}_{\text{attn},t}W_{\text{LinAttn},t},\qquad W_{\text{LinAttn},t}=W_{\text{LinAttn},t-1}+\boldsymbol{v}_t\boldsymbol{k}_t^{\top}
+$$
+
+§5.1's punchline in symbols: the *lowest*-frequency level owns `W_k, W_v, W_q`
+(feedforward), attention is the non-parametric solution of a regression (still a matrix of neurons), and
+the block's last weight is a memory with **its own** in-context level. Everything is a feedforward
+network; only the level, objective and update rule differ. **"Recurrent models are MLP blocks with one
+more level."**
+
+--- code
+import torch, torch.nn as nn, torch.nn.functional as F      # the whole paper is linear algebra + autograd
+
+import sys; sys.path.insert(0, "learning")
+import vizkit as vz                                            # the shared visual + explainability layer
+
+DEV = torch.device("cuda" if torch.cuda.is_available() else "cpu")   # every proof runs on the GPU
+torch.set_default_device(DEV)                                  # so EVERY tensor/module below is on DEV
+# These cells PROVE matrix identities, so they need full fp32: TF32 truncates the mantissa to 10 bits
+# and an identity that holds to 1e-6 in fp32 only holds to ~1e-3 in TF32. Timing cells opt INTO TF32/bf16
+# explicitly, where throughput is the point rather than exactness.
+torch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False
+torch.manual_seed(0); torch.set_printoptions(precision=4, sci_mode=False)
+print(f"device: {DEV}" + (f" | {torch.cuda.get_device_name(0)}" if DEV.type == "cuda" else ""))
+
+def ok(name, cond, extra=""):                                  # a lesson's PROOF prints PASS/FAIL, never prose
+    print(("PASS  " if cond else "FAIL  ") + name + (f"   | {extra}" if extra else ""))
+
+def close(a, b, tol=1e-5):                                     # float-safe equality for matrix identities
+    return torch.allclose(a, b, atol=tol, rtol=tol)
+
+def newton_schulz(G, steps=5, eps=1e-7):                       # the orthogonalisation used by Muon/M3
+    a, b, c = 3.4445, -4.7750, 2.0315                          # the standard quintic coefficients
+    X = G / (G.norm() + eps)
+    tall = X.shape[0] > X.shape[1]
+    if tall: X = X.T
+    for _ in range(steps):
+        A = X @ X.T; X = a * X + (b * A + c * A @ A) @ X
+    return X.T if tall else X
+
+T, d = 6, 4                                                     # this lesson's own tensors
+X = torch.randn(T, d); Wk, Wv, Wq = (torch.randn(d, d) / d ** 0.5 for _ in range(3))
+K, V, Q = X @ Wk, X @ Wv, X @ Wq; Kn = F.normalize(K, dim=-1)
+y_attn = torch.stack([F.softmax(K[:t + 1] @ Q[t] / d ** 0.5, dim=0) @ V[:t + 1] for t in range(T)])
+W_lin = torch.zeros(d, d); outs = []
+for t in range(T):
+    outs.append(y_attn[t] @ W_lin)                                # read with the CURRENT weight
+    W_lin = W_lin + torch.outer(V[t], Kn[t])                       # eq. 69: the weight is a memory
+outs = torch.stack(outs)
+W_mlp = torch.randn(d, d) / d ** 0.5
+ok("an MLP tail gives the same shapes", (y_attn @ W_mlp).shape == outs.shape, f"{tuple(outs.shape)}")
+ok("but only the AdaTransformer tail changes with the context",
+   not close(outs[T - 1], y_attn[T - 1] @ (torch.zeros(d, d))), "W_LinAttn moved")
+print("levels: {W_k,W_v,W_q} (slowest) -> Attn (non-parametric, freq inf) -> W_LinAttn (per token)")
+
+--- output
+```
+device: cuda | NVIDIA GeForce RTX 5090
+PASS  an MLP tail gives the same shapes   | (6, 4)
+PASS  but only the AdaTransformer tail changes with the context   | W_LinAttn moved
+levels: {W_k,W_v,W_q} (slowest) -> Attn (non-parametric, freq inf) -> W_LinAttn (per token)
+```
+
+--- image
+learning/assets/nested-learning/eq/eq_p24_282.png
+Equation (69) as printed in the PDF
+
+--- note
+### "More parameters than we knew", counted
+Take a 2-layer MLP trained with Adam and count what the NL representation says the model *is*: the
+weights (level 1) **plus** the first and second moments (their own level) **plus** any recurrent state.
+The optimizer state is not scaffolding — it is where the knowledge about the loss landscape lives, and
+throwing it away at "end of pre-training" deletes that knowledge.
+
+--- code
+net = nn.Sequential(nn.Linear(64, 128), nn.GELU(), nn.Linear(128, 64))
+opt = torch.optim.Adam(net.parameters(), lr=1e-3)
+x = torch.randn(8, 64)
+opt.zero_grad(); net(x).pow(2).mean().backward(); opt.step()      # one step, so the moments exist
+
+weights = sum(p.numel() for p in net.parameters())
+state = sum(v.numel() for s in opt.state.values() for k, v in s.items() if torch.is_tensor(v) and v.dim() > 0)
+print(f"weights (level 1): {weights}   |   optimizer memory (its own level): {state}")
+ok("the NL parameter count is ~3x the 'model size'", state >= 2 * weights - 8,
+   f"total {weights + state} vs advertised {weights}")
+print("discarding the momentum at 'end of pre-training' deletes the model's knowledge of its own"
+      " loss landscape (§4.5 note on continual learning)")
+
+--- output
+```
+weights (level 1): 16576   |   optimizer memory (its own level): 33152
+PASS  the NL parameter count is ~3x the 'model size'   | total 49728 vs advertised 16576
+discarding the momentum at 'end of pre-training' deletes the model's knowledge of its own loss landscape (§4.5 note on continual learning)
+```
+

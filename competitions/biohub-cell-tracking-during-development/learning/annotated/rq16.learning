@@ -1,0 +1,12 @@
+@ id: rq16
+@ order: 2250
+@ title: G Multi-Seed Reliability
+@ subtitle: RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory §G
+@ source: docs/papers/ratequant/ratequant.md
+
+--- note
+## G Multi-Seed Reliability
+**Paper:** RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory · §G · pages 16–16 · equations (none) · 0 figures.
+
+> TODO(author): the *why* of §G in 3–5 lines.
+

@@ -1,0 +1,56 @@
+@ id: g413
+@ order: 413
+@ title: Responsibility, safety & security
+@ subtitle: governance, safety policies, train-time mitigations, evaluations, and ethics
+@ source: arxiv 2607.02770
+
+--- note
+## Why a whole section
+As open models become "central to enterprise infrastructure," the report argues **provenance and
+security are paramount**. Gemma 4 undergoes "the same rigorous safety evaluations as Gemini models,"
+and treats responsibility, safety, and security as first-class development concerns.
+
+--- note
+## Governance & assessment
+The approach weighs the **benefits of openness** (spreading the technology's benefits across society)
+against the **risk of malicious use** causing individual and institutional harm (Weidinger et al.,
+2021). Models were built **in partnership with internal safety and responsible-AI teams**, with
+scrutiny of evolving LLM risks and how models get deployed in the wild.
+
+--- note
+## Safety policies (train-time mitigations)
+A key pillar is aligning fine-tuned models with Google's AI principles. The policies aim to prevent
+generation of:
+
+- **CSAM** and child exploitation content,
+- **dangerous** content (e.g. promoting suicide, real-world-harm instructions),
+- **sexually explicit** content,
+- **hate speech** (dehumanizing protected groups),
+- **harassment** (encouraging violence).
+
+Mitigations: careful **input data pre-processing**, **filtering training data to remove personal
+information** and other sensitive data (privacy), plus **post-training evaluations and train-time
+mitigations** aligned to those policies.
+
+--- note
+## Safety evaluations
+Automated and human evaluations were run across all safety areas. The report claims **major
+improvements in every content-safety category** relative to previous Gemma models, with **minimal
+policy violations** for both text-to-text and image-to-text, across all sizes — **while keeping
+unjustified refusals low** (a real tension: over-refusal is itself a failure). Importantly, testing was
+done **without safety filters**, to measure the model's *inherent* behavior. They frame this within
+Google DeepMind's **Frontier Safety Framework** (2024).
+
+--- note
+## Ethical considerations
+Three areas are called out for developers who build on Gemma 4:
+
+- **Bias & fairness** — text/image training data can carry socio-cultural bias; the report urges
+  continuous monitoring and de-biasing during fine-tuning.
+- **Misinformation & misuse** — mitigated with technical limitations, developer education, and the
+  **Responsible Generative AI Toolkit**.
+- **Privacy** — datasets were filtered for personal info, but developers must still follow local
+  privacy law and use privacy-preserving techniques.
+
+The stated stance on open release: adopt safety mitigations **proportionate to risk**, and share models
+**only when confident the benefits significantly outweigh foreseeable risks**.

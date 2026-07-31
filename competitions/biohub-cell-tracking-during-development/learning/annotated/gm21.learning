@@ -1,0 +1,12 @@
+@ id: gm21
+@ order: 2400
+@ title: K GradMem Algorithm and Minimal Code
+@ subtitle: GradMem: Learning to Write Context into Memory §K
+@ source: docs/papers/gradmem/gradmem.md
+
+--- note
+## K GradMem Algorithm and Minimal Code
+**Paper:** GradMem: Learning to Write Context into Memory · §K · pages 23–24 · equations (none) · 0 figures.
+
+> TODO(author): the *why* of §K in 3–5 lines.
+

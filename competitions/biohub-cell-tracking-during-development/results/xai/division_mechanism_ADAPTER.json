@@ -1,0 +1,18 @@
+{
+  "tag": "ADAPTER:adapter_last",
+  "both_det": 63,
+  "n_div": 63,
+  "det_rate": 1.0,
+  "weaker_bands": {
+    "gt05": 11,
+    "b0205": 4,
+    "marg": 2,
+    "blind": 46,
+    "n": 63,
+    "med": 0.0
+  },
+  "spurious_median": 0.074,
+  "sep_adv_auc": 0.7343407560700453,
+  "concept_linear_bal_acc": 0.539,
+  "verdict": "MODEL-BLIND on many sisters \u2192 needs training/detection"
+}

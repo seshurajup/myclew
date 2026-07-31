@@ -1,0 +1,17 @@
+[
+  {
+    "after_line": 10,
+    "text": ">>> HELLO, ALICE",
+    "caption": "@shout wraps greet"
+  },
+  {
+    "after_line": 26,
+    "text": ">>> took 0.1001s\\n>>> 5",
+    "caption": "@timed measures any function",
+    "volatile": true
+  },
+  {
+    "after_line": 27,
+    "image": "artifacts/terminal.png"
+  }
+]

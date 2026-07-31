@@ -1,0 +1,211 @@
+@ id: rws03
+@ order: 2320
+@ title: 2 Ordered Schur Coordinates
+@ subtitle: Task-Restricted Symmetries in Recurrent Weight Space §2
+@ source: docs/papers/rnn-weight-symmetry/rnn-weight-symmetry.md
+
+--- note
+## 2 Ordered Schur Coordinates
+**Paper:** Task-Restricted Symmetries in Recurrent Weight Space · §2 · pages 2–2 · equations (3–6) · 0 figures.
+
+**Ordered Schur coordinates.** `W = QTQᵀ` with `Q` orthogonal and `T` upper
+quasi-triangular (eq. 3). Split `T = B + N` (eq. 4): `B` holds the 1×1 and 2×2 diagonal blocks — the
+eigenvalues, i.e. what the dynamics *rotate and decay* by — and `N` holds the strictly upper part, the
+**directed nonnormal couplings** that funnel activity from one mode into another. Ordering the modes by
+`|λ|` (eq. 5) separates a retained set `R` (near the spectral radius) from a complement `C`, giving the
+block structure of eq. 6. The point of the basis: `B` is what a normal matrix would have, so `N` is exactly
+the *nonnormality* — and it is where the task-restricted freedom lives.
+
+--- note
+### The real Schur decomposition — eq. (3)
+
+$$
+W = QTQ^{\top}
+$$
+
+`Q` orthogonal, `T` upper quasi-triangular. Unlike an eigendecomposition this is always
+real and numerically stable, and unlike an SVD it *preserves the dynamics*: `W` and `T` are similar, so
+they have the same eigenvalues and the same asymptotic behaviour. That is why it is the right basis for
+talking about recurrent dynamics.
+
+--- code
+import torch, torch.nn as nn, torch.nn.functional as F      # Schur coordinates + structured ablation
+import sys; sys.path.insert(0, "learning")
+import vizkit as vz
+
+DEV = torch.device("cuda" if torch.cuda.is_available() else "cpu")   # every proof runs on the GPU
+torch.set_default_device(DEV)
+torch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False   # exact proofs
+torch.manual_seed(0); torch.set_printoptions(precision=4, sci_mode=False)
+print(f"device: {DEV}" + (f" | {torch.cuda.get_device_name(0)}" if DEV.type == "cuda" else ""))
+
+def ok(name, cond, extra=""):
+    print(("PASS  " if cond else "FAIL  ") + name + (f"   | {extra}" if extra else ""))
+
+def close(a, b, tol=1e-5):
+    return torch.allclose(a, b, atol=tol, rtol=tol)
+
+def schur(W):
+    """Real Schur form via scipy on the CPU (LAPACK has no CUDA path), returned on DEV."""
+    import numpy as np
+    from scipy.linalg import schur as _schur
+    T, Q = _schur(W.detach().double().cpu().numpy(), output="real")
+    return (torch.tensor(Q, dtype=torch.float32, device=DEV),
+            torch.tensor(T, dtype=torch.float32, device=DEV))
+
+H, T_len, d_in, d_out = 24, 40, 4, 2                              # this lesson's own setup
+Wx = torch.randn(H, d_in) / 2; Wy = torch.randn(d_out, H) / (H ** 0.5)
+W = torch.randn(H, H) / (H ** 0.5); W = 0.95 * W / torch.linalg.matrix_norm(W, 2)
+X = torch.randn(T_len, d_in)
+def states(Wr):
+    h = torch.zeros(H); hs = []
+    for t in range(T_len):
+        h = torch.tanh(Wx @ X[t] + Wr @ h)
+        hs.append(h)
+    return torch.stack(hs)
+rollout = lambda Wr: states(Wr) @ Wy.T
+Q, T_ = schur(W)
+ok("Q is orthogonal", close(Q.T @ Q, torch.eye(H), 1e-4),
+   f"max |QᵀQ - I| = {float((Q.T @ Q - torch.eye(H)).abs().max()):.2e}")
+ok("the factorisation is exact", close(Q @ T_ @ Q.T, W, 1e-3),
+   f"max |QTQᵀ - W| = {float((Q @ T_ @ Q.T - W).abs().max()):.2e}")
+ok("T is upper quasi-triangular (only the 2x2 subdiagonal survives)",
+   float(torch.tril(T_, -2).abs().max()) < 1e-3,
+   f"max below the first subdiagonal = {float(torch.tril(T_, -2).abs().max()):.2e}")
+ok("and the spectrum is preserved (a similarity transform)",
+   close(torch.linalg.eigvals(W).abs().sort().values,
+         torch.linalg.eigvals(T_).abs().sort().values, 1e-3))
+
+--- output
+```
+device: cuda | NVIDIA GeForce RTX 5090
+PASS  Q is orthogonal   | max |QᵀQ - I| = 5.96e-08
+PASS  the factorisation is exact   | max |QTQᵀ - W| = 3.54e-08
+PASS  T is upper quasi-triangular (only the 2x2 subdiagonal survives)   | max below the first subdiagonal = 0.00e+00
+PASS  and the spectrum is preserved (a similarity transform)
+```
+
+--- image
+learning/assets/rnn-weight-symmetry/eq/eq_p02_003.png
+Equation (3) as printed in the PDF
+
+--- note
+### Splitting the dynamics from the couplings — eq. (4)
+
+$$
+T = B + N
+$$
+
+**The decomposition that gives the paper its handle.** `B` = the diagonal blocks (1×1
+real eigenvalues, 2×2 rotation blocks for complex pairs) — the part a *normal* matrix would consist of.
+`N` = everything strictly above — the **directed nonnormal couplings**. Editing `B` changes the modes
+themselves; editing `N` only changes how activity is routed between them, and that is where task-restricted
+freedom is expected to live.
+
+--- code
+def split_bn(T_, tol=1e-3):
+    n = T_.shape[0]
+    B = torch.zeros_like(T_); i = 0
+    while i < n:
+        if i + 1 < n and abs(float(T_[i + 1, i])) > tol:          # a 2x2 complex block
+            B[i:i + 2, i:i + 2] = T_[i:i + 2, i:i + 2]; i += 2
+        else:
+            B[i, i] = T_[i, i]; i += 1
+    return B, T_ - B
+
+B, N = split_bn(T_)
+ok("B + N reconstructs T exactly", close(B + N, T_, 1e-6))
+ok("N is strictly upper (a pure coupling term)", float(torch.tril(N).abs().max()) < 1e-3,
+   f"max lower-triangular entry of N = {float(torch.tril(N).abs().max()):.2e}")
+ok("B alone carries the spectrum", close(torch.linalg.eigvals(B).abs().sort().values,
+                                        torch.linalg.eigvals(T_).abs().sort().values, 1e-3))
+ok("and N is exactly the NONNORMALITY (zero for a normal matrix)",
+   float(N.abs().sum()) > 0,
+   f"||N||_F / ||T||_F = {float(torch.linalg.matrix_norm(N)/torch.linalg.matrix_norm(T_)):.3f}")
+
+--- output
+```
+PASS  B + N reconstructs T exactly
+PASS  N is strictly upper (a pure coupling term)   | max lower-triangular entry of N = 0.00e+00
+PASS  B alone carries the spectrum
+PASS  and N is exactly the NONNORMALITY (zero for a normal matrix)   | ||N||_F / ||T||_F = 0.665
+```
+
+--- image
+learning/assets/rnn-weight-symmetry/eq/eq_p02_004.png
+Equation (4) as printed in the PDF
+
+--- note
+### Ordering the modes by spectral weight — eq. (5)
+
+$$
+R = \big\{i : |\lambda_i| \ge \alpha\,\rho(W)\big\},\qquad C = \{1,\dots,N_h\}\setminus R
+$$
+
+Sort the Schur basis so the slow, dominant modes come first, then split at a fraction
+`α` of the spectral radius. `R` is the retained (behaviour-carrying) set and `C` its complement. Ordering
+matters because it makes the coupling blocks of eq. 6 *interpretable*: `T_{C→R}` is "fast modes feeding
+slow ones", which is a mechanism, not just an index set.
+
+--- code
+lam = torch.linalg.eigvals(W).abs()
+rho = float(lam.max())
+for a in (0.9, 0.7, 0.5, 0.3):
+    R = int((lam >= a * rho).sum())
+    print(f"  alpha = {a}:  |R| = {R:>2} retained modes, |C| = {H - R:>2} complement")
+alpha = 0.7
+R_size = int((lam >= alpha * rho).sum())
+ok("the retained set grows as alpha falls", int((lam >= 0.3 * rho).sum()) >= R_size)
+ok("R and C partition the modes", R_size + (H - R_size) == H, f"|R|={R_size}, |C|={H-R_size}")
+ok("the spectral radius is below 1 (a stable RNN)", rho < 1.0, f"rho(W) = {rho:.4f}")
+
+--- output
+```
+  alpha = 0.9:  |R| =  7 retained modes, |C| = 17 complement
+  alpha = 0.7:  |R| = 13 retained modes, |C| = 11 complement
+  alpha = 0.5:  |R| = 18 retained modes, |C| =  6 complement
+  alpha = 0.3:  |R| = 21 retained modes, |C| =  3 complement
+PASS  the retained set grows as alpha falls
+PASS  R and C partition the modes   | |R|=13, |C|=11
+PASS  the spectral radius is below 1 (a stable RNN)   | rho(W) = 0.4944
+```
+
+--- note
+### The block structure this induces — eq. (6)
+
+$$
+B = \begin{pmatrix} B_R & 0 \\ 0 & B_C\end{pmatrix},\qquad N = \begin{pmatrix} T_{RR} & T_{C\to R} \\ 0 & T_{CC}\end{pmatrix}
+$$
+
+In the ordered basis the couplings acquire names: `T_RR` (within the retained modes),
+`T_{C→R}` (complement feeding the retained modes — the directed, nonnormal path that can amplify
+transients), and `T_CC` (within the complement). Structured ablation means zeroing one of these blocks and
+asking what the rollout does — which is a *mechanistic* question, unlike zeroing individual weights.
+
+--- code
+r = R_size
+blocks = {"T_RR": (slice(0, r), slice(0, r)), "T_C->R": (slice(0, r), slice(r, H)),
+          "T_CC": (slice(r, H), slice(r, H))}
+for name, (rs, cs) in blocks.items():
+    sub = N[rs, cs]
+    print(f"  {name:8s} shape {tuple(sub.shape)}  ||.||_F = {float(torch.linalg.matrix_norm(sub)):.4f}")
+ok("the three coupling blocks tile the upper part of N",
+   abs(float(torch.linalg.matrix_norm(N) ** 2)
+       - sum(float(torch.linalg.matrix_norm(N[rs, cs]) ** 2) for rs, cs in blocks.values())) < 1e-2,
+   "no coupling is double-counted or missed")
+ok("B is block-diagonal by construction", float((B - torch.block_diag(B[:r, :r], B[r:, r:])).abs().max())
+   < 1e-5)
+
+--- output
+```
+  T_RR     shape (13, 13)  ||.||_F = 0.8090
+  T_C->R   shape (13, 11)  ||.||_F = 1.2567
+  T_CC     shape (11, 11)  ||.||_F = 0.6902
+PASS  the three coupling blocks tile the upper part of N   | no coupling is double-counted or missed
+PASS  B is block-diagonal by construction
+```
+
+--- image
+learning/assets/rnn-weight-symmetry/eq/eq_p02_016.png
+Equation (6) as printed in the PDF
+

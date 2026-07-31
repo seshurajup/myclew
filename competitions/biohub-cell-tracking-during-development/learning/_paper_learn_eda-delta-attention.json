@@ -1,0 +1,39 @@
+{
+  "slug": "eda-delta-attention",
+  "lessons": 8,
+  "ids": [
+    "edab1",
+    "eda02",
+    "eda03",
+    "eda04",
+    "eda05",
+    "eda06",
+    "eda07",
+    "edaz1"
+  ],
+  "coverage": {
+    "total": 22,
+    "placed": 22,
+    "missing": [],
+    "taught": 22,
+    "untaught": [],
+    "proven": 22,
+    "unproven": [],
+    "cropped": 6,
+    "figures": 1,
+    "figures_placed": 1,
+    "lessons": 6
+  },
+  "curriculum": {
+    "appended": true,
+    "section": "Erase-then-Delta Attention (2026) \u2014 decoupling erase from write, proved in PyTorch",
+    "lessons": 8
+  },
+  "pruned": [],
+  "code_cells": 25,
+  "cells_with_output": 25,
+  "silent_lessons": [],
+  "out_dir": "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated",
+  "assets": "learning/assets/eda-delta-attention",
+  "python": "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/research/cellmot_venv/bin/python"
+}

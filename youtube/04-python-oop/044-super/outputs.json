@@ -1,0 +1,11 @@
+[
+  {
+    "after_line": 17,
+    "text": ">>> 4\\n>>> Toyota: 4 wheels",
+    "caption": "super() runs the parent's code"
+  },
+  {
+    "after_line": 17,
+    "image": "artifacts/terminal.png"
+  }
+]

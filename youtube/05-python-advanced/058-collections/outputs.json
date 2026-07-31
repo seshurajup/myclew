@@ -1,0 +1,21 @@
+[
+  {
+    "after_line": 5,
+    "text": ">>> [('i', 4), ('s', 4)]",
+    "caption": "Counter tallies instantly"
+  },
+  {
+    "after_line": 11,
+    "text": ">>> {'a': ['ant', 'auk'], 'b': ['bee']}",
+    "caption": "defaultdict groups cleanly"
+  },
+  {
+    "after_line": 16,
+    "text": ">>> 3 4 Point(x=3, y=4)",
+    "caption": "namedtuple: readable records"
+  },
+  {
+    "after_line": 16,
+    "image": "artifacts/terminal.png"
+  }
+]

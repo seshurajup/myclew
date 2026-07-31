@@ -1,0 +1,12 @@
+[
+  {
+    "after_line": 9,
+    "text": ">>> 10\n>>> name=Sam, age=30",
+    "caption": "*args collects, **kwargs names"
+  },
+  {
+    "after_line": 11,
+    "text": ">>> 60",
+    "caption": "* unpacks a list back into args"
+  }
+]

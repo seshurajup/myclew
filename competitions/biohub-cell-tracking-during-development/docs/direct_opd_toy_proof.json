@@ -1,0 +1,161 @@
+{
+  "paper": "Weak-to-Strong Generalization via Direct On-Policy Distillation (arXiv 2607.05394)",
+  "repo": "tools/researchpapers/research_refs/direct-opd (verl-based)",
+  "objective_confirmed": "rm = softmax(student_logp.detach()) * (teacher_rl_logp - teacher_ref_logp); advantage = token_reward_direct (rm*mask); on-policy student rollouts.",
+  "delta_opd_numerics_identical_to_repo_tests": true,
+  "device": "cuda",
+  "gpu": "NVIDIA GeForce RTX 5090",
+  "amp": "bf16",
+  "tf32": true,
+  "config": {
+    "C": 16,
+    "L": 6,
+    "V": 12,
+    "n_sft": 4,
+    "d_weak": 3,
+    "d_strong": 64,
+    "p_demo": 0.7,
+    "sft_steps": 400,
+    "sft_lr": 0.003,
+    "teacher_rl_steps": 400,
+    "teacher_kl": 0.1,
+    "rl_lr": 0.01,
+    "student_steps": 400,
+    "student_kl": 0.05,
+    "opd_kl": 1.0,
+    "distill_lr": 0.005,
+    "opd_lr": 0.01,
+    "G": 32,
+    "eval_reps": 128
+  },
+  "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+  ],
+  "per_seed": [
+    {
+      "teacher_ref": 0.28125,
+      "teacher_postRL": 0.5625,
+      "student_ref": 0.7083333730697632,
+      "endpoint_distill": 0.5625,
+      "direct_opd": 0.6041666865348816,
+      "student_oracle": 0.96875
+    },
+    {
+      "teacher_ref": 0.25,
+      "teacher_postRL": 0.6041666865348816,
+      "student_ref": 0.6979166865348816,
+      "endpoint_distill": 0.6041666865348816,
+      "direct_opd": 0.625,
+      "student_oracle": 0.9791666865348816
+    },
+    {
+      "teacher_ref": 0.2291666865348816,
+      "teacher_postRL": 0.5,
+      "student_ref": 0.7083333730697632,
+      "endpoint_distill": 0.5,
+      "direct_opd": 0.6354166865348816,
+      "student_oracle": 0.9791666865348816
+    },
+    {
+      "teacher_ref": 0.25,
+      "teacher_postRL": 0.4791666865348816,
+      "student_ref": 0.6875,
+      "endpoint_distill": 0.46875,
+      "direct_opd": 0.6145833730697632,
+      "student_oracle": 0.9895833730697632
+    },
+    {
+      "teacher_ref": 0.28125,
+      "teacher_postRL": 0.5625,
+      "student_ref": 0.6875,
+      "endpoint_distill": 0.5625,
+      "direct_opd": 0.6354166865348816,
+      "student_oracle": 0.9270833730697632
+    },
+    {
+      "teacher_ref": 0.1666666716337204,
+      "teacher_postRL": 0.5625,
+      "student_ref": 0.7083333730697632,
+      "endpoint_distill": 0.5625,
+      "direct_opd": 0.6770833730697632,
+      "student_oracle": 1.0
+    },
+    {
+      "teacher_ref": 0.2604166865348816,
+      "teacher_postRL": 0.5208333730697632,
+      "student_ref": 0.7083333730697632,
+      "endpoint_distill": 0.5208333730697632,
+      "direct_opd": 0.5208333730697632,
+      "student_oracle": 0.9791666865348816
+    },
+    {
+      "teacher_ref": 0.1979166716337204,
+      "teacher_postRL": 0.5,
+      "student_ref": 0.6770833730697632,
+      "endpoint_distill": 0.5,
+      "direct_opd": 0.5729166865348816,
+      "student_oracle": 0.9583333730697632
+    }
+  ],
+  "aggregate": {
+    "teacher_ref": {
+      "mean": 0.2395833395421505,
+      "std": 0.037557824580672854
+    },
+    "teacher_postRL": {
+      "mean": 0.5364583432674408,
+      "std": 0.04000596614350748
+    },
+    "student_ref": {
+      "mean": 0.6979166939854622,
+      "std": 0.011646196268156293
+    },
+    "endpoint_distill": {
+      "mean": 0.5351562574505806,
+      "std": 0.04197073536058814
+    },
+    "direct_opd": {
+      "mean": 0.610677108168602,
+      "std": 0.04386687445814498
+    },
+    "student_oracle": {
+      "mean": 0.9726562723517418,
+      "std": 0.020792595483192136
+    }
+  },
+  "gpu_live_diagnosis": {
+    "bottleneck": "mixed",
+    "mean_util": 44.0,
+    "max_util": 56.0,
+    "mean_mem_frac": 0.04,
+    "cpu_load_frac": 0.04,
+    "recommendation": {
+      "num_workers": 19,
+      "cache_decoded_audio": true,
+      "note": "partial starvation \u2192 add workers + cache decode"
+    }
+  },
+  "claim_direct_opd_beats_weak_teacher": true,
+  "claim_direct_opd_beats_endpoint_distill": true,
+  "weak_to_strong_reproduced": true,
+  "paired": {
+    "n_seeds": 8,
+    "direct_opd_beats_endpoint_in_seeds": 7,
+    "direct_opd_beats_teacher_in_seeds": 7,
+    "direct_opd_beats_own_base_in_seeds": 0,
+    "mean_paired_delta_vs_endpoint": 0.0755,
+    "mean_paired_delta_vs_teacher": 0.0742,
+    "mean_paired_delta_vs_base": -0.0872
+  },
+  "headroom_over_teacher": 0.0742,
+  "headroom_over_endpoint": 0.0755,
+  "headroom_over_own_base": -0.0872,
+  "runtime_s": 54.3
+}

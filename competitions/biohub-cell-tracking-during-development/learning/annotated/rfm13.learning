@@ -1,0 +1,12 @@
+@ id: rfm13
+@ order: 2520
+@ title: A Load-Balancing Losses
+@ subtitle: Routing-Free Mixture-of-Experts §A
+@ source: docs/papers/routing-free-moe/routing-free-moe.md
+
+--- note
+## A Load-Balancing Losses
+**Paper:** Routing-Free Mixture-of-Experts · §A · pages 16–16 · equations (none) · 0 figures.
+
+> TODO(author): the *why* of §A in 3–5 lines.
+

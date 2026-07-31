@@ -1,0 +1,538 @@
+{
+  "MABe-mouse-behavior-detection": {
+    "writeups": 5,
+    "repos": [
+      "GosUxD/MABe-5th"
+    ]
+  },
+  "ai-mathematical-olympiad-progress-prize-2": {
+    "writeups": 5,
+    "repos": [
+      "InternLM/lmdeploy",
+      "Qihoo360/360-LLaMA-Factory",
+      "Qihoo360/Light-R1",
+      "imagination-research/aimo2"
+    ]
+  },
+  "ai-mathematical-olympiad-progress-prize-3": {
+    "writeups": 5,
+    "repos": []
+  },
+  "arc-prize-2024": {
+    "writeups": 5,
+    "repos": [
+      "ironbar/arc24",
+      "ksb21ST/Mini-ARC",
+      "michaelhodel/arc-dsl",
+      "michaelhodel/re-arc",
+      "neoneye/arc-dataset-collection",
+      "neoneye/arc-dataset-tama",
+      "xu3kev/BARC",
+      "zoenguyenramirez/arc-prize-2024"
+    ]
+  },
+  "arc-prize-2025": {
+    "writeups": 5,
+    "repos": [
+      "1ytic/NVARC",
+      "KSB21ST/MINI-ARC",
+      "Le-Gris/h-arc",
+      "NVIDIA-NeMo/RL",
+      "SamsungSAILMontreal/TinyRecursiveModels",
+      "jcole75/arc_2025_mindsai",
+      "michaelhodel/re-arc",
+      "thinking-machines-lab/batch_invariant_ops",
+      "victorvikram/ConceptARC",
+      "xu3kev/BARC"
+    ]
+  },
+  "ariel-data-challenge-2025": {
+    "writeups": 5,
+    "repos": [
+      "Alehandreus/ariel-2025",
+      "jcottaar/ariel2",
+      "thomasdueholm/kaggle_ariel_2025"
+    ]
+  },
+  "birdclef-2025": {
+    "writeups": 5,
+    "repos": [
+      "VSydorskyy/BirdCLEF_2025_2nd_place",
+      "dylanliu2/BirdCLEF2025-4th-place-solution",
+      "myso1987/BirdCLEF-2025-5th-place-solution",
+      "snakers4/silero-vad"
+    ]
+  },
+  "birdclef-2026": {
+    "writeups": 5,
+    "repos": [
+      "FlorentinGe/Birdclef2026-2ndplace",
+      "StarrySky-SHT/BirdClef2025-8thSol",
+      "jak-ma/BirdCLEF2026-5th-solution"
+    ]
+  },
+  "byu-locating-bacterial-flagellar-motors-2025": {
+    "writeups": 5,
+    "repos": [
+      "Blosc/python-blosc2",
+      "ChristofHenkel/kaggle-cryoet-1st-place-segmentation",
+      "MIC-DKFZ/batchgeneratorsv2",
+      "MIC-DKFZ/kaggle_BYU_Locating_Bacterial-Flagellar_Motors_2025_solution",
+      "MIC-DKFZ/napari-data-inspection",
+      "MIC-DKFZ/nnDetection",
+      "MIC-DKFZ/nnUNet",
+      "ZFTurbo/segmentation_models_pytorch_3d",
+      "ZFTurbo/timm_3d",
+      "brendanartley/BYU-competition",
+      "cvat-ai/cvat",
+      "dangnh0611/kaggle_byu",
+      "facebookresearch/SlowFast",
+      "kenshohara/3D-ResNets-PyTorch"
+    ]
+  },
+  "cafa-6-protein-function-prediction": {
+    "writeups": 5,
+    "repos": [
+      "SamusRam/ProFun",
+      "biomed-AI/SPROF-GO",
+      "btbpanda/CAFA5-protein-function-prediction-2nd-place",
+      "btbpanda/CAFA5-protein-function-prediction-2nd-place.",
+      "btbpanda/CAFA6-updates",
+      "claradepaolis/CAFA-evaluator-PK",
+      "sb-ai-lab/Py-Boost",
+      "yuanlao153/CAFA5-protein-function-prediction-2nd-place"
+    ]
+  },
+  "child-mind-institute-problematic-internet-use": {
+    "writeups": 5,
+    "repos": []
+  },
+  "cmi-detect-behavior-with-sensor-data": {
+    "writeups": 5,
+    "repos": [
+      "Yamato-Arai/kaggle-cmi-detect-behavior-2nd-place-solution",
+      "statist-bhfz/kaggle_cmi_1st_place_solution"
+    ]
+  },
+  "csiro-biomass": {
+    "writeups": 5,
+    "repos": [
+      "ByteDance-Seed/Depth-Anything-3",
+      "QwenLM/Qwen-Image",
+      "khawar-islam/diffuseMix",
+      "script-Yang/SegDINO",
+      "yanqiangmiffy/2025-Kaggle-CSIRO-5th-solution"
+    ]
+  },
+  "czii-cryo-et-object-identification": {
+    "writeups": 5,
+    "repos": [
+      "ChristofHenkel/kaggle-cryoet-1st-place-segmentation",
+      "GWwangshuo/Kaggle-2024-CZII-Pub",
+      "Project-MONAI/MONAI",
+      "Project-MONAI/tutorials",
+      "ZFTurbo/segmentation_models_pytorch_3d",
+      "luoziqianX/CZII-CryoET-Object-Identification-2nd-luoziqian",
+      "tattaka/czii-cryo-et-object-identification-public",
+      "yu4u/kaggle-czii-4th"
+    ]
+  },
+  "deep-past-initiative-machine-translation": {
+    "writeups": 5,
+    "repos": [
+      "Anaphase21/Deep-Past-Challenge-2026"
+    ]
+  },
+  "drawing-with-llms": {
+    "writeups": 5,
+    "repos": [
+      "THUDM/ImageReward",
+      "clarkkev/svg-diffusion",
+      "fogleman/primitive",
+      "matheuspf/draw",
+      "richzhang/PerceptualSimilarity",
+      "tgxs002/HPSv2",
+      "yuvalkirstain/PickScore"
+    ]
+  },
+  "eedi-mining-misconceptions-in-mathematics": {
+    "writeups": 5,
+    "repos": [
+      "TakoiHirokazu/kaggle-Eedi-4th-solution",
+      "charmq00/kaggle_eedi_public",
+      "ebinan92/Eedi-5th-solution",
+      "intel/auto-round",
+      "rbiswasfc/eedi-mining-misconceptions",
+      "vllm-project/vllm",
+      "wangqihanginthesky/Eedi_kaggle"
+    ]
+  },
+  "equity-post-HCT-survival-predictions": {
+    "writeups": 5,
+    "repos": [
+      "AutoML-Grandmasters/Fourth-AutoML-Grand-Prix"
+    ]
+  },
+  "fide-google-efficiency-chess-ai-challenge": {
+    "writeups": 5,
+    "repos": [
+      "AndyGrant/ClosedGrapheus",
+      "AndyGrant/Ethereal",
+      "AndyGrant/KaggleFish",
+      "AndyGrant/OpenBench",
+      "Lgeu/kaggle-stockfish",
+      "Luecx/Grapheus",
+      "Rafbillpc/kaggle-chess",
+      "disservin/fastchess",
+      "jw1912/bullet",
+      "linrock/Primer",
+      "linrock/minifish",
+      "official-stockfish/Stockfish",
+      "official-stockfish/fishtest",
+      "official-stockfish/nnue-pytorch",
+      "peregrineshahin/Approvers",
+      "peregrineshahin/Approvers.",
+      "syzygy1/Cfish"
+    ]
+  },
+  "google-code-golf-2025": {
+    "writeups": 5,
+    "repos": [
+      "Seek64/NeurIPS-Code-Golf-2025",
+      "google/ARC-GEN",
+      "jailctf-merger-goog-golf/compression",
+      "jailctf-merger-goog-golf/golf",
+      "key-moon/deflate-viz",
+      "key-moon/golf",
+      "lynn/pysearch",
+      "madler/infgen",
+      "michaelhodel/arc-dsl",
+      "michaelhodel/re-arc",
+      "orgs/jailctf-merger-goog-golf",
+      "xsot/google-code-golf-2025"
+    ]
+  },
+  "hull-tactical-market-prediction": {
+    "writeups": 4,
+    "repos": []
+  },
+  "image-matching-challenge-2025": {
+    "writeups": 5,
+    "repos": [
+      "naver/mast3r",
+      "ns-rokuyon/kaggle-image-matching-challenge-2025",
+      "ternaus/check_orientation",
+      "xtcpete/rdd"
+    ]
+  },
+  "isic-2024-challenge": {
+    "writeups": 5,
+    "repos": [
+      "ImageMarkup/isic-cli",
+      "NYNYNY67/kaggle_isic",
+      "ToseiHatori/isic",
+      "auccchi/kaggle_isic",
+      "dungnb1333/ISIC-2024",
+      "fyk7/kaggle-isic2024-5th-table-part-",
+      "ilyanovo/isic-2024",
+      "kyohei-123/kaggle-isic-2024-3rd-place-solution",
+      "uchiyama33/isic-2024-2nd-place"
+    ]
+  },
+  "jane-street-real-time-market-data-forecasting": {
+    "writeups": 3,
+    "repos": [
+      "evgeniavolkova/kagglejanestreet"
+    ]
+  },
+  "jigsaw-agile-community-rules": {
+    "writeups": 5,
+    "repos": []
+  },
+  "konwinski-prize": {
+    "writeups": 5,
+    "repos": []
+  },
+  "llms-you-cant-please-them-all": {
+    "writeups": 5,
+    "repos": []
+  },
+  "lux-ai-season-3": {
+    "writeups": 5,
+    "repos": [
+      "Elias-Buerger/kaggle-lux-s3",
+      "IsaiahPressman/kaggle-lux-2024",
+      "KASSII/Kaggle_LuxAI-s3",
+      "Lux-AI-Challenge/Lux-Design-S3",
+      "luchris429/purejaxrl",
+      "tonykozlovsky/lux-ai3-pub",
+      "w9PcJLyb/lux3-bot"
+    ]
+  },
+  "make-data-count-finding-data-references": {
+    "writeups": 5,
+    "repos": [
+      "Make-Data-Count-Community/corpus-data-file",
+      "rbiswasfc/mdc-4th-place-solution"
+    ]
+  },
+  "map-charting-student-math-misunderstandings": {
+    "writeups": 5,
+    "repos": [
+      "intel/auto-round",
+      "tascj/kaggle-map-charting-student-math-misunderstandings",
+      "tascj/offload_adam"
+    ]
+  },
+  "march-machine-learning-mania-2025": {
+    "writeups": 5,
+    "repos": [
+      "fakyras/ncaa_women_2018",
+      "gotoConversion/goto_conversion"
+    ]
+  },
+  "march-machine-learning-mania-2026": {
+    "writeups": 5,
+    "repos": [
+      "BrendanCarlin/march-mania-2026-2nd-place",
+      "Xroxa/4th-Place-Solution-for-the-March-Machine-Learning-Mania-2026-Competition",
+      "kevin1000/march-mania-2026-3rd-place"
+    ]
+  },
+  "mitsui-commodity-prediction-challenge": {
+    "writeups": 5,
+    "repos": []
+  },
+  "neurips-open-polymer-prediction-2025": {
+    "writeups": 5,
+    "repos": [
+      "Duke-MatSci/ChemProps",
+      "RUIMINMA1996/PI1M",
+      "RadonPy/RadonPy",
+      "fresnellll/kaggle-NeurIPS-polymer-prediction-solution",
+      "jday96314/NeurIPS-polymer-prediction"
+    ]
+  },
+  "nfl-big-data-bowl-2026-prediction": {
+    "writeups": 5,
+    "repos": []
+  },
+  "nvidia-nemotron-model-reasoning-challenge": {
+    "writeups": 5,
+    "repos": [
+      "YS-L/nvidia-nemotron-reasoning-3rd-place-solution",
+      "livctr/nvidia-nemotron"
+    ]
+  },
+  "orbit-wars": {
+    "writeups": 5,
+    "repos": [
+      "IsaiahPressman/kaggle-orbit-wars",
+      "Lightning-AI/pytorch-lightning",
+      "SimJeg/orbit-wars",
+      "karpathy/autoresearch",
+      "pufferai/pufferlib",
+      "sinking-point/ender"
+    ]
+  },
+  "physionet-ecg-image-digitization": {
+    "writeups": 5,
+    "repos": [
+      "LSXI7/MINIMA",
+      "alphanumericslab/ecg-image-kit",
+      "dangnh0611/kaggle_ecg_digitization",
+      "someya-takashi/physionet-image-digitization",
+      "tanghaozhe/physionet-ecg-image-digitization-3rd-place",
+      "uchiyama33/physionet_4th_place"
+    ]
+  },
+  "playground-series-s5e1": {
+    "writeups": 5,
+    "repos": []
+  },
+  "playground-series-s5e10": {
+    "writeups": 5,
+    "repos": []
+  },
+  "playground-series-s5e11": {
+    "writeups": 5,
+    "repos": []
+  },
+  "playground-series-s5e12": {
+    "writeups": 4,
+    "repos": [
+      "awaliuddin/Diabetes-Prediction-Challenge"
+    ]
+  },
+  "playground-series-s5e2": {
+    "writeups": 4,
+    "repos": []
+  },
+  "playground-series-s5e3": {
+    "writeups": 4,
+    "repos": [
+      "PriorLabs/TabPFN"
+    ]
+  },
+  "playground-series-s5e4": {
+    "writeups": 5,
+    "repos": []
+  },
+  "playground-series-s5e5": {
+    "writeups": 5,
+    "repos": []
+  },
+  "playground-series-s5e6": {
+    "writeups": 5,
+    "repos": []
+  },
+  "playground-series-s5e7": {
+    "writeups": 1,
+    "repos": []
+  },
+  "playground-series-s5e8": {
+    "writeups": 5,
+    "repos": []
+  },
+  "playground-series-s5e9": {
+    "writeups": 2,
+    "repos": []
+  },
+  "playground-series-s6e1": {
+    "writeups": 5,
+    "repos": []
+  },
+  "playground-series-s6e2": {
+    "writeups": 5,
+    "repos": [
+      "mert-byrktr/KAGGLE-PS-S6E2-PREDICTING-HEART-DISEASE"
+    ]
+  },
+  "playground-series-s6e3": {
+    "writeups": 5,
+    "repos": [
+      "cdeotte/KGMON-Playbook-2026",
+      "mert-byrktr/KAGGLE-PS-S6E3-PREDICT-CUSTOMER-CHURN"
+    ]
+  },
+  "playground-series-s6e4": {
+    "writeups": 5,
+    "repos": []
+  },
+  "playground-series-s6e5": {
+    "writeups": 5,
+    "repos": []
+  },
+  "playground-series-s6e6": {
+    "writeups": 5,
+    "repos": []
+  },
+  "recodai-luc-scientific-image-forgery-detection": {
+    "writeups": 5,
+    "repos": [
+      "GuidoBartoli/sherloq",
+      "Nivratti/recodai-luc-sifd-4th-place-solution",
+      "cvg/glue-factory",
+      "gmberton/vismatch",
+      "phillipecardenuto/upm",
+      "photoholmes/photoholmes",
+      "researchintegrity/copy-move-detection-keypoint",
+      "researchintegrity/panel-extractor",
+      "vlad3996/forgeryscope"
+    ]
+  },
+  "rohlik-sales-forecasting-challenge-v2": {
+    "writeups": 3,
+    "repos": [
+      "dholzmueller/pytabkit"
+    ]
+  },
+  "rsna-2024-lumbar-spine-degenerative-classification": {
+    "writeups": 5,
+    "repos": [
+      "ElFazouani/RSNA-2024-Lumbar-Spine-Degenerative-Classification",
+      "FrancescoSaverioZuppichini/ConvNext",
+      "Moyasii/Kaggle-2024-RSNA-Pub",
+      "naver-ai/rdnet",
+      "siwooyong/RSNA-2024-Lumbar-Spine-Degenerative-Classification",
+      "tattaka/rsna-2024-lumbar-spine-degenerative-classification-public",
+      "yu4u/kaggle-rsna2024-4th",
+      "yujiariyasu/rsna_2024_lumbar_spine_degenerative_classification"
+    ]
+  },
+  "rsna-intracranial-aneurysm-detection": {
+    "writeups": 5,
+    "repos": [
+      "HumanSignal/labelImg",
+      "PengchengShi1220/RSNA2025_Intracranial-Aneurysm-Detection",
+      "hoanghuyen797/RSNA-Intracranial-Aneurysm-Detection",
+      "tamotamo17/RSNA2025-3rd-place-solution",
+      "uchiyama33/rsna2025_1st_place"
+    ]
+  },
+  "santa-2024": {
+    "writeups": 5,
+    "repos": [
+      "Lgeu/santa2024"
+    ]
+  },
+  "santa-2025": {
+    "writeups": 5,
+    "repos": [
+      "jcottaar/packing",
+      "saharan/santa-2025",
+      "terry-u16/santa2025"
+    ]
+  },
+  "stanford-rna-3d-folding": {
+    "writeups": 5,
+    "repos": [
+      "CatIIIIIIII/RNAErnie",
+      "Shujun-He/RibonanzaNet",
+      "bytedance/Protenix",
+      "chaidiscovery/chai-lab",
+      "genbio-ai/ModelGenerator",
+      "google-deepmind/alphafold",
+      "jwohlwend/boltz",
+      "leeyang/DRfold2",
+      "pylelab/rMSA",
+      "soedinglab/MMseqs2",
+      "yamule/matrix_align"
+    ]
+  },
+  "stanford-rna-3d-folding-2": {
+    "writeups": 5,
+    "repos": [
+      "DasLab/arnie",
+      "NVIDIA-Digital-Bio/RNAPro",
+      "ViennaRNA/ViennaRNA",
+      "WaymentSteeleLab/EternaFold",
+      "bytedance/Protenix"
+    ]
+  },
+  "vesuvius-challenge-surface-detection": {
+    "writeups": 5,
+    "repos": [
+      "Paul-G2/VesuviusSurfaceDetection"
+    ]
+  },
+  "waveform-inversion": {
+    "writeups": 5,
+    "repos": [
+      "shlomoron/GWI-solution",
+      "tascj/kaggle-waveform-inversion",
+      "tensorflow/models"
+    ]
+  },
+  "wsdm-cup-multilingual-chatbot-arena": {
+    "writeups": 5,
+    "repos": [
+      "LIHANG-HONG/WSDM-Cup-3rd-place-solution",
+      "lcy80366872/kaggle-project",
+      "maxreciprocate/kaggle-lmarena-1st-place",
+      "rbiswasfc/lmsys-arena",
+      "tascj/kaggle-lmsys-chatbot-arena",
+      "zhudongwork/wsdm-cub-2nd-place-solution"
+    ]
+  }
+}

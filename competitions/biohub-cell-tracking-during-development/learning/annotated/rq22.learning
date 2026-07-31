@@ -1,0 +1,12 @@
+@ id: rq22
+@ order: 2310
+@ title: M Complete Per-Model Results
+@ subtitle: RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory §M
+@ source: docs/papers/ratequant/ratequant.md
+
+--- note
+## M Complete Per-Model Results
+**Paper:** RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory · §M · pages 19–19 · equations (none) · 0 figures.
+
+> TODO(author): the *why* of §M in 3–5 lines.
+

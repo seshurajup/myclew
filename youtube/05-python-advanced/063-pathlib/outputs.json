@@ -1,0 +1,21 @@
+[
+  {
+    "after_line": 6,
+    "text": ">>> folder/data/file.txt\\n>>> file.txt .txt file\\n>>> folder/data",
+    "caption": "paths know their own parts"
+  },
+  {
+    "after_line": 10,
+    "text": ">>> True True",
+    "caption": ".exists() / .is_dir()"
+  },
+  {
+    "after_line": 14,
+    "text": ">>> (lists *.py files)",
+    "caption": ".glob() finds matching files"
+  },
+  {
+    "after_line": 14,
+    "image": "artifacts/terminal.png"
+  }
+]

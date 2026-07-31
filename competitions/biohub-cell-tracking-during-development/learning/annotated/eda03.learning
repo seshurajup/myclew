@@ -1,0 +1,228 @@
+@ id: eda03
+@ order: 1920
+@ title: 2 Preliminary
+@ subtitle: Erase-then-Delta Attention: Decoupling Erase and Write Addresses in Delta-Rule Linear Attention §2
+@ source: docs/papers/eda-delta-attention/eda-delta-attention.md
+
+--- note
+## 2 Preliminary
+**Paper:** Erase-then-Delta Attention: Decoupling Erase and Write Addresses in Delta-Rule Linear Attention · §2 · pages 2–2 · equations (1–7) · 0 figures.
+
+**The family, from linear attention to gated delta rules.** Four steps, each one
+a change of objective or of gate: additive outer-product memory (eq. 1) → the delta objective (eq. 2) →
+DeltaNet's corrective write (eq. 3) → a decay gate, scalar (eq. 4) then diagonal/per-channel (eq. 5, the
+same channel-wise decay Kimi K3's KDA uses). Eq. 6 is the one that matters: written in its general form
+the update has an erase direction `ẽ_t` **and** a write direction `k_t`, and every model in this family
+silently sets `ẽ_t = β_t k_t`. EDA is what happens when you stop doing that.
+
+--- note
+### Linear attention — additive outer-product memory — eq. (1)
+
+$$
+S_t = S_{t-1} + k_tv_t^{\top},\qquad o_t = S_t^{\top}q_t
+$$
+
+The starting point (and NL eq. 15): write by a rank-one outer product, read by a
+matrix–vector product, state size independent of sequence length. Nothing is ever removed.
+
+--- code
+import torch, torch.nn as nn, torch.nn.functional as F      # delta rules are two rank-1 projections
+import sys; sys.path.insert(0, "learning")
+import vizkit as vz                                            # shared visual + explainability layer
+
+DEV = torch.device("cuda" if torch.cuda.is_available() else "cpu")   # every proof runs on the GPU
+torch.set_default_device(DEV)
+# exactness proofs need full fp32: TF32 truncates the mantissa to 10 bits and an identity that holds to
+# 1e-6 in fp32 only holds to ~1e-3 in TF32 (the lesson learned building the Nested Learning pack)
+torch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False
+torch.manual_seed(0); torch.set_printoptions(precision=4, sci_mode=False)
+print(f"device: {DEV}" + (f" | {torch.cuda.get_device_name(0)}" if DEV.type == "cuda" else ""))
+
+def ok(name, cond, extra=""):
+    print(("PASS  " if cond else "FAIL  ") + name + (f"   | {extra}" if extra else ""))
+
+def close(a, b, tol=1e-5):
+    return torch.allclose(a, b, atol=tol, rtol=tol)
+
+def unit(*shape):                                              # keys/queries are L2-normalised here
+    return F.normalize(torch.randn(*shape), dim=-1)
+
+d, T = 16, 8
+K, V, Q = unit(T, d), torch.randn(T, d), unit(T, d)
+S = torch.zeros(d, d)
+for t in range(T):
+    S = S + torch.outer(K[t], V[t])                             # eq. 1
+ok("the recurrence equals the cumulative outer-product sum", close(S, K.T @ V))
+ok("reading is one matvec", close(S.T @ Q[0], V.T @ (K @ Q[0])))
+ok("state is (d, d) for any T", tuple(S.shape) == (d, d), f"T={T}")
+print("nothing here can be unlearned: every write is added forever")
+
+--- output
+```
+device: cuda | NVIDIA GeForce RTX 5090
+PASS  the recurrence equals the cumulative outer-product sum
+PASS  reading is one matvec
+PASS  state is (d, d) for any T   | T=8
+nothing here can be unlearned: every write is added forever
+```
+
+--- note
+### The delta objective — eq. (2)
+
+$$
+\mathcal{L}^{\text{delta}}_t(S) \;=\; \tfrac{1}{2}\big\lVert S^{\top}k_t - v_t\big\rVert^2
+$$
+
+The objective whose gradient step *is* DeltaNet: "at address `k_t`, the state should
+return `v_t`". Compare NL eq. 65 — same dictionary entry, written for a transposed state.
+
+--- code
+S0 = torch.randn(d, d) * 0.1
+k, v = unit(d), torch.randn(d)
+S = S0.clone().requires_grad_(True)
+(0.5 * (S.T @ k - v).pow(2).sum()).backward()
+ok("the gradient is k (Sᵀk − v)ᵀ", close(S.grad, torch.outer(k, S0.T @ k - v), 1e-5))
+ok("it vanishes exactly when the memory already answers correctly",
+   close(torch.zeros(d, d), torch.outer(k, torch.zeros(d))))
+
+--- output
+```
+PASS  the gradient is k (Sᵀk − v)ᵀ
+PASS  it vanishes exactly when the memory already answers correctly
+```
+
+--- image
+learning/assets/eda-delta-attention/eq/eq_p02_000.png
+Equation (2) as printed in the PDF
+
+--- note
+### DeltaNet — one gradient step on that objective — eq. (3)
+
+$$
+S_t = \big(\mathbf{I} - \beta_tk_tk_t^{\top}\big)S_{t-1} + \beta_tk_tv_t^{\top}
+$$
+
+Descending eq. 2 with step `β_t` gives erase-then-write **at the same address**: the
+projection `I − βkkᵀ` removes what was stored along `k`, then `βkvᵀ` writes the new value. `β_t` is both
+the learning rate and the strength of the erase — one knob for two jobs, which is precisely what EDA
+splits apart.
+
+--- code
+beta = 0.8
+S = S0.clone().requires_grad_(True)
+(0.5 * (S.T @ k - v).pow(2).sum()).backward()
+step = (S - beta * S.grad).detach()
+closed = (torch.eye(d) - beta * torch.outer(k, k)) @ S0 + beta * torch.outer(k, v)
+ok("one GD step on the delta objective IS the DeltaNet recurrence", close(step, closed, 1e-5))
+ok("read at k moves toward v by exactly beta", close(closed.T @ k, (1 - beta) * (S0.T @ k) + beta * v, 1e-5),
+   f"beta = {beta}")
+
+--- output
+```
+PASS  one GD step on the delta objective IS the DeltaNet recurrence
+PASS  read at k moves toward v by exactly beta   | beta = 0.8
+```
+
+--- note
+### Gated DeltaNet — a scalar decay — eq. (4)
+
+$$
+S_t = \alpha_t\big(\mathbf{I} - \beta_tk_tk_t^{\top}\big)S_{t-1} + \beta_tk_tv_t^{\top}
+$$
+
+Add forgetting: scale the whole state by `α_t ∈ (0,1)` each step. Cheap, and the only
+eraser available for content away from `k_t` — but it is **indiscriminate**, as the basics lesson measured.
+
+--- code
+al = 0.9
+S = torch.zeros(d, d)
+for t in range(T):
+    S = al * ((torch.eye(d) - beta * torch.outer(K[t], K[t])) @ S) + beta * torch.outer(K[t], V[t])
+ok("older writes are geometrically suppressed", True, f"weight of the first write ~ {al ** (T - 1):.3f}")
+ok("a scalar gate cannot distinguish two addresses", True,
+   "alpha multiplies EVERY direction by the same number")
+
+--- output
+```
+PASS  older writes are geometrically suppressed   | weight of the first write ~ 0.478
+PASS  a scalar gate cannot distinguish two addresses   | alpha multiplies EVERY direction by the same number
+```
+
+--- note
+### Diagonal (per-channel) decay — eq. (5)
+
+$$
+S_t = \big(\mathbf{I} - \beta_tk_tk_t^{\top}\big)D_tS_{t-1} + \beta_tk_tv_t^{\top}
+$$
+
+Give each channel its own forget rate — `D_t` diagonal. This is exactly Kimi K3's KDA
+(`k302`, eq. 1) and it buys multiple timescales in one state. It still cannot *target* an address: a
+diagonal acts on channels, not on directions.
+
+--- code
+g = torch.rand(d) * 0.2 + 0.8                                   # per-channel decay
+D = torch.diag(g)
+S = torch.zeros(d, d)
+for t in range(T):
+    S = (torch.eye(d) - beta * torch.outer(K[t], K[t])) @ (D @ S) + beta * torch.outer(K[t], V[t])
+ok("a diagonal gate gives per-CHANNEL timescales", float(g.std()) > 1e-3, f"spread {float(g.std()):.3f}")
+e = unit(d)
+ok("but it is not a projection along any direction e",
+   not close(D @ torch.outer(e, e), torch.zeros(d, d)), "diagonal != rank-1 along e")
+
+--- output
+```
+PASS  a diagonal gate gives per-CHANNEL timescales   | spread 0.057
+PASS  but it is not a projection along any direction e   | diagonal != rank-1 along e
+```
+
+--- note
+### The general form — where the hidden assumption lives — eq. (6)
+
+$$
+S_t = \big(I - k_t\widetilde{e}_t^{\top}\big)D_tS_{t-1} + k_tz_t^{\top},\qquad \widetilde{e}_t = \beta_tk_t
+$$
+
+**The pivot of the paper.** Written generally, the update has an *erase* direction `ẽ_t`
+and a *write* direction `k_t`. Every model above quietly sets `ẽ_t = β_t k_t` — erase where you write.
+Nothing in the algebra requires that; it is a modelling choice, and EDA is the model that drops it.
+
+--- code
+z = beta * v
+general = (torch.eye(d) - torch.outer(k, beta * k)) @ (D @ S0) + torch.outer(k, z)
+gated_dn = (torch.eye(d) - beta * torch.outer(k, k)) @ (D @ S0) + beta * torch.outer(k, v)
+ok("with e~ = beta*k the general form IS gated DeltaNet", close(general, gated_dn, 1e-5))
+free = (torch.eye(d) - torch.outer(k, beta * unit(d))) @ (D @ S0) + torch.outer(k, z)
+ok("choosing any OTHER e~ gives a rule outside the family", not close(free, gated_dn),
+   f"||difference|| = {(free - gated_dn).norm():.4f}")
+print("so 'where to erase' was never derived - it was assumed")
+
+--- output
+```
+PASS  with e~ = beta*k the general form IS gated DeltaNet
+PASS  choosing any OTHER e~ gives a rule outside the family   | ||difference|| = 0.2218
+so 'where to erase' was never derived - it was assumed
+```
+
+--- note
+### The decay gate as a diagonal matrix — eq. (7)
+
+$$
+D_t = \mathrm{Diag}\big(g_t\big),\qquad g_t \in (0,1)^{d}
+$$
+
+Book-keeping: the per-channel gate is a diagonal matrix, so the state update stays a
+product of matrices and the whole recurrence remains linear in `S` — which is what allows the chunked
+parallel form later.
+
+--- code
+ok("Diag(g) keeps the recurrence linear in S", close(D @ (S0 + S0), (D @ S0) + (D @ S0)))
+ok("and the gate stays inside (0,1)", bool((g > 0).all() and (g < 1).all()),
+   f"g in [{float(g.min()):.3f}, {float(g.max()):.3f}]")
+
+--- output
+```
+PASS  Diag(g) keeps the recurrence linear in S
+PASS  and the gate stays inside (0,1)   | g in [0.811, 0.992]
+```
+

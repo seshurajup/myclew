@@ -1,0 +1,12 @@
+@ id: rq07
+@ order: 2160
+@ title: 6 Conclusion
+@ subtitle: RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory §6
+@ source: docs/papers/ratequant/ratequant.md
+
+--- note
+## 6 Conclusion
+**Paper:** RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory · §6 · pages 9–9 · equations (none) · 0 figures.
+
+> TODO(author): the *why* of §6 in 3–5 lines.
+

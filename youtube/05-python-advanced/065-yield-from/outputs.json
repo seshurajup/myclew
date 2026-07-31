@@ -1,0 +1,16 @@
+[
+  {
+    "after_line": 13,
+    "text": ">>> ['a', 'b', 1, 2]",
+    "caption": "yield from splices generators"
+  },
+  {
+    "after_line": 23,
+    "text": ">>> [1, 2, 3, 4, 5]",
+    "caption": "recursive flatten via yield from"
+  },
+  {
+    "after_line": 23,
+    "image": "artifacts/terminal.png"
+  }
+]

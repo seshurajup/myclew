@@ -1,0 +1,299 @@
+[
+  {
+    "n": null,
+    "page": 4,
+    "latex": "h",
+    "raw": "h",
+    "image": "assets/eq/eq_p04_000.png",
+    "y0": 190.08819580078125,
+    "y1": 200.99729919433594
+  },
+  {
+    "n": null,
+    "page": 4,
+    "latex": "i",
+    "raw": "\u0001i",
+    "image": "assets/eq/eq_p04_001.png",
+    "y0": 190.088134765625,
+    "y1": 204.27024841308594
+  },
+  {
+    "n": null,
+    "page": 4,
+    "latex": "P_{K}",
+    "raw": "PK",
+    "image": "assets/eq/eq_p04_002.png",
+    "y0": 191.62310791015625,
+    "y1": 204.92527770996094
+  },
+  {
+    "n": null,
+    "page": 4,
+    "latex": "P(m | s) = E",
+    "raw": "P(m | s) = E",
+    "image": "assets/eq/eq_p04_003.png",
+    "y0": 191.9699249267578,
+    "y1": 205.2623291015625
+  },
+  {
+    "n": null,
+    "page": 4,
+    "latex": "_{K}^{1}",
+    "raw": "1 K",
+    "image": "assets/eq/eq_p04_004.png",
+    "y0": 192.35516357421875,
+    "y1": 208.3822021484375
+  },
+  {
+    "n": null,
+    "page": 4,
+    "latex": "U(s^{\u2032}",
+    "raw": "U(s\u2032",
+    "image": "assets/eq/eq_p04_005.png",
+    "y0": 192.58877563476562,
+    "y1": 205.26226806640625
+  },
+  {
+    "n": null,
+    "page": 4,
+    "latex": "",
+    "raw": "\u0000",
+    "image": "assets/eq/eq_p04_006.png",
+    "y0": 193.36114501953125,
+    "y1": 204.27024841308594
+  },
+  {
+    "n": null,
+    "page": 4,
+    "latex": "_{k}) -U(s)",
+    "raw": "k) \u2212U(s)",
+    "image": "assets/eq/eq_p04_007.png",
+    "y0": 194.21177673339844,
+    "y1": 207.94219970703125
+  },
+  {
+    "n": null,
+    "page": 4,
+    "latex": "^{k=1}",
+    "raw": "k=1",
+    "image": "assets/eq/eq_p04_008.png",
+    "y0": 199.8760986328125,
+    "y1": 207.84619140625
+  },
+  {
+    "n": null,
+    "page": 4,
+    "latex": "U(s) = E_{(x,y)\\sim \\mathcal{T}}",
+    "raw": "U(s) = E(x,y)\u223cT",
+    "image": "assets/eq/eq_p04_009.png",
+    "y0": 313.5309143066406,
+    "y1": 328.40118408203125
+  },
+  {
+    "n": null,
+    "page": 4,
+    "latex": "",
+    "raw": "\u0002",
+    "image": "assets/eq/eq_p04_010.png",
+    "y0": 314.92218017578125,
+    "y1": 325.831298828125
+  },
+  {
+    "n": null,
+    "page": 4,
+    "latex": "",
+    "raw": "\u0000",
+    "image": "assets/eq/eq_p04_011.png",
+    "y0": 314.92218017578125,
+    "y1": 325.831298828125
+  },
+  {
+    "n": null,
+    "page": 4,
+    "latex": "",
+    "raw": "\u0001\u0003",
+    "image": "assets/eq/eq_p04_012.png",
+    "y0": 314.92218017578125,
+    "y1": 325.831298828125
+  },
+  {
+    "n": null,
+    "page": 4,
+    "latex": "r",
+    "raw": "r",
+    "image": "assets/eq/eq_p04_013.png",
+    "y0": 315.9141845703125,
+    "y1": 326.82330322265625
+  },
+  {
+    "n": null,
+    "page": 4,
+    "latex": "A_{s}(x), y",
+    "raw": "As(x), y",
+    "image": "assets/eq/eq_p04_014.png",
+    "y0": 315.9141845703125,
+    "y1": 327.8182373046875
+  },
+  {
+    "n": "2",
+    "page": 4,
+    "latex": "m = (\\psi, \\sigma, \\alpha, \\pi, \\epsilon). \\tag{2}",
+    "raw": "m = (\u03c8, \u03c3, \u03b1, \u03c0, \u03b5). (2)",
+    "image": "assets/eq/eq_p04_015.png",
+    "y0": 543.13720703125,
+    "y1": 554.2987670898438
+  },
+  {
+    "n": null,
+    "page": 4,
+    "latex": "\u02c6 \\eta^{1}U^{v} + \\eta^{2} P^{v} + \\eta^{3}N^{v}",
+    "raw": "\u03b71Uv + \u03b72 \u02c6Pv + \u03b73Nv",
+    "image": "assets/eq/eq_p04_016.png",
+    "y0": 731.0562133789062,
+    "y1": 746.3593139648438
+  },
+  {
+    "n": null,
+    "page": 4,
+    "latex": "",
+    "raw": "\u0002",
+    "image": "assets/eq/eq_p04_017.png",
+    "y0": 732.8222045898438,
+    "y1": 743.7313232421875
+  },
+  {
+    "n": null,
+    "page": 4,
+    "latex": "",
+    "raw": "\u0003",
+    "image": "assets/eq/eq_p04_018.png",
+    "y0": 732.8222045898438,
+    "y1": 743.7313232421875
+  },
+  {
+    "n": null,
+    "page": 4,
+    "latex": "^{v\\in \\mathcal{F}}",
+    "raw": "v\u2208F",
+    "image": "assets/eq/eq_p04_019.png",
+    "y0": 743.2718505859375,
+    "y1": 751.34521484375
+  },
+  {
+    "n": null,
+    "page": 6,
+    "latex": "_{1: P\u02c6 \\gets |\\mathcal{H}|}^{1}",
+    "raw": "1: \u02c6P \u2190 1 |H|",
+    "image": "assets/eq/eq_p06_020.png",
+    "y0": 149.0334930419922,
+    "y1": 162.5784912109375
+  },
+  {
+    "n": null,
+    "page": 6,
+    "latex": "^{P}",
+    "raw": "P",
+    "image": "assets/eq/eq_p06_021.png",
+    "y0": 150.9954376220703,
+    "y1": 159.9618377685547
+  },
+  {
+    "n": null,
+    "page": 6,
+    "latex": "^{3:}_{4:5:}^{\\phi}_{\\mathcal{I}Kmmm}^{, a}_{\\gets \\gets mRetriever Allocator}^{\\gets Analyzer}_{(\\phi(\\mathcal{H}m,,}^{(}^{f}_{abmmv,}^{,}_{,}_{m.\\sigma}^{m}_{\\mathcal{I}m}^{)}_{,) m.\\alpha}^{\u25b7round-robin fallback}_{)}",
+    "raw": "3: \u03c6m, am \u2190Analyzer(fm, m) \u25b7round-robin fallback 4: Im \u2190Retriever(\u03c6m, bv, m.\u03c3) 5: Km \u2190Allocator(H, am, Im, m.\u03b1)",
+    "image": "assets/eq/eq_p06_022.png",
+    "y0": 194.7972869873047,
+    "y1": 224.68568420410156
+  },
+  {
+    "n": null,
+    "page": 6,
+    "latex": "^{6:}_{7:8:}^{\\phi, a}_{\\mathcal{I}K \\gets \\gets}^{\\gets}_{RetrieverAllocator}^{Analyzer}_{(\\phi,(h}^{(}^{f,}_{vb,v}_{a,}^{m}_{, m v\\mathcal{I}}^{.\\psi}_{v,.\\sigma}^{)}_{m)v.\\alpha)\u25b7inspiring nodes\u25b7}^{\u25b7}_{child budget}^{tag, analysis}",
+    "raw": "6: \u03c6, a \u2190Analyzer(f, mv.\u03c8) \u25b7tag, analysis 7: I \u2190Retriever(\u03c6, bv, mv.\u03c3) \u25b7inspiring nodes 8: K \u2190Allocator(hv, a, I, mv.\u03b1) \u25b7child budget",
+    "image": "assets/eq/eq_p06_023.png",
+    "y0": 206.83726501464844,
+    "y1": 236.18788146972656
+  },
+  {
+    "n": null,
+    "page": 6,
+    "latex": "_{12:10:11:9: for}^{Propose and evolve (}_{ksRestore\\delta \u2032= 1\\gets Proposer . . . K sv do(f,}^{K}_{a,}^{children)}_{\\mathcal{I}, mv.\\pi)}",
+    "raw": "Propose and evolve (K children) 9: for k = 1 . . . K do 10: Restore sv 11: \u03b4 \u2190Proposer(f, a, I, mv.\u03c0) 12: s\u2032",
+    "image": "assets/eq/eq_p06_024.png",
+    "y0": 243.06748962402344,
+    "y1": 295.33038330078125
+  },
+  {
+    "n": null,
+    "page": 6,
+    "latex": "_{10:11:end for{m(jm)} \\gets}^{\\gets Proposer}_{ParallelEvolver}^{(f}_{m}^{, a}_{(m{\\delta}^{|tgt}_{(j)}^{=j, \\mathcal{I}}_{m}^{, m.\\pi)}",
+    "raw": "m \u2190Proposer(fm, am|tgt=j, Im, m.\u03c0) 10: end for 11: {m(j)} \u2190ParallelEvolver({\u03b4(j)",
+    "image": "assets/eq/eq_p06_025.png",
+    "y0": 276.04132080078125,
+    "y1": 305.25640869140625
+  },
+  {
+    "n": null,
+    "page": 6,
+    "latex": "_{13:Uk \u2032}^{\\gets Evolver(s}_{v}^{, \\delta, m}_{v}^{.\\epsilon)}",
+    "raw": "k \u2190Evolver(sv, \u03b4, mv.\u03b5) 13: U \u2032",
+    "image": "assets/eq/eq_p06_026.png",
+    "y0": 286.04022216796875,
+    "y1": 305.29229736328125
+  },
+  {
+    "n": null,
+    "page": 6,
+    "latex": "_{k \\gets Eval(s}^{\u2032}",
+    "raw": "k \u2190Eval(s\u2032",
+    "image": "assets/eq/eq_p06_027.png",
+    "y0": 294.5677490234375,
+    "y1": 306.8255920410156
+  },
+  {
+    "n": null,
+    "page": 6,
+    "latex": "_{k}^{, \\mathcal{D}}_{val}^{); \u2206U}_{k}^{\\gets U \u2032}",
+    "raw": "k, Dval); \u2206Uk \u2190U \u2032",
+    "image": "assets/eq/eq_p06_028.png",
+    "y0": 294.5677490234375,
+    "y1": 306.288818359375
+  },
+  {
+    "n": null,
+    "page": 6,
+    "latex": "_{14: end fork}^{-U}_{v}",
+    "raw": "k \u2212Uv 14: end for",
+    "image": "assets/eq/eq_p06_029.png",
+    "y0": 296.002197265625,
+    "y1": 315.25531005859375
+  },
+  {
+    "n": null,
+    "page": 6,
+    "latex": "productivity P\u02c6(m | s) =_{|\\mathcal{H}|}^{1}",
+    "raw": "productivity \u02c6P(m | s) = 1 |H|",
+    "image": "assets/eq/eq_p06_030.png",
+    "y0": 400.0802001953125,
+    "y1": 416.9059143066406
+  },
+  {
+    "n": null,
+    "page": 6,
+    "latex": "P",
+    "raw": "P",
+    "image": "assets/eq/eq_p06_031.png",
+    "y0": 402.4991760253906,
+    "y1": 413.4082946777344
+  },
+  {
+    "n": null,
+    "page": 6,
+    "latex": "\u2206U_{u} over the ^{u\\in \\mathcal{H}}",
+    "raw": "u\u2208H \u2206Uu over the",
+    "image": "assets/eq/eq_p06_032.png",
+    "y0": 402.837158203125,
+    "y1": 416.9722900390625
+  }
+]

@@ -1,0 +1,54 @@
+[
+  {
+    "text": "Star args and double-star kwargs let a function accept any number of arguments.",
+    "until_line": 1
+  },
+  {
+    "text": "Star args collects every positional argument into a tuple called args.",
+    "until_line": 1
+  },
+  {
+    "text": "So total just sums that tuple, however many numbers you pass in.",
+    "until_line": 2
+  },
+  {
+    "text": "Even calling it with no arguments works, because sum of an empty tuple is zero.",
+    "until_line": 2
+  },
+  {
+    "text": "Double-star kwargs does the same for keyword arguments, collecting them into a dictionary.",
+    "until_line": 4
+  },
+  {
+    "text": "We join the key value pairs into one readable string.",
+    "until_line": 5
+  },
+  {
+    "text": "The names args and kwargs are only convention — the stars do the actual work.",
+    "until_line": 5
+  },
+  {
+    "text": "Four numbers in, and total adds them all to ten.",
+    "until_line": 7
+  },
+  {
+    "text": "Profile takes name and age as keywords and formats them back out.",
+    "until_line": 8
+  },
+  {
+    "text": "The star works in the other direction too, when you're calling rather than defining.",
+    "until_line": 10
+  },
+  {
+    "text": "Star nums unpacks the list into three separate arguments, giving sixty.",
+    "until_line": 11
+  },
+  {
+    "text": "One star unpacks a sequence, and two stars unpack a dictionary into keywords.",
+    "until_line": 11
+  },
+  {
+    "text": "Next video: unpacking. Tell me in the comments if this clicked.",
+    "until_line": 11
+  }
+]

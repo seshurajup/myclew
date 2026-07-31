@@ -1,0 +1,21 @@
+[
+  {
+    "after_line": 9,
+    "text": ">>> Color.RED\\n>>> RED 1",
+    "caption": "named constants with .name/.value"
+  },
+  {
+    "after_line": 13,
+    "text": ">>> True",
+    "caption": "safe identity comparison"
+  },
+  {
+    "after_line": 17,
+    "text": ">>> RED\\n>>> GREEN\\n>>> BLUE",
+    "caption": "enums are iterable"
+  },
+  {
+    "after_line": 17,
+    "image": "artifacts/terminal.png"
+  }
+]

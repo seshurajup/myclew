@@ -1,0 +1,470 @@
+[
+  {
+    "n": null,
+    "page": 3,
+    "latex": "Z",
+    "raw": "Z",
+    "image": "assets/eq/eq_p03_000.png",
+    "y0": 162.4022979736328,
+    "y1": 172.36489868164062
+  },
+  {
+    "n": "2",
+    "page": 3,
+    "latex": "p_{t}(x_{t}|z)q(z) dz. \\tag{2}",
+    "raw": "pt(xt|z)q(z) dz. (2)",
+    "image": "assets/eq/eq_p03_001.png",
+    "y0": 168.6697540283203,
+    "y1": 179.603515625
+  },
+  {
+    "n": null,
+    "page": 3,
+    "latex": "p_{t}(x_{t}) =",
+    "raw": "pt(xt) =",
+    "image": "assets/eq/eq_p03_002.png",
+    "y0": 168.7988739013672,
+    "y1": 179.603515625
+  },
+  {
+    "n": null,
+    "page": 3,
+    "latex": "v_{t}(x_{t}|z)p_{t}(x_{t}|z)",
+    "raw": "\u0014vt(xt|z)pt(xt|z)",
+    "image": "assets/eq/eq_p03_003.png",
+    "y0": 208.2002716064453,
+    "y1": 219.14849853515625
+  },
+  {
+    "n": null,
+    "page": 3,
+    "latex": "",
+    "raw": "\u0015",
+    "image": "assets/eq/eq_p03_004.png",
+    "y0": 208.20033264160156,
+    "y1": 218.16293334960938
+  },
+  {
+    "n": null,
+    "page": 3,
+    "latex": "v_{t}(x_{t}) = E_{q(z)}",
+    "raw": "vt(xt) = Eq(z)",
+    "image": "assets/eq/eq_p03_005.png",
+    "y0": 212.90830993652344,
+    "y1": 226.4133758544922
+  },
+  {
+    "n": null,
+    "page": 3,
+    "latex": "p_{t}(x_{t})",
+    "raw": "pt(xt)",
+    "image": "assets/eq/eq_p03_006.png",
+    "y0": 221.91893005371094,
+    "y1": 232.72259521484375
+  },
+  {
+    "n": null,
+    "page": 3,
+    "latex": "\\mathcal{L}_{CFM}(\\theta) = E_{t,q(z),pt(xt|z)}\\|v_{\\theta}(x_{t}, t) -v_{t}(x_{t}|z)\\|^{2}",
+    "raw": "LCFM(\u03b8) = Et,q(z),pt(xt|z)\u2225v\u03b8(xt, t) \u2212vt(xt|z)\u22252",
+    "image": "assets/eq/eq_p03_007.png",
+    "y0": 302.9734191894531,
+    "y1": 316.81927490234375
+  },
+  {
+    "n": "5",
+    "page": 3,
+    "latex": "\\nabla _{\\theta}\\mathcal{L}_{FM}(\\theta) = \\nabla _{\\theta}\\mathcal{L}_{CFM}(\\theta). \\tag{5}",
+    "raw": "\u2207\u03b8LFM(\u03b8) = \u2207\u03b8LCFM(\u03b8). (5)",
+    "image": "assets/eq/eq_p03_008.png",
+    "y0": 341.28778076171875,
+    "y1": 352.5068359375
+  },
+  {
+    "n": null,
+    "page": 3,
+    "latex": "Z",
+    "raw": "Z",
+    "image": "assets/eq/eq_p03_009.png",
+    "y0": 541.4403076171875,
+    "y1": 551.4029541015625
+  },
+  {
+    "n": null,
+    "page": 3,
+    "latex": "\\|x_{0} -x_{1}\\|^{2}",
+    "raw": "\u2225x0 \u2212x1\u22252",
+    "image": "assets/eq/eq_p03_010.png",
+    "y0": 546.2796630859375,
+    "y1": 559.1654663085938
+  },
+  {
+    "n": "6",
+    "page": 3,
+    "latex": "_{2} d\\pi(x_{0}, x_{1}) \\tag{6}",
+    "raw": "2 d\u03c0(x0, x1) (6)",
+    "image": "assets/eq/eq_p03_011.png",
+    "y0": 547.8379516601562,
+    "y1": 560.2635498046875
+  },
+  {
+    "n": null,
+    "page": 3,
+    "latex": "^{\\pi\\in \\Pi}",
+    "raw": "\u03c0\u2208\u03a0",
+    "image": "assets/eq/eq_p03_012.png",
+    "y0": 558.4463500976562,
+    "y1": 565.73046875
+  },
+  {
+    "n": null,
+    "page": 3,
+    "latex": "\\mathcal{L}_{FM}(\\theta) = E_{t,xt\\sim pt}\\|v_{\\theta}(x_{t}, t) -v_{t}(x_{t})\\|^{2}",
+    "raw": "LFM(\u03b8) = Et,xt\u223cpt\u2225v\u03b8(xt, t) \u2212vt(xt)\u22252",
+    "image": "assets/eq/eq_p03_013.png",
+    "y0": 665.7064208984375,
+    "y1": 679.248291015625
+  },
+  {
+    "n": null,
+    "page": 4,
+    "latex": "Z_{1}",
+    "raw": "Z 1",
+    "image": "assets/eq/eq_p04_014.png",
+    "y0": 506.47265625,
+    "y1": 521.04296875
+  },
+  {
+    "n": null,
+    "page": 4,
+    "latex": "x\u02c6_{0} := x_{1} -",
+    "raw": "\u02c6x0 := x1 \u2212",
+    "image": "assets/eq/eq_p04_015.png",
+    "y0": 517.3389282226562,
+    "y1": 528.9334716796875
+  },
+  {
+    "n": "7",
+    "page": 4,
+    "latex": "_{0}v_{\\theta}(\u02c6x_{t}, t) dt, \\tag{7}",
+    "raw": "0 v\u03b8(\u02c6xt, t) dt, (7)",
+    "image": "assets/eq/eq_p04_016.png",
+    "y0": 517.3389282226562,
+    "y1": 536.08349609375
+  },
+  {
+    "n": null,
+    "page": 4,
+    "latex": "1 \\mu_{0,k} =",
+    "raw": "\u03bc0,k = 1",
+    "image": "assets/eq/eq_p04_017.png",
+    "y0": 633.4398803710938,
+    "y1": 651.636474609375
+  },
+  {
+    "n": null,
+    "page": 4,
+    "latex": "X",
+    "raw": "X",
+    "image": "assets/eq/eq_p04_018.png",
+    "y0": 637.8782958984375,
+    "y1": 647.8409423828125
+  },
+  {
+    "n": null,
+    "page": 4,
+    "latex": "|X \u02c6_{0,k}|",
+    "raw": "| \u02c6X0,k|",
+    "image": "assets/eq/eq_p04_019.png",
+    "y0": 646.001953125,
+    "y1": 659.5444946289062
+  },
+  {
+    "n": null,
+    "page": 4,
+    "latex": "_{x\u02c60\\in X}^{\u02c6}_{0,k}",
+    "raw": "\u02c6x0\u2208\u02c6 X0,k",
+    "image": "assets/eq/eq_p04_020.png",
+    "y0": 654.7186279296875,
+    "y1": 663.8572387695312
+  },
+  {
+    "n": null,
+    "page": 4,
+    "latex": "X",
+    "raw": "X",
+    "image": "assets/eq/eq_p04_021.png",
+    "y0": 671.7913208007812,
+    "y1": 681.7539672851562
+  },
+  {
+    "n": "9",
+    "page": 4,
+    "latex": "(\u02c6x_{0} -\\mu_{0,k})(\u02c6x_{0} -\\mu_{0,k})^{^{\\top}}, \\tag{9}",
+    "raw": "(\u02c6x0 \u2212\u03bc0,k)(\u02c6x0 \u2212\u03bc0,k)\u22a4, (9)",
+    "image": "assets/eq/eq_p04_022.png",
+    "y0": 672.224365234375,
+    "y1": 685.42041015625
+  },
+  {
+    "n": null,
+    "page": 4,
+    "latex": "|X \u02c6_{0,k}|",
+    "raw": "| \u02c6X0,k|",
+    "image": "assets/eq/eq_p04_023.png",
+    "y0": 679.9149169921875,
+    "y1": 693.4574584960938
+  },
+  {
+    "n": null,
+    "page": 4,
+    "latex": "_{x\u02c60\\in X}^{\u02c6}_{0,k}",
+    "raw": "\u02c6x0\u2208\u02c6 X0,k",
+    "image": "assets/eq/eq_p04_024.png",
+    "y0": 688.6306762695312,
+    "y1": 697.769287109375
+  },
+  {
+    "n": "10",
+    "page": 4,
+    "latex": "p_{0,k}(x) = \\mathcal{N}(x; \\mu_{0,k}, \\Sigma_{0,k}). \\tag{10}",
+    "raw": "p0,k(x) = N(x; \u03bc0,k, \u03a30,k). (10)",
+    "image": "assets/eq/eq_p04_025.png",
+    "y0": 703.0847778320312,
+    "y1": 714.2374877929688
+  },
+  {
+    "n": null,
+    "page": 5,
+    "latex": "R^{1}",
+    "raw": "R 1",
+    "image": "assets/eq/eq_p05_026.png",
+    "y0": 122.43170166015625,
+    "y1": 137.00198364257812
+  },
+  {
+    "n": null,
+    "page": 5,
+    "latex": "\u02c6 ^{4:}X^{0,k} \\gets {x^{1} -",
+    "raw": "4: \u02c6X0,k \u2190{x1 \u2212",
+    "image": "assets/eq/eq_p05_027.png",
+    "y0": 125.38298034667969,
+    "y1": 139.22946166992188
+  },
+  {
+    "n": null,
+    "page": 5,
+    "latex": "v_{\\theta}(\u02c6x_{t}, t) dt|x_{1} \\in \\mathcal{C}_{k}} ^{0} ^{5:}Estimate source distributions: \u02c6 ^{6:}n^{k} \\gets |X ^{0,k}| ^{7:}\\mu_{0,k} \\gets _{n}^{1}_{k}",
+    "raw": "0 v\u03b8(\u02c6xt, t) dt|x1 \u2208Ck} 5: Estimate source distributions: 6: nk \u2190| \u02c6X0,k| 7: \u03bc0,k \u2190 1 nk",
+    "image": "assets/eq/eq_p05_028.png",
+    "y0": 127.76298522949219,
+    "y1": 177.13427734375
+  },
+  {
+    "n": null,
+    "page": 5,
+    "latex": "^{6:}Sample a source-target pair: (x_{0}, x_{1})^{j=1} \\sim ^{|\\mathcal{C}}\\pi^{j}_{k}^{|} ^{7:}Append to minibatch: B \\gets B \\cup {(x_{0}, x_{1})} ^{8:}end for ^{9:}\\mathcal{L}_{CFM}(\\theta) = E_{t,(x0,x1)\\sim B}\\|v_{\\theta}(x_{t}, t) -(x_{1} -x_{0})\\|^{2}",
+    "raw": "j=1 |Cj| 6: Sample a source-target pair: (x0, x1) \u223c\u03c0k 7: Append to minibatch: B \u2190B \u222a{(x0, x1)} 8: end for 9: LCFM(\u03b8) = Et,(x0,x1)\u223cB\u2225v\u03b8(xt, t) \u2212(x1 \u2212x0)\u22252",
+    "image": "assets/eq/eq_p05_029.png",
+    "y0": 155.56436157226562,
+    "y1": 212.53228759765625
+  },
+  {
+    "n": null,
+    "page": 5,
+    "latex": "P",
+    "raw": "P",
+    "image": "assets/eq/eq_p05_030.png",
+    "y0": 163.4583282470703,
+    "y1": 173.42092895507812
+  },
+  {
+    "n": null,
+    "page": 5,
+    "latex": "_{\u02c6}x\u02c6_{0} ^{x\u02c60\\in X0,k}",
+    "raw": "\u02c6x0\u2208\u02c6 X0,k \u02c6x0",
+    "image": "assets/eq/eq_p05_031.png",
+    "y0": 163.62889099121094,
+    "y1": 177.96148681640625
+  },
+  {
+    "n": null,
+    "page": 5,
+    "latex": "^{8:}\\Sigma_{0,k} \\gets _{n}^{1}_{k}",
+    "raw": "8: \u03a30,k \u2190 1 nk",
+    "image": "assets/eq/eq_p05_032.png",
+    "y0": 177.05462646484375,
+    "y1": 191.78826904296875
+  },
+  {
+    "n": null,
+    "page": 5,
+    "latex": "_{x\u02c60\\in X\u02c60,k}(\u02c6x_{0} -\\mu_{0,k})(\u02c6x_{0} -\\mu_{0,k})^{^{\\top}}",
+    "raw": "\u02c6x0\u2208\u02c6 X0,k(\u02c6x0 \u2212\u03bc0,k)(\u02c6x0 \u2212\u03bc0,k)\u22a4",
+    "image": "assets/eq/eq_p05_033.png",
+    "y0": 177.05136108398438,
+    "y1": 191.52728271484375
+  },
+  {
+    "n": null,
+    "page": 5,
+    "latex": "P",
+    "raw": "P",
+    "image": "assets/eq/eq_p05_034.png",
+    "y0": 178.1133575439453,
+    "y1": 188.07595825195312
+  },
+  {
+    "n": null,
+    "page": 5,
+    "latex": "^{9:}p_{0,k}(x) \\gets \\mathcal{N}(x; \\mu_{0,k}, \\Sigma_{0,k}) ^{10:}Draw source samples X_{0,k} \\gets {x_{0} | x_{0} \\sim p_{0,k}} ^{11:}Cluster-wise OT map: \\pi_{k} \\gets OT(X_{0,k}, \\mathcal{C}_{k}) ^{12:} end for",
+    "raw": "9: p0,k(x) \u2190N(x; \u03bc0,k, \u03a30,k) 10: Draw source samples X0,k \u2190{x0 | x0 \u223cp0,k} 11: Cluster-wise OT map: \u03c0k \u2190OT(X0,k, Ck) 12: end for",
+    "image": "assets/eq/eq_p05_035.png",
+    "y0": 191.9607696533203,
+    "y1": 238.05714416503906
+  },
+  {
+    "n": null,
+    "page": 5,
+    "latex": "^{10:}\\theta \\gets \\theta -\\gamma\\nabla _{\\theta}\\mathcal{L}_{CFM}(\\theta)^{2} ^{11:} end for",
+    "raw": "2 10: \u03b8 \u2190\u03b8 \u2212\u03b3\u2207\u03b8LCFM(\u03b8) 11: end for",
+    "image": "assets/eq/eq_p05_036.png",
+    "y0": 205.8917236328125,
+    "y1": 234.8751983642578
+  },
+  {
+    "n": null,
+    "page": 5,
+    "latex": ") \\cdot ^{1} ^{T}",
+    "raw": "T ) \u00b7 1",
+    "image": "assets/eq/eq_p05_037.png",
+    "y0": 340.36865234375,
+    "y1": 355.134521484375
+  },
+  {
+    "n": null,
+    "page": 5,
+    "latex": "_{j=1 |\\mathcal{C}j|}, where |\\mathcal{C}_{k}| denotes the",
+    "raw": "j=1 |Cj|, where |Ck| denotes the",
+    "image": "assets/eq/eq_p05_038.png",
+    "y0": 608.6387939453125,
+    "y1": 624.5071411132812
+  },
+  {
+    "n": null,
+    "page": 8,
+    "latex": "^{x}_{1}",
+    "raw": "x1",
+    "image": "assets/eq/eq_p08_039.png",
+    "y0": 300.81060791015625,
+    "y1": 308.593505859375
+  },
+  {
+    "n": null,
+    "page": 12,
+    "latex": "^{8:}Roll out FM: x\u02c6_{1} \\gets ODESolver(v_{\\theta}, x_{0}, c_{k}) ^{9:}V \\gets exp(-MSE(\u02c6x_{1}, x_{1})) _{10:}A\u02c6 \\gets V -E_{pk}[V ] ^{11:}Appendtominibatch:B\\gets B\\cup \u02c6 {(c^{k}, x^{0}, A, log p^{\\phi}(x^{0} | c^{k})} ^{12:}end for",
+    "raw": "8: Roll out FM: \u02c6x1 \u2190ODESolver(v\u03b8, x0, ck) 9: V \u2190exp(\u2212MSE(\u02c6x1, x1)) 10: \u02c6A \u2190V \u2212Epk[V ] 11: Append to minibatch: B \u2190 B \u222a {(ck, x0, \u02c6A, log p\u03c6(x0 | ck)} 12: end for",
+    "image": "assets/eq/eq_p12_040.png",
+    "y0": 208.6780242919922,
+    "y1": 278.69415283203125
+  },
+  {
+    "n": null,
+    "page": 12,
+    "latex": "x_{0} \\sim \\mathcal{N}(\\mu_{\\phi}(c_{k}), \\sigma^{2}",
+    "raw": "x0 \u223cN(\u03bc\u03c6(ck), \u03c32",
+    "image": "assets/eq/eq_p12_041.png",
+    "y0": 337.76263427734375,
+    "y1": 350.64837646484375
+  },
+  {
+    "n": "11",
+    "page": 12,
+    "latex": "_{\\phi}(c_{k})I), \\tag{11}",
+    "raw": "\u03c6(ck)I), (11)",
+    "image": "assets/eq/eq_p12_042.png",
+    "y0": 339.3208923339844,
+    "y1": 351.0935363769531
+  },
+  {
+    "n": "13",
+    "page": 12,
+    "latex": "R(s_{0}, a_{0}) = exp(-MSE(\u02c6x_{1}, x_{1})). \\tag{13}",
+    "raw": "R(s0, a0) = exp(\u2212MSE(\u02c6x1, x1)). (13)",
+    "image": "assets/eq/eq_p12_043.png",
+    "y0": 382.6609191894531,
+    "y1": 393.82342529296875
+  },
+  {
+    "n": "15",
+    "page": 12,
+    "latex": "A\u02c6 = V -E_{pk}[V ], \\tag{15}",
+    "raw": "\u02c6A = V \u2212Epk[V ], (15)",
+    "image": "assets/eq/eq_p12_044.png",
+    "y0": 483.4618835449219,
+    "y1": 497.4062194824219
+  },
+  {
+    "n": null,
+    "page": 12,
+    "latex": "x_{0} \\sim \\mathcal{N}(\\mu_{\\phi}(c_{k}), \\sigma^{2}",
+    "raw": "x0 \u223cN(\u03bc\u03c6(ck), \u03c32",
+    "image": "assets/eq/eq_p12_045.png",
+    "y0": 697.837646484375,
+    "y1": 710.722412109375
+  },
+  {
+    "n": "12",
+    "page": 12,
+    "latex": "_{\\phi}(c_{k})I), \\tag{12}",
+    "raw": "\u03c6(ck)I), (12)",
+    "image": "assets/eq/eq_p12_046.png",
+    "y0": 699.3949584960938,
+    "y1": 711.1675415039062
+  },
+  {
+    "n": null,
+    "page": 13,
+    "latex": "^{6:}x_{0} \\sim \\mathcal{N}(\\mu_{\\phi}(c_{k}), \\sigma^{2}",
+    "raw": "6: x0 \u223cN(\u03bc\u03c6(ck), \u03c32",
+    "image": "assets/eq/eq_p13_047.png",
+    "y0": 183.90069580078125,
+    "y1": 196.28848266601562
+  },
+  {
+    "n": null,
+    "page": 13,
+    "latex": "_{\\phi}(c_{k})I) ^{7:}Append to minibatch: B \\gets B \\cup {(x_{0}, x_{1})} ^{8:}end for ^{9:}\\mathcal{L}_{CFM}(\\theta) = E_{t,(x0,x1)\\sim B}\\|v_{\\theta}(x_{t}, t) -(x_{1} -x_{0})\\|^{2}",
+    "raw": "\u03c6(ck)I) 7: Append to minibatch: B \u2190B \u222a{(x0, x1)} 8: end for 9: LCFM(\u03b8) = Et,(x0,x1)\u223cB\u2225v\u03b8(xt, t) \u2212(x1 \u2212x0)\u22252",
+    "image": "assets/eq/eq_p13_048.png",
+    "y0": 184.9609832763672,
+    "y1": 232.495361328125
+  },
+  {
+    "n": null,
+    "page": 13,
+    "latex": "^{10:}\\theta \\gets \\theta -\\gamma\\nabla _{\\theta}\\mathcal{L}_{CFM}(\\theta)^{2} ^{11:} end for",
+    "raw": "2 10: \u03b8 \u2190\u03b8 \u2212\u03b3\u2207\u03b8LCFM(\u03b8) 11: end for",
+    "image": "assets/eq/eq_p13_049.png",
+    "y0": 225.85479736328125,
+    "y1": 254.83827209472656
+  },
+  {
+    "n": null,
+    "page": 13,
+    "latex": "^{2:} Draw source sample x \\sim \\mathcal{N}(\\mu_{\\phi}(c_{k}), \\sigma_{\\phi}^{2}(c_{k})I) ^{3:} for t = 0 to T -1 do ^{4:}x \\gets x + v_{\\theta}(x,^{t}",
+    "raw": "2: Draw source sample x \u223cN(\u03bc\u03c6(ck), \u03c32 \u03c6(ck)I) 3: for t = 0 to T \u22121 do 4: x \u2190x + v\u03b8(x, t",
+    "image": "assets/eq/eq_p13_050.png",
+    "y0": 337.5156555175781,
+    "y1": 373.2895202636719
+  },
+  {
+    "n": null,
+    "page": 13,
+    "latex": ") \\cdot ^{1} ^{T}",
+    "raw": "T ) \u00b7 1",
+    "image": "assets/eq/eq_p13_051.png",
+    "y0": 361.11865234375,
+    "y1": 375.8835144042969
+  }
+]

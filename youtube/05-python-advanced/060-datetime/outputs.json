@@ -1,0 +1,22 @@
+[
+  {
+    "after_line": 7,
+    "text": ">>> 2026-07-24 14:30",
+    "caption": "strftime formats dates",
+    "volatile": true
+  },
+  {
+    "after_line": 11,
+    "text": ">>> 2026-07-31",
+    "caption": "timedelta does date math"
+  },
+  {
+    "after_line": 15,
+    "text": ">>> 160 days left",
+    "caption": "subtract dates → timedelta"
+  },
+  {
+    "after_line": 16,
+    "image": "artifacts/terminal.png"
+  }
+]

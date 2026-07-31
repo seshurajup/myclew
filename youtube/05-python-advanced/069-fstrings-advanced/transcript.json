@@ -1,0 +1,42 @@
+[
+  {
+    "text": "F-strings do far more than drop variables into text — they have a rich formatting mini-language.",
+    "until_line": 1
+  },
+  {
+    "text": "After a colon, you can control alignment and width — less-than for left, greater-than for right.",
+    "until_line": 4
+  },
+  {
+    "text": "So you can line up names and scores into neat columns, perfect for tables.",
+    "until_line": 4
+  },
+  {
+    "text": "[chuckle] Numbers get powerful formatting too — dot-one-f rounds to one decimal place.",
+    "until_line": 7
+  },
+  {
+    "text": "[sniff] A percent sign formats a fraction as a percentage, and a comma adds thousands separators automatically.",
+    "until_line": 9
+  },
+  {
+    "text": "So a big number like one-point-two million prints with commas, instantly readable.",
+    "until_line": 9
+  },
+  {
+    "text": "[sigh] The equals specifier is a debugging gem — it prints both the variable's name and its value.",
+    "until_line": 13
+  },
+  {
+    "text": "That single trick replaces countless print statements while you hunt down a bug.",
+    "until_line": 13
+  },
+  {
+    "text": "[groan] And you can run real expressions and method calls right inside the braces — f-strings are tiny programs in a string.",
+    "until_line": 16
+  },
+  {
+    "text": "assertions is next, video number 70. Save this one for when you need it.",
+    "until_line": 16
+  }
+]

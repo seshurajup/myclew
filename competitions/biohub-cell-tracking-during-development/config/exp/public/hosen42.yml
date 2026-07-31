@@ -1,0 +1,10 @@
+# PUBLIC notebook config — **hosen42** / cv6
+name: pub_hosen42
+source: **hosen42** / cv6
+family: other
+base: unknown
+lb: 0.842
+golden_cv: None
+mined_params: ""
+run: manual
+score: golden-12 (adj_edge_J + 0.1*div_J), by_embryo

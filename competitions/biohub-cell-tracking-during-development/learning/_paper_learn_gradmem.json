@@ -1,0 +1,47 @@
+{
+  "slug": "gradmem",
+  "lessons": 16,
+  "ids": [
+    "gmb1",
+    "gm01",
+    "gm03",
+    "gm04",
+    "gm05",
+    "gm12",
+    "gm13",
+    "gm14",
+    "gm15",
+    "gm16",
+    "gm17",
+    "gm18",
+    "gm19",
+    "gm20",
+    "gm21",
+    "gmz1"
+  ],
+  "coverage": {
+    "total": 11,
+    "placed": 11,
+    "missing": [],
+    "taught": 11,
+    "untaught": [],
+    "proven": 11,
+    "unproven": [],
+    "cropped": 8,
+    "figures": 6,
+    "figures_placed": 7,
+    "lessons": 14
+  },
+  "curriculum": {
+    "appended": true,
+    "section": "GradMem (2026) \u2014 writing a context into memory by test-time GD, proved in PyTorch",
+    "lessons": 16
+  },
+  "pruned": [],
+  "code_cells": 14,
+  "cells_with_output": 14,
+  "silent_lessons": [],
+  "out_dir": "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated",
+  "assets": "learning/assets/gradmem",
+  "python": "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/research/cellmot_venv/bin/python"
+}

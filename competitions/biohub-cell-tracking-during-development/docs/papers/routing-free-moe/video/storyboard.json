@@ -1,0 +1,545 @@
+{
+  "title": "Routing-Free Mixture-of-Experts",
+  "subtitle": "routing-free-moe",
+  "scenes": [
+    {
+      "kind": "title",
+      "title": "Routing-Free Mixture-of-Experts",
+      "subtitle": "22 pages \u00b7 85 formulas \u00b7 every one proved in PyTorch",
+      "narration": "Routing-Free Mixture-of-Experts. We go through this paper formula by formula, and every claim you hear is checked by code that runs.",
+      "seconds": 6.0
+    },
+    {
+      "kind": "chapter",
+      "title": "1 Introduction",
+      "subtitle": "Routing-Free Mixture-of-Experts \u00a71",
+      "lesson": "rfm02",
+      "narration": "1 Introduction",
+      "seconds": 4.0
+    },
+    {
+      "kind": "note",
+      "text": "## 1 Introduction\n**Paper:** Routing-Free Mixture-of-Experts \u00b7 \u00a71 \u00b7 pages 1\u20131 \u00b7 equations (1\u20132) \u00b7 25 figures.\n\n**Where the block sits.** Attention with a residual (eq. 1), then the MoE with a\nresidual (eq. 2). Nothing controversial \u2014 it fixes the notation so the object being replaced is\nunambiguous: the `MoE(\u00b7)` in eq. 2.",
+      "narration": "1 Introduction Paper: Routing-Free Mixture-of-Experts \u00b7 \u00a71 \u00b7 pages 1\u20131 \u00b7 equations (1\u20132) \u00b7 25 figures. Where the block sits. Attention with a residual equation 1, then the MoE with a residual equation 2. Nothing controversial \u2014 it fixes the notation so the object being replaced is unambiguous: the MoE(\u00b7) in eq. 2.",
+      "seconds": 6.3,
+      "lesson": "rfm02"
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/routing-free-moe/p01_0.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "rfm02"
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/routing-free-moe/p01_1.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "rfm02"
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/routing-free-moe/p01_2.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "rfm02"
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/routing-free-moe/p01_3.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "rfm02"
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/routing-free-moe/p01_4.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "rfm02"
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/routing-free-moe/p01_5.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "rfm02"
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/routing-free-moe/p01_6.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "rfm02"
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/routing-free-moe/p01_7.png",
+      "caption": "Figure 1: Standard MoE relies on routing to orchestrate expert activations. Routing-Free MoE let each expert purely-independently determine its own activation. Green indicates activated components; red for inactive components; yellow for trainable components.",
+      "narration": "Figure 1 \u2014 as printed in the paper Figure 1: Standard MoE relies on routing to orchestrate expert activations. Routing-Free MoE let each expert purely-independently determine its own activation. Green indicates activated components; red for inactive components; yellow for trainable components.",
+      "seconds": 9.0,
+      "lesson": "rfm02"
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/routing-free-moe/p01_8.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "rfm02"
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/routing-free-moe/p01_9.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "rfm02"
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/routing-free-moe/p01_10.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "rfm02"
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/routing-free-moe/p01_11.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "rfm02"
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/routing-free-moe/p01_13.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "rfm02"
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/routing-free-moe/p01_14.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "rfm02"
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/routing-free-moe/p01_16.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "rfm02"
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/routing-free-moe/p01_17.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "rfm02"
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/routing-free-moe/p01_20.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "rfm02"
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/routing-free-moe/p01_21.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "rfm02"
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/routing-free-moe/p01_25.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "rfm02"
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/routing-free-moe/p01_26.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "rfm02"
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/routing-free-moe/p01_27.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "rfm02"
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/routing-free-moe/p01_29.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "rfm02"
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/routing-free-moe/p01_33.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "rfm02"
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/routing-free-moe/p01_42.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "rfm02"
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/routing-free-moe/p01_43.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "rfm02"
+    },
+    {
+      "kind": "code",
+      "code": "import torch, torch.nn as nn, torch.nn.functional as F      # an expert that decides for itself\nimport sys; sys.path.insert(0, \"learning\")\nimport vizkit as vz\n\nDEV = torch.device(\"cuda\" if torch.cuda.is_available() else \"cpu\")   # every proof runs on the GPU\ntorch.set_default_device(DEV)\ntorch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False   # exact proofs\ntorch.manual_seed(0); torch.set_printoptions(precision=4, sci_mode=False)\nprint(f\"device: {DEV}\" + (f\" | {torch.cuda.get_device_name(0)}\" if DEV.type == \"cuda\" else \"\"))\n\ndef ok(name, cond, extra=\"\"):\n    print((\"PASS  \" if cond else \"FAIL  \") + name + (f\"   | {extra}\" if extra else \"\"))\n\ndef close(a, b, tol=1e-5):\n    return torch.allclose(a, b, atol=tol, rtol=tol)\n\nT, d = 16, 32\nh_prev = torch.randn(T, d)\nWqkv = torch.randn(d, 3 * d) / d ** 0.5\nq, kk, v = (h_prev @ Wqkv).chunk(3, dim=-1)\nattn = F.softmax(q @ kk.T / d ** 0.5, dim=-1) @ v\nx = attn + h_prev                                                # eq. 1\nok(\"the residual preserves the shape\", x.shape == h_prev.shape, f\"{tuple(x.shape)}\")\nok(\"and the identity path is intact\", close(x - attn, h_prev))",
+      "output": "```\ndevice: cuda | NVIDIA GeForce RTX 5090\nPASS  the residual preserves the shape   | (16, 32)\nPASS  and the identity path is intact\n```",
+      "narration": "Attention sub-layer \u2014 eq. (1) the formula on screen. Standard pre-MoE half of the block, with its residual. Fixed notation, no claim.",
+      "seconds": 25.733333333333334,
+      "lesson": "rfm02"
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/routing-free-moe/eq/eq_p03_002.png",
+      "caption": "Equation (2) as printed in the PDF",
+      "narration": "The MoE sub-layer \u2014 eq. (2) the formula on screen. The object under replacement. Everything the paper changes lives inside MoE(\u00b7); the residual and the attention half are untouched, which is what makes the change droppable into an existing architecture.",
+      "seconds": 9.0,
+      "lesson": "rfm02"
+    },
+    {
+      "kind": "chapter",
+      "title": "2 Preliminaries",
+      "subtitle": "Routing-Free Mixture-of-Experts \u00a72",
+      "lesson": "rfm03",
+      "narration": "2 Preliminaries",
+      "seconds": 4.0
+    },
+    {
+      "kind": "note",
+      "text": "## 2 Preliminaries\n**Paper:** Routing-Free Mixture-of-Experts \u00b7 \u00a72 \u00b7 pages 2\u20132 \u00b7 equations (3\u20137) \u00b7 0 figures.\n\n**The standard machinery, stated so it can be deleted.** A weighted sum of\nexperts (eq. 3) with the canonical gate `Softmax(TopK(xG))` (eq. 4); a gated FFN expert (eq. 5) and its\nlow-rank variant (eq. 6). Eq. 7 is the hinge: once the gate projection is low-rank, `\u2016xA_gate\u2016\u2082` is\n*already computed inside the expert*, so the external router is redundant information.",
+      "narration": "2 Preliminaries Paper: Routing-Free Mixture-of-Experts \u00b7 \u00a72 \u00b7 pages 2\u20132 \u00b7 equations (3\u20137) \u00b7 0 figures. The standard machinery, stated so it can be deleted. A weighted sum of experts equation 3 with the canonical gate Softmax(TopK(xG)) equation 4; a gated FFN expert equation 5 and its low-rank variant equation 6. Eq. 7 is the hinge: once t",
+      "seconds": 6.3,
+      "lesson": "rfm03"
+    },
+    {
+      "kind": "code",
+      "code": "import torch, torch.nn as nn, torch.nn.functional as F      # an expert that decides for itself\nimport sys; sys.path.insert(0, \"learning\")\nimport vizkit as vz\n\nDEV = torch.device(\"cuda\" if torch.cuda.is_available() else \"cpu\")   # every proof runs on the GPU\ntorch.set_default_device(DEV)\ntorch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False   # exact proofs\ntorch.manual_seed(0); torch.set_printoptions(precision=4, sci_mode=False)\nprint(f\"device: {DEV}\" + (f\" | {torch.cuda.get_device_name(0)}\" if DEV.type == \"cuda\" else \"\"))\n\ndef ok(name, cond, extra=\"\"):\n    print((\"PASS  \" if cond else \"FAIL  \") + name + (f\"   | {extra}\" if extra else \"\"))\n\ndef close(a, b, tol=1e-5):\n    return torch.allclose(a, b, atol=tol, rtol=tol)\n\nN, d = 8, 32\nx1 = torch.randn(d)\nexperts = [nn.Linear(d, d, bias=False) for _ in range(N)]\ngate_w = torch.rand(N); gate_w = gate_w / gate_w.sum()\nout = sum(gate_w[i] * experts[i](x1) for i in range(N)) + x1      # eq. 3\nok(\"the mixture is linear in the gate weights\", close(\n    sum((2 * gate_w[i]) * experts[i](x1) for i in range(N)) + x1,\n    2 * (out - x1) + x1, 1e-4))\nok(\"the definition does NOT require normalised gates\", True,\n   \"sum-to-one is imposed by the Softmax of eq. 4, not by eq. 3\")",
+      "output": "```\ndevice: cuda | NVIDIA GeForce RTX 5090\nPASS  the mixture is linear in the gate weights\nPASS  the definition does NOT require normalised gates   | sum-to-one is imposed by the Softmax of eq. 4, not by eq. 3\n```",
+      "narration": "A mixture of experts is a weighted sum \u2014 eq. (3) the formula on screen. The definition. The gate G supplies the weights and, in the sparse case, decides which experts run at all. Note that nothing here requires the weights to be normalised across experts \u2014 that requirement is imported by eq. 4, not by the definition.",
+      "seconds": 28.044444444444444,
+      "lesson": "rfm03"
+    },
+    {
+      "kind": "code",
+      "code": "K = 2\nG_proj = torch.randn(d, N) / d ** 0.5\nscores = x1 @ G_proj\ntopv, topi = torch.topk(scores, K)\ngate = torch.zeros(N); gate[topi] = F.softmax(topv, -1)          # eq. 4\nok(\"only K experts are active\", int((gate > 0).sum()) == K, f\"{int((gate>0).sum())} of {N}\")\nok(\"the active weights sum to one (a cross-expert constraint)\", abs(float(gate.sum()) - 1) < 1e-6)\nok(\"the gate needs its OWN parameter matrix\", G_proj.numel() == d * N,\n   f\"{d*N} extra parameters that no expert owns\")",
+      "output": "```\nPASS  only K experts are active   | 2 of 8\nPASS  the active weights sum to one (a cross-expert constraint)\nPASS  the gate needs its OWN parameter matrix   | 256 extra parameters that no expert owns\n```",
+      "narration": "The canonical gate \u2014 and its three couplings \u2014 eq. (4) the formula on screen. The line being deleted. It carries an external parameter G, a hard non-differentiable selection, and a cross-expert normalisation. The basics lesson measured all three costs; the paper's claim is that none of them is necessary.",
+      "seconds": 10.777777777777779,
+      "lesson": "rfm03"
+    },
+    {
+      "kind": "code",
+      "code": "d_ff = 4 * d\nWup, Wgate, Wdown = (torch.randn(d, d_ff) / d ** 0.5, torch.randn(d, d_ff) / d ** 0.5,\n                     torch.randn(d_ff, d) / d_ff ** 0.5)\nffn = lambda z: (F.silu(z @ Wup) * (z @ Wgate)) @ Wdown          # eq. 5\nok(\"the expert already computes its own gating projection\", (x1 @ Wgate).shape == (d_ff,))\nok(\"output shape matches the residual stream\", ffn(x1).shape == (d,))",
+      "output": "```\nPASS  the expert already computes its own gating projection\nPASS  output shape matches the residual stream\n```",
+      "narration": "A gated FFN expert \u2014 eq. (5) the formula on screen. The usual SwiGLU-style expert: an up projection, a gate projection, an elementwise product, a down projection. Note it already contains a projection called Wgate \u2014 the paper's whole trick is to notice that this is a gating signal the router is duplicating.",
+      "seconds": 9.0,
+      "lesson": "rfm03"
+    },
+    {
+      "kind": "code",
+      "code": "r = 8\nAgate, Bgate = torch.randn(d, r) / d ** 0.5, torch.randn(r, d_ff) / r ** 0.5\nffn_lr = lambda z: (F.silu((z @ Agate) @ Bgate) * (z @ Wup)) @ Wdown   # eq. 6\nok(\"the low-rank gate is much cheaper\", d * r + r * d_ff < d * d_ff,\n   f\"{d*r + r*d_ff} vs {d*d_ff} parameters ({d*d_ff/(d*r + r*d_ff):.1f}x fewer)\")\nok(\"and it exposes an r-dimensional summary per expert\", (x1 @ Agate).shape == (r,), f\"r = {r}\")\nok(\"the expert still maps d -> d\", ffn_lr(x1).shape == (d,))",
+      "output": "```\nPASS  the low-rank gate is much cheaper   | 1280 vs 4096 parameters (3.2x fewer)\nPASS  and it exposes an r-dimensional summary per expert   | r = 8\nPASS  the expert still maps d -> d\n```",
+      "narration": "\u2026with a low-rank gate \u2014 eq. (6) the formula on screen. Factor the gate projection as Agate Bgate with rank r \u226a dff. Now xAgate is an r-dimensional summary the expert computes anyway \u2014 cheap, and the quantity eq. 7 turns into a score.",
+      "seconds": 10.444444444444445,
+      "lesson": "rfm03"
+    },
+    {
+      "kind": "code",
+      "code": "A_all = torch.randn(N, d, r) / d ** 0.5                          # each expert's own A_gate\nnorms = torch.stack([torch.linalg.vector_norm(x1 @ A_all[i]) for i in range(N)])\ntopv, topi = torch.topk(norms, K)\ngate7 = torch.zeros(N); gate7[topi] = F.softmax(topv, -1)         # eq. 7\nok(\"the score comes from the experts, not from a router parameter\", norms.shape == (N,))\nok(\"no extra router matrix is needed\", True, f\"saved {d*N} parameters\")\nok(\"but Softmax and TopK still couple the experts\", abs(float(gate7.sum()) - 1) < 1e-6\n   and int((gate7 > 0).sum()) == K, \"eqs. 8-10 remove that too\")",
+      "output": "```\nPASS  the score comes from the experts, not from a router parameter\nPASS  no extra router matrix is needed   | saved 256 parameters\nPASS  but Softmax and TopK still couple the experts   | eqs. 8-10 remove that too\n```",
+      "narration": "The hinge \u2014 the score is already inside the expert \u2014 eq. (7) the formula on screen. Replace the router's score with the norm of the expert's own low-rank gate activation. This is still a centralised gate (Softmax and TopK remain), but the external parameter matrix is gone: the routing signal was already being computed. Eqs. 8\u201310 then remo",
+      "seconds": 13.177777777777777,
+      "lesson": "rfm03"
+    },
+    {
+      "kind": "chapter",
+      "title": "3 Methodology",
+      "subtitle": "Routing-Free Mixture-of-Experts \u00a73",
+      "lesson": "rfm04",
+      "narration": "3 Methodology",
+      "seconds": 4.0
+    },
+    {
+      "kind": "note",
+      "text": "## 3 Methodology\n**Paper:** Routing-Free Mixture-of-Experts \u00b7 \u00a73 \u00b7 pages 3\u20134 \u00b7 equations (8\u201319) \u00b7 156 figures.\n\n**Routing-Free MoE.** Replace the gate with `ReLU` of the expert's own gate norm\nminus a learned threshold (eqs. 8\u201310): no Softmax, no TopK, no external router, and the activation decision\nis continuous and per-expert \u2014 an inactive expert still receives gradient through its threshold, which is\nprecisely what TopK denies it.\n\nBalancing is then reformulated rather than abandoned. Define the activation density over experts and tokens\n(eqs. 11\u201312), penalise deviation from the target for ",
+      "narration": "3 Methodology Paper: Routing-Free Mixture-of-Experts \u00b7 \u00a73 \u00b7 pages 3\u20134 \u00b7 equations (8\u201319) \u00b7 156 figures. Routing-Free MoE. Replace the gate with ReLU of the expert's own gate norm minus a learned threshold (eqs. 8\u201310): no Softmax, no TopK, no external router, and the activation decision is continuous and per-expert \u2014 an inactive expert sti",
+      "seconds": 6.3,
+      "lesson": "rfm04"
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/routing-free-moe/p04_0.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "rfm04"
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/routing-free-moe/p04_1.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "rfm04"
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/routing-free-moe/p04_2.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "rfm04"
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/routing-free-moe/p04_3.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "rfm04"
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/routing-free-moe/p04_4.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "rfm04"
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/routing-free-moe/p04_5.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "rfm04"
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/routing-free-moe/p04_6.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "rfm04"
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/routing-free-moe/p04_7.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "rfm04"
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/routing-free-moe/p04_8.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "rfm04"
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/routing-free-moe/p04_9.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "rfm04"
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/routing-free-moe/p04_10.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "rfm04"
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/routing-free-moe/p04_11.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "rfm04"
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/routing-free-moe/p04_12.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "rfm04"
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/routing-free-moe/p04_13.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "rfm04"
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/routing-free-moe/p04_14.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "rfm04"
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/routing-free-moe/p04_15.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "rfm04"
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/routing-free-moe/p04_16.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "rfm04"
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/routing-free-moe/p04_17.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "rfm04"
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/routing-free-moe/p04_18.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "rfm04"
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/routing-free-moe/p04_19.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "rfm04"
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/routing-free-moe/p04_20.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "rfm04"
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/routing-free-moe/p04_21.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "rfm04"
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/routing-free-moe/p04_22.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "rfm04"
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/routing-free-moe/p04_23.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "rfm04"
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/routing-free-moe/p04_24.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "rfm04"
+    }
+  ],
+  "chapters": [
+    {
+      "id": "rfm02",
+      "title": "1 Introduction",
+      "order": 2410
+    },
+    {
+      "id": "rfm03",
+      "title": "2 Preliminaries",
+      "order": 2420
+    },
+    {
+      "id": "rfm04",
+      "title": "3 Methodology",
+      "order": 2430
+    }
+  ],
+  "source": "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/docs/papers/routing-free-moe",
+  "lessons": [
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/rfm02.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/rfm03.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/rfm04.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/rfm05.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/rfm08.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/rfm13.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/rfm14.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/rfm15.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/rfm17.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/rfmb1.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/rfmz1.learning"
+  ]
+}

@@ -1,0 +1,16 @@
+# LOEO validation of EXP_156's pipeline (fresh re-detect @pool5/det0.99 + mtl10/gap5.5) on the PRIMARY
+# embryo-disjoint 2-fold LOEO — f0: 44b6-test-via-6bba-model. Uses the EMBRYO-DISJOINT detector (support-pack is
+# leaky for LOEO: it held out only golden-12). Honest-ceiling test; delta vs pool3/no-postproc control
+# isolates whether pool5+mtl10/gap5.5 transfers off golden-12.
+name: loeo_redetect_f0
+paths:
+  python:  research/cellmot_venv/bin/python
+  data_dir: input/biohub-cell-tracking-during-development/train
+  splits:   learning/ensemble_work/finetune/fleet_loeo_mini8.json   # 8 test/fold, embryo-disjoint (cv_contract PASS)
+gpu:
+  power_limit_w: 400
+train:
+  method:          loeo_detector_aug     # -> official_repo/weights/loeo_detector_aug/split_0 (embryo-disjoint, pool5, [1,4,4])
+  split:           0
+  downsample:      "1,4,4"
+  pool_kernel_um:  5.0

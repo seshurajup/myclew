@@ -1,0 +1,21 @@
+[
+  {
+    "after_line": 8,
+    "text": ">>> line one\\n>>> line two",
+    "caption": "with open(...) auto-closes"
+  },
+  {
+    "after_line": 13,
+    "text": ">>> line one\\n>>> line two",
+    "caption": "loop reads line by line"
+  },
+  {
+    "after_line": 17,
+    "text": ">>> (appends line three)",
+    "caption": "'a' mode appends"
+  },
+  {
+    "after_line": 17,
+    "image": "artifacts/terminal.png"
+  }
+]

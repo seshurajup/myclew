@@ -1,0 +1,40 @@
+# aug_journey — CLEAN ISOLATED SINGLE. GEOMETRIC: in-plane 90deg rot; Y==X (64x64) batch-safe. augfinder rot90_yx=PASS.
+# ONE-CHANGE ABLATION: every field is IDENTICAL across the journey (split, bs8, epochs, seed) — the ONLY
+# difference between configs is the `augment:` block. Trains on the human's stage-matched SCREEN substrate
+# (splits_screen_matched, both embryos 12/12); JUDGE BY EMBRYO on the 6/6 test (adjJ_44b6 = money, adjJ_6bba =
+# guardrail, never the blend); use splits_screen_matched_k6 (6-fold) for close-call keep/reject. NO Kaggle.
+name: 21_rot90_yx
+paths:
+  python:  research/cellmot_venv/bin/python
+  trainer: research/official_repo/scripts/train_unet_transformer.py
+  pythonpath:
+    - research/official_repo/src
+    - research/official_repo/scripts
+    - .
+  data_dir: input/biohub-cell-tracking-during-development/train
+  splits:   learning/ensemble_work/finetune/splits_screen_matched.json
+  cache_dir: research/cache/ds1x4x4
+mlflow:
+  tracking_uri: http://localhost:5000
+  experiment:   kaggle-biohub-stagebridge
+  run_name:     21_rot90_yx
+  log_artifacts: false
+gpu:
+  power_limit_w: 400
+train:
+  method:          21_rot90_yx
+  split:           0
+  downsample:      "1,4,4"
+  epochs:          10
+  lr:              1e-4
+  batch_size:      8
+  num_workers:     6
+  det_loss_weight: 10.0
+  det_neg_weight:  0.01
+  window_size:     2
+  pool_kernel_um:  5.0
+  max_iters:       150
+  seed:            1234
+augment:
+  - name: rot90_yx
+    p: 0.5

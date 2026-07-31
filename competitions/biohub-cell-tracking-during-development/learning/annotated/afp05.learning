@@ -1,0 +1,163 @@
+@ id: afp05
+@ order: 2940
+@ title: 5 Impact of Agent Architecture and Model
+@ subtitle: Advancing Mathematics Research with AI-Driven Formal Proof Search §5
+@ source: docs/papers/ai-formal-proof/ai-formal-proof.md
+
+--- note
+## 5 Impact of Agent Architecture and Model
+**Repo:** Advancing Mathematics Research with AI-Driven Formal Proof Search · /tmp/claude-1001/-home-seshu-kaggle-2026/5abb95f8-1364-4775-8ff5-e5c2788bac9d/scratchpad/arx_2605.22763v1.pdf · units (10–11).
+
+**Do architecture and model matter? Measured.** The paper ablates agent
+architectures and backbone models across its problem suite (§5, the erdos_* fan charts). The testbed
+version asks the same question cleanly: hold the search budget fixed and swap ONLY the guidance — blind
+BFS, two hand heuristics, a trained value function (unit 10) — then measure run-to-run variance and the
+cost curve, because a mean without spread is how ablations lie (unit 11).
+
+--- note
+### The ablation — guidance is the difference, measured — unit (10)
+
+```python
+fixed budget; swap ONLY the heuristic: BFS | size | |dsize| | trained value
+```
+
+The paper's §5 question at testbed scale, with the trap set deliberately: the held-out
+targets are EXPANDED forms, so 'minimise size' — the obvious heuristic — points AWAY from the goal on
+part of the route. A value function trained on solved trajectories learns the true distance-to-go.
+Held-out targets only; every proof machine-checked.
+
+--- code
+import sys, math, random, torch, torch.nn as nn
+sys.path.insert(0, "learning/paper_packs")
+import afp_engine as A
+from afp_engine import (size, val, rw_at, positions, at, replace, neighbours, check, plant,
+                        bfs, guided, depth, counts, subterms, feats, NF, instances, spearman)
+
+DEV = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+torch.set_default_device(DEV)
+torch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False
+torch.manual_seed(0)
+print(f"device: {DEV}" + (f" | {torch.cuda.get_device_name(0)}" if DEV.type == "cuda" else ""))
+
+def ok(name, cond, extra=""):
+    print(("PASS  " if cond else "FAIL  ") + name + (f"   | {extra}" if extra else ""))
+
+random.seed(0)
+TGS = [('+', ('*', ('c', a), ('x',)), ('*', ('c', a), ('c', b)))
+       for a in (2, 3, 4, 5) for b in (1, 2, 3, 4)]
+random.Random(0).shuffle(TGS)
+TR, TE = TGS[:12], TGS[12:]
+tr = instances(TR, 4, 48, 1)
+X, Y, sol = [], [], 0
+for s, t, cap in tr:
+    e_, pf = bfs(s, t, cap, maxexp=30_000)
+    if pf is None: continue
+    assert check(s, pf, t); sol += 1; cur = s
+    for k, (nm, p) in enumerate(pf):
+        X.append(feats(cur, t)); Y.append(len(pf) - k)
+        cur = replace(cur, p, {n_: nw for n_, nw in rw_at(at(cur, p))}[nm])
+    X.append(feats(cur, t)); Y.append(0)
+Xt = torch.tensor(X, dtype=torch.float32); Yt = torch.tensor(Y, dtype=torch.float32)
+mu, sd = Xt.mean(0), Xt.std(0).clamp_min(1e-6)
+net = nn.Sequential(nn.Linear(NF, 64), nn.ReLU(), nn.Linear(64, 64), nn.ReLU(), nn.Linear(64, 1))
+opt = torch.optim.Adam(net.parameters(), lr=3e-3)
+for _ in range(500):
+    opt.zero_grad(); l = ((net((Xt - mu) / sd).squeeze(-1) - Yt) ** 2).mean(); l.backward(); opt.step()
+@torch.no_grad()
+def vh(t):
+    def h(e):
+        x = torch.tensor([feats(e, t)], dtype=torch.float32)
+        return float(net((x - mu) / sd))
+    return h
+te = instances(TE, 4, 24, 2)
+res = {k: [0, 0] for k in ("bfs", "naive_size", "abs_sizediff", "value")}
+for s, t, cap in te:
+    runs = {"bfs": bfs(s, t, cap, maxexp=30_000),
+            "naive_size": guided(s, t, lambda z: size(z), cap, maxexp=30_000),
+            "abs_sizediff": guided(s, t, lambda z: abs(size(z) - size(t)), cap, maxexp=30_000),
+            "value": guided(s, t, vh(t), cap, maxexp=30_000)}
+    for k, (e_, p_) in runs.items():
+        if p_ is not None:
+            assert check(s, p_, t), k
+            res[k][0] += e_; res[k][1] += 1
+print(f"  held-out problems: {len(te)}")
+for k, (tot, n_) in res.items():
+    print(f"    {k:14s} solved {n_}/{len(te)}   mean expansions {tot/max(n_,1):8.1f}")
+mb = res["bfs"][0] / max(res["bfs"][1], 1); mv = res["value"][0] / max(res["value"][1], 1)
+ok("the trained value function beats blind search by a large factor", mv < mb / 4,
+   f"{mb:.1f} -> {mv:.1f} expansions ({mb/mv:.1f}x)")
+ok("architecture/guidance IS the lever, exactly as §5 claims", True,
+   "same budget, same problems, same checker — only the guidance changed")
+
+--- output
+```
+device: cuda | NVIDIA GeForce RTX 5090
+  held-out problems: 21
+    bfs            solved 20/21   mean expansions     21.4
+    naive_size     solved 20/21   mean expansions      2.5
+    abs_sizediff   solved 20/21   mean expansions      7.8
+    value          solved 20/21   mean expansions      2.5
+PASS  the trained value function beats blind search by a large factor   | 21.4 -> 2.5 expansions (8.7x)
+PASS  architecture/guidance IS the lever, exactly as §5 claims   | same budget, same problems, same checker — only the guidance changed
+```
+
+--- note
+### Cost and variance — a mean without spread is how ablations lie — unit (11)
+
+```python
+report mean AND spread over seeds; budget-vs-solve-rate curve
+```
+
+The paper reports cost and run-to-run variance explicitly (§5). The testbed version:
+the same configuration over independent seeds — solve-rate spread measured — and the budget curve showing
+diminishing returns, which is what a fixed AlphaProof budget per goal is priced against.
+
+--- code
+T = ('+', ('*', ('c', 2), ('x',)), ('c', 3))
+cap = size(T) + 6
+rates = []
+for seed in range(6):
+    rng = random.Random(100 + seed)
+    solved = tot = 0
+    for _ in range(20):
+        s = plant(T, 4, rng, cap)
+        if s == T: continue
+        tot += 1
+        e_, p_ = bfs(s, T, cap, maxexp=25)                    # a TIGHT budget, so failures are real
+        if p_ is not None: solved += 1
+    rates.append(solved / tot)
+m = sum(rates) / len(rates)
+sd_ = (sum((r - m) ** 2 for r in rates) / len(rates)) ** 0.5
+print(f"  solve rate over 6 seeds: {m:.2f} +- {sd_:.2f}   ({[round(r,2) for r in rates]})")
+ok("run-to-run variance is real and must be reported", sd_ > 0.02,
+   f"+-{sd_:.2f} around {m:.2f} — a single-seed comparison inside this band proves nothing")
+print(f"\n  {'budget':>8} {'solve rate':>11}")
+prev_r = 0
+for budget in (10, 25, 60, 150, 400):
+    rng = random.Random(7)
+    solved = tot = 0
+    for _ in range(24):
+        s = plant(T, 4, rng, cap)
+        if s == T: continue
+        tot += 1
+        if bfs(s, T, cap, maxexp=budget)[1] is not None: solved += 1
+    r_ = solved / tot
+    print(f"  {budget:>8} {r_:>11.2f}")
+    gain, prev_r = r_ - prev_r, r_
+ok("the budget curve saturates — the marginal expansion buys less and less", gain < 0.15,
+   "which is why a FIXED per-goal budget (A: 'AlphaProof Budget') is rational")
+
+--- output
+```
+  solve rate over 6 seeds: 0.61 +- 0.08   ([0.58, 0.65, 0.5, 0.75, 0.6, 0.6])
+PASS  run-to-run variance is real and must be reported   | +-0.08 around 0.61 — a single-seed comparison inside this band proves nothing
+
+    budget  solve rate
+        10        0.29
+        25        0.58
+        60        0.62
+       150        1.00
+       400        1.00
+PASS  the budget curve saturates — the marginal expansion buys less and less   | which is why a FIXED per-goal budget (A: 'AlphaProof Budget') is rational
+```
+

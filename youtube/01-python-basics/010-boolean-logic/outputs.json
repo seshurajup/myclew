@@ -1,0 +1,21 @@
+[
+  {
+    "after_line": 8,
+    "text": ">>> True\n>>> False\n>>> True\n>>> True\n>>> False\n>>> True",
+    "caption": "comparisons return True/False"
+  },
+  {
+    "after_line": 15,
+    "text": ">>> False\n>>> False\n>>> False\n>>> True\n>>> True",
+    "caption": "0, \"\", [] are all falsy"
+  },
+  {
+    "after_line": 22,
+    "text": ">>> False",
+    "caption": "short-circuit: noisy() never runs"
+  },
+  {
+    "after_line": 24,
+    "image": "artifacts/terminal.png"
+  }
+]

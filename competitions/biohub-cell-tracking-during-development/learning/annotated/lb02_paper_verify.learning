@@ -1,0 +1,55 @@
+@ id: lb02
+@ order: 41
+@ title: Proving the papers match our training data
+@ subtitle: the paper-verify agent — six falsifiable claims, checked on all 199 movies
+@ source: fleet_agents/paper_verify.py
+
+--- note
+## Don't trust a paper — verify it against your data
+A protocol from a paper is a hypothesis about *our* data until it is measured. The **`paper-verify`** agent
+encodes each falsifiable claim from Zebrahub + Ultrack **with its citation**, measures it against our cached
+artifacts (Cellpose detections + GT lineage stats over all 199 movies), and returns a **MATCH / PARTIAL /
+MISMATCH** verdict. Result: **4 MATCH, 2 PARTIAL, 0 MISMATCH.**
+--- image
+learning/label_figs/paper_verify_table.png
+Every claim carries its source; the two PARTIALs are informative, not failures (explained below).
+
+--- note
+### C1 — cell number rises with developmental time  ✅ MATCH
+The Zebrahub atlas is a continuous time-course. Our movies, binned by density into stages S0→S4, show mean
+cells/frame **5,583 → 9,229 → 17,397 → 30,374 → 59,013** — a clean **10.6×** monotonic climb. Density *is*
+developmental stage.
+--- code
+cells_per_frame_by_stage = {"S0": 5583, "S1": 9229, "S2": 17397, "S3": 30374, "S4": 59013}
+monotone = all(seq[i] < seq[i+1] for i in range(len(seq)-1))   # True -> MATCH
+--- shape
+S0 5.6k → S4 59k<br><b>10.6× growth</b>
+
+--- note
+### C2 — the 10 hpf → 10 dpf window  ⚠️ PARTIAL (by design)
+Zebrahub spans 10 hpf to 10 dpf. Our movies sit at **cells/frame 3,783–78,644** — the **early somitogenesis
+sub-window**, not the whole atlas. This is not a failure: it tells us our (and the hidden test's) data lives at
+the *early, sparser* end, which is exactly where detection is tractable.
+--- shape
+paper: 10 hpf → 10 dpf<br>ours: early sub-window<br>(3.8k–79k cells/frame)
+
+--- note
+### C3 — frequent divisions  ⚠️ PARTIAL (under-sampled)
+The tissue divides constantly, and you can see mitoses in the raw frames. But the **sparse** platinum lineages
+capture only **151 divisions total** across 199 movies (**0.066 per track**). Divisions are real but the GT
+**under-annotates** them — so the metric's **+0.1 division term has only modest headroom**. A strategic fact,
+straight from the data.
+--- shape
+151 divisions / 199 movies<br>0.066 / track<br>→ small div-term headroom
+
+--- note
+### C4–C6 — sparse, less-crowded, long lineages  ✅ MATCH ×3
+**C4:** GT is ~2.6% of cells, `gap_frac = 0.00` (continuous), complete tracks — matches *"platinum"* curated
+lineages. **C5:** labeled cells sit in **less-crowded** regions (local-density Cohen's *d* = **−0.58**) — matches
+*"the sparse channel is consistently easier to track."* **C6:** median track span **38 frames** with few
+divisions — matches *"selecting long, high-quality lineages."*
+--- shape
+C4 sparse+continuous ✅<br>C5 less-crowded d=−0.58 ✅<br>C6 long tracks (38 fr) ✅
+
+--- note
+**Next → lb03: what a model — XGBoost + TreeSHAP — says about the labels, and what it means for our score.**

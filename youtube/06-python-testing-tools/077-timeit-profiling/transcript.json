@@ -1,0 +1,42 @@
+[
+  {
+    "text": "Before optimizing code, you should measure it — guessing where the slowness lives is usually wrong.",
+    "until_line": 1
+  },
+  {
+    "text": "The timeit module runs a snippet many times and reports how long it took, accurately.",
+    "until_line": 5
+  },
+  {
+    "text": "Running it ten thousand times averages out noise, giving a reliable number.",
+    "until_line": 5
+  },
+  {
+    "text": "[chuckle] Its real value is comparing two approaches head to head, on equal footing.",
+    "until_line": 9
+  },
+  {
+    "text": "Here we pit a manual loop against a list comprehension, and see which is genuinely faster.",
+    "until_line": 9
+  },
+  {
+    "text": "[sniff] Measuring like this settles performance arguments with data instead of opinion.",
+    "until_line": 10
+  },
+  {
+    "text": "[sigh] For a whole program, cProfile breaks down where every second is actually spent, function by function.",
+    "until_line": 16
+  },
+  {
+    "text": "It shows you the true bottlenecks, so you optimize the parts that matter, not the parts you assume.",
+    "until_line": 16
+  },
+  {
+    "text": "[groan] Measure first, optimize second — timeit and cProfile turn performance work from guesswork into science.",
+    "until_line": 16
+  },
+  {
+    "text": "Up next, math and random. Comment PYTHON if you want the cheat sheet.",
+    "until_line": 16
+  }
+]

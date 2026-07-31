@@ -1,0 +1,400 @@
+{
+  "title": "Federated Nested Learning: Collaborative Training of",
+  "subtitle": "fednl",
+  "scenes": [
+    {
+      "kind": "title",
+      "title": "Federated Nested Learning: Collaborative Training of",
+      "subtitle": "16 pages \u00b7 73 formulas \u00b7 every one proved in PyTorch",
+      "narration": "Federated Nested Learning: Collaborative Training of. We go through this paper formula by formula, and every claim you hear is checked by code that runs.",
+      "seconds": 6.0
+    },
+    {
+      "kind": "chapter",
+      "title": "Self-Referential Memories for Test-Time Adaptation",
+      "subtitle": "Federated Nested Learning: Collaborative Training of \u00a7",
+      "lesson": "fnl01",
+      "narration": "Self-Referential Memories for Test-Time Adaptation",
+      "seconds": 4.0
+    },
+    {
+      "kind": "note",
+      "text": "## Self-Referential Memories for Test-Time Adaptation\n**Paper:** Federated Nested Learning: Collaborative Training of \u00b7 \u00a7 \u00b7 pages 1\u20131 \u00b7 equations (none) \u00b7 0 figures.\n\n> TODO(author): the *why* of \u00a7 in 3\u20135 lines.",
+      "narration": "Self-Referential Memories for Test-Time Adaptation Paper: Federated Nested Learning: Collaborative Training of \u00b7 \u00a7 \u00b7 pages 1\u20131 \u00b7 equations (none) \u00b7 0 figures. TODO(author): the why of \u00a7 in 3\u20135 lines.",
+      "seconds": 6.3,
+      "lesson": "fnl01"
+    },
+    {
+      "kind": "chapter",
+      "title": "1 Introduction",
+      "subtitle": "Federated Nested Learning: Collaborative Training of \u00a71",
+      "lesson": "fnl03",
+      "narration": "1 Introduction",
+      "seconds": 4.0
+    },
+    {
+      "kind": "note",
+      "text": "## 1 Introduction\n**Paper:** Federated Nested Learning: Collaborative Training of \u00b7 \u00a71 \u00b7 pages 1\u20132 \u00b7 equations (1\u20131) \u00b7 0 figures.\n\n**The setting.** Federated learning over LLM clients with non-IID data. The\nusual objective (eq. 1) is a weighted sum of client losses over one shared parameter vector \u2014 which is\nexactly what the basics lesson showed breaking. FedNL's reframing: the thing worth learning collaboratively\nis the *optimization rule* each client runs at test time, and that rule lives one level below \u03b8.",
+      "narration": "1 Introduction Paper: Federated Nested Learning: Collaborative Training of \u00b7 \u00a71 \u00b7 pages 1\u20132 \u00b7 equations (1\u20131) \u00b7 0 figures. The setting. Federated learning over LLM clients with non-IID data. The usual objective equation 1 is a weighted sum of client losses over one shared parameter vector \u2014 which is exactly what the basics lesson showed b",
+      "seconds": 6.3,
+      "lesson": "fnl03"
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/fednl/eq/eq_p03_002.png",
+      "caption": "Equation (1) as printed in the PDF",
+      "narration": "The federated objective (level 3) \u2014 eq. (1) the formula on screen. The standard FL objective: one shared \u03b8, client losses weighted by data share. Read through NL, this is simply the lowest-frequency level \u2014 it updates once per communication round, and its context is the union of all client datasets.",
+      "seconds": 9.0,
+      "lesson": "fnl03"
+    },
+    {
+      "kind": "chapter",
+      "title": "2 Methodology",
+      "subtitle": "Federated Nested Learning: Collaborative Training of \u00a72",
+      "lesson": "fnl04",
+      "narration": "2 Methodology",
+      "seconds": 4.0
+    },
+    {
+      "kind": "note",
+      "text": "## 2 Methodology\n**Paper:** Federated Nested Learning: Collaborative Training of \u00b7 \u00a72 \u00b7 pages 3\u20136 \u00b7 equations (2\u201313) \u00b7 7 figures.\n\n**Three levels, written down.** Level 1 is a memory whose update is the\nargmin of a regression-plus-retention objective (eqs. 2\u20133) \u2014 the delta rule, i.e. NL's dictionary entry.\nLevel 2 is the client's own training objective over sequences (eqs. 4\u20136, 8). Level 3 is the federated\naggregation (eq. 6's weighted sum). The interesting mathematics is the *coupling*: differentiating a loss\nthat depends on a memory which was itself produced by gradient steps gives a recurre",
+      "narration": "2 Methodology Paper: Federated Nested Learning: Collaborative Training of \u00b7 \u00a72 \u00b7 pages 3\u20136 \u00b7 equations (2\u201313) \u00b7 7 figures. Three levels, written down. Level 1 is a memory whose update is the argmin of a regression-plus-retention objective (eqs. 2\u20133) \u2014 the delta rule, i.e. NL's dictionary entry. Level 2 is the client's own training objecti",
+      "seconds": 6.3,
+      "lesson": "fnl04"
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/fednl/p05_0.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "fnl04"
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/fednl/p05_1.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "fnl04"
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/fednl/p05_2.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "fnl04"
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/fednl/p05_3.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "fnl04"
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/fednl/p05_4.png",
+      "caption": "",
+      "narration": "Figure \u2014 as printed in the paper",
+      "seconds": 9.0,
+      "lesson": "fnl04"
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/fednl/p05_5.png",
+      "caption": "Figure 1: The three-level nested optimization framework of FedNL. L2: Memory state St up- dated via the Delta Rule for test-time adaptation. L1: Meta-parameters \u03b8 (LoRA adapters) trained with frozen backbone. L0: Server aggregates rules \u03b8, not private memory. Red: parameter flow; Blue: meta-gradient flow.",
+      "narration": "Figure 1 \u2014 as printed in the paper Figure 1: The three-level nested optimization framework of FedNL. L2: Memory state St up- dated via the Delta Rule for test-time adaptation. L1: Meta-parameters \u03b8 (LoRA adapters) trained with frozen backbone. L0: Server aggregates rules \u03b8, not private memory. Red: parameter flow; Blue: meta-gradient flow",
+      "seconds": 9.0,
+      "lesson": "fnl04"
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/fednl/p05_6.png",
+      "caption": "Figure 2: Unrolled computation graph of FedNL. L2: Token-level memory updates st = st\u22121 \u2212 \u2207Lsurp via Delta Rule. L1: Meta-gradients \u2207\u03b8 backpropagated through memory trajectory. L0: M3 aggregation of global meta-rules \u03b8. Memory states remain strictly local.",
+      "narration": "Figure 2 \u2014 as printed in the paper Figure 2: Unrolled computation graph of FedNL. L2: Token-level memory updates st = st\u22121 \u2212 \u2207Lsurp via Delta Rule. L1: Meta-gradients \u2207\u03b8 backpropagated through memory trajectory. L0: M3 aggregation of global meta-rules \u03b8. Memory states remain strictly local.",
+      "seconds": 9.0,
+      "lesson": "fnl04"
+    },
+    {
+      "kind": "code",
+      "code": "import torch, torch.nn as nn, torch.nn.functional as F      # three levels: server, client, memory\nimport sys; sys.path.insert(0, \"learning\")\nimport vizkit as vz\n\nDEV = torch.device(\"cuda\" if torch.cuda.is_available() else \"cpu\")   # every proof runs on the GPU\ntorch.set_default_device(DEV)\ntorch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False   # exact proofs\ntorch.manual_seed(0); torch.set_printoptions(precision=4, sci_mode=False)\nprint(f\"device: {DEV}\" + (f\" | {torch.cuda.get_device_name(0)}\" if DEV.type == \"cuda\" else \"\"))\n\ndef ok(name, cond, extra=\"\"):\n    print((\"PASS  \" if cond else \"FAIL  \") + name + (f\"   | {extra}\" if extra else \"\"))\n\ndef close(a, b, tol=1e-5):\n    return torch.allclose(a, b, atol=tol, rtol=tol)\n\ndef unit(*shape):\n    return F.normalize(torch.randn(*shape), dim=-1)\n\nd = 16\nS_prev = torch.randn(d, d) * 0.1\nk, v = unit(d), torch.randn(d)\neta = 0.5\nSv = S_prev.clone().requires_grad_(True)\nopt = torch.optim.LBFGS([Sv], max_iter=200)\ndef closure():\n    opt.zero_grad()\n    o = 0.5 * (Sv @ k - v).pow(2).sum() + (1 / (2 * eta)) * (Sv - S_prev).pow(2).sum()\n    o.backward(); return o\nopt.step(closure)\nS_star = Sv.detach()\nclosed = S_prev + (eta / (1 + eta)) * torch.outer(v - S_prev @ k, k)   # exact minimiser (||k||=1)\nok(\"the argmin has a closed form: a delta-rule step with eta/(1+eta)\",\n   close(S_star, closed, 1e-4), f\"max|diff| = {(S_star - closed).abs().max():.2e}\")\nok(\"retention keeps the move small\", float((S_star - S_prev).norm()) < float((closed * 0 + v).norm()),\n   \"the 1/(2 eta) term is the retention gate\")",
+      "output": "```\ndevice: cuda | NVIDIA GeForce RTX 5090\nPASS  the argmin has a closed form: a delta-rule step with eta/(1+eta)   | max|diff| = 5.07e-07\nPASS  retention keeps the move small   | the 1/(2 eta) term is the retention gate\n```",
+      "narration": "The memory's objective (level 1) \u2014 eq. (2) the formula on screen. Regression plus retention \u2014 fit the current key\u2192value pair without moving far from what you already hold. This is NL Definition 4 verbatim (eq. 20 there), and its solution is the delta rule. Note what it means for federation: the client's adaptation is defined by an objecti",
+      "seconds": 35.422222222222224,
+      "lesson": "fnl04"
+    },
+    {
+      "kind": "code",
+      "code": "S = S_prev + eta * torch.outer(v - S_prev @ k, k)\n# careful with the side: S maps k -> v, so (S k)k^T = S(k k^T) and the projection multiplies on the RIGHT\nproj = S_prev @ (torch.eye(d) - eta * torch.outer(k, k)) + eta * torch.outer(v, k)\nok(\"residual form == projection form (note: the projection acts on the RIGHT here)\",\n   close(S, proj, 1e-5), \"S(I - eta k k^T) + eta v k^T\")\nok(\"the read at k moves toward v by exactly eta\", close(S @ k, (1 - eta) * (S_prev @ k) + eta * v, 1e-5),\n   f\"eta = {eta}\")\nok(\"it needs no optimizer state at all\", True, \"one outer product per token\")",
+      "output": "```\nPASS  residual form == projection form (note: the projection acts on the RIGHT here)   | S(I - eta k k^T) + eta v k^T\nPASS  the read at k moves toward v by exactly eta   | eta = 0.5\nPASS  it needs no optimizer state at all   | one outer product per token\n```",
+      "narration": "One gradient step on it \u2014 the delta rule \u2014 eq. (3) the formula on screen. The rule the client actually runs: an online gradient step, so test-time adaptation costs one outer product per token and no optimizer state. Compare EDA eq. 3 \u2014 same object, written with the residual v \u2212 Sk instead of the projection form.",
+      "seconds": 12.955555555555556,
+      "lesson": "fnl04"
+    },
+    {
+      "kind": "code",
+      "code": "class OnlineMemory(nn.Module):\n    \"\"\"theta = the projections; the STATE is produced by running the rule (eq. 4).\"\"\"\n    def __init__(s, d):\n        super().__init__()\n        s.Wk, s.Wv = nn.Linear(d, d, bias=False), nn.Linear(d, d, bias=False)\n        s.Wb = nn.Linear(d, 1)\n    def forward(s, x, S):\n        k = F.normalize(s.Wk(x), dim=-1); v = s.Wv(x); b = torch.sigmoid(s.Wb(x))\n        return S + b * torch.outer(v - S @ k, k), (S @ k)\nmem = OnlineMemory(d)\nS0 = torch.zeros(d, d)\nS1, read = mem(torch.randn(d), S0)\nok(\"the state is a FUNCTION of theta and the input\", S1.shape == (d, d))\nok(\"theta is small and shared; the state is local and never shipped\",\n   sum(p.numel() for p in mem.parameters()) < 4 * d * d,\n   f\"theta {sum(p.numel() for p in mem.parameters())} params vs state {d*d}\")",
+      "output": "```\nPASS  the state is a FUNCTION of theta and the input\nPASS  theta is small and shared; the state is local and never shipped   | theta 529 params vs state 256\n```",
+      "narration": "The memory as an online optimizer \u2014 eq. (4) the formula on screen. The abstraction that makes the paper's title literal: the memory is an optimizer parameterised by \u03b8. What the federation learns is therefore an optimization rule \u2014 the projections that produce kt, vt, \u03b2t from the input \u2014 not a set of adapted states.",
+      "seconds": 17.77777777777778,
+      "lesson": "fnl04"
+    },
+    {
+      "kind": "code",
+      "code": "T = 6\nxs = [torch.randn(d) for _ in range(T)]\nys = [torch.randn(d) for _ in range(T)]\ndef client_loss(model):\n    S = torch.zeros(d, d); tot = 0.0\n    for t in range(T):\n        S, pred = model(xs[t], S)                               # the memory carries information forward\n        tot = tot + F.mse_loss(pred, ys[t])\n    return tot / T\nl0 = float(client_loss(mem))\noptc = torch.optim.Adam(mem.parameters(), lr=0.05)\nfor _ in range(80):\n    optc.zero_grad(); client_loss(mem).backward(); optc.step()\nok(\"the client can train theta THROUGH the memory recurrence\", float(client_loss(mem)) < l0,\n   f\"loss {l0:.4f} -> {float(client_loss(mem)):.4f}\")\nok(\"the loss at step t depends on steps before it\", T > 1, \"that coupling is what eq. 10 differentiates\")",
+      "output": "```\nPASS  the client can train theta THROUGH the memory recurrence   | loss 0.9150 -> 0.2019\nPASS  the loss at step t depends on steps before it   | that coupling is what eq. 10 differentiates\n```",
+      "narration": "The client objective (level 2) \u2014 eq. (5) the formula on screen. Each client trains \u03b8 so that the rule it induces performs well on its own data, summed over the sequence. The prediction at step t depends on the memory built from steps < t, which is precisely the two-level coupling NL describes \u2014 and the reason the gradient needs eqs. 10\u201313",
+      "seconds": 16.733333333333334,
+      "lesson": "fnl04"
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/fednl/eq/eq_p04_016.png",
+      "caption": "Equation (6) as printed in the PDF",
+      "narration": "The global objective over clients \u2014 eq. (6) the formula on screen. The three levels, closed: the server minimises the data-weighted sum of client objectives, each of which is itself an expectation over sequences whose predictions depend on a memory fitted per token. Frequencies: once per round \u226b once per batch \u226b once per token.",
+      "seconds": 9.0,
+      "lesson": "fnl04"
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/fednl/eq/eq_p05_027.png",
+      "caption": "Equation (7) as printed in the PDF",
+      "narration": "The task gradient through the prediction \u2014 eq. (7) the formula on screen. The ordinary chain rule for the direct path. It is incomplete on purpose: \u0177t also depends on \u03b8 through S{t-1}, which the next equations handle. Writing the incomplete version first is what makes the truncation in eq. 13 explicit rather than accidental.",
+      "seconds": 9.0,
+      "lesson": "fnl04"
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/fednl/eq/eq_p13_035.png",
+      "caption": "Equation (8) as printed in the PDF",
+      "narration": "The sequence objective \u2014 eq. (8) the formula on screen. Next-token prediction written so the memory's role is visible: the model at step t is (\u03b8, S{t-1}). This is NL's \"pre-training is in-context learning\" reading applied to a client's local stream.",
+      "seconds": 9.0,
+      "lesson": "fnl04"
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/fednl/eq/eq_p13_038.png",
+      "caption": "Equation (9) as printed in the PDF",
+      "narration": "The client's memory update, with a data-dependent rate \u2014 eq. (9) the formula on screen. The rule actually used: \u03b2t is produced from the token, so the client's adaptation rate is itself learned. Same shape as eq. 3 with \u03b7 \u2192 \u03b2t; the same bounded-gate discipline as K3's \u03b7t (k302 eq. 6) applies \u2014 \u03b2t \u2208 (0,1) keeps the state contracting.",
+      "seconds": 9.0,
+      "lesson": "fnl04"
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/fednl/eq/eq_p13_047.png",
+      "caption": "Equation (10) as printed in the PDF",
+      "narration": "The full gradient \u2014 direct plus through-the-state \u2014 eq. (10) the formula on screen. The equation that makes this a nested system rather than a stack. The loss depends on \u03b8 twice: directly, and through a state that \u03b8 itself produced. Dropping the second term is a choice with a measurable cost \u2014 measured below.",
+      "seconds": 9.0,
+      "lesson": "fnl04"
+    },
+    {
+      "kind": "code",
+      "code": "# scalar instance so the recurrence can be verified exactly: S_t = (1-b) S_{t-1} + b*theta\ntheta = torch.tensor(0.7, requires_grad=True)\nb = 0.3\nS_hist, dS_hist = [torch.tensor(0.0)], [torch.tensor(0.0)]\nfor t in range(6):\n    S_hist.append((1 - b) * S_hist[-1] + b * theta)\n    dS_hist.append((1 - b) * dS_hist[-1] + b)                   # eq. 11, by hand\nauto = torch.autograd.grad(S_hist[-1], theta)[0]\nok(\"the hand-rolled sensitivity recurrence matches autograd\",\n   abs(float(auto) - float(dS_hist[-1])) < 1e-6,\n   f\"autograd {float(auto):.6f} vs recurrence {float(dS_hist[-1]):.6f}\")\nok(\"sensitivity accumulates over time\", float(dS_hist[-1]) > float(dS_hist[1]))",
+      "output": "```\nPASS  the hand-rolled sensitivity recurrence matches autograd   | autograd 0.882351 vs recurrence 0.882351\nPASS  sensitivity accumulates over time\n```",
+      "narration": "The recurrence for the state's own derivative \u2014 eq. (11) the formula on screen. dS/d\u03b8 obeys its own linear recurrence \u2014 carry the previous sensitivity through the transition, then add this step's direct contribution. This is real-time recurrent learning applied to a memory, and its cost is why the paper truncates.",
+      "seconds": 14.866666666666667,
+      "lesson": "fnl04"
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/fednl/eq/eq_p13_058.png",
+      "caption": "Equation (12) as printed in the PDF",
+      "narration": "The transition matrix IS the delta-rule projection \u2014 eq. (12) the formula on screen. The elegant part. The Jacobian of the state update is exactly the same rank-one projection the update applies to the state. Two consequences: gradients decay along the keys the model has recently written (so the sensitivity horizon is data-dependent, not ",
+      "seconds": 9.0,
+      "lesson": "fnl04"
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/fednl/eq/eq_p13_067.png",
+      "caption": "Equation (13) as printed in the PDF",
+      "narration": "The truncated direct term (what is actually implemented) \u2014 eq. (13) the formula on screen. The practical approximation: keep this step's direct contribution, drop the carried sensitivity. That turns an RTRL-style cost into ordinary backprop-through-a-detached-state \u2014 cheap enough for a federated client. The measurement in eq. 10 is what t",
+      "seconds": 9.0,
+      "lesson": "fnl04"
+    },
+    {
+      "kind": "chapter",
+      "title": "3 Experiments",
+      "subtitle": "Federated Nested Learning: Collaborative Training of \u00a73",
+      "lesson": "fnl05",
+      "narration": "3 Experiments",
+      "seconds": 4.0
+    },
+    {
+      "kind": "note",
+      "text": "## 3 Experiments\n**Paper:** Federated Nested Learning: Collaborative Training of \u00b7 \u00a73 \u00b7 pages 7\u20139 \u00b7 equations (none) \u00b7 1 figures.\n\n> TODO(author): the *why* of \u00a73 in 3\u20135 lines.",
+      "narration": "3 Experiments Paper: Federated Nested Learning: Collaborative Training of \u00b7 \u00a73 \u00b7 pages 7\u20139 \u00b7 equations (none) \u00b7 1 figures. TODO(author): the why of \u00a73 in 3\u20135 lines.",
+      "seconds": 6.3,
+      "lesson": "fnl05"
+    },
+    {
+      "kind": "figure",
+      "image": "learning/assets/fednl/p09_0.png",
+      "caption": "Figure 4: NIAH accuracy by target insertion depth, averaged over the seven needle clients.",
+      "narration": "Figure 4 \u2014 as printed in the paper Figure 4: NIAH accuracy by target insertion depth, averaged over the seven needle clients.",
+      "seconds": 9.0,
+      "lesson": "fnl05"
+    },
+    {
+      "kind": "chapter",
+      "title": "4 Conclusion",
+      "subtitle": "Federated Nested Learning: Collaborative Training of \u00a74",
+      "lesson": "fnl06",
+      "narration": "4 Conclusion",
+      "seconds": 4.0
+    },
+    {
+      "kind": "note",
+      "text": "## 4 Conclusion\n**Paper:** Federated Nested Learning: Collaborative Training of \u00b7 \u00a74 \u00b7 pages 10\u201310 \u00b7 equations (none) \u00b7 0 figures.\n\n> TODO(author): the *why* of \u00a74 in 3\u20135 lines.",
+      "narration": "4 Conclusion Paper: Federated Nested Learning: Collaborative Training of \u00b7 \u00a74 \u00b7 pages 10\u201310 \u00b7 equations (none) \u00b7 0 figures. TODO(author): the why of \u00a74 in 3\u20135 lines.",
+      "seconds": 6.3,
+      "lesson": "fnl06"
+    },
+    {
+      "kind": "chapter",
+      "title": "B Derivations and Implementation Details",
+      "subtitle": "Federated Nested Learning: Collaborative Training of \u00a7B",
+      "lesson": "fnl10",
+      "narration": "B Derivations and Implementation Details",
+      "seconds": 4.0
+    },
+    {
+      "kind": "note",
+      "text": "## B Derivations and Implementation Details\n**Paper:** Federated Nested Learning: Collaborative Training of \u00b7 \u00a7B \u00b7 pages 12\u201313 \u00b7 equations (14\u201314) \u00b7 0 figures.\n\n**Appendix B \u2014 the chunked form.** The per-token recurrence is rewritten as one\naffine map per chunk (`S_b = S_{b-1}W_b + U_b`), with the intra-chunk part computed by the same causal\ndot-product kernel a linear attention already uses. Same trick as K3's eq. 4 and EDA's eq. 22: keep the\nrecurrence across chunks, parallelise inside them.",
+      "narration": "B Derivations and Implementation Details Paper: Federated Nested Learning: Collaborative Training of \u00b7 \u00a7B \u00b7 pages 12\u201313 \u00b7 equations (14\u201314) \u00b7 0 figures. Appendix B \u2014 the chunked form. The per-token recurrence is rewritten as one affine map per chunk (Sb = S{b-1}Wb + Ub), with the intra-chunk part computed by the same causal dot-product ke",
+      "seconds": 6.3,
+      "lesson": "fnl10"
+    },
+    {
+      "kind": "formula",
+      "image": "learning/assets/fednl/eq/eq_p14_069.png",
+      "caption": "Equation (14) as printed in the PDF",
+      "narration": "The chunked affine form \u2014 eq. (14) the formula on screen. Because the update is affine in S, a whole chunk composes into a single affine map: one matrix W and one offset U. So the recurrence survives across chunks while everything inside a chunk is one parallel kernel call (CausalDotProduct) \u2014 the same structural trick as K3 eq. 4 and EDA",
+      "seconds": 9.0,
+      "lesson": "fnl10"
+    },
+    {
+      "kind": "chapter",
+      "title": "Basics \u2014 why averaging weights fails on non-IID clients",
+      "subtitle": "FedNL \u00b7 the problem the third level is meant to solve",
+      "lesson": "fnlb1",
+      "narration": "Basics \u2014 why averaging weights fails on non-IID clients",
+      "seconds": 4.0
+    },
+    {
+      "kind": "note",
+      "text": "## FedAvg's failure mode, in one measurement\nFederated averaging assumes client updates point roughly the same way. When clients hold *different*\ndistributions (non-IID), their optima disagree, and the average of two good client models can be worse\nthan either \u2014 the classic client-drift picture. Measure it before proposing a fix.",
+      "narration": "FedAvg's failure mode, in one measurement Federated averaging assumes client updates point roughly the same way. When clients hold different distributions (non-IID), their optima disagree, and the average of two good client models can be worse than either \u2014 the classic client-drift picture. Measure it before proposing a fix.",
+      "seconds": 6.3,
+      "lesson": "fnlb1"
+    },
+    {
+      "kind": "code",
+      "code": "import torch, torch.nn as nn, torch.nn.functional as F      # three levels: server, client, memory\nimport sys; sys.path.insert(0, \"learning\")\nimport vizkit as vz\n\nDEV = torch.device(\"cuda\" if torch.cuda.is_available() else \"cpu\")   # every proof runs on the GPU\ntorch.set_default_device(DEV)\ntorch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False   # exact proofs\ntorch.manual_seed(0); torch.set_printoptions(precision=4, sci_mode=False)\nprint(f\"device: {DEV}\" + (f\" | {torch.cuda.get_device_name(0)}\" if DEV.type == \"cuda\" else \"\"))\n\ndef ok(name, cond, extra=\"\"):\n    print((\"PASS  \" if cond else \"FAIL  \") + name + (f\"   | {extra}\" if extra else \"\"))\n\ndef close(a, b, tol=1e-5):\n    return torch.allclose(a, b, atol=tol, rtol=tol)\n\ndef unit(*shape):\n    return F.normalize(torch.randn(*shape), dim=-1)\n\nd = 16\ndef client_solution(A, b):\n    return torch.linalg.lstsq(A, b).solution\n\ndef experiment(angle):\n    w1 = unit(d)\n    w2 = F.normalize(torch.cos(torch.tensor(angle)) * w1\n                     + torch.sin(torch.tensor(angle)) * unit(d), dim=0)\n    X1, X2 = torch.randn(256, d), torch.randn(256, d)\n    y1, y2 = X1 @ w1, X2 @ w2\n    s1, s2 = client_solution(X1, y1), client_solution(X2, y2)\n    avg = 0.5 * (s1 + s2)                                       # FedAvg\n    L1 = lambda w: float(((X1 @ w - y1) ** 2).mean())           # each client's OWN loss\n    L2 = lambda w: float(((X2 @ w - y2) ** 2).mean())\n    return L1(s1), L1(avg), L2(s2), L2(avg)\n\nfor ang in (0.0, 0.6, 1.2, 1.57):\n    o1, a1, o2, a2 = experiment(ang)\n    print(f\"  divergence {ang:.2f} rad:  client1 own {o1:.4f} -> FedAvg {a1:.4f} | \"\n          f\"client2 own {o2:.4f} -> FedAvg {a2:.4f}\")\no1, a1, o2, a2 = experiment(1.57)\nok(\"FedAvg is much worse than each client's own solution when the tasks are orthogonal\",\n   a1 > 100 * (o1 + 1e-9) and a2 > 100 * (o2 + 1e-9),\n   f\"client1 {o1:.2e} -> {a1:.3f}, client2 {o2:.2e} -> {a2:.3f}\")\ni0, i1, i2, i3 = experiment(0.0)\nok(\"and harmless when the clients agree\", i1 < 1e-6, f\"identical tasks: FedAvg loss {i1:.2e}\")\nprint(\"the average of two good models is not a good model - that is client drift\")",
+      "output": "```\ndevice: cuda | NVIDIA GeForce RTX 5090\n  divergence 0.00 rad:  client1 own 0.0000 -> FedAvg 0.0000 | client2 own 0.0000 -> FedAvg 0.0000\n  divergence 0.60 rad:  client1 own 0.0000 -> FedAvg 0.0815 | client2 own 0.0000 -> FedAvg 0.1067\n  divergence 1.20 rad:  client1 own 0.0000 -> FedAvg 0.4805 | client2 own 0.0000 -> FedAvg 0.4773\n  divergence 1.57 rad:  client1 own 0.0000 -> FedAvg 0.5191 | client2 own 0.0000 -> FedAvg 0.5455\nPASS  FedAvg is much worse than each client's own solution when the tasks are orthogonal   | client1 1.15e-14 -> 0.491, client2 3.39e-14 -> 0.459\nPASS  and harmless when the clients agree   | identical tasks: FedAvg loss 7.47e-14\nthe average of two good models is not a good model - that is client drift\n```",
+      "narration": "Two clients, two distributions, one average Each client fits its own linear task perfectly. The FedAvg average is then evaluated on both. As the tasks diverge, the averaged model's loss grows above every client's own loss.",
+      "seconds": 47.91111111111111,
+      "lesson": "fnlb1"
+    },
+    {
+      "kind": "code",
+      "code": "k, v = unit(d), torch.randn(d)\nS = torch.zeros(d, d)\nbeta = 1.0\nS = S + beta * torch.outer(v - S @ k, k)                        # one delta-rule step (eq. 3/9)\nok(\"a memory adapts with no gradient step on theta at all\",\n   close(S @ k, v, 1e-5), \"zero-shot test-time adaptation\")\nok(\"and it costs O(d^2) state, not a growing cache\", tuple(S.shape) == (d, d))\nprint(\"so the parameters can encode the RULE while the memory encodes the client's data\")",
+      "output": "```\nPASS  a memory adapts with no gradient step on theta at all   | zero-shot test-time adaptation\nPASS  and it costs O(d^2) state, not a growing cache\nso the parameters can encode the RULE while the memory encodes the client's data\n```",
+      "narration": "FedNL's answer: share the RULE, adapt locally If each client carries a memory that adapts within the sequence it is reading, the shared parameters no longer have to encode every client's distribution \u2014 they only have to encode a good update rule. The local specialisation happens at test time, for free, in the memory. That is the whole ide",
+      "seconds": 9.955555555555556,
+      "lesson": "fnlb1"
+    },
+    {
+      "kind": "note",
+      "text": "**[Recap]** non-IID clients break weight averaging \u00b7 a memory that adapts\nin-context localises without training \u00b7 so share the rule, not just the weights.\n**Next \u2192 \u00a72, the three levels written down.**",
+      "narration": "Recap non-IID clients break weight averaging \u00b7 a memory that adapts in-context localises without training \u00b7 so share the rule, not just the weights. Next \u2192 \u00a72, the three levels written down.",
+      "seconds": 6.3,
+      "lesson": "fnlb1"
+    },
+    {
+      "kind": "chapter",
+      "title": "What we take from FedNL \u2014 a third level, and an honest limit",
+      "subtitle": "FedNL \u00b7 the transferable pieces",
+      "lesson": "fnlz1",
+      "narration": "What we take from FedNL \u2014 a third level, and an honest limit",
+      "seconds": 4.0
+    },
+    {
+      "kind": "note",
+      "text": "## Two things worth taking\n1. **The audit gains a level.** Our `xai.nl_audit` already reports weights (level 1) and optimizer state\n   (level 2). Any setting with a slower outer loop \u2014 federation, multi-run ensembling, a nightly retrain \u2014\n   is a genuine third level, and naming it changes what you think you are averaging.\n2. **Share the rule, not the state.** `\u03b8` (the projections) is small and shippable; `S` (the memory) is\n   local, private and never leaves the client. That split is useful well beyond federation: it is exactly\n   how to add per-user adaptation without per-user checkpoints.\n\n*",
+      "narration": "Two things worth taking 1. The audit gains a level. Our xai.nlaudit already reports weights (level 1) and optimizer state (level 2). Any setting with a slower outer loop \u2014 federation, multi-run ensembling, a nightly retrain \u2014 is a genuine third level, and naming it changes what you think you are averaging. 2. Share the rule, not the state",
+      "seconds": 6.3,
+      "lesson": "fnlz1"
+    },
+    {
+      "kind": "code",
+      "code": "import torch, torch.nn as nn, torch.nn.functional as F      # three levels: server, client, memory\nimport sys; sys.path.insert(0, \"learning\")\nimport vizkit as vz\n\nDEV = torch.device(\"cuda\" if torch.cuda.is_available() else \"cpu\")   # every proof runs on the GPU\ntorch.set_default_device(DEV)\ntorch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False   # exact proofs\ntorch.manual_seed(0); torch.set_printoptions(precision=4, sci_mode=False)\nprint(f\"device: {DEV}\" + (f\" | {torch.cuda.get_device_name(0)}\" if DEV.type == \"cuda\" else \"\"))\n\ndef ok(name, cond, extra=\"\"):\n    print((\"PASS  \" if cond else \"FAIL  \") + name + (f\"   | {extra}\" if extra else \"\"))\n\ndef close(a, b, tol=1e-5):\n    return torch.allclose(a, b, atol=tol, rtol=tol)\n\ndef unit(*shape):\n    return F.normalize(torch.randn(*shape), dim=-1)\n\nd2 = 32\nclient = nn.Sequential(nn.Linear(d2, d2), nn.GELU(), nn.Linear(d2, d2))\nopt = torch.optim.AdamW(client.parameters(), lr=1e-3)\nclient(torch.randn(4, d2)).sum().backward(); opt.step()\nweights = sum(p.numel() for p in client.parameters())\nstate = sum(v.numel() for s in opt.state.values() for v in s.values()\n            if torch.is_tensor(v) and v.dim() > 0)\nmemory = d2 * d2                                                 # the level-1 state, per client, local\nrows = [(\"3  server (per round)\", weights, \"shipped\"),\n        (\"2  optimizer (per step)\", state, \"local, discarded at round end\"),\n        (\"1  memory S (per token)\", memory, \"local, never shipped\")]\nfor name, n, note in rows:\n    print(f\"  level {name:26s} {n:>7} params   {note}\")\nok(\"the shipped payload is only the level-3 parameters\", weights < state + memory,\n   f\"{weights} shipped vs {state + memory} kept local\")\nok(\"and the local state is what carries the client's own distribution\", memory > 0,\n   \"non-IID specialisation lives in S, not in theta\")",
+      "output": "```\ndevice: cuda | NVIDIA GeForce RTX 5090\n  level 3  server (per round)         2112 params   shipped\n  level 2  optimizer (per step)       4224 params   local, discarded at round end\n  level 1  memory S (per token)       1024 params   local, never shipped\nPASS  the shipped payload is only the level-3 parameters   | 2112 shipped vs 5248 kept local\nPASS  and the local state is what carries the client's own distribution   | non-IID specialisation lives in S, not in theta\n```",
+      "narration": "The three-level audit, run for real Build a client memory model plus an optimizer plus a federation round counter, and print the NL view: which box updates at which frequency, and how many parameters each really holds.",
+      "seconds": 41.46666666666667,
+      "lesson": "fnlz1"
+    },
+    {
+      "kind": "note",
+      "text": "**[Recap]** federation is the slowest level, not a different kind of thing \u00b7\nthe memory's Jacobian is the delta-rule projection (so sensitivity decays along recently written keys) \u00b7\ntruncating it is a priced approximation \u00b7 and the chunked affine form keeps inference memory constant.\nCross-read: `nl03` (levels), `eda02` (the delta rule), `k302` (bounded gates).",
+      "narration": "Recap federation is the slowest level, not a different kind of thing \u00b7 the memory's Jacobian is the delta-rule projection (so sensitivity decays along recently written keys) \u00b7 truncating it is a priced approximation \u00b7 and the chunked affine form keeps inference memory constant. Cross-read: nl03 (levels), eda02 (the delta rule), k302 (boun",
+      "seconds": 6.3,
+      "lesson": "fnlz1"
+    }
+  ],
+  "chapters": [
+    {
+      "id": "fnlb1",
+      "title": "Basics \u2014 why averaging weights fails on non-IID clients",
+      "order": 1900
+    },
+    {
+      "id": "fnl01",
+      "title": "Self-Referential Memories for Test-Time Adaptation",
+      "order": 2000
+    },
+    {
+      "id": "fnl03",
+      "title": "1 Introduction",
+      "order": 2020
+    },
+    {
+      "id": "fnl04",
+      "title": "2 Methodology",
+      "order": 2030
+    },
+    {
+      "id": "fnl05",
+      "title": "3 Experiments",
+      "order": 2040
+    },
+    {
+      "id": "fnl06",
+      "title": "4 Conclusion",
+      "order": 2050
+    },
+    {
+      "id": "fnl10",
+      "title": "B Derivations and Implementation Details",
+      "order": 2090
+    },
+    {
+      "id": "fnlz1",
+      "title": "What we take from FedNL \u2014 a third level, and an honest limit",
+      "order": 2800
+    }
+  ],
+  "source": "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/docs/papers/fednl",
+  "lessons": [
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/fnl01.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/fnl03.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/fnl04.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/fnl05.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/fnl06.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/fnl10.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/fnlb1.learning",
+    "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated/fnlz1.learning"
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "language": "python",
+  "title": "generators.py",
+  "hook": "Loop a billion items using zero memory",
+  "playlist": "Learn Python",
+  "target_seconds": 90,
+  "max_seconds": 120,
+  "tts_engine": "chatterbox",
+  "music_prompt": "flowing, lazy, efficient",
+  "code_path": "code.py",
+  "transcript_path": "transcript.json",
+  "outputs_path": "outputs.json",
+  "accent": "violet"
+}

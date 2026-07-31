@@ -1,0 +1,15 @@
+@ id: mse04
+@ order: 3130
+@ title: 1 Introduction
+@ subtitle: MetaSkill-Evolve: Recursive Self-Improvement of LLM Agents §1
+@ source: docs/papers/paper-2607-05297/paper-2607-05297.md
+
+--- note
+## 1 Introduction
+**Paper:** MetaSkill-Evolve: Recursive Self-Improvement of LLM Agents · §1 · pages 1–2 · equations (none) · 0 figures.
+
+**The claim.** Self-improving agent loops plateau because the improvement
+machinery is fixed. Make the machinery the same kind of artifact as the thing it improves, add a slow loop
+that evolves it, keep every attempt in a persistent DAG, and select parents by a utility/productivity/
+novelty score. The result is recursive self-improvement with no new components.
+

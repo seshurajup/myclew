@@ -1,0 +1,11 @@
+[
+  {
+    "after_line": 17,
+    "text": ">>> test_negative ... ok\\n>>> test_positive ... ok\\n>>> test_type ... ok",
+    "caption": "3 tests, all passing"
+  },
+  {
+    "after_line": 17,
+    "image": "artifacts/terminal.png"
+  }
+]

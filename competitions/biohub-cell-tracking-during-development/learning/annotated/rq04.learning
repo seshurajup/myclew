@@ -1,0 +1,212 @@
+@ id: rq04
+@ order: 2130
+@ title: 3 R Q
+@ subtitle: RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory §3
+@ source: docs/papers/ratequant/ratequant.md
+
+--- note
+## 3 R Q
+**Paper:** RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory · §3 · pages 3–5 · equations (5–9) · 0 figures.
+
+**RateQuant proper.** The constrained problem with box constraints
+(`b_min ≤ b ≤ b_max`, eq. 5), its Lagrangian (eq. 6), the stationarity condition that produces the
+log-allocation (eq. 7), and the optimal cost in closed form (eq. 8). Eq. 9 is the importance model: a
+second-order expansion of the task loss in the cache perturbation, which is what justifies using
+gradient norms as the weights `w_i`.
+
+--- note
+### The problem with box constraints (what you can actually ship) — eq. (5)
+
+$$
+\min_{b}\;\sum_{i=1}^{N} w_i\,\alpha\beta^{-b_i}\qquad \text{s.t.}\quad \sum_i b_i = B,\;\; b_{\min}\le b_i\le b_{\max}
+$$
+
+Hardware only has 2/3/4/8-bit kernels, and a head cannot get −1 bits. Adding box
+constraints keeps the problem convex, so the unconstrained log-allocation followed by clipping and
+re-normalising is a legitimate (and standard) water-filling solution.
+
+--- code
+import torch, torch.nn as nn, torch.nn.functional as F      # bit allocation is one Lagrange multiplier
+import sys; sys.path.insert(0, "learning")
+import vizkit as vz
+
+DEV = torch.device("cuda" if torch.cuda.is_available() else "cpu")   # every proof runs on the GPU
+torch.set_default_device(DEV)
+torch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False   # exact proofs
+torch.manual_seed(0); torch.set_printoptions(precision=4, sci_mode=False)
+print(f"device: {DEV}" + (f" | {torch.cuda.get_device_name(0)}" if DEV.type == "cuda" else ""))
+
+def ok(name, cond, extra=""):
+    print(("PASS  " if cond else "FAIL  ") + name + (f"   | {extra}" if extra else ""))
+
+def close(a, b, tol=1e-5):
+    return torch.allclose(a, b, atol=tol, rtol=tol)
+
+N = 16; alpha, beta = 1.0, 4.0                                   # this lesson's own setup
+w = torch.distributions.LogNormal(0.0, 1.2).sample((N,))
+B = 4.0 * N; bbar = B / N
+D = lambda b: alpha * beta ** (-b)
+J = lambda b: float((w * D(b)).sum())
+b_uniform = torch.full((N,), bbar)
+b_star = bbar + (torch.log(w) - torch.log(w).mean()) / torch.log(torch.tensor(beta))
+am = float(w.mean()); gm = float(torch.exp(torch.log(w).mean()))
+b_min, b_max = 2.0, 8.0
+def water_fill(w, B, b_min, b_max, beta=beta, iters=60):
+    lw = torch.log(w)
+    lo, hi = -50.0, 50.0
+    for _ in range(iters):                                      # bisect the multiplier to hit the budget
+        lam = 0.5 * (lo + hi)
+        b = ((lw - lam) / torch.log(torch.tensor(beta))).clamp(b_min, b_max)
+        if float(b.sum()) > B: lo = lam
+        else: hi = lam
+    return ((lw - 0.5 * (lo + hi)) / torch.log(torch.tensor(beta))).clamp(b_min, b_max)
+
+b_box = water_fill(w, B, b_min, b_max)
+ok("the budget is met", abs(float(b_box.sum()) - B) < 0.05, f"sum = {float(b_box.sum()):.3f} vs {B}")
+ok("every head is inside the hardware range",
+   bool((b_box >= b_min - 1e-6).all() and (b_box <= b_max + 1e-6).all()),
+   f"bits in [{float(b_box.min()):.2f}, {float(b_box.max()):.2f}]")
+ok("and it still beats uniform", J(b_box) < J(b_uniform),
+   f"J {J(b_uniform):.6f} -> {J(b_box):.6f}")
+
+--- output
+```
+device: cuda | NVIDIA GeForce RTX 5090
+PASS  the budget is met   | sum = 64.000 vs 64.0
+PASS  every head is inside the hardware range   | bits in [2.00, 6.16]
+PASS  and it still beats uniform   | J 0.124838 -> 0.047207
+```
+
+--- image
+learning/assets/ratequant/eq/eq_p26_101.png
+Equation (5) as printed in the PDF
+
+--- note
+### The Lagrangian — eq. (6)
+
+$$
+\mathcal{L} = \sum_i w_i\alpha\beta^{-b_i} + \lambda\Big(\sum_i b_i - B\Big) + \sum_i \mu_i\big(\text{box terms}\big)
+$$
+
+One multiplier `λ` for the budget and KKT multipliers for the box. `λ` has a clean
+meaning: **the marginal distortion bought by one more bit anywhere** — at the optimum it is equal across
+all unclipped heads, which is exactly the water-filling picture.
+
+--- code
+lam = 0.02
+Lag = lambda b: float((w * D(b)).sum() + lam * (b.sum() - B))
+ok("the Lagrangian equals the objective on the feasible set",
+   abs(Lag(b_star) - J(b_star)) < 1e-4, "the constraint term vanishes when the budget is met")
+marg = -(w * D(b_star) * torch.log(torch.tensor(beta)))          # dJ/db per head
+ok("at the optimum the marginal gain is EQUAL across heads (water-filling)",
+   float(marg.std() / marg.abs().mean()) < 1e-4,
+   f"relative spread of dJ/db = {float(marg.std()/marg.abs().mean()):.2e}")
+
+--- output
+```
+PASS  the Lagrangian equals the objective on the feasible set   | the constraint term vanishes when the budget is met
+PASS  at the optimum the marginal gain is EQUAL across heads (water-filling)   | relative spread of dJ/db = 1.91e-07
+```
+
+--- image
+learning/assets/ratequant/eq/eq_p26_106.png
+Equation (6) as printed in the PDF
+
+--- note
+### Stationarity gives the log-allocation — eq. (7)
+
+$$
+w_i\alpha(\ln\beta)\beta^{-b_i} = \lambda \;\;\Longrightarrow\;\; b_i = \frac{\ln(w_i\alpha\ln\beta) - \ln\lambda}{\ln\beta}
+$$
+
+Set the derivative to zero and take logs — the exponential distortion turns the
+condition linear, which is why the answer is closed-form and not a search. `λ` is then fixed by the budget
+(one bisection, eq. 5's water-filling).
+
+--- code
+bv = b_star.clone().requires_grad_(True)
+(w * alpha * beta ** (-bv)).sum().backward()
+grads = bv.grad
+ok("all per-head derivatives are equal at b*", float(grads.std() / grads.abs().mean()) < 1e-4,
+   f"relative spread {float(grads.std()/grads.abs().mean()):.2e}")
+lam_star = float(-grads.mean())
+b_from_lam = (torch.log(w * alpha * torch.log(torch.tensor(beta))) -
+              torch.log(torch.tensor(lam_star))) / torch.log(torch.tensor(beta))
+ok("inverting the condition reproduces b* exactly", close(b_from_lam, b_star, 1e-3),
+   f"lambda* = {lam_star:.6f}")
+
+--- output
+```
+PASS  all per-head derivatives are equal at b*   | relative spread 1.80e-07
+PASS  inverting the condition reproduces b* exactly   | lambda* = 0.004088
+```
+
+--- image
+learning/assets/ratequant/eq/eq_p26_110.png
+Equation (7) as printed in the PDF
+
+--- note
+### The optimal cost, in closed form — eq. (8)
+
+$$
+\mathcal{J}^{*} = \alpha\sum_i e^{Y_i}\beta^{-\bar{b} - (Y_i - \bar{Y})/\ln\beta} = \alpha\beta^{-\bar{b}}\,N\,\widetilde{w},\qquad Y_i = \ln w_i
+$$
+
+Substituting the optimum collapses the sum to `N·(geometric mean of w)·αβ^{-b̄}`. That
+is where AM/GM comes from: the uniform cost has the **arithmetic** mean in the same slot. Two lines of
+algebra, and it turns a design question into a computable number.
+
+--- code
+J_star_closed = alpha * beta ** (-bbar) * N * gm
+ok("the closed form matches the evaluated optimum", abs(J(b_star) - J_star_closed) / J(b_star) < 1e-4,
+   f"evaluated {J(b_star):.6f} vs closed form {J_star_closed:.6f}")
+J_unif_closed = alpha * beta ** (-bbar) * N * am
+ok("and the uniform cost is the same expression with the ARITHMETIC mean",
+   abs(J(b_uniform) - J_unif_closed) / J(b_uniform) < 1e-6,
+   f"uniform {J(b_uniform):.6f} vs {J_unif_closed:.6f}")
+
+--- output
+```
+PASS  the closed form matches the evaluated optimum   | evaluated 0.047186 vs closed form 0.047186
+PASS  and the uniform cost is the same expression with the ARITHMETIC mean   | uniform 0.124838 vs 0.124838
+```
+
+--- note
+### Why gradient norms are the right importance — eq. (9)
+
+$$
+\mathcal{L}(\hat{\theta}) - \mathcal{L}(\theta) \approx \sum_{l,h}\big\langle \nabla_K\mathcal{L},\,\delta^{K}\big\rangle + \big\langle \nabla_V\mathcal{L},\,\delta^{V}\big\rangle + O(\lVert\delta\rVert^2)
+$$
+
+Expand the task loss in the quantisation perturbation `δ`. To first order the damage a
+head does is governed by the gradient flowing through its cache, so `w_i = ‖∂L/∂K_i‖²` is not a heuristic —
+it is the coefficient in the expansion. This is the same move HOPE makes when it scores a neuron by the
+function it computes rather than by its weights.
+
+--- code
+dh, T = 16, 24
+K = torch.randn(T, dh, requires_grad=True)
+V = torch.randn(T, dh, requires_grad=True)
+q = torch.randn(dh)
+loss = ((F.softmax(K @ q / dh ** 0.5, 0) @ V) ** 2).sum()
+gK, gV = torch.autograd.grad(loss, [K, V])
+eps = 1e-3
+dK = eps * torch.randn_like(K)
+pred = float((gK * dK).sum())                                    # the first-order term
+with torch.no_grad():
+    actual = float(((F.softmax((K + dK) @ q / dh ** 0.5, 0) @ V) ** 2).sum() - loss)
+ok("the first-order term predicts the loss change", abs(pred - actual) < 0.05 * abs(actual) + 1e-6,
+   f"predicted {pred:.3e} vs actual {actual:.3e}")
+ok("so a gradient norm IS the importance weight, not a proxy",
+   float((gK ** 2).sum()) > 0, f"||dL/dK||_F^2 = {float((gK**2).sum()):.4f}")
+
+--- output
+```
+PASS  the first-order term predicts the loss change   | predicted -2.293e-05 vs actual -2.277e-05
+PASS  so a gradient norm IS the importance weight, not a proxy   | ||dL/dK||_F^2 = 0.2378
+```
+
+--- image
+learning/assets/ratequant/eq/eq_p26_115.png
+Equation (9) as printed in the PDF
+

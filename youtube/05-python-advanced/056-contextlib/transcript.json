@@ -1,0 +1,42 @@
+[
+  {
+    "text": "Writing a full class with enter and exit just for a context manager is often overkill.",
+    "until_line": 7
+  },
+  {
+    "text": "The contextmanager decorator lets you build one from a single generator function instead.",
+    "until_line": 7
+  },
+  {
+    "text": "Everything before the yield is the setup, and everything after it is the cleanup.",
+    "until_line": 7
+  },
+  {
+    "text": "[chuckle] So this tag manager prints an opening tag, yields to your code, then prints the closing tag.",
+    "until_line": 10
+  },
+  {
+    "text": "The with block runs in the middle, perfectly bracketed by the setup and teardown.",
+    "until_line": 10
+  },
+  {
+    "text": "[sniff] contextlib also ships handy ready-made managers, like suppress.",
+    "until_line": 16
+  },
+  {
+    "text": "suppress quietly ignores specific exceptions, replacing a clunky try-except-pass block.",
+    "until_line": 16
+  },
+  {
+    "text": "[sigh] Here a missing file no longer crashes us — the error is swallowed and the program continues.",
+    "until_line": 17
+  },
+  {
+    "text": "[groan] contextlib turns context managers from a chore into a one-line habit worth reaching for often.",
+    "until_line": 17
+  },
+  {
+    "text": "Next video: functools. Follow so you don't miss it.",
+    "until_line": 17
+  }
+]

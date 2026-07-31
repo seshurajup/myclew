@@ -1,0 +1,52 @@
+{
+  "slug": "nested-learning",
+  "lessons": 21,
+  "ids": [
+    "nlb1",
+    "nlb2",
+    "nlb3",
+    "nlb4",
+    "nlb5",
+    "nlb6",
+    "nl01",
+    "nl02",
+    "nl03",
+    "nl04",
+    "nl05",
+    "nl06",
+    "nl07",
+    "nl08",
+    "nl09",
+    "nl10",
+    "nl12",
+    "nl13",
+    "nl14",
+    "nlz1",
+    "nlz2"
+  ],
+  "coverage": {
+    "total": 121,
+    "placed": 121,
+    "missing": [],
+    "taught": 121,
+    "untaught": [],
+    "proven": 121,
+    "unproven": [],
+    "cropped": 98,
+    "figures": 18,
+    "figures_placed": 18,
+    "lessons": 13
+  },
+  "curriculum": {
+    "updated": true,
+    "section": "Nested Learning (Behrouz et al., NeurIPS 2025) \u2014 every formula, proved in PyTorch",
+    "lessons": 21
+  },
+  "pruned": [],
+  "code_cells": 159,
+  "cells_with_output": 159,
+  "silent_lessons": [],
+  "out_dir": "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/annotated",
+  "assets": "learning/assets/nested-learning",
+  "python": "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/research/cellmot_venv/bin/python"
+}

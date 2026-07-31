@@ -1,0 +1,227 @@
+[
+  {
+    "n": null,
+    "page": 4,
+    "latex": "q_{i}= f(g(\\mathcal{P}(\\mathcal{M}_{n}(t_{q}\u2295q_{i})))),p^{\\pm}",
+    "raw": "qi= f(g(P(Mn(tq\u2295qi)))), p\u00b1",
+    "image": "assets/eq/eq_p04_000.png",
+    "y0": 109.44124603271484,
+    "y1": 122.96669006347656
+  },
+  {
+    "n": null,
+    "page": 4,
+    "latex": "_{i}= f(g(\\mathcal{P}(\\mathcal{M}_{n}(t_{p}\u2295p^{\\pm}",
+    "raw": "i= f(g(P(Mn(tp\u2295p\u00b1",
+    "image": "assets/eq/eq_p04_001.png",
+    "y0": 109.4413070678711,
+    "y1": 123.72175598144531
+  },
+  {
+    "n": "1",
+    "page": 4,
+    "latex": "_{i})))). \\tag{1}",
+    "raw": "i)))). (1)",
+    "image": "assets/eq/eq_p04_002.png",
+    "y0": 110.59214782714844,
+    "y1": 123.72181701660156
+  },
+  {
+    "n": null,
+    "page": 4,
+    "latex": "\\sum^{B}",
+    "raw": "B \u2211\ufe01",
+    "image": "assets/eq/eq_p04_003.png",
+    "y0": 197.07919311523438,
+    "y1": 216.49859619140625
+  },
+  {
+    "n": null,
+    "page": 4,
+    "latex": "_{i}^{)/\\tau}",
+    "raw": "i)/\u03c4",
+    "image": "assets/eq/eq_p04_004.png",
+    "y0": 198.93820190429688,
+    "y1": 209.09765625
+  },
+  {
+    "n": null,
+    "page": 4,
+    "latex": "\uf8ee\uf8ef\uf8ef\uf8ef\uf8ef",
+    "raw": "\uf8ee\uf8ef\uf8ef\uf8ef\uf8ef\uf8f0",
+    "image": "assets/eq/eq_p04_005.png",
+    "y0": 200.8584747314453,
+    "y1": 244.49456787109375
+  },
+  {
+    "n": null,
+    "page": 4,
+    "latex": "\uf8f9\uf8fa\uf8fa\uf8fa\uf8fa\uf8fb",
+    "raw": "\uf8f9\uf8fa\uf8fa\uf8fa\uf8fa\uf8fb",
+    "image": "assets/eq/eq_p04_006.png",
+    "y0": 200.8584747314453,
+    "y1": 244.49456787109375
+  },
+  {
+    "n": "2",
+    "page": 4,
+    "latex": "1 \\mathcal{L}_{\\mathcal{C}} = \\tag{2}",
+    "raw": "LC = 1",
+    "image": "assets/eq/eq_p04_007.png",
+    "y0": 201.8728790283203,
+    "y1": 221.52496337890625
+  },
+  {
+    "n": null,
+    "page": 4,
+    "latex": "_{j}^{)/\\tau}",
+    "raw": "j)/\u03c4",
+    "image": "assets/eq/eq_p04_008.png",
+    "y0": 215.59017944335938,
+    "y1": 225.83160400390625
+  },
+  {
+    "n": null,
+    "page": 4,
+    "latex": "_{)/\\tau}\\sum_{B} ^{i}+",
+    "raw": "i)/\u03c4+ \u00cdB",
+    "image": "assets/eq/eq_p04_009.png",
+    "y0": 216.38418579101562,
+    "y1": 238.18255615234375
+  },
+  {
+    "n": null,
+    "page": 4,
+    "latex": "^{i=1}",
+    "raw": "i=1",
+    "image": "assets/eq/eq_p04_010.png",
+    "y0": 223.26821899414062,
+    "y1": 232.3385009765625
+  },
+  {
+    "n": null,
+    "page": 4,
+    "latex": "(",
+    "raw": "(",
+    "image": "assets/eq/eq_p04_011.png",
+    "y0": 269.8894958496094,
+    "y1": 280.798583984375
+  },
+  {
+    "n": null,
+    "page": 4,
+    "latex": "_{i}= p^{+}",
+    "raw": "i= p+",
+    "image": "assets/eq/eq_p04_012.png",
+    "y0": 271.0052185058594,
+    "y1": 285.2857360839844
+  },
+  {
+    "n": "3",
+    "page": 4,
+    "latex": "1_{TN}(i, j) = \\tag{3}",
+    "raw": "1TN(i, j) =",
+    "image": "assets/eq/eq_p04_013.png",
+    "y0": 279.489013671875,
+    "y1": 292.86749267578125
+  },
+  {
+    "n": null,
+    "page": 4,
+    "latex": "1 \\mathcal{L}_{\\mathcal{S}} = B(B-1)",
+    "raw": "LS = 1 B(B\u22121)",
+    "image": "assets/eq/eq_p04_014.png",
+    "y0": 494.5409240722656,
+    "y1": 520.3189697265625
+  },
+  {
+    "n": null,
+    "page": 4,
+    "latex": "_{2} +1 _{i}q_{j}) B(B-1)",
+    "raw": "iqj)2 + 1 B(B\u22121)",
+    "image": "assets/eq/eq_p04_015.png",
+    "y0": 494.5408935546875,
+    "y1": 520.3189697265625
+  },
+  {
+    "n": null,
+    "page": 4,
+    "latex": "\\sum",
+    "raw": "\u2211\ufe01",
+    "image": "assets/eq/eq_p04_016.png",
+    "y0": 498.2574768066406,
+    "y1": 509.16656494140625
+  },
+  {
+    "n": null,
+    "page": 4,
+    "latex": "\\sum",
+    "raw": "\u2211\ufe01",
+    "image": "assets/eq/eq_p04_017.png",
+    "y0": 498.2574768066406,
+    "y1": 509.16656494140625
+  },
+  {
+    "n": null,
+    "page": 4,
+    "latex": "(q^{^{\\top}}",
+    "raw": "(q\u22a4",
+    "image": "assets/eq/eq_p04_018.png",
+    "y0": 499.2702331542969,
+    "y1": 512.794677734375
+  },
+  {
+    "n": null,
+    "page": 4,
+    "latex": "(p^{+^{\\top}}",
+    "raw": "(p+\u22a4",
+    "image": "assets/eq/eq_p04_019.png",
+    "y0": 499.2702331542969,
+    "y1": 512.794677734375
+  },
+  {
+    "n": null,
+    "page": 4,
+    "latex": "_{i}p^{+}",
+    "raw": "i p+",
+    "image": "assets/eq/eq_p04_020.png",
+    "y0": 499.27020263671875,
+    "y1": 513.5507202148438
+  },
+  {
+    "n": null,
+    "page": 4,
+    "latex": "+ \\mathcal{L}^{P+} ^{\\mathcal{D}}",
+    "raw": "D + LP+",
+    "image": "assets/eq/eq_p04_021.png",
+    "y0": 729.3192138671875,
+    "y1": 747.8053588867188
+  },
+  {
+    "n": null,
+    "page": 4,
+    "latex": "+ \\mathcal{L}^{P-} ^{\\mathcal{D}}",
+    "raw": "D + LP\u2212",
+    "image": "assets/eq/eq_p04_022.png",
+    "y0": 729.3192138671875,
+    "y1": 747.1483764648438
+  },
+  {
+    "n": null,
+    "page": 4,
+    "latex": "\\mathcal{L}_{\\mathcal{D}} = \\mathcal{L}^{Q}",
+    "raw": "LD = LQ",
+    "image": "assets/eq/eq_p04_023.png",
+    "y0": 730.5054321289062,
+    "y1": 745.7589721679688
+  },
+  {
+    "n": null,
+    "page": 7,
+    "latex": "^{\\sqrt}",
+    "raw": "\u221a",
+    "image": "assets/eq/eq_p07_024.png",
+    "y0": 431.3722229003906,
+    "y1": 439.3423156738281
+  }
+]

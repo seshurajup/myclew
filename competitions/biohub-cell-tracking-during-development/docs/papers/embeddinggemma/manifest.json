@@ -1,0 +1,196 @@
+{
+  "slug": "embeddinggemma",
+  "source": "/tmp/claude-1001/-home-seshu-kaggle-2026/5abb95f8-1364-4775-8ff5-e5c2788bac9d/scratchpad/arx_2509.20354.pdf",
+  "pdf": "/tmp/claude-1001/-home-seshu-kaggle-2026/5abb95f8-1364-4775-8ff5-e5c2788bac9d/scratchpad/arx_2509.20354.pdf",
+  "title": "EmbeddingGemma: Powerful and Lightweight Text Representations",
+  "backend": "docling",
+  "pages": 18,
+  "figures": [
+    {
+      "page": 1,
+      "path": "assets/fig/p01_0.png",
+      "y0": 49.002628326416016,
+      "y1": 61.04998779296875,
+      "caption": "",
+      "label": "",
+      "w": 3810,
+      "h": 512
+    },
+    {
+      "page": 2,
+      "path": "assets/fig/p02_0.png",
+      "y0": 86.12065124511719,
+      "y1": 278.7330322265625,
+      "caption": "",
+      "label": "",
+      "w": 1254,
+      "h": 1037
+    },
+    {
+      "page": 2,
+      "path": "assets/fig/p02_1.png",
+      "y0": 85.0369873046875,
+      "y1": 278.7330322265625,
+      "caption": "",
+      "label": "",
+      "w": 1247,
+      "h": 1037
+    },
+    {
+      "page": 16,
+      "path": "assets/fig/p16_0.png",
+      "y0": 237.6315155029297,
+      "y1": 421.6419677734375,
+      "caption": "",
+      "label": "",
+      "w": 1247,
+      "h": 1037
+    }
+  ],
+  "tables": [
+    {
+      "page": 6,
+      "rows": 2,
+      "cols": 4,
+      "image": "assets/tab/p06_0.png"
+    },
+    {
+      "page": 6,
+      "rows": 3,
+      "cols": 2,
+      "image": "assets/tab/p06_1.png"
+    },
+    {
+      "page": 7,
+      "rows": 3,
+      "cols": 2,
+      "image": "assets/tab/p07_0.png"
+    },
+    {
+      "page": 7,
+      "rows": 3,
+      "cols": 2,
+      "image": "assets/tab/p07_1.png"
+    },
+    {
+      "page": 8,
+      "rows": 8,
+      "cols": 2,
+      "image": "assets/tab/p08_0.png"
+    },
+    {
+      "page": 8,
+      "rows": 8,
+      "cols": 2,
+      "image": "assets/tab/p08_1.png"
+    },
+    {
+      "page": 9,
+      "rows": 3,
+      "cols": 2,
+      "image": "assets/tab/p09_0.png"
+    },
+    {
+      "page": 10,
+      "rows": 3,
+      "cols": 2,
+      "image": "assets/tab/p10_0.png"
+    },
+    {
+      "page": 10,
+      "rows": 3,
+      "cols": 2,
+      "image": "assets/tab/p10_1.png"
+    },
+    {
+      "page": 11,
+      "rows": 3,
+      "cols": 2,
+      "image": "assets/tab/p11_0.png"
+    }
+  ],
+  "sections": [
+    {
+      "level": 1,
+      "page": 1,
+      "num": "1",
+      "title": "Introduction",
+      "heading": "1. Introduction"
+    },
+    {
+      "level": 1,
+      "page": 3,
+      "num": "2",
+      "title": "EmbeddingGemma",
+      "heading": "2. EmbeddingGemma"
+    },
+    {
+      "level": 1,
+      "page": 6,
+      "num": "3",
+      "title": "Ablation Studies",
+      "heading": "3. Ablation Studies"
+    },
+    {
+      "level": 1,
+      "page": 7,
+      "num": "4",
+      "title": "Evaluation",
+      "heading": "4. Evaluation"
+    },
+    {
+      "level": 1,
+      "page": 11,
+      "num": "5",
+      "title": "Future Work",
+      "heading": "5. Future Work"
+    },
+    {
+      "level": 1,
+      "page": 11,
+      "num": "6",
+      "title": "Conclusion",
+      "heading": "6. Conclusion"
+    },
+    {
+      "level": 1,
+      "page": 12,
+      "num": "",
+      "title": "References",
+      "heading": "References"
+    },
+    {
+      "level": 1,
+      "page": 15,
+      "num": "A",
+      "title": "Full Results",
+      "heading": "A. Full Results"
+    },
+    {
+      "level": 1,
+      "page": 17,
+      "num": "B",
+      "title": "Contributions and Acknowledgments",
+      "heading": "B. Contributions and Acknowledgments"
+    }
+  ],
+  "equations": 25,
+  "numbered": 3,
+  "md": "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/docs/papers/embeddinggemma/embeddinggemma.md",
+  "equations_json": "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development/docs/papers/embeddinggemma/equations.json",
+  "available": {
+    "pymupdf": true,
+    "marker": true,
+    "docling": true
+  },
+  "score": {
+    "chars": 81273,
+    "headings": 26,
+    "equations": 5,
+    "eq_tags": 0,
+    "images": 0,
+    "tables": 265,
+    "latex_cmds": 59,
+    "mojibake": 2
+  }
+}

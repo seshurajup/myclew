@@ -1,0 +1,30 @@
+@ id: rq05
+@ order: 2140
+@ title: 4 Experiments
+@ subtitle: RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory §4
+@ source: docs/papers/ratequant/ratequant.md
+
+--- note
+## 4 Experiments
+**Paper:** RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory · §4 · pages 6–8 · equations (none) · 2 figures.
+
+> TODO(author): the *why* of §4 in 3–5 lines.
+
+--- note
+### Figure 4 — as printed in the paper
+
+Figure 4: Per-head sensitivity for Qwen3-8B (36 layers × 8 KV heads, log scale). Left: Gradient-based shows a U-shaped pattern (early + late layers sensitive). Right: Activation-based is monotonically increasing.
+
+--- image
+learning/assets/ratequant/p08_0.png
+Figure 4: Per-head sensitivity for Qwen3-8B (36 layers × 8 KV heads, log scale). Left: Gradient-based shows a U-shaped pattern (early + late layers sensitive). Right: Activation-based is monotonically increasing.
+
+--- note
+### Figure 5 — as printed in the paper
+
+Figure 5: PPL vs. bits (Qwen3-8B). Gap is largest at 2.5–3.5 bits.
+
+--- image
+learning/assets/ratequant/p08_1.png
+Figure 5: PPL vs. bits (Qwen3-8B). Gap is largest at 2.5–3.5 bits.
+

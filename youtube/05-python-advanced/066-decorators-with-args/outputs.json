@@ -1,0 +1,16 @@
+[
+  {
+    "after_line": 18,
+    "text": ">>> hi Alice\\n>>> hi Alice\\n>>> hi Alice",
+    "caption": "@repeat(times=3) runs it 3x"
+  },
+  {
+    "after_line": 19,
+    "text": ">>> greet",
+    "caption": "@wraps preserves the name"
+  },
+  {
+    "after_line": 19,
+    "image": "artifacts/terminal.png"
+  }
+]

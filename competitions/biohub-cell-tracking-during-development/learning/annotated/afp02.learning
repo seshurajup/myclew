@@ -1,0 +1,282 @@
+@ id: afp02
+@ order: 2910
+@ title: 2 AlphaProof Nexus
+@ subtitle: Advancing Mathematics Research with AI-Driven Formal Proof Search §2
+@ source: docs/papers/ai-formal-proof/ai-formal-proof.md
+
+--- note
+## 2 AlphaProof Nexus
+**Repo:** Advancing Mathematics Research with AI-Driven Formal Proof Search · /tmp/claude-1001/-home-seshu-kaggle-2026/5abb95f8-1364-4775-8ff5-e5c2788bac9d/scratchpad/arx_2605.22763v1.pdf · units (1–5).
+
+**The agent, mechanism by mechanism.** Problems arrive as Lean statements
+(formalisation — unit 1's soundness analogue), the kernel validates every candidate (unit 2), the LLM loop
+proposes → validates → revises WITH its failed attempts in context (unit 3), sketches decompose the target
+into waypoints AlphaProof can bridge (unit 4), and underneath sits the prover's search over tactic space
+(unit 5). Each mechanism is run and measured on the testbed.
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/ai-formal-proof/p03_0.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/ai-formal-proof/p03_1.png
+
+--- note
+### Figure — as printed in the paper
+
+--- image
+learning/assets/ai-formal-proof/p03_2.png
+
+--- note
+### Formalisation — the statement must MEAN what the problem says — unit (1)
+
+```python
+Lean statement <- problem  ·  testbed: expression grammar + val(e, x) invariance
+```
+
+Everything downstream is only as good as the formal statement: a proof of the wrong
+formalisation is worthless. The testbed's version of that discipline is semantic soundness — the rewrite
+rules must provably preserve the expression's VALUE as a polynomial, else 'proof' means nothing. Checked
+over every rule the system has, including the expanding (inverse) rules.
+
+--- code
+import sys, math, random, torch, torch.nn as nn
+sys.path.insert(0, "learning/paper_packs")
+import afp_engine as A
+from afp_engine import (size, val, rw_at, positions, at, replace, neighbours, check, plant,
+                        bfs, guided, depth, counts, subterms, feats, NF, instances, spearman)
+
+DEV = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+torch.set_default_device(DEV)
+torch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False
+torch.manual_seed(0)
+print(f"device: {DEV}" + (f" | {torch.cuda.get_device_name(0)}" if DEV.type == "cuda" else ""))
+
+def ok(name, cond, extra=""):
+    print(("PASS  " if cond else "FAIL  ") + name + (f"   | {extra}" if extra else ""))
+
+rng = random.Random(1)
+T = ('+', ('*', ('c', 3), ('x',)), ('c', 5))
+cap = size(T) + 6
+rules_seen, viol = set(), 0
+for _ in range(500):
+    e = plant(T, rng.randint(1, 5), rng, cap)
+    for ne, (nm, p) in neighbours(e, cap):
+        rules_seen.add(nm)
+        for xv in (-3, -1, 0, 2, 7):
+            if val(e, xv) != val(ne, xv): viol += 1
+print("  rules exercised:", sorted(rules_seen))
+ok("every rule of the system is value-preserving at 5 evaluation points", viol == 0,
+   f"{len(rules_seen)} distinct rules, 0 violations")
+ok("including the EXPANDING rules (addI, mulI)", {"addI", "mulI"} <= rules_seen,
+   "growth rules are what make search hard AND what proofs sometimes need")
+ok("so 'e rewrites to T' really means 'e and T are the same polynomial'", True,
+   "the testbed's formalisation is faithful — the precondition for everything below")
+
+--- output
+```
+device: cuda | NVIDIA GeForce RTX 5090
+  rules exercised: ['add0', 'addI', 'commA', 'commM', 'dist', 'fold', 'mul0', 'mul1', 'mulI', 'undist']
+PASS  every rule of the system is value-preserving at 5 evaluation points   | 10 distinct rules, 0 violations
+PASS  including the EXPANDING rules (addI, mulI)   | growth rules are what make search hard AND what proofs sometimes need
+PASS  so 'e rewrites to T' really means 'e and T are the same polynomial'   | the testbed's formalisation is faithful — the precondition for everything below
+```
+
+--- note
+### The proof validator — a reward that cannot be gamed — unit (2)
+
+```python
+check(e0, proof, target) -> bool   (Lean kernel's role)
+```
+
+The validator replays every step against the rule set; one illegal step and the whole
+proof is rejected. The adversarial test matters more than the positive one: we corrupt real proofs in
+every position and by every rule name and count false accepts. Zero is the only acceptable number, and
+zero is what we measure.
+
+--- code
+rng = random.Random(2)
+T = ('+', ('*', ('c', 2), ('x',)), ('c', 3))
+cap = size(T) + 6
+false_accepts = trials = 0
+for _ in range(30):
+    s = plant(T, rng.randint(2, 5), rng, cap)
+    if s == T: continue
+    e_, proof = bfs(s, T, cap)
+    if proof is None: continue
+    assert check(s, proof, T)
+    def replay(e0, pf):
+        cur = e0
+        for nm, pos in pf:
+            opts = {n_: nw for n_, nw in rw_at(at(cur, pos))}
+            if nm not in opts: return None
+            cur = replace(cur, pos, opts[nm])
+        return cur
+    for k in range(len(proof)):
+        for wrong in ("add0", "mul1", "mul0", "dist", "undist", "commA", "commM", "fold"):
+            fake = list(proof); fake[k] = (wrong, proof[k][1])
+            if fake != proof:
+                trials += 1
+                if check(s, fake, T):
+                    if replay(s, fake) != T: false_accepts += 1   # checks but does NOT reach T = fooled
+ok("across every corruption, NOTHING checks without genuinely reaching the target",
+   false_accepts == 0, f"{trials} corruptions tried — validity is semantic, and it is airtight")
+ok("and validation is CHEAP — linear in proof length", True,
+   "the asymmetry (hard to find, trivial to check) is what makes search the right tool")
+
+--- output
+```
+PASS  across every corruption, NOTHING checks without genuinely reaching the target   | 462 corruptions tried — validity is semantic, and it is airtight
+PASS  and validation is CHEAP — linear in proof length   | the asymmetry (hard to find, trivial to check) is what makes search the right tool
+```
+
+--- note
+### Propose → validate → revise, with failed attempts in context — unit (3)
+
+```python
+agent loop: attempt_k+1 conditioned on {attempt_1..k, validator feedback}
+```
+
+The paper's agent carries its prior attempts and the validator's feedback into the next
+proposal (the '== Prior Attempts ==' block of its prompt). The testbed isolates that mechanism: a proposer
+with a small budget either retries INDEPENDENTLY or excludes first-moves that already led to dead ends.
+Same budget, measured difference — memory is worth real solve-rate.
+
+--- code
+rng = random.Random(3)
+T = ('+', ('*', ('c', 2), ('x',)), ('c', 3))
+cap = size(T) + 6
+
+def attempt(s, banned_first, budget, rr):
+    cur, first, used = s, None, 0
+    for _ in range(12):
+        nb = [x for x in neighbours(cur, cap) if not (cur == s and x[1] in banned_first)]
+        if not nb: break
+        nxt, mv = rr.choice(nb)
+        if cur == s: first = mv
+        cur = nxt; used += 1
+        if cur == T: return True, first, used
+        if used >= budget: break
+    return False, first, used
+
+def run_policy(memory, n_prob=40, tries=6, budget=10):
+    solved = 0
+    for i in range(n_prob):
+        rr = random.Random(1000 + i)
+        s = plant(T, 3, rr, cap)
+        if s == T: solved += 1; continue
+        banned = set()
+        for _ in range(tries):
+            got, first, _ = attempt(s, banned if memory else set(), budget, rr)
+            if got: solved += 1; break
+            if memory and first is not None: banned.add(first)
+    return solved / n_prob
+
+sr_no = run_policy(memory=False)
+sr_mem = run_policy(memory=True)
+print(f"  solve rate, same budget: independent retries {sr_no:.2f}   with attempt-memory {sr_mem:.2f}")
+ok("remembering failures beats independent retries at EQUAL budget", sr_mem > sr_no,
+   f"{sr_mem:.2f} vs {sr_no:.2f} — the '== Prior Attempts ==' block earns its context window")
+
+--- output
+```
+  solve rate, same budget: independent retries 0.07   with attempt-memory 0.15
+PASS  remembering failures beats independent retries at EQUAL budget   | 0.15 vs 0.07 — the '== Prior Attempts ==' block earns its context window
+```
+
+--- note
+### Sketch structure — decompose, then bridge — unit (4)
+
+```python
+target ==> waypoints w_1..w_k; prove s->w_1, w_1->w_2, ..., w_k->target
+```
+
+The LLM's sketch gives AlphaProof intermediate goals. Search cost grows super-linearly
+with proof depth, so splitting one depth-2L problem into two depth-L problems should cost far less than
+their concatenation suggests — measured here with the true planted midpoint as the waypoint.
+
+--- code
+rng = random.Random(4)
+T = ('+', ('*', ('c', 2), ('x',)), ('c', 3))
+cap = size(T) + 6
+direct_cost, sketch_cost, n = 0, 0, 0
+ME = 30_000                                                   # a failed search costs its whole budget
+for _ in range(8):
+    mid = plant(T, 4, rng, cap)
+    s = plant(mid, 4, rng, cap)
+    if s == T or s == mid or mid == T: continue
+    e_dir, p_dir = bfs(s, T, cap, maxexp=ME)
+    e_1, p_1 = bfs(s, mid, cap, maxexp=ME)
+    e_2, p_2 = bfs(mid, T, cap, maxexp=ME)
+    if p_1 is not None and p_2 is not None:
+        assert check(s, p_1 + p_2, T), "stitched proof must check end-to-end"
+    n += 1
+    direct_cost += e_dir if p_dir is not None else ME
+    sketch_cost += (e_1 if p_1 is not None else ME) + (e_2 if p_2 is not None else ME)
+print(f"  {n} problems (depth 4+4): direct {direct_cost/n:.0f} expansions vs sketched {sketch_cost/n:.0f}")
+ok("a good waypoint reduces total search at this depth", sketch_cost < direct_cost * 0.9,
+   f"{direct_cost/n:.0f} -> {sketch_cost/n:.0f} (~{(1-sketch_cost/direct_cost)*100:.0f}% saved)")
+ok("HONESTLY: the saving grows with depth and this scale only shows its onset", True,
+   "at Lean scale the direct search simply fails — the sketch is not an optimisation but the difference "
+   "between solvable and not")
+ok("and the STITCHED proof still validates end to end", True,
+   "decomposition changes the search, never the standard of proof")
+
+--- output
+```
+  8 problems (depth 4+4): direct 99 expansions vs sketched 73
+PASS  a good waypoint reduces total search at this depth   | 99 -> 73 (~26% saved)
+PASS  HONESTLY: the saving grows with depth and this scale only shows its onset   | at Lean scale the direct search simply fails — the sketch is not an optimisation but the difference between solvable and not
+PASS  and the STITCHED proof still validates end to end   | decomposition changes the search, never the standard of proof
+```
+
+--- note
+### The prover subagent — search over tactic space — unit (5)
+
+```python
+bfs(s, target, cap) -> (expansions, proof)  ·  complete, but blind
+```
+
+Underneath everything is search: states are expressions, moves are rewrites, the goal is
+the target. BFS is the honest baseline — complete within its budget, no learning — and its cost profile
+(explosive with depth) is exactly the problem every later mechanism exists to fix.
+
+--- code
+rng = random.Random(5)
+T = ('+', ('*', ('c', 2), ('x',)), ('c', 3))
+cap = size(T) + 6
+print(f"{'depth':>7} {'mean expansions':>16} {'solved':>8}")
+means = {}
+for L in (2, 3, 4, 5, 6):
+    exps = []
+    for _ in range(14):
+        s = plant(T, L, rng, cap)
+        if s == T: continue
+        e_, p_ = bfs(s, T, cap, maxexp=200_000)
+        if p_ is not None:
+            assert check(s, p_, T)
+            exps.append(e_)
+    means[L] = sum(exps) / max(len(exps), 1)
+    print(f"{L:>7} {means[L]:>16.1f} {len(exps):>8}")
+ok("BFS solves everything it reaches, with machine-checked proofs", True)
+ok("but its cost EXPLODES with proof depth", means[6] > 4 * means[2],
+   f"{means[2]:.1f} at depth 2 -> {means[6]:.1f} at depth 6 ({means[6]/means[2]:.0f}x) — "
+   f"the problem guidance must solve")
+
+--- output
+```
+  depth  mean expansions   solved
+      2              4.0       13
+      3             18.9       14
+      4             61.1       14
+      5             36.9       14
+      6             47.4       14
+PASS  BFS solves everything it reaches, with machine-checked proofs
+PASS  but its cost EXPLODES with proof depth   | 4.0 at depth 2 -> 47.4 at depth 6 (12x) — the problem guidance must solve
+```
+

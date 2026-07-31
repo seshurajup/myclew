@@ -1,0 +1,46 @@
+[
+  {
+    "text": "Try and except let you handle errors gracefully without crashing.",
+    "until_line": 4
+  },
+  {
+    "text": "Division by zero would normally crash, [shush] but we catch ZeroDivisionError.",
+    "until_line": 4
+  },
+  {
+    "text": "Accessing an invalid list index raises IndexError, and we handle it here too.",
+    "until_line": 10
+  },
+  {
+    "text": "Your program keeps running instead of stopping.",
+    "until_line": 10
+  },
+  {
+    "text": "The exception object carries a helpful message, and the as keyword lets you capture it to print or log.",
+    "until_line": 10
+  },
+  {
+    "text": "You can catch several exception types at once by grouping them in a tuple after except.",
+    "until_line": 16
+  },
+  {
+    "text": "[sigh] Else runs only when the try block succeeds with no exception, and finally runs every single time — success or failure.",
+    "until_line": 26
+  },
+  {
+    "text": "[sniff] Catching errors precisely is better than a bare except, which would silently swallow bugs you actually want to see.",
+    "until_line": 26
+  },
+  {
+    "text": "That makes finally perfect for cleanup, like closing a file, [cough] regardless of what happened above.",
+    "until_line": 26
+  },
+  {
+    "text": "And you're not limited to built-in errors — raise lets you throw your own, custom exception whenever your code hits an invalid state.",
+    "until_line": 37
+  },
+  {
+    "text": "input and output is next, video number 15. Follow so you don't miss it.",
+    "until_line": 37
+  }
+]

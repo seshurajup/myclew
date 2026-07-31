@@ -1,0 +1,51 @@
+# =====================================================================
+# EXPERIMENT: detection-threshold recall/precision sweep under the CURRENT (Monday) metric
+#   score = adjusted_edge_jaccard + 0.1 * division_jaccard  (node-over-prediction penalty)
+#
+# WHY: our 0.903 notebook fixes the graph detection threshold at 0.970. That was calibrated
+#   BEFORE the Monday metric change. This probes whether the threshold optimum moved, PER-EMBRYO,
+#   on an embryo-disjoint LOEO 2-CV (f0: train 6bba -> test UNSEEN 44b6 ; f1: train 44b6 -> test 6bba).
+#
+# HOW (cheap + honest): predict ONCE per fold at a LOW threshold (0.50) to expose the full candidate
+#   range with per-node scores, then SWEEP the pilk_post graph threshold (BIOHUB_DET_THRESHOLD) at
+#   SCORE time (CPU) with the official current-metric scorer. Reports official_score, per-embryo
+#   adjusted edge Jaccard, division_jaccard, and count_ratio at each threshold.
+#
+# Run:  bash experiments/run_detthr_sweep.sh config/exp/detthr_sweep_loeo.yml
+# =====================================================================
+name: detthr_sweep_loeo
+
+predict:
+  python:     research/cellmot_venv/bin/python
+  script:     research/official_repo/scripts/predict_unet_transformer.py
+  data_dir:   input/biohub-cell-tracking-during-development/train
+  det_threshold: 0.50        # LOW: expose the full candidate range (scores span 0.5..1.0)
+  pool_kernel_um: 5.0        # pilkwang setting (3.0 over-detects)
+  force: false               # reuse an existing low-threshold geff dir if present
+
+folds:
+  - tag: f0_test44b6
+    method:  detthr_f0
+    weights: research/official_repo/weights/loeo_conv_baseline_bs4_f0/split_0/edge_predictor_best.pth
+    splits:  research/student/loeo_valheldout_f0.json
+    split:   0
+  - tag: f1_test6bba
+    method:  detthr_f1
+    weights: research/official_repo/weights/loeo_conv_baseline_bs4_f1/split_0/edge_predictor_best.pth
+    splits:  research/student/loeo_valheldout_f1.json
+    split:   0
+
+# pilk_post env pinned to the 0.903 notebook (only BIOHUB_DET_THRESHOLD is swept)
+post_env:
+  BIOHUB_OUTPUT_MIN_TRACK_LEN: "6"
+  BIOHUB_OUTPUT_KEEP_DIVISION_COMPONENTS: "1"
+  BIOHUB_OUTPUT_FILTER_SHORT_TRACKS: "1"
+  BIOHUB_MOTION_RELINK_LEARNED_BONUS: "1.0"
+  BIOHUB_GAP_CLOSE_MAX_GAP: "2"
+  BIOHUB_GAP_CLOSE_UM: "5.8"
+  BIOHUB_OUTPUT_LINEFIT_SMOOTH: "1"
+  BIOHUB_SAFE_DIV_MAX_UM: "4.66"
+  BIOHUB_SAFE_DIV_SISTER_MAX_UM: "8.5"
+
+sweep_det_threshold: [0.90, 0.95, 0.97, 0.98, 0.99, 0.995]
+baseline_det_threshold: 0.97

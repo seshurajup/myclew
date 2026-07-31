@@ -1,0 +1,11 @@
+[
+  {
+    "after_line": 15,
+    "text": ">>> HELLO, ALICE!\\n>>> HELLO, ALICE!",
+    "caption": "positional + optional args + flags"
+  },
+  {
+    "after_line": 15,
+    "image": "artifacts/terminal.png"
+  }
+]

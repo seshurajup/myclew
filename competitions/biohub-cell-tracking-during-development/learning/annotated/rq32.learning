@@ -1,0 +1,12 @@
+@ id: rq32
+@ order: 2410
+@ title: W Additional Visualizations
+@ subtitle: RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory §W
+@ source: docs/papers/ratequant/ratequant.md
+
+--- note
+## W Additional Visualizations
+**Paper:** RATEQUANT: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory · §W · pages 23–29 · equations (none) · 0 figures.
+
+> TODO(author): the *why* of §W in 3–5 lines.
+

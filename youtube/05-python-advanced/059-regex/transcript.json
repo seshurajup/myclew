@@ -1,0 +1,42 @@
+[
+  {
+    "text": "Regular expressions let you search and manipulate text using powerful patterns instead of exact strings.",
+    "until_line": 1
+  },
+  {
+    "text": "The re module is Python's built-in engine for these patterns.",
+    "until_line": 1
+  },
+  {
+    "text": "findall scans the text and returns every substring matching your pattern — here, email addresses.",
+    "until_line": 6
+  },
+  {
+    "text": "[chuckle] The pattern reads: some word characters, an at-sign, then more word characters — the shape of an email.",
+    "until_line": 6
+  },
+  {
+    "text": "[sniff] search finds the first match, and parentheses create groups you can pull out individually.",
+    "until_line": 10
+  },
+  {
+    "text": "This pattern captures a phone number as two separate pieces, the prefix and the line number.",
+    "until_line": 11
+  },
+  {
+    "text": "[sigh] And sub replaces every match with new text — here collapsing runs of whitespace into a single space.",
+    "until_line": 15
+  },
+  {
+    "text": "Regex is dense and cryptic at first, but incredibly powerful once the symbols click.",
+    "until_line": 15
+  },
+  {
+    "text": "[groan] Learn a few core patterns, and text cleaning and extraction that once took loops becomes a single line.",
+    "until_line": 15
+  },
+  {
+    "text": "dates and times is next, video number 60. Comment PYTHON if you want the cheat sheet.",
+    "until_line": 15
+  }
+]

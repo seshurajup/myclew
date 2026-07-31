@@ -1,0 +1,4 @@
+[
+  {"after_line": 14, "text": ">>> Point(x=3, y=4)", "caption": "free __repr__ and __init__"},
+  {"after_line": 15, "text": ">>> 5.0", "caption": "still a normal method"}
+]

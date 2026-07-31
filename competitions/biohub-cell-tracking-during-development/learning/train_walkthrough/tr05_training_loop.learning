@@ -1,0 +1,94 @@
+@ id: tr05
+@ order: 165
+@ title: train_unet_transformer.py — the training loop
+@ subtitle: lines 782–915: the 5-step train_epoch, combined loss, grad-clip step
+@ source: research/pilkwang_support_pack/repo/scripts/train_unet_transformer.py
+
+--- note
+## `train_epoch` — five steps per batch (lines 830–891)
+Each batch runs the whole pipeline end-to-end. The five commented steps in the source are exactly
+the tr03/tr04 pieces wired together:
+```python
+# 1. Encode: UNet features + per-frame detection logits
+unet_out, det_logits = model.encode(imgs)                    # (B,W,C,*sp), list of W (B,1,*sp)
+# 2. Detection loss over all W frames
+det_loss = sum(compute_detection_loss(det_logits[i], coords[:,i], masks[:,i], det_neg_weight)
+               for i in range(W)) / W                        # recall-tilted BCE (tr04)
+# 3. Per-frame detect → match → index UNet features
+for i in range(W):
+    det_c, det_p, det_m, matches = detect_and_match(det_logits[i], coords[:,i], masks[:,i], ...)
+    unet_feat = model._index_features(unet_out[:,i], det_c, det_m)   # gather feats at detections
+# 4. Per-pair edge prediction + loss
+edge_logits = model.predict_edges(...)                       # transformer over detected nodes
+pair_target = build_matched_edge_targets(...)                # GT links re-indexed onto detections
+edge_loss = sum(block_losses) / len(block_losses)            # focal-BCE link loss (tr01)
+# 5. Combined loss
+loss = edge_loss + det_loss_weight * det_loss                # linking + weighted detection
+```
+**[Domain]** the model is supervised on **its own detections**, not the GT nodes — so it learns to
+link exactly the cells its detector actually finds. That's why detection and linking co-train.
+
+--- note
+### The optimiser step (888–891) — the universal five lines
+Identical to pt08, but on the **combined** loss. Grad-clipping at norm 1.0 keeps the two-headed model
+stable:
+```python
+optimizer.zero_grad()                                        # clear old grads
+loss.backward()                                              # backprop through BOTH heads + UNet
+torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)      # stabilise (two losses can spike)
+optimizer.step()                                             # apply the update
+```
+Below we reproduce the combined-loss step on real targets: a detection term (recall-tilted BCE on a
+real GT-voxel map) plus a link term (focal-BCE on a real transition matrix), and confirm the summed
+loss **drops** after one AdamW step.
+
+--- code
+import torch, torch.nn as nn, torch.nn.functional as F        # layers + losses
+import numpy as np, zarr                                       # real data
+ROOT = "/home/seshu/kaggle/2026/biohub-cell-tracking-during-development"  # root
+TRAIN = f"{ROOT}/input/biohub-cell-tracking-during-development/train"     # embryos
+G = f"{TRAIN}/6bba_062c8d37.geff"                             # one embryo
+nid = np.asarray(zarr.open(f"{G}/nodes/ids")[:]); nt_ = np.asarray(zarr.open(f"{G}/nodes/props/t/values")[:])
+src = np.asarray(zarr.open(f"{G}/edges/ids")[:][:,0]); tgt = np.asarray(zarr.open(f"{G}/edges/ids")[:][:,1])
+ids0, ids1 = nid[nt_==0], nid[nt_==1]                        # frame 0 / 1 node ids
+r = {n:i for i,n in enumerate(ids0)}; c = {n:i for i,n in enumerate(ids1)}  # index maps
+M = torch.zeros(len(ids0), len(ids1))                       # GT transition matrix
+for s,d in zip(src,tgt):                                     # every GT edge
+    if s in r and d in c: M[r[s], c[d]] = 1.0               # mark links
+det_target = torch.zeros(1, 8, 16, 16); det_target[0, :len(ids0)%8, 0, 0] = 1.0  # tiny GT-voxel map
+det_head = nn.Conv3d(4, 1, 1); link = nn.Parameter(torch.randn_like(M))  # a detect head + link logits
+feat = torch.randn(1, 4, 8, 16, 16)                         # a UNet-like feature map
+opt = torch.optim.AdamW(list(det_head.parameters())+[link], lr=5e-2)  # optimiser over both heads
+def combined():                                             # the file's step-5 loss shape
+    det = F.binary_cross_entropy_with_logits(det_head(feat)[:,0], det_target)  # detection term
+    edge = F.binary_cross_entropy(torch.softmax(link,0), M, reduction="none")  # link focal-BCE
+    p = torch.softmax(link,0)*M + (1-torch.softmax(link,0))*(1-M)              # p_correct
+    edge = (((1-p)**2)*edge).mean()                          # focal weighting
+    return edge + 1.0*det                                    # edge + det_loss_weight·det
+before = float(combined())                                  # loss before
+opt.zero_grad(); l = combined(); l.backward()               # backprop combined loss
+torch.nn.utils.clip_grad_norm_(list(det_head.parameters())+[link], 1.0)  # clip
+opt.step()                                                  # apply
+{"combined_before": round(before,4), "combined_after": round(float(combined()),4)}  # drops
+
+--- output
+```
+{'combined_before': 1.0598, 'combined_after': 1.0067}
+```
+
+--- note
+### `--max-iters` and the timing print (802–910)
+For quick smoke-runs the loop can `_cycle(loader)` and stop after `max_iters` batches regardless of
+dataset size. It also prints a **data / forward / backward** timing breakdown each epoch — the honest
+way to see whether the input pipeline (zarr streaming) or the GPU is the bottleneck. `train_epoch`
+returns `(avg_edge_loss, avg_det_loss)` for logging. **Next → tr06: evaluate + the main train() +
+CLI, including the key change — checkpoint on the division metric.**
+
+--- shape
+step 1 encode → UNet feats + det logits<br>
+step 2 det loss (×W frames)<br>
+step 3 detect→match→index<br>
+step 4 edge predict + loss (×W−1)<br>
+step 5 loss = edge + det_w·det<br>
+clip_grad_norm_(·, 1.0) → step
+

@@ -1,0 +1,16 @@
+@ id: hp02
+@ order: 1010
+@ title: 2 Related Works
+@ subtitle: Hilbert Operator for Progressive Encoding (HOPE) §2
+@ source: docs/papers/hope-hilbert/hope-hilbert.md
+
+--- note
+## 2 Related Works
+**Paper:** Hilbert Operator for Progressive Encoding (HOPE) · §2 · pages 3–3 · 0 numbered equation(s), 0 figure(s).
+
+> TODO(author): the *why* of this section in 3–5 lines, then teach each formula below.
+> Source markdown: `docs/papers/hope-hilbert/hope-hilbert.md`
+
+--- note
+**[Recap]** TODO(author): 3 bullets — the claim, the mechanism, the consequence for our own models.
+

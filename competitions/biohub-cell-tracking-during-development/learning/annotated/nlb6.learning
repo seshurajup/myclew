@@ -1,0 +1,96 @@
+@ id: nlb6
+@ order: 1250
+@ title: Basics 6 — an optimizer is a memory (momentum's 43-gradient horizon)
+@ subtitle: Momentum as an EMA and as an argmin, and how little of the past it keeps (§4.3)
+@ source: docs/papers/nested-learning/nested-learning.md
+
+--- note
+## The state you never called a parameter
+Momentum keeps `m ← βm + g`. Expand it: `mₜ = Σᵢ βⁱ gₜ₋ᵢ` — a *memory of past gradients* with
+exponentially decaying weights. The paper's §4.3 makes the consequence concrete: with the standard
+`β = 0.9`, the last **6** gradients carry 50% of the momentum and the last **43** carry 99%. Everything
+older than ~43 steps contributes <1%, so the optimizer is structurally short-sighted — which is exactly
+why continual learning breaks (eq. 45) and why the paper builds deeper momenta (§4.4) and multi-scale
+memory (M³, §7.2).
+
+--- note
+### Compute the horizon the paper quotes
+`contribution of the i-th past gradient = βⁱ(1−β)`; cumulate until 50% and 99%.
+
+--- code
+import torch, torch.nn as nn, torch.nn.functional as F      # the whole paper is linear algebra + autograd
+
+import sys; sys.path.insert(0, "learning")
+import vizkit as vz                                            # the shared visual + explainability layer
+
+DEV = torch.device("cuda" if torch.cuda.is_available() else "cpu")   # every proof runs on the GPU
+torch.set_default_device(DEV)                                  # so EVERY tensor/module below is on DEV
+# These cells PROVE matrix identities, so they need full fp32: TF32 truncates the mantissa to 10 bits
+# and an identity that holds to 1e-6 in fp32 only holds to ~1e-3 in TF32. Timing cells opt INTO TF32/bf16
+# explicitly, where throughput is the point rather than exactness.
+torch.backends.cuda.matmul.allow_tf32 = False; torch.backends.cudnn.allow_tf32 = False
+torch.manual_seed(0); torch.set_printoptions(precision=4, sci_mode=False)
+print(f"device: {DEV}" + (f" | {torch.cuda.get_device_name(0)}" if DEV.type == "cuda" else ""))
+
+def ok(name, cond, extra=""):                                  # a lesson's PROOF prints PASS/FAIL, never prose
+    print(("PASS  " if cond else "FAIL  ") + name + (f"   | {extra}" if extra else ""))
+
+def close(a, b, tol=1e-5):                                     # float-safe equality for matrix identities
+    return torch.allclose(a, b, atol=tol, rtol=tol)
+
+def newton_schulz(G, steps=5, eps=1e-7):                       # the orthogonalisation used by Muon/M3
+    a, b, c = 3.4445, -4.7750, 2.0315                          # the standard quintic coefficients
+    X = G / (G.norm() + eps)
+    tall = X.shape[0] > X.shape[1]
+    if tall: X = X.T
+    for _ in range(steps):
+        A = X @ X.T; X = a * X + (b * A + c * A @ A) @ X
+    return X.T if tall else X
+
+beta = 0.9
+contrib = torch.tensor([beta ** i * (1 - beta) for i in range(400)])   # beta^i (1-beta)
+cum = contrib.cumsum(0)
+mass6, mass43 = float(cum[5]), float(cum[42])                   # mass held by the last 6 / 43 gradients
+print(f"beta={beta}:  last 6 gradients hold {mass6:.1%} of the momentum, last 43 hold {mass43:.1%}")
+ok("paper's claim: the last ~6 gradients hold about half", 0.45 <= mass6 <= 0.55, f"{mass6:.3f}")
+ok("paper's claim: the last ~43 hold about 99%", 0.98 <= mass43 <= 0.995, f"{mass43:.3f}")
+ok("anything older than ~43 steps is negligible", (1 - mass43) < 0.02, f"tail={1-mass43:.4f}")
+print("(the paper rounds: exactly 6 -> 46.9% and 43 -> 98.8%; the point stands, the horizon is tiny)")
+
+--- output
+```
+device: cuda | NVIDIA GeForce RTX 5090
+beta=0.9:  last 6 gradients hold 46.9% of the momentum, last 43 hold 98.9%
+PASS  paper's claim: the last ~6 gradients hold about half   | 0.469
+PASS  paper's claim: the last ~43 hold about 99%   | 0.989
+PASS  anything older than ~43 steps is negligible   | tail=0.0108
+(the paper rounds: exactly 6 -> 46.9% and 43 -> 98.8%; the point stands, the horizon is tiny)
+```
+
+--- note
+### The same momentum, written as an argmin
+Eq. 13: `mₜ₊₁ = argmin_m −⟨m, ∇L⟩ + ‖m−mₜ‖²/(2η)`. Solving it gives `mₜ + η∇L` — the momentum buffer is
+an associative memory fitted by gradient descent, one level below the weights.
+
+--- code
+d = 5; m_t = torch.randn(d); g = torch.randn(d); eta = 0.2
+m_rule = m_t + eta * g                                          # the EMA-style update (alpha = 1)
+m = m_t.clone().requires_grad_(True)
+opt = torch.optim.LBFGS([m], max_iter=100)
+def closure():
+    opt.zero_grad()
+    obj = -(m * g).sum() + (m - m_t).pow(2).sum() / (2 * eta)    # -<m, grad> + prox
+    obj.backward(); return obj
+opt.step(closure)
+ok("momentum argmin (eq. 13) == the momentum update", close(m.detach(), m_rule, 1e-4))
+
+--- output
+```
+PASS  momentum argmin (eq. 13) == the momentum update
+```
+
+--- note
+**[Recap]** momentum is a decaying *memory of gradients* with a ~43-step horizon,
+and it is fitted by its own gradient descent one level below the weights — the first "extra level" the
+paper points at. **Next → §1: why any of this is needed.**
+
