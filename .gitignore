@@ -8,3 +8,8 @@ kaggle.json
 .env
 *.pem
 *.key
+
+# ===== python bytecode (915 .pyc files leaked in via a sync before this rule) =====
+__pycache__/
+*.pyc
+*.pyo
