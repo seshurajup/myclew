@@ -167,7 +167,7 @@ def run(cfg):
         if hw.get("allow_tf32"):
             torch.backends.cuda.matmul.allow_tf32 = True
             torch.backends.cudnn.allow_tf32 = True
-    except Exception:
+    except Exception:  # noqa: BLE001 — standalone worker: no hardware profile = safe defaults, not a crash
         pass
 
     # ---- XAI: derive every knob from a MEASURED number ----

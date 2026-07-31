@@ -75,8 +75,13 @@ def mux_audio_video(video_path, audio_path, out_path):
     if not ff:
         raise RuntimeError("mux_audio_video needs ffmpeg on PATH (install ffmpeg / imageio-ffmpeg)")
     cmd = [ff, "-y", "-i", str(video_path), "-i", str(audio_path),
+           "-map", "0:v:0", "-map", "1:a:0",                       # explicit maps: default pick can mux silence
            "-c:v", "copy", "-c:a", "aac", "-shortest", str(out_path)]
-    r = subprocess.run(cmd, capture_output=True, text=True)
+    try:
+        r = subprocess.run(cmd, capture_output=True, text=True,
+                           timeout=600)  # ffmpeg can hang on a corrupt input; stream-copy mux is fast
+    except subprocess.TimeoutExpired:
+        raise RuntimeError(f"ffmpeg mux timed out after 600s: {video_path}")
     if r.returncode != 0:
         raise RuntimeError(f"ffmpeg mux failed: {r.stderr[-300:]}")
     return {"path": str(out_path)}

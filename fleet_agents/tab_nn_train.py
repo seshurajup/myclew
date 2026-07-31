@@ -21,8 +21,9 @@ def _device(gpu=None):
     return "cuda" if torch.cuda.is_available() else "cpu"
 
 
-def _make_mlp(d_in, d_out, width=256, blocks=3, dropout=0.2):
+def _make_mlp(d_in, d_out, width=256, blocks=3, dropout=0.2, loop_r=1):
     import torch.nn as nn
+    from .layer_grow import loop_expand              # shared Loopie layer-loop primitive (fleet-wide)
 
     class ResBlock(nn.Module):
         def __init__(self, d):
@@ -32,8 +33,11 @@ def _make_mlp(d_in, d_out, width=256, blocks=3, dropout=0.2):
         def forward(self, x):
             return x + self.net(x)
 
+    # residual blocks are the natural Loopie unit — "one transform + one local refinement". loop_expand
+    # repeats each ResBlock loop_r× with SHARED weights → deeper effective refinement at 0 extra params.
+    stored = [ResBlock(width) for _ in range(blocks)]
     layers = [nn.Linear(d_in, width), nn.BatchNorm1d(width), nn.ReLU(), nn.Dropout(dropout)]
-    layers += [ResBlock(width) for _ in range(blocks)]
+    layers += loop_expand(stored, loop_r)
     layers += [nn.Linear(width, d_out)]
     return nn.Sequential(*layers)
 
@@ -45,7 +49,7 @@ def _task_kind(cfg, y):
 
 
 def train_nn(cfg, epochs=60, width=256, blocks=3, lr=1e-3, seed=42, fe=False,
-             dropout=0.2, weight_decay=1e-4, n_folds=None, gpu=None, patience=None):
+             dropout=0.2, weight_decay=1e-4, n_folds=None, gpu=None, patience=None, loop_r=1):
     """OOF neural-tabular training. Returns ({'nn': {'oof','test','cv'}}, meta) — same shape as tab-train.
     dropout: residual-block dropout probability (regularization).
     weight_decay: AdamW L2 weight decay.
@@ -79,7 +83,7 @@ def train_nn(cfg, epochs=60, width=256, blocks=3, lr=1e-3, seed=42, fe=False,
     oof = np.zeros(len(y)) if d_out == 1 else np.zeros((len(y), d_out))
     test_acc = None
     for tr, va in folds:
-        net = _make_mlp(Xs.shape[1], d_out, width, blocks, dropout=dropout).to(dev)
+        net = _make_mlp(Xs.shape[1], d_out, width, blocks, dropout=dropout, loop_r=loop_r).to(dev)
         opt = torch.optim.AdamW(net.parameters(), lr=lr, weight_decay=weight_decay)
         xt = torch.tensor(Xs[tr]).to(dev)
         if kind == "regression":
@@ -136,7 +140,8 @@ class TabNnTrain(BaseAgent):
                              blocks=int(spec.get("blocks", 3)), seed=int(spec.get("seed", 42)),
                              fe=bool(spec.get("fe", False)), dropout=float(spec.get("dropout", 0.2)),
                              weight_decay=float(spec.get("weight_decay", 1e-4)),
-                             n_folds=spec.get("n_folds"), gpu=spec.get("gpu"), patience=spec.get("patience"))
+                             n_folds=spec.get("n_folds"), gpu=spec.get("gpu"), patience=spec.get("patience"),
+                             loop_r=int(spec.get("loop_r", 1)))
         cv = res["nn"]["cv"]
         msg = f"tab-nn-train: neural-tabular OOF CV({cfg.metric})={cv:.5f} on {meta['device']} — ensemble diversity member"
         self.log(msg, kind="finding", recommendation="blend the NN OOF with GBDTs via blend-optimize (decorrelated)")

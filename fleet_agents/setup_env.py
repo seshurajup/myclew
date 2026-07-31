@@ -48,7 +48,20 @@ CU128_STACK = {
     "nvidia-cufft-cu12":      "11.3.3.83",
     "nvidia-nvjitlink-cu12":  "12.8.93",
     "nvidia-nccl-cu12":       "2.29.3",
+    "nvidia-cudnn-cu12":      "9.8.0.87",    # DL primitives (torch/onnx); loads on sm_120
 }
+# RAPIDS / cuDF GPU-dataframe stack — VERIFIED groupby on sm_120 (2026-07-23). Same cu12 family;
+# gives GPU pandas for the big tabular assembles (Track A: 3.78M rows). Install from pypi.nvidia.com.
+RAPIDS_STACK = {
+    "cudf-cu12":              "25.8.0",
+    "rmm-cu12":               "25.8.0",
+    "pylibcudf-cu12":         "25.8.0",
+    "libcudf-cu12":           "25.8.0",
+    "librmm-cu12":            "25.8.0",
+    "nvidia-cuda-nvcc-cu12":  "12.9.86",
+    "nvidia-cuda-runtime-cu12": "12.9.79",
+}
+RAPIDS_INDEX = "https://pypi.nvidia.com"   # pip install --extra-index-url=RAPIDS_INDEX ...
 # cu13/cu130 packages that POISON the sm_120 stack (bare names = cu13 wheels dragged in by torch+cu130).
 CU13_POISON = ("torch==*cu130*", "nvidia-cuda-nvrtc", "nvidia-cuda-runtime", "nvidia-cublas",
                "nvidia-curand", "nvidia-cusolver", "nvidia-cusparse", "nvidia-cufft", "nvidia-cuda-cupti",

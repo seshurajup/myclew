@@ -10,6 +10,23 @@ every Playground winner. All sklearn/numpy, offline-verifiable, CompConfig-agnos
   • residual-boost           — fit model B on the residuals of a baseline A; final = A + B (cdeotte lever).
   • knn-feature              — leak-safe OOF kNN target-mean + distance meta-features.
   • full-retrain-calibrator  — the 100%-train retrain iteration count iters×(1+1/(K-1)) + seed-averaging.
+
+Lifted from google-research/tabfm (https://github.com/google-research/tabfm · lessons
+learning/annotated/tfm*.learning · no paper exists, so the code at the pinned commit IS the reference):
+  • appearance_ordinal_encode — codes ordered by first appearance/frequency, not alphabet (tfm unit 5).
+  • two_stage_clip            — z-score outlier CLIPPING in two passes, because one pass under-detects when
+                                the outlier inflates the σ it is measured against (unit 10).
+  • noise_then_quantile       — RTDL quantile transform with noise before fitting and n_quantiles scaled to
+                                the row count instead of a fixed 1000 (unit 12).
+  • train_range_clip          — fit clip bounds on TRAIN, apply at test, so an unseen extreme cannot walk
+                                off the distribution the model was fitted on (unit 13).
+  • order_sensitivity         — THE GATE. Measures whether a fitted predictor's output actually changes when
+                                you permute columns. We measured that trees and forests give +0.00% from
+                                column-shuffle TTA (they are order-invariant: the permuted tree IS the same
+                                tree), while TabFM's own forward moves by 4e-2. So view-ensembling is only
+                                worth running when this returns non-zero — check before you spend the compute.
+  • view_ensemble             — tabfm's EnsembleGenerator idea (one frozen predictor, N views) with that
+                                gate wired in front of it.
 """
 from __future__ import annotations
 import numpy as np
@@ -125,6 +142,135 @@ def seed_average(pred_fn, seeds):
     """Average predictions over seeds (variance reduction for rank/threshold metrics). pred_fn(seed)->array."""
     preds = [np.asarray(pred_fn(s), float) for s in seeds]
     return np.mean(preds, axis=0)
+
+
+# ---------------------------------------------------------------- tabfm lifts (github.com/google-research/tabfm)
+def appearance_ordinal_encode(col, min_frequency=None):
+    """Ordinal codes ordered by FREQUENCY then first appearance — not by alphabet (tabfm unit 5).
+
+    Which arbitrary integer a category gets is arbitrary; which *arbitrariness* is not. Ordering by
+    frequency puts common categories at small indices, so a model that treats the code as a magnitude sees
+    a meaningful ordering rather than alphabetical noise. Categories rarer than `min_frequency` fold into a
+    single bucket. Unknown values at transform time map to -1 rather than raising.
+    """
+    a = np.asarray(["NA" if v is None or (isinstance(v, float) and v != v) else str(v)
+                    for v in np.asarray(col).ravel()], dtype=object)
+    vals, counts = np.unique(a, return_counts=True)
+    if min_frequency:
+        rare = set(vals[counts < int(min_frequency)].tolist())
+        if rare:
+            a = np.asarray(["__RARE__" if v in rare else v for v in a], dtype=object)
+            vals, counts = np.unique(a, return_counts=True)
+    # frequency-descending, ties broken by first appearance so the mapping is deterministic
+    first = {v: int(np.argmax(a == v)) for v in vals.tolist()}
+    order = sorted(vals.tolist(), key=lambda v: (-int(counts[vals.tolist().index(v)]), first[v]))
+    mapping = {v: i for i, v in enumerate(order)}
+    return np.asarray([mapping.get(v, -1) for v in a], dtype=float), mapping
+
+
+def two_stage_clip(X, threshold=4.0):
+    """Two-pass z-score clipping (tabfm unit 10). Returns (clipped, lower, upper).
+
+    One pass under-detects: a single extreme value inflates the σ it is being measured against. So pass one
+    clips on the raw σ, pass two recomputes σ on the already-clipped data and clips again. Values are
+    CLIPPED, never dropped — a row's other features are still informative, and in tabular comps rows are
+    the scarce resource.
+    """
+    A = np.asarray(X, float).copy()
+    lo = hi = None
+    for _ in range(2):
+        mu, sd = np.nanmean(A, axis=0), np.nanstd(A, axis=0)
+        sd = np.where(sd > 1e-12, sd, 1.0)
+        lo, hi = mu - threshold * sd, mu + threshold * sd
+        A = np.clip(A, lo, hi)
+    return A, lo, hi
+
+
+def noise_then_quantile(X, n_quantiles=None, noise=1e-3, random_state=0, output="normal"):
+    """RTDL quantile transform: add noise BEFORE fitting, and scale n_quantiles to the data (tabfm unit 12).
+
+    Quantile-transforming a tied column memorises the exact breakpoints of those ties; a little noise breaks
+    them so the mapping generalises. `n_quantiles` defaults to a data-dependent value — tabfm's shipped
+    transformer chose 10 for 20 rows and 166 for 5000, where a fixed 1000 would over-fit a small column.
+    Returns (transformed, fitted_transformer) so test data reuses the TRAIN fit.
+    """
+    from sklearn.preprocessing import QuantileTransformer
+    A = np.asarray(X, float)
+    n = max(A.shape[0], 1)
+    nq = int(n_quantiles) if n_quantiles else max(10, min(1000, n // 30 or 10))
+    rs = np.random.RandomState(random_state)
+    qt = QuantileTransformer(n_quantiles=min(nq, n), output_distribution=output,
+                             subsample=max(n, 10_000), random_state=random_state)
+    Z = qt.fit_transform(A + noise * rs.randn(*A.shape) * (np.nanstd(A, axis=0, keepdims=True) + 1e-12))
+    return Z, qt
+
+
+def train_range_clip(X_train, X_test, threshold=4.0):
+    """Fit clip bounds on TRAIN, apply them to TEST (tabfm unit 13).
+
+    The quiet detail in tabfm's PreprocessingPipeline: at transform time it clips to bounds learned during
+    fit. A model — frozen foundation model or fitted GBM — only behaves where it was fitted, so an unseen
+    extreme in the test set must not be allowed outside that range. Returns (train_clipped, test_clipped).
+    """
+    tr, lo, hi = two_stage_clip(X_train, threshold)
+    te = np.clip(np.asarray(X_test, float), lo, hi)
+    return tr, te
+
+
+def order_sensitivity(predict_fn, X, n_probe=8, random_state=0):
+    """**Run this BEFORE any view-ensembling.** Does permuting columns change the prediction at all?
+
+    tabfm ensembles over dataset VIEWS (feature shuffles × label shifts × categorical permutations ×
+    normalisations) because its network's output genuinely depends on column order — measured at 4e-2 on the
+    real architecture. A tree does not: it splits on feature CONTENT, so the permuted model is the same
+    model and column-shuffle TTA bought exactly +0.00% on both a DecisionTree and a RandomForest in our
+    measurement. This function separates the two cases so we never pay for TTA that cannot work.
+
+    `predict_fn(X) -> 1-D or 2-D predictions`. Returns the mean absolute movement and a verdict.
+    """
+    A = np.asarray(X, float)
+    base = np.asarray(predict_fn(A), float)
+    rs = np.random.RandomState(random_state)
+    moves = []
+    for _ in range(int(n_probe)):
+        perm = rs.permutation(A.shape[1])
+        p = np.asarray(predict_fn(A[:, perm]), float)
+        moves.append(float(np.abs(p - base).mean()))
+    m = float(np.mean(moves))
+    scale = float(np.abs(base).mean()) + 1e-12
+    rel = m / scale
+    return {"mean_abs_move": m, "relative_move": rel,
+            "order_sensitive": rel > 1e-6,
+            "verdict": ("view-ensembling CAN help — the output depends on column order"
+                        if rel > 1e-6 else
+                        "order-INVARIANT predictor: column-shuffle views are identical, do not spend the "
+                        "compute (measured +0.00% on trees/forests)")}
+
+
+def view_ensemble(predict_fn, X, n_views=16, transforms=None, random_state=0, gate=True):
+    """tabfm's EnsembleGenerator idea for any frozen predictor — with `order_sensitivity` in front of it.
+
+    One predictor, N information-preserving views, averaged. Views are column permutations plus any
+    `transforms` (callables applied to X, e.g. different normalisations). `gate=True` refuses to waste
+    compute on an order-invariant predictor and says so, rather than silently returning the single-view
+    answer dressed up as an ensemble.
+    """
+    A = np.asarray(X, float)
+    if gate:
+        chk = order_sensitivity(predict_fn, A, random_state=random_state)
+        if not chk["order_sensitive"] and not transforms:
+            return {"pred": np.asarray(predict_fn(A), float), "n_views": 1, "gated": True,
+                    "reason": chk["verdict"]}
+    rs = np.random.RandomState(random_state)
+    preds = [np.asarray(predict_fn(A), float)]
+    for _ in range(max(int(n_views) - 1, 0)):
+        perm = rs.permutation(A.shape[1])
+        preds.append(np.asarray(predict_fn(A[:, perm]), float))
+    for t in (transforms or []):
+        preds.append(np.asarray(predict_fn(np.asarray(t(A), float)), float))
+    P = np.stack(preds)
+    return {"pred": P.mean(0), "n_views": int(P.shape[0]), "gated": False,
+            "disagreement": float(P.std(0).mean())}
 
 
 # ---------------------------------------------------------------- agents

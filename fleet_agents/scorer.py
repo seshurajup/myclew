@@ -40,7 +40,7 @@ def _runs(mlflow=MLFLOW, experiment=EXPERIMENT):
                 if v == v and abs(v) != float("inf"):     # drop nan/inf metrics
                     m[x["key"]] = v
             except (TypeError, ValueError):
-                pass
+                pass    # a non-numeric metric value is logging noise, never a scoring input
         s = m.get("official_score", m.get("golden_cv", m.get("adj_edge_jaccard")))
         if _finite(s):
             out.append((r["info"].get("run_name", r["info"]["run_id"][:8]), m.get("golden_cv", s), m))

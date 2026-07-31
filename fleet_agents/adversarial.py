@@ -49,7 +49,7 @@ def report(q, worker):
             if int(n_splits) != len(folds):
                 probs.append(f"fold-count {len(folds)} != expected n_splits={int(n_splits)}")
         except (TypeError, ValueError):
-            pass
+            pass    # an unparsable n_splits is a spec typo, not a leak signal — the fold checks above still ran
     ok = not probs
     verdict = ("EMBRYO-DISJOINT ✓ (correct CV axis)" if ok else "LEAK: " + "; ".join(probs))
     return ("done", {"embryo_disjoint": ok, "adversarial_auc": ADVERSARIAL_AUC, "folds": fold_desc,

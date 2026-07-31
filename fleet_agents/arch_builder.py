@@ -239,6 +239,56 @@ def build(q, worker):
 # ════════════════════════════════════════════════════════════════════════════════════════════════════
 
 MODERN_CATALOG = [
+    # ---- ARCHITECTURE, from the 2026 papers we studied end-to-end -------------------------------
+    # Kimi Team, "Kimi K3: Open Frontier Intelligence", arXiv:2607.24653
+    #   paper: https://arxiv.org/pdf/2607.24653 · local: docs/papers/kimi-k3/kimi-k3.md
+    #   lessons: learning/annotated/k302.learning (every formula proved) · config verified against
+    #   https://huggingface.co/moonshotai/Kimi-K3/blob/main/config.json (config.json only, no weights)
+    # Behrouz et al., "Nested Learning", NeurIPS 2025 — https://alibehrouz.com/files/NL.pdf
+    #   local: docs/papers/nested-learning/nested-learning.md · lessons: learning/annotated/nl*.learning
+    # LFM2.5-Encoders: Fast at Long Context, Even on CPU (Liquid AI)
+    #   blog: https://www.liquid.ai/blog/lfm2-5-encoders
+    #   config: https://huggingface.co/LiquidAI/LFM2.5-Encoder-350M/blob/main/config.json
+    #   local: docs/papers/lfm25-encoders/model_card.md · lessons: learning/annotated/lfm*.learning
+    {"name": "hybrid-shortconv-attention-interleave", "category": "architecture",
+     "what": "LFM2.5-Encoders (https://www.liquid.ai/blog/lfm2-5-encoders, published config "
+             "LiquidAI/LFM2.5-Encoder-350M): replace MOST attention layers with gated width-3 DEPTHWISE "
+             "short convs, keeping a minority of full-attention layers for global mixing. The shipped 350M "
+             "interleaves 10 conv + 6 attention (layer_types), so 62% of the depth never builds an LxL "
+             "matrix; conv is O(L·k) against attention's O(L²), and GQA at 2:1 halves KV in the six layers "
+             "that do attend",
+     "when": "LONG sequences on scarce parallelism — our volume-time regime (199x100 frames) and a 2xT4 box, "
+             "where there is no spare compute to hide a quadratic term behind. Attack the layer COUNT before "
+             "optimising the attention kernel",
+     "constraint": "attention layers are MANDATORY, not optional: ten stacked width-3 convs reach only ±10 "
+             "tokens (the measured span is smaller still, since influence decays), so a pure-conv stack "
+             "cannot see a document. And the MAC saving is nearly length-INDEPENDENT (it collapses to "
+             "n_attn/n_layers), so it cannot be the adoption gate — the WALL-CLOCK crossover must be "
+             "measured, because a naive depthwise Conv1d is overhead-bound at short L and can be SLOWER",
+     "evidence": "lfm*.learning, 18/18 units proven: fitted exponents conv L^~1 vs attention L^~2 on a 5090; "
+             "full 16-layer stacks on CPU measured 1.02x at L=256 -> 1.49x at 2048 -> 1.56x at 4096, with "
+             "the isolated conv block 5.1x cheaper than attention at L=4096. NOT reproduced: the ModernBERT "
+             "throughput comparison (needs both checkpoints)"},
+    {"name": "situ-glu-bounded-activation", "category": "architecture",
+     "what": "SiTU-GLU (K3 eq. 12 + Appendix B): gate = β₁·tanh(z/β₁)·sigmoid(z), linear branch clipped at β₂ → a PROVED activation ceiling ‖·‖∞ ≤ β₁β₂. K3 ships β₁=4.0, β₂=25.0 (hidden_act='situ'), i.e. a hard ceiling of exactly 100",
+     "when": "any low-bit / bf16 / very-wide training where an activation outlier is what actually kills a run; β tanh(z/β) = z + O(z³/β²), so it is the identity where it matters and only bites on outliers",
+     "constraint": "two extra elementwise ops per FFN; the ceiling is only meaningful if BOTH factors are bounded — clipping just the gate does nothing",
+     "evidence": "k312.learning proves the bound over ±1e3 inputs and confirms β₁β₂=100 from the published config; an unbounded SiLU-GLU reaches >1e5 on the same inputs"},
+    {"name": "channel-wise-decay-memory", "category": "architecture",
+     "what": "Kimi Delta Attention (K3 eq. 1): the delta rule with a PER-CHANNEL forget gate, S ← (I − βkkᵀ)diag(α)S + βkvᵀ, α = exp(g) with g = g_min·sigmoid(e^A z) ∈ (g_min,0) so α ∈ (e^g_min, 1) by construction",
+     "when": "a recurrent/memory head that must hold several timescales at once (fast local detail + slow context) with O(d²) state instead of an O(T) cache",
+     "constraint": "parameterise the LOG of the decay or it drifts out of (0,1); chunked training (eq. 4) is an approximation whose drift GROWS with chunk size — measured, not free",
+     "evidence": "k302.learning: >50× faster chunked than token-by-token at d=128/T=4096 on the 5090, and rows with slower α provably hold more energy (corr>0.3)"},
+    {"name": "attention-over-depth", "category": "architecture",
+     "what": "Attention Residuals (K3 eqs. 8-10): layer l takes a softmax over the outputs of ALL earlier layers in its block (attn_res_block_size=12 in the published config) instead of only adding the previous one",
+     "when": "deep stacks where late layers need early features directly; blocking bounds the cost to O(block²) instead of O(depth²)",
+     "constraint": "one extra projection per source layer; a plain residual is the one-hot special case, so the win has to be measured against it",
+     "evidence": "k302.learning renders the real depth-attention matrix: the last layer takes >30% of its read from before its immediate predecessor"},
+    {"name": "cms-multi-frequency-blocks", "category": "training",
+     "what": "Continuum Memory System (NL eqs. 70-71): a chain of blocks updated every C^(l) steps — fill in the spectrum between attention (freq ∞) and a frozen MLP (freq 0) so fast blocks adapt while slow ones keep persistent knowledge",
+     "when": "continual / long-context setups where a single update rate means either forgetting or not adapting; also the cheapest way to add 'levels' to an existing model",
+     "constraint": "gate the OPTIMISER step, not the forward pass, so inference cost is unchanged; wired via train_tricks_pack.cms_param_groups/cms_step_gate",
+     "evidence": "nl07.learning: measured parameters-written-per-step equals the predicted Σ n_l/C_l to <2%, and Integrated Gradients shows the fastest level carrying 80.2% of the output"},
     # ---- ARCHITECTURE ----------------------------------------------------------------------------
     {"name": "moe-conditional-compute", "category": "architecture",
      "what": "sparse Mixture-of-Experts: a router fires top-k experts/token — big TOTAL capacity at small ACTIVE compute (Gemma-4 26B-A4B); route by density / dev-stage for heterogeneous data",

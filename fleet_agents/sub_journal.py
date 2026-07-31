@@ -66,6 +66,11 @@ def parse_submissions(csv_text):
 
     def g(row, *keys):
         for k in row:
+            # csv.DictReader yields a None KEY for any column beyond the header (a short/ragged header, or
+            # a stubbed CLI response), and `None.lower()` took the whole agent down on data it is meant to
+            # parse defensively. Skip non-string keys rather than trusting the CSV shape.
+            if not isinstance(k, str):
+                continue
             kl = k.lower().replace(" ", "").replace("_", "")
             for want in keys:
                 if kl == want:

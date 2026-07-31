@@ -74,6 +74,13 @@ class DivTemporalFeas(BaseAgent):
                 f"[{worker}] div-temporal-feas {verdict['decision']}: {verdict['recommendation']}")
 
     def _verdict(self, res):
+        # `overall` is absent whenever the feasibility pass produced no usable rows (no data, or a stubbed
+        # scorer). Indexing it raised KeyError and crashed the agent instead of reporting that it had
+        # nothing to judge -- a verdict of "no data" is a legitimate answer, a traceback is not.
+        if not isinstance(res, dict) or "overall" not in res:
+            return {"decision": "no-data",
+                    "recommendation": "div-temporal-feas produced no `overall` block (no scored rows) -- "
+                                      "nothing to judge; check the scorer output before re-running"}
         ov = res["overall"]; stages = res.get("by_stage", {}); emb = res.get("by_embryo", {})
         hard = res.get("hard_invisible", {})
         stage_temps = [v["temporal"] for v in stages.values() if v.get("temporal") is not None]

@@ -1,0 +1,95 @@
+#!/usr/bin/env python
+"""torch-prof — run a script under torch.profiler and print the result as a
+terminal table (no browser, no TensorBoard needed).
+
+    torch-prof train.py --epochs 1
+    torch-prof --sort cpu --rows 30 bench.py
+    torch-prof --stacks train.py        # attribute kernels to Python source lines
+
+Profiles the whole script. For a long training run don't profile end to end —
+put torch.profiler.schedule() around a handful of steps instead; `tprof-snippet`
+prints that boilerplate.
+
+A Chrome/Perfetto trace is always written alongside the table, so the same run
+can be inspected visually later via `torch-trace-summary` or ui.perfetto.dev.
+"""
+import argparse
+import os
+import runpy
+import sys
+import time
+
+parser = argparse.ArgumentParser(add_help=False)
+parser.add_argument("--sort", default="cuda",
+                    choices=["cuda", "cpu", "cuda_mem", "cpu_mem", "count"])
+parser.add_argument("--rows", type=int, default=25)
+parser.add_argument("--trace", default=None, help="output trace path")
+parser.add_argument("--stacks", action="store_true",
+                    help="record Python stacks (slower, but shows source lines)")
+parser.add_argument("--no-shapes", action="store_true")
+parser.add_argument("-h", "--help", action="store_true")
+args, rest = parser.parse_known_args()
+
+if args.help or not rest:
+    print(__doc__)
+    sys.exit(0 if args.help else 2)
+
+import torch
+from torch.profiler import ProfilerActivity, profile
+
+script, argv = rest[0], rest[1:]
+trace_path = args.trace or f"trace-{os.path.basename(script)}-{time.strftime('%Y%m%d-%H%M%S')}.json"
+
+SORT_KEYS = {
+    "cuda": "self_cuda_time_total",
+    "cpu": "self_cpu_time_total",
+    "cuda_mem": "self_cuda_memory_usage",
+    "cpu_mem": "self_cpu_memory_usage",
+    "count": "count",
+}
+# PyTorch renamed the CUDA sort keys to "device" in 2.x; fall back if needed.
+sort_by = SORT_KEYS[args.sort]
+
+activities = [ProfilerActivity.CPU]
+if torch.cuda.is_available():
+    activities.append(ProfilerActivity.CUDA)
+
+sys.argv = [script] + argv
+sys.path.insert(0, os.path.dirname(os.path.abspath(script)) or ".")
+
+print(f"\033[36m▶ profiling {script} {' '.join(argv)}\033[0m", file=sys.stderr)
+start = time.time()
+
+with profile(
+    activities=activities,
+    record_shapes=not args.no_shapes,
+    profile_memory=True,
+    with_stack=args.stacks,
+) as prof:
+    try:
+        runpy.run_path(script, run_name="__main__")
+    except SystemExit as e:
+        if e.code not in (0, None):
+            raise
+
+elapsed = time.time() - start
+if torch.cuda.is_available():
+    torch.cuda.synchronize()
+
+print(f"\n\033[36m── torch.profiler — top {args.rows} by {args.sort} "
+      f"(wall {elapsed:.1f}s) ──\033[0m")
+try:
+    table = prof.key_averages().table(sort_by=sort_by, row_limit=args.rows)
+except (KeyError, AssertionError):
+    sort_by = sort_by.replace("cuda", "device")
+    table = prof.key_averages().table(sort_by=sort_by, row_limit=args.rows)
+print(table)
+
+if args.stacks:
+    print(f"\n\033[36m── grouped by Python source line ──\033[0m")
+    print(prof.key_averages(group_by_stack_n=5).table(sort_by=sort_by, row_limit=args.rows))
+
+prof.export_chrome_trace(trace_path)
+print(f"\n\033[32m✓ trace: {trace_path}\033[0m")
+print(f"  terminal summary : torch-trace-summary {trace_path}")
+print(f"  visual timeline  : open at https://ui.perfetto.dev")

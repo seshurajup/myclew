@@ -195,13 +195,18 @@ def _mpnn_layer(torch, nn):
 
 
 def build_mpnn(in_dim, hidden=64, n_layers=3, out_dim=1, edge_dim=0, aggr="mean", task="graph",
-               readout="mean", norm=True, dropout=0.0, directional=False, device=None):
+               readout="mean", norm=True, dropout=0.0, directional=False, device=None, loop_r=1):
     """Build a general MPNN (pure torch). `task`='node' → per-node output (N, out_dim); 'graph' → per-graph
     output (G, out_dim) via `readout` pooling. N layers each: MPNNLayer → norm → GELU → residual. Grounded:
     GraphSAGE stack + residual (runtime 1st/2nd/5th), global-mean readout (runtime 1st). Returns an nn.Module.
+
+    `loop_r` > 1 applies each stored message-passing layer R× with SHARED weights (Loopie layer-loop,
+    arXiv:2607.16051) — the recurrent-GNN / Universal-Transformer idea: more propagation hops (effective
+    depth) at 0 extra params. loop_r=1 = the plain distinct-layer stack (backward-compatible).
     """
     import torch
     from torch import nn
+    from .layer_grow import loop_expand              # shared Loopie layer-loop primitive (fleet-wide)
     dev = device or ("cuda" if torch.cuda.is_available() else "cpu")
     MPNNLayer = _mpnn_layer(torch, nn)
 
@@ -215,13 +220,15 @@ def build_mpnn(in_dim, hidden=64, n_layers=3, out_dim=1, edge_dim=0, aggr="mean"
                 [MPNNLayer(hidden, hidden, edge_dim=edge_dim, aggr=aggr, directional=directional)
                  for _ in range(n_layers)])
             self.norms = nn.ModuleList([nn.LayerNorm(hidden) if norm else nn.Identity() for _ in range(n_layers)])
+            # execution order: each (layer, norm) pair repeated loop_r× (SAME objects → shared weights)
+            self._exec = loop_expand(list(zip(self.layers, self.norms)), loop_r)
             self.act = nn.GELU()
             self.drop = nn.Dropout(dropout)
             self.head = nn.Linear(hidden, out_dim)
 
         def encode(self, x, edge_index, edge_attr=None):
             h = self.inp(x)
-            for lyr, nrm in zip(self.layers, self.norms):
+            for lyr, nrm in self._exec:
                 h = h + self.drop(self.act(nrm(lyr(h, edge_index, edge_attr))))   # residual
             return h
 

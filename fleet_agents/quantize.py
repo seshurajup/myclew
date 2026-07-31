@@ -13,6 +13,84 @@ from .base import BaseAgent, COMP
 DETECT_BUDGET_SPF = round(12 * 3600 * 2 / 19_900 * 0.65, 2)     # ~2.82 GPU-s/f (2×T4 credited)
 
 
+# ---------------------------------------------------------------- RateQuant (2026): the bit allocator
+# "RateQuant: Optimal Mixed-Precision KV Cache Quantization via Rate-Distortion Theory", arXiv:2605.06675
+# paper: https://arxiv.org/pdf/2605.06675 · local: docs/papers/ratequant/ratequant.md
+# lessons: learning/annotated/rq*.learning (16/16 formulas proved) · builds on HOPE's J/Δparams criterion
+# in `compress_select` (https://arxiv.org/pdf/2607.21366)
+#
+# Everything above quantises UNIFORMLY — one bit-width for the whole tensor/model. RateQuant's point is
+# that this is provably suboptimal whenever importance varies, and the optimum is closed-form:
+#   • measured fact: quantisation MSE is exponential in the bit-width, D(b) = α β^{-b} with β ≈ 4
+#     (verified by fit, R² > 0.995, lesson rqb1) — one extra bit ⇒ a quarter of the squared error;
+#   • therefore the optimal allocation is LOGARITHMIC in importance: b_i* = b̄ + (ln w_i − mean ln w)/ln β,
+#     so a β-times more important tensor earns exactly ONE more bit;
+#   • the price of uniform allocation is exactly the arithmetic/geometric-mean ratio of the importances —
+#     computable BEFORE writing any kernel, so it tells you whether mixed precision is worth doing at all;
+#   • marginal gains diminish, so greedy integer allocation over legal widths is near-optimal (lesson rq16).
+def mixed_precision_gain(importances):
+    """AM/GM of the importances = the exact factor uniform bit-width loses (RateQuant eq. 4).
+
+    THE diagnostic to run first: ≈1 means every tensor matters equally and mixed precision is pointless;
+    3 means a uniform quantiser is paying 3× the achievable distortion at the same bit budget.
+    """
+    import numpy as np
+    w = np.asarray(list(importances), dtype=float)
+    w = w[w > 0]
+    if w.size == 0:
+        return 1.0
+    return float(w.mean() / np.exp(np.log(w).mean()))
+
+
+def allocate_bits(importances, budget_bits=None, avg_bits=4.0, legal=(2, 3, 4, 8), beta=4.0):
+    """Importance → a bit-width per tensor (RateQuant eqs. 2 + 5), snapped to widths a kernel has.
+
+    `importances` are any positive per-tensor weights — the paper uses ‖∂L/∂K‖²_F, which its eq. 9 derives
+    as the first-order coefficient of the loss in the quantisation perturbation (so it is the right signal,
+    not a heuristic). Returns {"bits": [...], "gain": AM/GM, "avg_bits": float, "budget_bits": int}.
+
+    The allocation is invariant to rescaling every importance (only relative log-importance matters), and
+    it respects the budget: bits are handed back from the least important tensor until it fits.
+    """
+    import numpy as np
+    w = np.asarray(list(importances), dtype=float)
+    n = w.size
+    if n == 0:
+        return {"bits": [], "gain": 1.0, "avg_bits": 0.0, "budget_bits": 0}
+    w = np.clip(w, 1e-30, None)
+    legal = sorted(int(b) for b in legal)
+    B = float(budget_bits) if budget_bits else float(avg_bits) * n
+    lw = np.log(w)
+    raw = B / n + (lw - lw.mean()) / np.log(beta)                # eq. 2: log-importance allocation
+    bits = np.array([min(legal, key=lambda c: abs(c - r)) for r in raw], dtype=float)
+    order = np.argsort(w)                                        # give bits back cheapest-first
+    guard = 0
+    while bits.sum() > B + 1e-9 and guard < 10 * n:
+        guard += 1
+        for i in order:
+            cur = int(bits[i])
+            lower = [c for c in legal if c < cur]
+            if lower:
+                bits[i] = lower[-1]
+                break
+        else:
+            break
+    return {"bits": [int(b) for b in bits], "gain": mixed_precision_gain(w),
+            "avg_bits": float(bits.mean()), "budget_bits": int(B)}
+
+
+def bit_importance(grads):
+    """‖∂L/∂X‖²_F per tensor — RateQuant eq. 9's importance weight, from gradients you already have."""
+    out = []
+    for g in grads:
+        try:
+            out.append(float((g.detach() ** 2).sum()) if hasattr(g, "detach")
+                       else float((g ** 2).sum()))
+        except Exception:  # noqa: BLE001
+            out.append(0.0)
+    return out
+
+
 def estimate_speedup(base_spf, int8=True, tome_r=0.0):
     """PURE (data-wise tested). base_spf = current T4 s/frame. INT8-PTQ on T4 ≈ ×0.55 (2× matmul on the ViT's
     dominant GEMMs, partial due to non-quant ops). ToMe merging fraction tome_r∈[0,0.6] of tokens per block cuts

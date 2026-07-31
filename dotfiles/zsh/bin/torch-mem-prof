@@ -1,0 +1,110 @@
+#!/usr/bin/env python
+"""torch-mem-prof — run a script with CUDA allocator history recording, then
+print a terminal memory report and dump a snapshot for later inspection.
+
+    torch-mem-prof train.py --batch-size 64
+
+Answers the two questions behind most CUDA OOMs: what the real peak was versus
+what the allocator was holding (fragmentation), and which call sites allocated
+the largest still-live blocks at peak.
+
+The .pickle it writes can be loaded at https://docs.pytorch.org/memory_viz for
+the visual timeline; everything below prints without leaving the terminal.
+"""
+import collections
+import os
+import runpy
+import sys
+import time
+
+if len(sys.argv) < 2:
+    print(__doc__)
+    sys.exit(2)
+
+import torch
+
+if not torch.cuda.is_available():
+    sys.exit("no CUDA device visible to torch")
+
+script, argv = sys.argv[1], sys.argv[2:]
+stamp = time.strftime("%Y%m%d-%H%M%S")
+snap_path = f"memsnap-{os.path.basename(script)}-{stamp}.pickle"
+
+# stacks="python": the default records C++ frames, which come back as
+# unsymbolised `torch::unwind::unwind()` and attribute nothing useful.
+torch.cuda.memory._record_memory_history(
+    enabled="all", context="all", stacks="python", max_entries=200_000
+)
+
+sys.argv = [script] + argv
+sys.path.insert(0, os.path.dirname(os.path.abspath(script)) or ".")
+
+print(f"\033[36m▶ recording allocator history for {script}\033[0m", file=sys.stderr)
+rc = 0
+try:
+    runpy.run_path(script, run_name="__main__")
+except SystemExit as e:
+    rc = e.code if isinstance(e.code, int) else 0
+except torch.cuda.OutOfMemoryError:
+    # An OOM is exactly when this report matters most — report, don't re-raise.
+    print("\n\033[31m✗ CUDA OOM — reporting allocator state at failure\033[0m")
+    rc = 1
+finally:
+    torch.cuda.synchronize()
+
+    GiB = 1024 ** 3
+    print(f"\n\033[36m── CUDA memory ──\033[0m")
+    for i in range(torch.cuda.device_count()):
+        peak_alloc = torch.cuda.max_memory_allocated(i) / GiB
+        peak_resv = torch.cuda.max_memory_reserved(i) / GiB
+        free, total = torch.cuda.mem_get_info(i)
+        print(f"  [{i}] peak allocated {peak_alloc:7.2f} GiB   "
+              f"peak reserved {peak_resv:7.2f} GiB   card {total/GiB:.1f} GiB")
+        if peak_resv > 0:
+            waste = 100 * (peak_resv - peak_alloc) / peak_resv
+            colour = "32" if waste < 15 else ("33" if waste < 35 else "31")
+            print(f"      reserved-but-unused at peak: \033[{colour}m{waste:.1f}%\033[0m "
+                  f"(high => fragmentation; PYTORCH_CUDA_ALLOC_CONF="
+                  f"expandable_segments:True already set)")
+
+    # Largest live blocks grouped by allocating call site.
+    try:
+        snap = torch.cuda.memory._snapshot()
+        by_frame = collections.defaultdict(lambda: [0, 0])
+        for seg in snap.get("segments", []):
+            for blk in seg.get("blocks", []):
+                if blk.get("state") != "active_allocated":
+                    continue
+                frames = blk.get("frames") or []
+                site = "?"
+                for f in frames:
+                    fn = f.get("filename", "")
+                    if "site-packages" not in fn and "torch/" not in fn:
+                        site = f"{os.path.basename(fn)}:{f.get('line')} {f.get('name','')}"
+                        break
+                else:
+                    if frames:
+                        f = frames[0]
+                        site = f"{os.path.basename(f.get('filename',''))}:{f.get('line')} {f.get('name','')}"
+                by_frame[site][0] += blk["size"]
+                by_frame[site][1] += 1
+        if by_frame:
+            print(f"\n\033[36m── largest live allocations by call site ──\033[0m")
+            print(f"  {'MiB':>10} {'blocks':>8}  site")
+            for site, (sz, n) in sorted(by_frame.items(), key=lambda kv: -kv[1][0])[:20]:
+                print(f"  {sz/1024**2:10.1f} {n:8d}  {site[:80]}")
+    except Exception as exc:
+        print(f"  (snapshot analysis unavailable: {exc})")
+
+    print(f"\n\033[36m── allocator summary ──\033[0m")
+    print(torch.cuda.memory_summary(abbreviated=True))
+
+    try:
+        torch.cuda.memory._dump_snapshot(snap_path)
+        print(f"\033[32m✓ snapshot: {snap_path}\033[0m  "
+              f"(visual timeline: https://docs.pytorch.org/memory_viz)")
+    except Exception as exc:
+        print(f"snapshot dump failed: {exc}")
+    torch.cuda.memory._record_memory_history(enabled=None)
+
+sys.exit(rc)

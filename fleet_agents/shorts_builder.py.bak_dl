@@ -1,0 +1,1112 @@
+"""shorts_builder — tutorial (code, transcript, language) → YouTube Short (1080×1920 MP4) with a
+Remotion-rendered typing-code animation styled with facebook/astryx neutral-theme tokens.
+
+The REAL renderer is the Node/Remotion project at myclew/remotion_shorts/ (remotion-dev/remotion:
+React composition `CodeShort` types the code char-by-char with Prism syntax highlighting in the
+astryx dark syntax palette, blinking cursor, auto-scroll, and timed transcript captions). This agent
+is the Python orchestrator: it normalizes the 3 spec inputs into props.json, ensures node_modules,
+and shells `npx remotion render`. When Node/Chromium is unavailable (offline test box, Kaggle), it
+falls back to a Python-native typing renderer (pygments + PIL, same astryx palette) streamed through
+video_builder's imageio writer — so the data-wise test stays green offline.
+
+Spec (3 core inputs, all reusable/config-driven):
+  • code       — tutorial source text, or code_path to a file
+  • transcript — narration; plain lines (spread over duration), "start|end|text" timed lines,
+                 or a list of {start,end,text} dicts; or transcript_path
+  • language   — "python" | "rust" (any Prism/pygments lexer name works)
+Optional: out, title, cps (chars/sec typing, 30), fps (30), tail_seconds (2), max_seconds (90; hard
+          YouTube Shorts cap 180), voice (af_heart), music/speech ("off" to disable), audio (user wav),
+          force_pil (skip Remotion), size ("WxH" for the PIL fallback only; Remotion is 1080×1920).
+Post-render verify_sync() MEASURES caption↔narration↔video alignment (audio RMS in/out of caption
+windows + caption-bubble pixels at segment midpoints) and reports sync=OK/FAIL in the message.
+"""
+from __future__ import annotations
+import json
+import os
+import shutil
+import subprocess
+from pathlib import Path
+
+from .base import BaseAgent, AUTO, COMP
+
+YT_ROOT = Path.home() / "kaggle" / "2026" / "youtube"      # the video factory home (not the comp dir)
+GALLERY = YT_ROOT / "gallery"
+REMOTION_DIR = YT_ROOT / "remotion_shorts"
+
+# astryx neutral theme, dark stops (mirror of remotion_shorts/src/astryxTheme.ts)
+ASTRYX = {
+    "body": (27, 27, 27), "surface": (38, 38, 38), "code_bg": (10, 10, 10),
+    "border": (64, 64, 64), "text": (229, 229, 229), "muted": (163, 163, 163),
+}
+ASTRYX_SYNTAX = {  # pygments token-name prefix → RGB (astryx dark syntax stops)
+    "Keyword": (239, 168, 255), "String": (166, 210, 162), "Comment": (163, 163, 163),
+    "Number": (255, 179, 127), "Name.Function": (160, 202, 255), "Name.Class": (239, 168, 255),
+    "Name.Builtin": (239, 168, 255), "Name.Decorator": (238, 193, 47), "Operator": (163, 163, 163),
+    "Punctuation": (82, 82, 82), "Name": (229, 229, 229),
+}
+
+
+def parse_transcript(raw):
+    """Normalize transcript input → [{start,end,text}] (seconds). Accepts list-of-dicts,
+    'start|end|text' lines, or plain lines (timed later against the typing duration)."""
+    if isinstance(raw, list):
+        out = []
+        for s in raw:
+            e = {"start": float(s.get("start", -1)), "end": float(s.get("end", -1)), "text": str(s["text"])}
+            if s.get("until_line") is not None:
+                e["until_line"] = int(s["until_line"])                  # pace-lock override
+            out.append(e)
+        return out
+    lines = [ln.strip() for ln in str(raw or "").splitlines() if ln.strip()]
+    timed, plain = [], []
+    for ln in lines:
+        parts = ln.split("|", 2)
+        try:
+            if len(parts) == 3:
+                timed.append({"start": float(parts[0]), "end": float(parts[1]), "text": parts[2].strip()})
+                continue
+        except ValueError:
+            pass
+        plain.append(ln)
+    if timed and not plain:
+        return timed
+    return [{"start": -1.0, "end": -1.0, "text": t} for t in plain]     # timed by build_props vs duration
+
+
+def build_props(code, transcript, language, title=None, cps=30, tail_seconds=2.0, max_seconds=90.0):
+    """Assemble the CodeShort props dict; spread untimed transcript lines evenly over the typing time."""
+    segs = parse_transcript(transcript)
+    max_seconds = min(float(max_seconds), 180.0)                        # YouTube Shorts hard limit (3 min)
+    typing = len(code) / max(float(cps), 1.0)
+    if segs and segs[0]["start"] < 0:                                   # plain lines → even spread
+        dur = min(max_seconds, typing + float(tail_seconds))
+        step = dur / len(segs)
+        segs = [{**s, "start": round(i * step, 2), "end": round((i + 1) * step, 2)}
+                for i, s in enumerate(segs)]                            # keep until_line etc.
+    return {"code": code, "language": str(language).lower(), "title": title or f"tutorial.{ 'rs' if str(language).lower()=='rust' else 'py'}",
+            "segments": segs, "cps": float(cps), "tailSeconds": float(tail_seconds),
+            "maxSeconds": max_seconds}
+
+
+def pace_lock(props):
+    """Attach charEnd to every segment: by a segment's end, exactly that many chars are typed —
+    typing can NEVER run ahead of (or lag) the narration. Mapping = explicit until_line per
+    transcript line when given, else code lines spread evenly across segments; always ends at
+    the full code length."""
+    code, segs = props["code"], props["segments"]
+    if not segs:
+        return props
+    lines = code.split("\n")
+    line_end = []
+    n = 0
+    for ln in lines:
+        n += len(ln) + 1
+        line_end.append(min(n, len(code)))
+    n_lines, n_segs = len(lines), len(segs)
+    prev = 0
+    for i, sg in enumerate(segs):
+        li = int(sg.get("until_line") or round((i + 1) * n_lines / n_segs))
+        li = max(1, min(li, n_lines))
+        ce = line_end[li - 1]
+        sg["charEnd"] = max(ce, prev)                                   # monotonic
+        prev = sg["charEnd"]
+    segs[-1]["charEnd"] = len(code)                                     # everything typed by the last caption
+    return props
+
+
+def normalize_outputs(raw):
+    """4th input: interpreter outputs / media events. JSON list of
+    {after_line | at, text?, image?, caption?, marks?:[{x,y,w,h} normalized]}. Image file paths are
+    inlined as base64 data URIs (works in Remotion AND keeps props self-contained); marks draw
+    highlight boxes on the image (paper-figure-with-markers use case)."""
+    import base64
+    import mimetypes
+    out = []
+    for ev in (raw or []):
+        e = {}
+        if ev.get("after_line") is not None:
+            e["afterLine"] = int(ev["after_line"])
+        if ev.get("at") is not None:
+            e["at"] = float(ev["at"])
+        for k in ("text", "caption", "marks"):
+            if ev.get(k):
+                e[k] = ev[k]
+        img = ev.get("image")
+        if img:
+            if str(img).startswith(("data:", "http")):
+                e["image"] = img
+            else:
+                mime = mimetypes.guess_type(str(img))[0] or "image/png"
+                e["image"] = f"data:{mime};base64," + base64.b64encode(Path(img).read_bytes()).decode()
+        if e:
+            out.append(e)
+    return out
+
+
+def render_remotion(props, out_path, fps=30, timeout=1800):
+    """Render props via `npx remotion render` in remotion_shorts/. Raises on any failure so the
+    caller can fall back to the PIL renderer."""
+    if not shutil.which("npx"):
+        raise RuntimeError("npx not on PATH")
+    if not (REMOTION_DIR / "node_modules" / "remotion").exists():
+        r = subprocess.run(["npm", "install", "--no-audit", "--no-fund"], cwd=str(REMOTION_DIR),
+                           capture_output=True, text=True, timeout=timeout)
+        if r.returncode != 0:
+            raise RuntimeError(f"npm install failed: {r.stderr[-300:]}")
+    props_file = AUTO / "shorts_props.json"
+    props_file.parent.mkdir(parents=True, exist_ok=True)
+    props_file.write_text(json.dumps(props))
+    r = subprocess.run(["npx", "remotion", "render", "src/index.ts", "CodeShort", str(out_path),
+                        f"--props={props_file}", "--crf=18", "--jpeg-quality=95"], cwd=str(REMOTION_DIR),
+                       capture_output=True, text=True, timeout=timeout)
+    if r.returncode != 0 or not Path(out_path).exists():
+        raise RuntimeError(f"remotion render failed: {(r.stderr or r.stdout)[-400:]}")
+    return {"path": str(out_path), "renderer": "remotion"}
+
+
+def render_pil(props, out_path, fps=30, size=(540, 960)):
+    """Python-native fallback: pygments-highlighted typing frames (astryx palette) streamed to MP4
+    (GIF if ffmpeg absent). Same layout idea as Short.tsx at reduced fidelity."""
+    import numpy as np
+    import imageio
+    from PIL import Image, ImageDraw, ImageFont
+    from pygments import lex
+    from pygments.lexers import get_lexer_by_name
+    W, H = size
+    fs = max(10, W // 45)
+    try:
+        font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf", fs)
+    except OSError:
+        font = ImageFont.load_default()
+    lexer = get_lexer_by_name(props["language"], stripall=False)
+    spans = []
+    for tok, text in lex(props["code"], lexer):
+        name = str(tok).replace("Token.", "")
+        color = ASTRYX_SYNTAX.get(name) or next(
+            (c for pfx, c in ASTRYX_SYNTAX.items() if name.startswith(pfx)), ASTRYX["text"])
+        spans.append((text, color))
+    code = props["code"]
+    typing = len(code) / max(props["cps"], 1.0)
+    dur = min(props.get("maxSeconds", 90.0), max(typing, max((s["end"] for s in props["segments"]), default=0)) + props["tailSeconds"])
+    n_frames = max(int(fps), int(round(dur * fps)))
+    pad, top = W // 20, H // 8
+    line_h = fs + 4
+    is_gif = str(out_path).endswith(".gif")
+    if is_gif:
+        writer = imageio.get_writer(str(out_path), duration=1.0 / fps, loop=0)
+    else:
+        import imageio_ffmpeg  # noqa: F401  (probe: no ffmpeg plugin → caller falls back to GIF)
+        writer = imageio.get_writer(str(out_path), fps=fps, codec="libx264")
+    for f in range(n_frames):
+        t = f / fps
+        n_typed = min(len(code), int(t * props["cps"]))
+        img = Image.new("RGB", (W, H), ASTRYX["body"])
+        d = ImageDraw.Draw(img)
+        d.rectangle([pad, top, W - pad, H - top], fill=ASTRYX["code_bg"], outline=ASTRYX["border"], width=2)
+        d.rectangle([pad, top - int(2.2 * line_h), W - pad, top], fill=ASTRYX["surface"],
+                    outline=ASTRYX["border"], width=2)
+        d.text((pad + 8, top - int(1.8 * line_h)), f"{props['title']}  [{props['language']}]",
+               font=font, fill=ASTRYX["muted"])
+        x, y, left = pad + 8, top + 6, n_typed
+        for text, color in spans:
+            if left <= 0:
+                break
+            chunk, left = text[:left], left - len(text)
+            for i, ln in enumerate(chunk.split("\n")):
+                if i > 0:
+                    x, y = pad + 8, y + line_h
+                if ln and y < H - top - line_h:
+                    d.text((x, y), ln, font=font, fill=color)
+                    x += d.textlength(ln, font=font)
+        if (int(t * 2.5) % 2 == 0 or n_typed < len(code)) and y < H - top - line_h:
+            d.rectangle([x, y, x + fs // 2, y + fs], fill=ASTRYX["text"])
+        seg = next((s for s in props["segments"] if s["start"] <= t < s["end"]), None)
+        if seg:
+            d.text((pad, H - top + line_h), seg["text"][: W // (fs // 2)], font=font, fill=ASTRYX["text"])
+        writer.append_data(np.asarray(img))
+    writer.close()
+    return {"path": str(out_path), "renderer": "pil", "n_frames": n_frames}
+
+
+# ---------------------------------------------------------------- audio (music bed + clicks + narration)
+SR = 24000  # kokoro native rate; music synthesized at the same rate so the mix is trivial
+
+
+def synth_music(duration, n_chars, cps, sr=SR, seed=0):
+    """Copyright-free procedural bed: lo-fi chord pad (Am–F–C–G, detuned sines, slow attack) + soft
+    key-click transients at the typing rate while code is being typed. Pure numpy — always works.
+    (HF alternative ACE-Step 1.5 is MIT but 4B-class — overkill for a background bed; MusicGen is
+    CC-BY-NC so unusable on YouTube.)"""
+    import numpy as np
+    rng = np.random.RandomState(seed)
+    n = int(duration * sr)
+    t = np.arange(n) / sr
+    out = np.zeros(n, np.float32)
+    chords = [[220.0, 261.63, 329.63], [174.61, 220.0, 261.63],
+              [130.81, 164.81, 196.0], [196.0, 246.94, 293.66]]      # Am F C G
+    bar = 60.0 / 72 * 4                                              # 72 bpm, one chord per bar
+    for i in range(int(np.ceil(duration / bar))):
+        s0, s1 = int(i * bar * sr), min(int((i + 1) * bar * sr), n)
+        if s0 >= n:
+            break
+        seg_t = t[s0:s1] - t[s0]
+        env = np.minimum(seg_t / 0.8, 1.0) * np.minimum((bar - seg_t) / 0.6, 1.0).clip(0, 1)
+        for f in chords[i % 4]:
+            for det in (-1.5, 1.5):                                   # gentle detune → warm pad
+                out[s0:s1] += 0.045 * env * np.sin(2 * np.pi * (f + det) * seg_t
+                                                   + rng.uniform(0, 2 * np.pi))
+    typing_end = min(duration, n_chars / max(cps, 1.0))
+    click = (rng.randn(int(0.02 * sr)) * np.exp(-np.arange(int(0.02 * sr)) / (0.004 * sr))).astype(np.float32)
+    for k in range(int(typing_end * cps)):
+        p = int(k / cps * sr + rng.randint(0, sr // 100))
+        if p + click.size < n:
+            out[p:p + click.size] += 0.05 * click
+    return out
+
+
+ACE_DIR = COMP.parent / "external" / "ACE-Step"
+
+
+def music_gen(duration, prompt=None, seed=7):
+    """Generate a REAL music bed with ACE-Step v1-3.5B (Apache-2.0 weights, MIT repo — safe for
+    YouTube) in its isolated venv via remotion_shorts/ace_music.py; cached by (prompt,duration,seed)
+    so each style is generated once. Returns mono float32 @SR, or None → synth fallback."""
+    import hashlib
+    import numpy as np
+    prompt = prompt or ("lofi hip hop, chill study beat, soft piano, vinyl crackle, mellow, "
+                        "instrumental, no vocals")
+    key = hashlib.md5(f"{prompt}|{int(duration)}|{seed}".encode()).hexdigest()[:16]
+    cache = AUTO / "music_cache"; cache.mkdir(parents=True, exist_ok=True)
+    wav = cache / f"ace_{key}.wav"
+    py = ACE_DIR / ".venv" / "bin" / "python"
+    if not wav.exists():
+        if not py.exists():
+            return None
+        req = cache / f"ace_{key}_req.json"
+        req.write_text(json.dumps({"prompt": prompt, "duration": float(duration),
+                                   "seed": int(seed), "out": str(wav)}))
+        r = subprocess.run([str(py), str(REMOTION_DIR / "ace_music.py"), str(req)],
+                           capture_output=True, text=True, cwd=str(ACE_DIR), timeout=1200)
+        if r.returncode != 0 or not wav.exists():
+            return None
+    try:
+        import soundfile as sf
+        a, in_sr = sf.read(str(wav), dtype="float32", always_2d=True)
+        a = a.mean(axis=1)
+        if in_sr != SR:
+            n_out = int(round(a.size * SR / in_sr))
+            a = np.interp(np.linspace(0, a.size - 1, n_out), np.arange(a.size), a).astype(np.float32)
+        return a
+    except Exception:  # noqa: BLE001
+        return None
+
+
+VOICEBOX_DIR = COMP.parent / "external" / "voicebox"
+VOICE_REF = YT_ROOT / "common" / "voice" / "af_heart_ref.wav"
+
+
+def tts_batch_chatterbox(texts, ref_wav=None):
+    """Natural human narration: Chatterbox Turbo 350M (MIT, voicebox .venv-tts) voice-cloned from
+    our af_heart reference — supports REAL non-verbal sounds via [chuckle] [sigh] [laugh] tags and
+    fillers like "hmm". One subprocess (remotion_shorts/cbx_tts.py) loads the model once and
+    renders every segment. Returns list of float32 mono @SR, or None → Kokoro fallback."""
+    import numpy as np
+    py = VOICEBOX_DIR / ".venv-tts" / "bin" / "python"
+    ref = str(ref_wav or VOICE_REF)
+    if not py.exists() or not Path(ref).exists():
+        return None
+    req = AUTO / "cbx_req.json"; out = AUTO / "cbx_out.npz"
+    if out.exists():
+        out.unlink()
+    req.write_text(json.dumps({"texts": list(texts), "ref": ref, "out": str(out)}))
+    r = subprocess.run([str(py), str(REMOTION_DIR / "cbx_tts.py"), str(req)],
+                       capture_output=True, text=True, cwd=str(VOICEBOX_DIR), timeout=1800)
+    if r.returncode != 0 or not out.exists():
+        return None
+    z = np.load(out)
+    in_sr = int(z["sr"])
+    clips = []
+    for i in range(len(texts)):
+        a = z[str(i)]
+        if in_sr != SR:
+            n_out = int(round(a.size * SR / in_sr))
+            a = np.interp(np.linspace(0, a.size - 1, n_out), np.arange(a.size), a).astype(np.float32)
+        clips.append(a)
+    return clips
+
+
+def tts_line(text, voice="af_heart"):
+    """One narration line via Kokoro-82M (Apache-2.0, af_heart = top female voice). Returns float32
+    mono @24k. Guarded import — caller treats any failure as 'no speech'."""
+    import numpy as np
+    from kokoro import KPipeline
+    global _KPIPE
+    if "_KPIPE" not in globals() or _KPIPE is None:
+        _KPIPE = KPipeline(lang_code="a", repo_id="hexgrad/Kokoro-82M")
+    return np.concatenate([np.asarray(a, dtype=np.float32) for _, _, a in _KPIPE(text, voice=voice)])
+
+
+def _strip_tags(t):
+    """Remove [chuckle]-style non-verbal tags for engines that would read them aloud (Kokoro)."""
+    import re
+    return re.sub(r"\s*\[[a-z ]+\]\s*", " ", t).strip()
+
+
+def build_audio(props, wav_path, voice="af_heart", speech=True, music=True, gap=0.35, voice_ref=None):
+    """Full audio track for the Short. When speech is on and the transcript was untimed, RETIME the
+    caption segments from the actual narration lengths (perfect caption↔voice sync) and stretch cps
+    so typing spans the narration. Music is ducked to 55% under speech. Returns updated props."""
+    import numpy as np
+    clips = None
+    if speech:
+        if props.get("ttsEngine", "chatterbox") == "chatterbox":
+            try:
+                clips = tts_batch_chatterbox([s["text"] for s in props["segments"]], ref_wav=voice_ref)
+            except Exception:  # noqa: BLE001
+                clips = None
+        if clips is None:
+            try:
+                clips = [tts_line(_strip_tags(s["text"]), voice=voice) for s in props["segments"]]
+            except Exception:  # noqa: BLE001  (kokoro absent → music-only, never breaks the render)
+                clips = None
+    if clips:
+        for sg in props["segments"]:
+            sg["text"] = _strip_tags(sg["text"])                        # tags are audio-only, not captions
+        speech_total = sum(c.size / SR for c in clips)
+        target = props.get("targetSeconds")
+        if target:                                                     # nudge gaps toward target, but
+            lead = 1.7 if props.get("hook") else 0.5                   # NEVER pad long silence — a big
+            budget = min(float(target), props.get("maxSeconds", 90.0)) - props["tailSeconds"] - lead
+            # cap the auto-stretch gap at a natural pause (0.8s): silence longer than that reads as
+            # dead air / "voice finished but caption frozen". Reach the target with narration length,
+            # not padding — if speech is too short for the target, the video is simply shorter.
+            gap = max(gap, min(0.8, (budget - speech_total) / max(len(clips), 1)))
+        cursor = 1.7 if props.get("hook") else 0.5                     # narration starts after the card
+        for s, c in zip(props["segments"], clips):                     # retime to narration
+            s["start"] = round(cursor, 2)
+            s["speechEnd"] = round(cursor + c.size / SR, 2)             # real end of voice (no gap)
+            s["end"] = round(s["speechEnd"] + gap, 2)                   # +silence gap to hit target length
+            cursor = s["end"]
+        total = min(props.get("maxSeconds", 90.0), cursor + props["tailSeconds"])
+        props["cps"] = (len(props["code"]) / max(total - props["tailSeconds"], 1) if target
+                        else max(props["cps"], len(props["code"]) / max(total - props["tailSeconds"], 1)))
+    dur = min(props.get("maxSeconds", 90.0), max(len(props["code"]) / max(props["cps"], 1),
+                        max((s["end"] for s in props["segments"]), default=0)) + props["tailSeconds"])
+    n = int(dur * SR)
+
+    def _rms_norm(x, target):                                          # loudness-normalize a track
+        r = float(np.sqrt((x.astype(np.float64) ** 2).mean())) or 1.0
+        return (x * (target / r)).astype(np.float32)
+
+    bed = None
+    if music:
+        bed = music_gen(dur, prompt=props.get("musicPrompt"))          # ACE-Step (cached) → synth fallback
+        if bed is None:
+            bed = synth_music(dur, len(props["code"]), props["cps"])
+    if bed is None:
+        bed = np.zeros(n, np.float32)
+    bed = bed[:n] if bed.size >= n else np.pad(bed, (0, n - bed.size))
+    if clips:
+        bed = _rms_norm(bed, 0.030)                                    # bed clearly UNDER the voice
+        duck = np.ones(n, np.float32)
+        speech_track = np.zeros(n, np.float32)
+        for s, c in zip(props["segments"], clips):
+            p = int(s["start"] * SR)
+            m = min(c.size, n - p)
+            if m > 0:
+                speech_track[p:p + m] += c[:m]
+                duck[p:p + m] = 0.25                                   # music drops to 25% while speaking
+        sp = speech_track[speech_track != 0]
+        if sp.size:                                                    # normalize speech on ITS windows only
+            speech_track = speech_track * (0.15 / (float(np.sqrt((sp.astype(np.float64) ** 2).mean())) or 1.0))
+        mix = bed * duck + speech_track                                # duck the bed under narration only
+    else:
+        mix = _rms_norm(bed, 0.06) if music else bed
+    peak = float(np.abs(mix).max()) or 1.0
+    mix = (0.9 / peak) * mix if peak > 0.9 else mix                    # never clip
+    from .video_builder import write_wav
+    write_wav(mix, wav_path, sample_rate=SR)
+    return props, str(wav_path), bool(clips)
+
+
+def mux(video_path, wav_path, out_path):
+    """Attach the wav using the ffmpeg binary bundled with imageio-ffmpeg (no system ffmpeg needed)."""
+    import imageio_ffmpeg
+    ff = imageio_ffmpeg.get_ffmpeg_exe()
+    # explicit -map: without it this ffmpeg build muxed a silent track (default best-audio pick bug)
+    r = subprocess.run([ff, "-y", "-i", str(video_path), "-i", str(wav_path),
+                        "-map", "0:v:0", "-map", "1:a:0",
+                        "-c:v", "copy", "-c:a", "aac", "-ar", "48000", "-ac", "2", "-b:a", "192k",
+                        "-shortest", "-movflags", "+faststart", str(out_path)],
+                       capture_output=True, text=True)  # 48kHz stereo = YouTube's recommended ingest spec
+    if r.returncode != 0:
+        raise RuntimeError(f"mux failed: {r.stderr[-300:]}")
+    return str(out_path)
+
+
+YT_TOKEN = AUTO / "youtube_token.json"
+YT_SECRETS = Path.home() / ".google" / "oauth.json"
+YT_SCOPES = ["https://www.googleapis.com/auth/youtube.upload",
+             "https://www.googleapis.com/auth/youtube"]           # upload + playlist management
+
+
+def _yt_service():
+    """Authorized YouTube client. First run needs the USER to complete the browser OAuth consent
+    (we never touch their password); the refresh token is then cached at YT_TOKEN (chmod 600)."""
+    from google.oauth2.credentials import Credentials
+    from googleapiclient.discovery import build
+    creds = None
+    if YT_TOKEN.exists():
+        creds = Credentials.from_authorized_user_file(str(YT_TOKEN), YT_SCOPES)
+    if creds and creds.expired and creds.refresh_token:
+        from google.auth.transport.requests import Request
+        creds.refresh(Request())
+    if not creds or not creds.valid:
+        if not YT_SECRETS.exists():
+            raise RuntimeError(f"no OAuth client secrets at {YT_SECRETS} — see agent docs")
+        from google_auth_oauthlib.flow import InstalledAppFlow
+        flow = InstalledAppFlow.from_client_secrets_file(str(YT_SECRETS), YT_SCOPES)
+        # remote/SSH-friendly: fixed port, no local browser — user tunnels the port from their
+        # laptop (ssh -L 8765:localhost:8765 <host>) and opens the printed URL there.
+        creds = flow.run_local_server(port=8765, open_browser=False,
+                                      authorization_prompt_message="\nOPEN THIS URL in the browser "
+                                      "on your LAPTOP (after: ssh -L 8765:localhost:8765 <this-host>):"
+                                      "\n\n{url}\n")
+    YT_TOKEN.write_text(creds.to_json()); YT_TOKEN.chmod(0o600)
+    return build("youtube", "v3", credentials=creds)
+
+
+def build_metadata(props, hook=None):
+    """YouTube-optimized Shorts metadata: hook-first title ≤100 chars with #Shorts, a description
+    that front-loads the learning outcome + hashtags, focused tags. Used when the upload spec
+    doesn't override."""
+    lang = props["language"]
+    hook = hook or props.get("hook") or f"{props['title']} explained"
+    title = f"{hook} — {lang} in {int(max((x['end'] for x in props['segments']), default=30))}s #Shorts"[:100]
+    lines = " ".join(s["text"] for s in props["segments"][:3])
+    description = (f"{hook}\n\n{lines}…\n\nWatch the code get typed and RUN with real output."
+                   f"\n\n#Shorts #{lang} #coding #programming #learntocode")
+    tags = [lang, "shorts", "coding", "programming", "tutorial", "learntocode", f"{lang} tutorial"]
+    return {"title": title, "description": description, "tags": tags}
+
+
+def youtube_upload(video_path, title, description="", tags=None, playlist="Learn Python",
+                   privacy="private"):
+    """Upload a rendered Short PRIVATE (never public from here) and add it to `playlist` (created if
+    missing). Returns {video_id, playlist_id, url}. NOTE: brand-new API projects are additionally
+    locked private by YouTube until the project passes their audit — fine for draft workflow."""
+    from googleapiclient.http import MediaFileUpload
+    if privacy != "private":
+        raise RuntimeError("shorts-builder only uploads PRIVATE; publish manually from Studio")
+    yt = _yt_service()
+    body = {"snippet": {"title": title[:100], "description": description[:4900],
+                        "tags": (tags or ["python", "coding", "shorts"])[:15], "categoryId": "27"},
+            "status": {"privacyStatus": "private", "selfDeclaredMadeForKids": False}}
+    media = MediaFileUpload(str(video_path), mimetype="video/mp4", resumable=True)
+    req = yt.videos().insert(part="snippet,status", body=body, media_body=media)
+    resp = None
+    while resp is None:
+        _, resp = req.next_chunk()
+    vid = resp["id"]
+    pl_id = None
+    if playlist:
+        found = yt.playlists().list(part="id,snippet", mine=True, maxResults=50).execute()
+        for it in found.get("items", []):
+            if it["snippet"]["title"].strip().lower() == playlist.strip().lower():
+                pl_id = it["id"]; break
+        if not pl_id:
+            pl = yt.playlists().insert(part="snippet,status", body={
+                "snippet": {"title": playlist, "description": "Auto-built code-typing Shorts"},
+                "status": {"privacyStatus": "private"}}).execute()     # playlist private too
+            pl_id = pl["id"]
+        yt.playlistItems().insert(part="snippet", body={"snippet": {
+            "playlistId": pl_id, "resourceId": {"kind": "youtube#video", "videoId": vid}}}).execute()
+    return {"video_id": vid, "playlist_id": pl_id, "url": f"https://studio.youtube.com/video/{vid}/edit"}
+
+
+def verify_sync(video_path, segments, fps=30):
+    """CONFORMANCE CHECK — measure, don't assume, that captions/narration/video line up:
+      (a) AUDIO: decode the muxed track; narration RMS inside caption windows must dominate the
+          ducked bed outside them (ratio > 1.5).
+      (b) VIDEO: decode the frame at each caption midpoint — the caption bubble (bright text in the
+          bottom band) must be present; and absent in the final tail frame (after the last caption).
+    Deterministic because Remotion renders the same segments JSON, so the only real risk is a mux
+    offset — exactly what (a) catches. Guarded: missing pyav/ffmpeg → {"checked": False}."""
+    import numpy as np
+    res = {"checked": False, "audio_ok": None, "captions_ok": None}
+    try:
+        import tempfile
+        import wave
+        import imageio_ffmpeg
+        import imageio.v3 as iio
+        ff = imageio_ffmpeg.get_ffmpeg_exe()
+        with tempfile.TemporaryDirectory() as td:
+            wavp = f"{td}/a.wav"
+            r = subprocess.run([ff, "-y", "-v", "error", "-i", str(video_path), "-map", "0:a:0",
+                                "-ac", "1", "-ar", "24000", wavp], capture_output=True)
+            if r.returncode == 0:
+                w = wave.open(wavp)
+                a = np.frombuffer(w.readframes(w.getnframes()), np.int16).astype(np.float64)
+                sr = 24000
+                mask = np.zeros(a.size, bool)
+                for sgm in segments:
+                    mask[int(sgm["start"] * sr):int(sgm["end"] * sr)] = True
+                rin = float(np.sqrt((a[mask] ** 2).mean())) if mask.any() else 0.0
+                rout = float(np.sqrt((a[~mask] ** 2).mean())) if (~mask).any() else 1.0
+                res["rms_in"], res["rms_out"] = round(rin), round(rout)
+                res["audio_ok"] = rin > 1.5 * max(rout, 1.0)
+        frames = iio.imread(str(video_path), plugin="pyav")             # (T,H,W,3)
+        T, H = frames.shape[0], frames.shape[1]
+        band = slice(int(0.78 * H), int(0.97 * H))                      # caption zone below the code pane
+        def bright(fr):                                                 # bubble text = near-white pixels
+            return int((fr[band].max(axis=-1) > 200).sum())
+        present = [bright(frames[min(T - 1, int((sgm["start"] + sgm["end"]) / 2 * fps))]) > 50
+                   for sgm in segments]
+        tail_clear = bright(frames[T - 1]) < 50                         # tail frame: caption gone
+        res["captions_ok"] = all(present) and tail_clear
+        res["caption_hits"] = present
+        res["checked"] = True
+        res["ok"] = bool(res["captions_ok"]) and (res["audio_ok"] is not False)
+    except Exception as e:  # noqa: BLE001  (verification must never break the render)
+        res["error"] = str(e)[:200]
+    return res
+
+
+class ShortsBuilder(BaseAgent):
+    name = "shorts-builder"
+    thread = "S"; kind = "finding"
+
+    def run(self, q, worker):
+        import time
+        t_build0 = time.time()
+        s = self.spec(q)
+        code = s.get("code") or (Path(s["code_path"]).read_text() if s.get("code_path") else None)
+        transcript = s.get("transcript") or (Path(s["transcript_path"]).read_text()
+                                             if s.get("transcript_path") else "")
+        language = s.get("language", "python")
+        if not code:                                                    # demo spec so a bare fleet run works
+            code = 'def hello(name: str) -> str:\n    return f"hi {name}"\n'
+            transcript = transcript or "A tiny typed function\nf-strings format inline"
+        props = build_props(code, transcript, language, title=s.get("title"),
+                            cps=s.get("cps", 30), tail_seconds=s.get("tail_seconds", 2.0),
+                            max_seconds=s.get("max_seconds", 90.0))
+        if s.get("target_seconds"):
+            props["targetSeconds"] = float(s["target_seconds"])
+        props["hook"] = s.get("hook") or ""                             # title card = Shorts poster frame
+        if s.get("music_prompt"):
+            props["musicPrompt"] = s["music_prompt"]
+        props["ttsEngine"] = s.get("tts_engine", "chatterbox")
+        raw_outputs = s.get("outputs")
+        pace_lock(props)
+        if not raw_outputs and s.get("outputs_path"):
+            raw_outputs = json.loads(Path(s["outputs_path"]).read_text())
+        props["outputs"] = normalize_outputs(raw_outputs)
+        AUTO.mkdir(parents=True, exist_ok=True)
+        out = s.get("out") or str(AUTO / "code_short.mp4")
+        fps = int(s.get("fps", 30))
+        # audio FIRST: narration retimes captions/cps, so props must be final before the render
+        wav, has_speech = None, False
+        if s.get("music", "auto") != "off" or s.get("speech", "auto") != "off":
+            try:
+                props, wav, has_speech = build_audio(
+                    props, AUTO / "shorts_audio.wav", voice=s.get("voice", "af_heart"),
+                    speech=s.get("speech", "auto") != "off", music=s.get("music", "auto") != "off",
+                    voice_ref=s.get("voice_ref"))
+            except Exception:  # noqa: BLE001  (numpy-only path failing would be a real bug, but never
+                wav = None     # let audio kill the video)
+        # render to a "_silent" temp path; the deliverable ends up at the plain `out` path (no suffix)
+        render_out = str(Path(out).with_name(Path(out).stem + "_silent" + Path(out).suffix))
+        try:
+            if s.get("force_pil") or os.environ.get("SHORTS_FORCE_PIL"):
+                raise RuntimeError("PIL renderer forced")
+            r = render_remotion(props, render_out, fps=fps)
+        except Exception as e:  # noqa: BLE001  (no Node/Chromium/npm → offline fallback)
+            size = tuple(int(v) for v in str(s.get("size", "540x960")).split("x"))
+            try:
+                r = render_pil(props, render_out, fps=fps, size=size)
+            except Exception:  # noqa: BLE001                            # ffmpeg absent → GIF
+                render_out = str(Path(render_out).with_suffix(".gif"))
+                r = render_pil(props, render_out, fps=fps, size=size)
+            r["fallback_reason"] = str(e)[:200]
+        track = s.get("audio") or wav                                   # user wav wins over generated mix
+        if track and not str(render_out).endswith(".gif"):
+            try:
+                r["path"] = mux(render_out, track, out)
+                r["audio"] = "speech+music" if has_speech else "music"
+                Path(render_out).unlink(missing_ok=True)  # silent pre-mux render is regenerable, don't keep it
+            except Exception as e:  # noqa: BLE001
+                r["audio_error"] = str(e)[:200]
+                r["path"] = render_out                    # mux failed → silent render is the only deliverable
+        else:
+            r["path"] = render_out                        # gif, or no audio track at all: silent IS the output
+        sync = verify_sync(r["path"], props["segments"], fps=fps) if r["renderer"] == "remotion" else \
+            {"checked": False}
+        sync_word = ("OK" if sync.get("ok") else "FAIL") if sync.get("checked") else "skipped"
+        msg = (f"shorts-builder: rendered {props['language']} typing short via {r['renderer']} → {r['path']} "
+               f"({len(props['segments'])} caption segments, cps={props['cps']:.0f}, "
+               f"audio={r.get('audio', 'none')}, sync={sync_word})")
+        self.log(msg, kind="finding",
+                 recommendation="spec: code/code_path + transcript(+timings) + language; Remotion render "
+                                "(remotion_shorts/, astryx theme) when Node present, PIL fallback offline")
+        up = s.get("upload")
+        if up and sync.get("ok"):                                       # sync-gated: never upload a FAIL
+            try:
+                meta = build_metadata(props, hook=up.get("hook"))
+                info = youtube_upload(r["path"], title=up.get("title") or meta["title"],
+                                      description=up.get("description") or meta["description"],
+                                      tags=up.get("tags") or meta["tags"],
+                                      playlist=up.get("playlist", "Learn Python"))
+                r["upload"] = info
+                msg += f" | uploaded PRIVATE → {info['url']} (playlist {up.get('playlist', 'Learn Python')})"
+            except Exception as e:  # noqa: BLE001
+                r["upload_error"] = str(e)[:300]; msg += f" | upload failed: {r['upload_error']}"
+        elif up:
+            msg += " | upload SKIPPED (sync not OK)"
+        build_seconds = round(time.time() - t_build0, 1)
+        msg += f" | built in {build_seconds}s"
+        # publish to the review gallery (:9090 shorts_hub): copy + sidecar meta + PG row
+        try:
+            GALLERY.mkdir(exist_ok=True)
+            final = Path(r["path"])
+            gal = final if final.parent == GALLERY else Path(shutil.copy2(final, GALLERY / final.name))
+            playlist = ((s.get("upload") or {}).get("playlist") if isinstance(s.get("upload"), dict)
+                        else None) or s.get("playlist") or "Learn Python"
+            side = {k: v for k, v in props.items() if k != "outputs"}   # keep sidecar small (no base64)
+            side["playlist"] = playlist
+            gal.with_suffix(".json").write_text(json.dumps(
+                {"props": side, "n_outputs": len(props.get("outputs") or []),
+                 "build_seconds": build_seconds, "sync": sync, "upload": r.get("upload"),
+                 "renderer": r["renderer"]}, indent=2))
+            r["gallery"] = str(gal)
+            try:                                                        # poster = the title-card frame
+                import imageio.v3 as _iio
+                _iio.imwrite(str(gal.with_suffix(".png")),
+                             _iio.imread(str(gal), plugin="pyav", index=8))
+            except Exception:  # noqa: BLE001
+                pass
+            try:                                                        # PG = queryable source for the hub
+                segs = props["segments"]
+                record_video(gal.name, title=props["title"], language=props["language"],
+                             duration_s=round(max((x["end"] for x in segs), default=0)
+                                              + props["tailSeconds"], 1),
+                             captions=len(segs), n_outputs=len(props.get("outputs") or []),
+                             build_seconds=build_seconds, renderer=r["renderer"], sync=sync,
+                             upload=r.get("upload"), playlist=playlist,
+                             status="uploaded" if r.get("upload") else "draft")
+            except Exception:  # noqa: BLE001  (PG down → sidecar still has everything)
+                pass
+        except Exception:  # noqa: BLE001
+            pass
+        return self.done({"path": r["path"], "renderer": r["renderer"], "props": props, "sync": sync,
+                          "upload": r.get("upload"), "upload_error": r.get("upload_error"),
+                          "gallery": r.get("gallery")}, msg)
+
+
+_AGENT = ShortsBuilder()
+
+
+def run_shorts(q, worker):
+    return _AGENT.run(q, worker)
+
+
+# ---------------------------------------------------------------- postgres (kaggle_shorts)
+from .db import PG
+
+DB = "kaggle_shorts"
+
+DDL = """
+CREATE TABLE IF NOT EXISTS videos (
+    id BIGSERIAL PRIMARY KEY,
+    name TEXT UNIQUE NOT NULL,
+    title TEXT, language TEXT,
+    duration_s REAL DEFAULT 0, captions INT DEFAULT 0, n_outputs INT DEFAULT 0,
+    build_seconds REAL DEFAULT 0,
+    renderer TEXT, sync JSONB, upload JSONB, spec JSONB,
+    playlist TEXT DEFAULT 'Learn Python',
+    status TEXT DEFAULT 'draft',
+    created_at TIMESTAMPTZ DEFAULT now()
+);
+"""
+
+
+def _connect(dbname=DB):
+    import psycopg2
+    return psycopg2.connect(dbname=dbname, **PG)
+
+
+def ensure_db():
+    import psycopg2
+    con = psycopg2.connect(dbname="postgres", **PG); con.autocommit = True
+    try:
+        cur = con.cursor()
+        cur.execute("SELECT 1 FROM pg_database WHERE datname=%s", (DB,))
+        if not cur.fetchone():
+            cur.execute(f'CREATE DATABASE "{DB}"')
+    finally:
+        con.close()
+    con = _connect()
+    try:
+        cur = con.cursor()
+        cur.execute(DDL)
+        cur.execute("ALTER TABLE videos ADD COLUMN IF NOT EXISTS playlist TEXT DEFAULT 'Learn Python'")
+        con.commit()
+    finally:
+        con.close()
+
+
+def record_video(name, *, title=None, language=None, duration_s=0, captions=0, n_outputs=0,
+                 build_seconds=0, renderer=None, sync=None, upload=None, spec=None, status="draft",
+                 playlist="Learn Python"):
+    """Upsert one video row (re-render of the same name overwrites — latest build wins)."""
+    ensure_db()
+    con = _connect()
+    try:
+        con.cursor().execute("""
+            INSERT INTO videos (name,title,language,duration_s,captions,n_outputs,build_seconds,
+                                renderer,sync,upload,spec,status,playlist)
+            VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+            ON CONFLICT (name) DO UPDATE SET
+                title=EXCLUDED.title, language=EXCLUDED.language, duration_s=EXCLUDED.duration_s,
+                captions=EXCLUDED.captions, n_outputs=EXCLUDED.n_outputs,
+                build_seconds=EXCLUDED.build_seconds, renderer=EXCLUDED.renderer,
+                sync=EXCLUDED.sync, upload=EXCLUDED.upload, spec=EXCLUDED.spec,
+                status=EXCLUDED.status, playlist=EXCLUDED.playlist, created_at=now()
+        """, (name, title, language, duration_s, captions, n_outputs, build_seconds, renderer,
+              json.dumps(sync or {}), json.dumps(upload) if upload else None,
+              json.dumps(spec or {}), status, playlist))
+        con.commit()
+    finally:
+        con.close()
+
+
+def list_videos():
+    """All non-deleted videos, newest first → list of dicts for the hub."""
+    ensure_db()
+    con = _connect()
+    try:
+        cur = con.cursor()
+        cur.execute("""SELECT name,title,language,duration_s,captions,n_outputs,build_seconds,
+                              renderer,sync,upload,status,created_at,playlist
+                       FROM videos WHERE status != 'deleted' ORDER BY created_at DESC""")
+        cols = [d[0] for d in cur.description]
+        return [dict(zip(cols, r)) for r in cur.fetchall()]
+    finally:
+        con.close()
+
+
+def mark_deleted(name):
+    ensure_db()
+    con = _connect()
+    try:
+        con.cursor().execute("UPDATE videos SET status='deleted' WHERE name=%s", (name,))
+        con.commit()
+    finally:
+        con.close()
+
+
+# ---------------------------------------------------------------- review hub (:9090)
+from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler  # noqa: E402
+
+
+PORT = 9090
+
+# astryx neutral tokens, light/dark pairs via prefers-color-scheme (system theme, no default forced)
+_PAGE = """<!doctype html><html><head><meta charset="utf-8"><title>Shorts Studio</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+:root{color-scheme:light dark;
+  --bg:#fafafa;--surface:#ffffff;--elev:#f5f5f5;--border:#e5e5e5;--text:#171717;--muted:#737373;
+  --accent:#00458c;--ok:#005600;--okbg:#e4f2e2;--fail:#89001a;--failbg:#ffe8e6;
+  --up:#00458c;--upbg:#e2edfb;--shadow:0 1px 3px rgba(0,0,0,.08),0 8px 24px rgba(0,0,0,.06)}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#111214;--surface:#1b1b1b;--elev:#262626;--border:#333;--text:#e5e5e5;--muted:#a3a3a3;
+  --accent:#a0caff;--ok:#a6d2a2;--okbg:#1c2a1b;--fail:#ffaeaa;--failbg:#301b1a;
+  --up:#a0caff;--upbg:#16233a;--shadow:0 1px 3px rgba(0,0,0,.5),0 8px 24px rgba(0,0,0,.35)}}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--text);margin:0;
+  font-family:Figtree,-apple-system,'Segoe UI',Roboto,Helvetica,sans-serif}
+header{display:flex;align-items:center;gap:12px;padding:14px 24px;
+  border-bottom:1px solid var(--border);background:var(--surface);position:sticky;top:0;z-index:2}
+.logo{width:26px;height:26px;border-radius:8px;background:linear-gradient(135deg,#a0caff,#efa8ff)}
+h1{font-size:15px;margin:0;font-weight:700}
+.count{color:var(--muted);font-size:12px;margin-left:auto}
+.wrap{display:flex;min-height:calc(100vh - 55px)}
+.col{border-right:1px solid var(--border);padding:16px;overflow-y:auto}
+.pl-col{width:240px}
+.vid-col{width:340px}
+.colhead{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--muted);margin:4px 4px 12px}
+.pl{display:block;text-decoration:none;color:var(--text);border:1px solid transparent;
+  border-radius:12px;padding:12px 14px;margin-bottom:6px}
+.pl:hover{background:var(--surface)}
+.pl.active{background:var(--surface);border-color:var(--accent);box-shadow:var(--shadow)}
+.pl .nm{font-weight:700;font-size:14px}
+.pl .info{color:var(--muted);font-size:11.5px;margin-top:3px}
+.item{display:block;text-decoration:none;color:var(--text);background:var(--surface);
+  border:1px solid var(--border);border-radius:14px;padding:12px 14px;margin-bottom:10px;
+  transition:transform .12s,box-shadow .12s}
+.item:hover{transform:translateY(-1px);box-shadow:var(--shadow)}
+.item.active{border-color:var(--accent);box-shadow:var(--shadow)}
+.iname{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;
+  word-break:break-all;margin-bottom:8px}
+.row{display:flex;gap:10px;align-items:center}
+.grow{flex:1;min-width:0}
+.thumb{width:44px;height:78px;object-fit:cover;border-radius:8px;border:1px solid var(--border)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-size:10.5px;padding:2px 9px;border-radius:999px;background:var(--elev);
+  color:var(--muted);border:1px solid var(--border)}
+.chip.ok{background:var(--okbg);color:var(--ok);border-color:transparent}
+.chip.fail{background:var(--failbg);color:var(--fail);border-color:transparent}
+.chip.up{background:var(--upbg);color:var(--up);border-color:transparent}
+.player{flex:1;padding:28px;display:flex;flex-direction:column;align-items:center}
+.stage{background:var(--surface);border:1px solid var(--border);border-radius:20px;
+  padding:18px;box-shadow:var(--shadow);max-width:520px;width:100%}
+.vtitle{font-weight:700;font-size:15px;margin:2px 4px 12px}
+video{height:70vh;max-width:100%;width:auto;aspect-ratio:9/16;border-radius:14px;background:#000;
+  display:block;margin:0 auto}
+.meta{margin-top:14px;display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.meta .chip{font-size:12px;padding:4px 12px}
+.empty{color:var(--muted);margin-top:28vh;font-size:14px}
+a.studio{color:var(--up);text-decoration:none;font-weight:600}
+</style></head><body>
+<header><div class="logo"></div><h1>Shorts Studio</h1>
+<span class="count">__N__ videos · say "ready to push &lt;name&gt;" in chat to upload private</span></header>
+<div class="wrap">
+  <nav class="col pl-col"><div class="colhead">Playlists</div><div id="pls"></div></nav>
+  <nav class="col vid-col"><div class="colhead">Videos</div><div id="links"></div></nav>
+  <main class="player">
+    <div class="stage" id="stage" style="display:none">
+      <div class="vtitle" id="vtitle"></div>
+      <video id="vid" controls></video>
+      <div id="meta" class="meta"></div>
+    </div>
+    <div id="empty" class="empty">select a playlist and a video</div>
+  </main>
+</div>
+<script>
+let VIDS = __VIDS__;
+const slugify = (x) => x.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+const vslug = (v) => v.name.slice(0, -4);
+function buildPls(vids){
+  const pls = [];
+  for (const v of vids) {
+    let pl = pls.find((p) => p.name === (v.playlist || 'Learn Python'));
+    if (!pl) { pl = {name: v.playlist || 'Learn Python', vids: []}; pls.push(pl); }
+    pl.vids.push(v);
+  }
+  return pls;
+}
+let PLS = buildPls(VIDS);
+const chip = (txt, cls) => '<span class="chip ' + (cls || '') + '">' + txt + '</span>';
+function chipsFor(v, big){
+  const c = [];
+  if (v.sync && v.sync.checked) c.push(chip(v.sync.ok ? 'sync OK' : 'sync FAIL', v.sync.ok ? 'ok' : 'fail'));
+  c.push(chip(v.upload ? 'UPLOADED' : 'draft', v.upload ? 'up' : ''));
+  if (v.lang) c.push(chip(v.lang));
+  c.push(chip('~' + v.dur + 's'));
+  if (v.build) c.push(chip('built ' + v.build + 's'));
+  if (big) {
+    c.push(chip(v.captions + ' captions'));
+    c.push(chip(v.outputs + ' outputs'));
+    c.push(chip(v.mb + ' MB'));
+    if (v.playlist) c.push(chip('playlist: ' + v.playlist));
+    if (v.upload) c.push('<a class="studio" href="' + v.upload + '">open in Studio &#8599;</a>');
+  }
+  return c.join('');
+}
+function parseUrl(){
+  const parts = location.pathname.split('/').filter(Boolean).map(decodeURIComponent);
+  const pl = PLS.find((p) => slugify(p.name) === parts[0]) || PLS[0];
+  const v = pl ? (pl.vids.find((x) => vslug(x) === parts[1]) || pl.vids[0]) : null;
+  return {pl, v};
+}
+function go(pl, v){
+  history.pushState({}, '', '/' + slugify(pl.name) + (v ? '/' + vslug(v) : ''));
+  render();
+}
+function render(){
+  const {pl, v} = parseUrl();
+  const pls = document.getElementById('pls'); pls.innerHTML = '';
+  for (const p of PLS) {
+    const a = document.createElement('a');
+    a.className = 'pl' + (pl === p ? ' active' : ''); a.href = '/' + slugify(p.name);
+    const secs = p.vids.reduce((t, x) => t + (x.dur || 0), 0);
+    a.innerHTML = '<div class="nm">' + p.name + '</div><div class="info">' + p.vids.length +
+      ' videos &middot; ' + Math.round(secs) + 's total &middot; ' +
+      p.vids.filter((x) => x.upload).length + ' uploaded</div>';
+    a.onclick = (e) => { e.preventDefault(); go(p, p.vids[0]); };
+    pls.appendChild(a);
+  }
+  const links = document.getElementById('links'); links.innerHTML = '';
+  if (pl) for (const x of pl.vids) {
+    const a = document.createElement('a');
+    a.className = 'item' + (v === x ? ' active' : ''); a.href = '/' + slugify(pl.name) + '/' + vslug(x);
+    const img = document.createElement('img');
+    img.className = 'thumb'; img.src = '/' + vslug(x) + '.png';
+    img.onerror = () => { img.style.display = 'none'; };
+    const grow = document.createElement('div'); grow.className = 'grow';
+    grow.innerHTML = '<div class="iname">' + x.name + '</div><div class="chips">' + chipsFor(x, false) + '</div>';
+    const row = document.createElement('div'); row.className = 'row';
+    row.appendChild(img); row.appendChild(grow); a.appendChild(row);
+    a.onclick = (e) => { e.preventDefault(); go(pl, x); };
+    links.appendChild(a);
+  }
+  const stage = document.getElementById('stage'), empty = document.getElementById('empty'),
+        vid = document.getElementById('vid');
+  if (!v) { stage.style.display = 'none'; empty.style.display = ''; return; }
+  empty.style.display = 'none'; stage.style.display = '';
+  document.getElementById('vtitle').textContent = (v.title || v.name) + ' — ' + pl.name;
+  if (!vid.src.endsWith('/' + encodeURIComponent(v.name))) vid.src = '/' + v.name;
+  vid.poster = '/' + vslug(v) + '.png';  // same title-card frame shown in the list, before play
+  document.getElementById('meta').innerHTML = chipsFor(v, true);
+}
+window.addEventListener('popstate', render);
+if (location.pathname === '/' && PLS.length)
+  history.replaceState({}, '', '/' + slugify(PLS[0].name) + '/' + vslug(PLS[0].vids[0]));
+render();
+// live auto-reload: poll the gallery JSON; re-render only when it actually changed, and never
+// while a video is playing (so a new build landing mid-watch doesn't interrupt playback).
+let _sig = JSON.stringify(VIDS);
+async function refresh(){
+  try {
+    const r = await fetch('/api/vids', {cache: 'no-store'});
+    if (!r.ok) return;
+    const next = await r.json();
+    const sig = JSON.stringify(next);
+    if (sig === _sig) return;                         // nothing changed
+    const vid = document.getElementById('vid');
+    const playing = vid && !vid.paused && !vid.ended && vid.currentTime > 0;
+    if (playing) return;                              // defer until playback stops/pauses
+    _sig = sig; VIDS = next; PLS = buildPls(VIDS);
+    render();
+  } catch (e) { /* transient fetch error — try again next tick */ }
+}
+setInterval(refresh, 4000);
+</script></body></html>"""
+
+
+def _pg_rows():
+    """PG is the source of truth; {} if it is down (sidecars carry on)."""
+    try:
+        return {r["name"]: r for r in list_videos()}
+    except Exception:  # noqa: BLE001
+        return {}
+
+
+def _vid_entry(mp4: Path, pg: dict) -> dict:
+    e = {"name": mp4.name, "mb": round(mp4.stat().st_size / 1e6, 1), "sync": None, "lang": None,
+         "captions": 0, "dur": 0, "upload": None, "build": None, "outputs": 0}
+    row = pg.get(mp4.name)
+    if row:                                                             # PG row (authoritative)
+        e["playlist"] = row.get("playlist") or "Learn Python"
+        e["title"] = row.get("title")
+        e.update(lang=row.get("language"), captions=row.get("captions") or 0,
+                 dur=round(row.get("duration_s") or 0), sync=row.get("sync"),
+                 build=row.get("build_seconds"), outputs=row.get("n_outputs") or 0,
+                 upload=(row.get("upload") or {}).get("url") if row.get("upload") else None)
+        return e
+    side = mp4.with_suffix(".json")                                     # sidecar fallback
+    if side.exists():
+        try:
+            m = json.loads(side.read_text())
+            e["sync"] = m.get("sync")
+            e["playlist"] = (m.get("props") or {}).get("playlist") or m.get("playlist") or "Learn Python"
+            e["build"] = m.get("build_seconds")
+            e["outputs"] = m.get("n_outputs") or 0
+            p = m.get("props") or {}
+            segs = p.get("segments") or []
+            e["lang"] = p.get("language")
+            e["captions"] = len(segs)
+            e["dur"] = round(max((s.get("end", 0) for s in segs), default=0) + p.get("tailSeconds", 0))
+            up = m.get("upload")
+            e["upload"] = up.get("url") if up else None
+        except Exception:  # noqa: BLE001
+            pass
+    return e
+
+
+class Handler(SimpleHTTPRequestHandler):
+    """Adds HTTP Range support (RFC 7233) on top of SimpleHTTPRequestHandler — browsers demand
+    ranges to play/seek mp4; the stdlib handler alone leaves the <video> element dead."""
+
+    def __init__(self, *a, **k):
+        super().__init__(*a, directory=str(GALLERY), **k)
+
+    def _serve_range(self, path: Path):
+        rng = self.headers.get("Range", "")
+        size = path.stat().st_size
+        try:
+            lo, hi = rng.split("=")[1].split("-")
+            lo = int(lo or 0); hi = min(int(hi) if hi else size - 1, size - 1)
+        except Exception:  # noqa: BLE001
+            lo, hi = 0, size - 1
+        self.send_response(206)
+        self.send_header("Content-Type", "video/mp4")
+        self.send_header("Accept-Ranges", "bytes")
+        self.send_header("Content-Range", f"bytes {lo}-{hi}/{size}")
+        self.send_header("Content-Length", str(hi - lo + 1))
+        self.end_headers()
+        with open(path, "rb") as f:
+            f.seek(lo)
+            left = hi - lo + 1
+            while left > 0:
+                chunk = f.read(min(1 << 20, left))
+                if not chunk:
+                    break
+                self.wfile.write(chunk)
+                left -= len(chunk)
+
+    def do_GET(self):  # noqa: N802
+        if self.path.endswith(".mp4") and "Range" in self.headers:
+            p = GALLERY / Path(self.path.split("?")[0]).name       # flat dir; basename kills traversal
+            if p.exists():
+                try:
+                    self._serve_range(p)
+                except (BrokenPipeError, ConnectionResetError):
+                    pass                                            # player seeked away mid-stream
+                return
+        clean = self.path.split("?")[0]
+        if clean == "/api/vids":                                       # live gallery JSON for auto-reload
+            finals = {p.stem for p in GALLERY.glob("*.mp4") if not p.stem.endswith("_silent")}
+            vids = sorted((p for p in GALLERY.glob("*.mp4")
+                           if not (p.stem.endswith("_silent") and p.stem[:-len("_silent")] in finals)),
+                          key=lambda p: p.stat().st_mtime, reverse=True)
+            body = json.dumps([_vid_entry(v, _pg_rows()) for v in vids], default=str).encode()
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Cache-Control", "no-store")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+            return
+        if clean in ("/", "/index.html") or "." not in Path(clean).name:   # path-routed video pages
+            finals = {p.stem for p in GALLERY.glob("*.mp4") if not p.stem.endswith("_silent")}
+            vids = sorted((p for p in GALLERY.glob("*.mp4")
+                           if not (p.stem.endswith("_silent") and p.stem[:-len("_silent")] in finals)),
+                          key=lambda p: p.stat().st_mtime, reverse=True)  # skip _silent when its final twin exists
+            pg = _pg_rows()
+            page = (_PAGE.replace("__N__", str(len(vids)))
+                    .replace("__VIDS__", json.dumps([_vid_entry(v, pg) for v in vids], default=str)))
+            body = page.encode()
+            self.send_response(200)
+            self.send_header("Content-Type", "text/html; charset=utf-8")
+            self.send_header("Cache-Control", "no-store")                # never serve a stale UI again
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+            return
+        super().do_GET()
+
+    def log_message(self, *a):  # quiet
+        pass
+
+
+def hub_main():
+    GALLERY.mkdir(exist_ok=True)
+    # threaded: one playing video stream must never block the index (single-thread wedge bug)
+    ThreadingHTTPServer(("0.0.0.0", PORT), Handler).serve_forever()
+
+
+
+if __name__ == "__main__":                                    # python -m fleet_agents.shorts_builder --hub
+    hub_main()

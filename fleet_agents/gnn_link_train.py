@@ -86,6 +86,9 @@ def train(q, worker):
     if not gt_path.exists():
         return ("done", {}, "all", f"[{worker}] gnn-link-train: GT parquet not found at {gt_path} (run box-sample/data-audit first).")
     hidden = int(spec.get("hidden", 128)); n_layers = int(spec.get("n_layers", 3))
+    loop_r = max(1, int(spec.get("loop_r", 1)))            # Loopie layer-loop (arXiv:2607.16051): apply each
+    # stored hidden→hidden block R times with SHARED weights → effective depth (n_layers-1)*R+1 at the SAME
+    # param count (2× compute). loop_r=1 = the original distinct-layer stack (backward-compatible).
     epochs = int(spec.get("epochs", 40)); frames = int(spec.get("sample_frames", 40))
     radius = float(spec.get("radius_vox", 6.0))
     lr = float(spec.get("lr", 1e-3))                       # Adam learning rate
@@ -130,11 +133,14 @@ def train(q, worker):
     mu, sd = Xtr.mean(0), Xtr.std(0) + 1e-6
     Xtr = (Xtr - mu) / sd; Xte = (Xte - mu) / sd
 
+    from .layer_grow import loop_expand              # shared Loopie layer-loop primitive (used fleet-wide)
+
     def mlp(out):
-        layers, d = [], Xtr.shape[1]
-        for _ in range(n_layers):
-            layers += [nn.Linear(d, hidden), nn.GELU()]; d = hidden
-        layers += [nn.Linear(d, out)]
+        # input projection (can't loop — changes width), then n_layers-1 hidden→hidden blocks. loop_expand
+        # repeats each stored block loop_r× with SHARED weights → effective depth at 0 extra params
+        # (Loopie layer-loop). loop_r=1 reproduces the original distinct-layer stack exactly.
+        stored = [nn.Sequential(nn.Linear(hidden, hidden), nn.GELU()) for _ in range(max(n_layers - 1, 0))]
+        layers = [nn.Linear(Xtr.shape[1], hidden), nn.GELU()] + loop_expand(stored, loop_r) + [nn.Linear(hidden, out)]
         return nn.Sequential(*layers).to(dev)
 
     div_net, flow_net = mlp(1), mlp(3)
@@ -161,7 +167,7 @@ def train(q, worker):
     flow_mae = float(np.abs(fp - Fte).mean())
     OUT.mkdir(parents=True, exist_ok=True)
     torch.save({"div": div_net.state_dict(), "flow": flow_net.state_dict(),
-                "mu": mu, "sd": sd, "hidden": hidden, "n_layers": n_layers}, OUT / "gnn_link.pt")
+                "mu": mu, "sd": sd, "hidden": hidden, "n_layers": n_layers, "loop_r": loop_r}, OUT / "gnn_link.pt")
     # FREE GPU MEMORY — the fleet worker is long-lived, and this step trains FULL-BATCH on the whole
     # combined external+competition tensor. Without an explicit teardown the tensors + nets + optimizer
     # stay resident on CUDA and leak into the NEXT GPU step (this is the 28.7GiB that starved combined-train

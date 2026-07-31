@@ -162,6 +162,134 @@ def _smoothgrad(torch, model, vol, n=16, sigma=0.15):
     return (acc / n)[0, 0]
 
 
+# ---------------------------------------------------------------- Nested-Learning audit (levels & memory)
+# Behrouz, Razaviyayn, Zhong & Mirrokni, "Nested Learning: The Illusion of Deep Learning Architecture",
+# NeurIPS 2025 — paper: https://alibehrouz.com/files/NL.pdf  (§3.2 Definition 2, §6 "models have more
+# parameters than we knew") · local: docs/papers/nested-learning/nested-learning.md
+# lessons: learning/annotated/nl03.learning, nl06.learning, nl07.learning
+#
+# Two claims worth auditing on OUR models, not just reading:
+#   1. A model's parameters are not only the ones in `model.parameters()`. The optimiser's state (momentum,
+#      second moment, preconditioner) is updated by the input, stores knowledge about the loss landscape,
+#      and is DELETED at "end of pre-training" — for AdamW that is ~2x the advertised parameter count.
+#   2. Every block has an (objective, context, update frequency). Two blocks with the same frequency and no
+#      dependency are the SAME level; the illusion of a heterogeneous architecture comes from not looking
+#      at that axis.
+def nl_audit(model, optimizer=None, accum_steps=1, cms_groups=None):
+    """The NL view of a model: one row per level, with its context, frequency and REAL parameter count.
+
+    Pure-ish (reads only shapes/state) and framework-safe: returns a list of dicts, so a caller can print
+    it, log it to the ledger, or assert on it. `cms_groups` (from train_tricks_pack.cms_param_groups) adds
+    one row per update frequency when a Continuum Memory System is wired.
+    """
+    rows = []
+    weights = int(sum(p.numel() for p in model.parameters()))
+    buffers = int(sum(b.numel() for b in model.buffers()))
+    # CMS groups are a BREAKDOWN of the weights by update frequency, not extra parameters — counting both
+    # would inflate the very number this audit exists to state honestly.
+    grouped = int(sum(int(g.get("n_params", 0)) for g in (cms_groups or [])))
+    rows.append(dict(level=1, component="weights" + (" (ungrouped)" if grouped else ""),
+                     context="the training set", objective="the task loss",
+                     freq=f"1 per {accum_steps} batch(es)", params=max(weights - grouped, 0)))
+    if buffers:
+        rows.append(dict(level=1, component="buffers (BN/EMA)", context="the training set",
+                         objective="running statistics", freq="1 per batch", params=buffers))
+    if optimizer is not None:
+        try:
+            import torch as _t
+            state = int(sum(v.numel() for s in optimizer.state.values() for v in s.values()
+                            if _t.is_tensor(v) and v.dim() > 0))
+        except Exception:  # noqa: BLE001
+            state = 0
+        if state:
+            rows.append(dict(level=2, component=type(optimizer).__name__ + " state",
+                             context="the gradients the model generates", objective="compress the gradient stream",
+                             freq="1 per step", params=state))
+    for g in (cms_groups or []):
+        rows.append(dict(level=3, component=f"CMS {g.get('name')}", context="its own chunk of the sequence",
+                         objective="persistent knowledge at this time-scale",
+                         freq=f"1 per {g['period']} steps", params=int(g.get("n_params", 0))))
+    total = sum(r["params"] for r in rows)
+    for r in rows:
+        r["share_%"] = round(100 * r["params"] / max(total, 1), 1)
+    return rows
+
+
+def fed_audit(model, optimizer=None, accum_steps=1, cms_groups=None, memory_numel=0,
+              round_every=None, n_clients=1):
+    """The NL audit with FedNL's OUTER level — `nl_audit` plus a server row and a local-memory row.
+
+    "Federated Nested Learning: Collaborative Training of Self-Referential Memories for Test-Time
+    Adaptation", arXiv:2605.16350 — paper: https://arxiv.org/pdf/2605.16350
+    local: docs/papers/fednl/fednl.md · lessons: learning/annotated/fnl*.learning (14/14 formulas proved)
+
+    FedNL's contribution to our audit is the frequency ORDER, which tells you what you are really
+    averaging: server (once per `round_every` steps) ≺ client weights ≺ optimizer state ≺ the in-context
+    memory `S` (once per token). Two consequences worth printing next to the numbers:
+      • only the SHIPPED rows cross the network — the memory never does, so per-client specialisation is
+        free of per-client checkpoints;
+      • the memory's Jacobian is the delta-rule projection `I − β_tk_tk_tᵀ` (FedNL eq. 12), so gradient
+        sensitivity decays along recently written keys — the horizon is data-dependent, not a fixed window.
+    """
+    rows = nl_audit(model, optimizer, accum_steps=accum_steps, cms_groups=cms_groups)
+    for r in rows:
+        r["level"] = int(r["level"]) + 1                         # make room for the server at level 1
+        r["shipped"] = r["component"].startswith("weights") or r["component"].startswith("CMS ")
+    shipped = sum(r["params"] for r in rows if r["shipped"])
+    rows.insert(0, dict(level=1, component=f"server aggregate ({n_clients} clients)",
+                        context="every client's data", objective="the weighted client loss",
+                        freq=(f"1 per {int(round_every)} steps" if round_every else "1 per round"),
+                        params=shipped, shipped=True))
+    if memory_numel:
+        rows.append(dict(level=max(r["level"] for r in rows) + 1, component="in-context memory S",
+                         context="the current sequence", objective="regression + retention (delta rule)",
+                         freq="1 per token", params=int(memory_numel), shipped=False))
+    total = sum(r["params"] for r in rows)
+    for r in rows:
+        r["share_%"] = round(100 * r["params"] / max(total, 1), 1)
+    return rows
+
+
+def fed_audit_summary(rows):
+    """One line: what crosses the network vs what stays local, and how many levels there really are."""
+    ship = sum(r["params"] for r in rows if r.get("shipped"))
+    local = sum(r["params"] for r in rows if not r.get("shipped"))
+    return {"shipped": ship, "local": local, "levels": len({r["level"] for r in rows}),
+            "local_fraction": round(local / max(ship + local, 1), 3),
+            "note": "the memory and the optimizer state never leave the client; only the RULE is shared "
+                    "(FedNL §2)"}
+
+
+def nl_audit_summary(rows):
+    """One line for the board/ledger: advertised vs REAL parameter count and the level count."""
+    advertised = sum(r["params"] for r in rows
+                     if r["component"].startswith("weights") or r["component"].startswith("CMS "))
+    total = sum(r["params"] for r in rows)
+    levels = len({r["level"] for r in rows})
+    return {"advertised": advertised, "nl_total": total,
+            "ratio": round(total / max(advertised, 1), 2), "levels": levels,
+            "note": "optimizer state is knowledge about the loss landscape; discarding it at 'end of "
+                    "pre-training' deletes that knowledge (NL §4.5)"}
+
+
+def component_attribution(forward, gates, names, n_steps=32):
+    """WHICH component produced this output? Integrated Gradients over a per-component scalar gate.
+
+    `forward(gates) -> (batch, 1)` must be batch-agnostic (IG expands the batch by `n_steps`); `gates` is
+    a (batch, n_components) tensor of ones. Returns rows sorted by share. This is how the CMS claim was
+    tested in lesson nl07: level 1 (every step) 80.2%, level 2 (every 8) 15.9%, level 3 (every 64) 3.9%.
+    """
+    import torch
+    from captum.attr import IntegratedGradients
+    g = gates if gates.requires_grad else gates.clone().requires_grad_(True)
+    a = IntegratedGradients(forward).attribute(g, baselines=torch.zeros_like(g), n_steps=n_steps)
+    tot = a.detach().abs().sum(0).float().cpu()
+    s = float(tot.sum()) or 1.0
+    rows = [dict(component=n, attribution=float(v), share_pct=round(100 * float(v) / s, 1))
+            for n, v in zip(names, tot)]
+    return sorted(rows, key=lambda r: -r["attribution"])
+
+
 def _occlusion(torch, model, vol, box=3):
     import itertools
     base = float(model(vol).item()); sal = torch.zeros_like(vol[0, 0])
@@ -826,8 +954,41 @@ def report(q, worker):
             for _ in range(nl):
                 L += [nn.Linear(d, h), nn.GELU()]; d = h
             L += [nn.Linear(d, out)]; return nn.Sequential(*L)
+
+        def _net_from_state_dict(sd):
+            """Rebuild the EXACT topology the checkpoint was saved from.
+
+            The saved net predates the current `mlp()`: its keys are nested (`2.0.weight`) where `mlp()` is
+            flat (`2.weight`), and the output layer sits at a different index — so `load_state_dict` raised
+            RuntimeError and took the whole agent down. Reading the structure back out of the state dict is
+            exact, unlike guessing from `hidden`/`n_layers`, and keeps the explanation working instead of
+            degrading it. Slots with no parameters (the activations) are refilled with GELU to preserve
+            the original indices.
+            """
+            slots = {}
+            for k, v in sd.items():
+                if not k.endswith(".weight"):
+                    continue
+                path = k[: -len(".weight")].split(".")
+                top = int(path[0])
+                slots[top] = (len(path) > 1, v.shape[1], v.shape[0])   # (nested, in_features, out_features)
+            mods = []
+            for i in range(max(slots) + 1):
+                if i not in slots:
+                    mods.append(nn.GELU()); continue
+                nested, fin, fout = slots[i]
+                lin = nn.Linear(fin, fout)
+                mods.append(nn.Sequential(lin, nn.GELU()) if nested else lin)
+            return nn.Sequential(*mods)
+
         nin = c["div"]["0.weight"].shape[1]                          # input dim from the checkpoint (5 or 6)
-        net = mlp(nin, c["hidden"], c["n_layers"], 1); net.load_state_dict(c["div"]); net.eval()
+        try:
+            net = mlp(nin, c["hidden"], c["n_layers"], 1)
+            net.load_state_dict(c["div"])
+        except RuntimeError:
+            net = _net_from_state_dict(c["div"])
+            net.load_state_dict(c["div"])
+        net.eval()
         default_feat = (["d1_child", "d2_child", "dist_ratio", "sister_dist", "symmetry", "nn_dist_t"]
                         if nin == 6 else ["density_t", "density_t+1", "count_change", "nn_dist", "z"])
         feat = spec.get("feature_names", default_feat)

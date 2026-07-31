@@ -26,6 +26,7 @@ INNOVATIONS = {
     "RoPE positions":     ("attention", "+", "0", "rotary positions generalise better; standard now", "search"),
     "sliding-window attn": ("attention", "0", "+", "local window = O(n) for our short temporal horizon", "search"),
     "Mamba / SSM":        ("sequence", "0", "+", "linear-time state-space; strong on long sequences (Gu 2024)", "search"),
+    "Loopie layer-loop (R=2)": ("backbone", "+", "-", "weight-SHARED recurrent depth: apply each block R=2× → EFFECTIVE depth without extra params (2× compute); activation memory stays O(stored depth) via single checkpointed unit → reinvest freed mem into bigger microbatch. Beats param-scaling ONLY under a compute-matched-by-measured-wall-clock budget; benefit peaks at R=2 & decays (Gao 'Loop the Loopies!' arXiv:2607.16051). WIRED: gnn_link_train loop_r knob + layer-grow tests loop-vs-add. Param-constrained regimes only; PROVE via layer-grow", "adopt-if-param-constrained"),
     # capacity
     "sparse MoE (top-k)": ("backbone", "+", "-", "more capacity at ~same FLOPs; memory heavy (per data-regime experts)", "search"),
     # norms / activations / blocks (cheap, usually free wins)
@@ -87,6 +88,9 @@ INNOVATIONS = {
     "INT4 (GPTQ/AWQ)":    ("precision", "-", "+", "4-bit weight quant for inference; more acc cost, big mem save", "search"),
     "BitNet b1.58 ternary": ("precision", "-", "++", "1.58-bit ternary {-1,0,1} weights; train-from-scratch native low-bit", "search"),
     "stochastic rounding": ("precision", "+", "0", "essential for stable FP4/low-bit training (removes quant bias)", "adopt-if-fp4"),
+    # test-time adaptation — LABEL-FREE inference-time self-correction (no retrain, no labels)
+    "DiScoFormer head-consistency TTA": ("tta", "+", "-", "amortized set→(density,score) cross-attn oracle; score head==∇log-density head gives a label-free consistency loss → few grad steps adapt to OOD at inference (Ilin arXiv:2511.05924 ICLR26). WIRED: inference_tricks_pack.head_consistency_tta + agent 'head-consistency'; reference model disco_density.py", "adopt-now"),
+    "DiScoFormer density/score oracle": ("estimator", "+", "0", "train-once equivariant transformer maps sample-set→density+score across distributions; self-attention = generalized KDE. Plug-in score oracle for score-debiased KDE, Fisher info, Fokker-Planck; density-ratio adv-val features (Ilin 2026)", "prototype"),
 }
 
 

@@ -142,7 +142,7 @@ class NbPreflight(BaseAgent):
                 subprocess.run([py, "-m", "pip", "install", "-q", "--no-index", "--no-deps", whl], check=False,
                                timeout=timeout)
             except subprocess.TimeoutExpired:
-                pass
+                pass    # a wheel that can't install shows up as the import failure this preflight reports
         # Kaggle offline env quirks the notebook MUST set (proven by hengck23 + 68 public notebooks):
         # POLARS_PREFER_PKG=32 makes polars load the split polars-runtime-32 wheel. Import WITH it set (a
         # correct notebook sets it); the source-level check below flags a notebook that imports polars but

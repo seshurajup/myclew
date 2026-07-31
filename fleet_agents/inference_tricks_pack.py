@@ -21,6 +21,14 @@ winners). All pure numpy/torch, offline-verified, CompConfig-agnostic. These are
   • bn-recalibrate   — recompute BatchNorm running stats (update_bn) after weight-averaging (SWA/EMA/soup);
                        a merged model has stale BN stats → this forward-passes data to fix them. No existing
                        agent touches BN stats (checkpoint-merger/quantize merge/compress WEIGHTS only).
+  • head-consistency — LABEL-FREE test-time adaptation (DiScoFormer, arXiv:2511.05924). When a model has
+                       ≥2 outputs tied by a DIFFERENTIABLE identity (e.g. a score head must equal ∇ of a
+                       log-density head), any violation of that identity is a self-supervised loss; a few
+                       grad steps on it at inference — input/context fixed, NO labels — adapt the model to
+                       an OOD input on the spot. Generic over any such head relation (`relation` closure).
+                       Differs from `multi-tta` (augment the INPUT, invert, fuse — model weights frozen);
+                       this ADAPTS the weights using an internal consistency constraint. Handles the
+                       sm_120 double-backward gap by forcing the MATH SDPA kernel.
 """
 from __future__ import annotations
 import numpy as np
@@ -273,6 +281,42 @@ def update_bn(loader, model, device=None, n_batches=None):
     return seen
 
 
+# ================================================================ head-consistency TTA (DiScoFormer)
+def head_consistency_tta(model, forward_fn, relation, steps=8, lr=0.02, clip=1.0, min_improve=0.0):
+    """Label-free test-time adaptation via a head-consistency constraint (DiScoFormer, arXiv:2511.05924).
+
+    model      : the nn.Module to adapt (its params get a few SGD steps; caller may deep-copy first).
+    forward_fn : zero-arg closure returning the model outputs for the FIXED test input/context.
+    relation   : outputs -> residual tensor that is zero iff the heads are mutually consistent
+                 (e.g. lambda o: o.score - grad(o.logp, o.query); caller builds the grad). The TTA
+                 loss is residual.pow(2).mean() — no ground truth used.
+    Returns the list of per-step gap values (first = before any step). Stops early on non-finite loss.
+
+    The canonical DiScoFormer instance — score head == ∇_q log-density head — is implemented as a
+    ready relation in disco_density.tta_consistency, which calls this primitive."""
+    import torch
+    from contextlib import nullcontext
+    try:                                     # double-backward through attention needs the MATH kernel on sm_120
+        from torch.nn.attention import sdpa_kernel, SDPBackend
+        mathctx = lambda: sdpa_kernel([SDPBackend.MATH])  # noqa: E731
+    except Exception:  # noqa: BLE001
+        mathctx = nullcontext
+    opt = torch.optim.SGD(model.parameters(), lr=lr)
+    gaps = []
+    for _ in range(steps + 1):
+        with mathctx():
+            res = relation(forward_fn())
+            gap = res.pow(2).mean()
+            gaps.append(float(gap.detach()))
+            if len(gaps) > steps or not torch.isfinite(gap):
+                break
+            opt.zero_grad(); gap.backward()
+            if clip:
+                torch.nn.utils.clip_grad_norm_(model.parameters(), clip)
+            opt.step()
+    return gaps
+
+
 # ================================================================ agents
 class _B(BaseAgent):
     thread = "S"; kind = "finding"
@@ -334,9 +378,28 @@ class MultiTta(_B):
         return self.done({"round_trip_err": err, "n_transforms": len(tfms)}, msg)
 
 
-_WBF = WbfFusion(); _SNAP = SnapshotAverage(); _TTA = MultiTta()
+class HeadConsistencyTta(_B):
+    name = "head-consistency"
+    def run(self, q, worker):
+        # agent path: prove the primitive on the DiScoFormer reference model (score head vs ∇ log-density);
+        # real models are adapted in-proc by calling head_consistency_tta directly.
+        try:
+            import disco_density as _dd
+            model, device = _dd.train(steps=120, log=None)
+            X, mu, w, sigma = _dd.sample_gmm(4, 128, 2, k=6, device=device)   # OOD context (more modes)
+            qy, _, _, _ = _dd.sample_gmm(4, 48, 2, device=device)
+            gaps = _dd.tta_consistency(model, X, qy, steps=8, lr=0.02, return_gaps=True)
+        except Exception as e:  # noqa: BLE001
+            return self.escalate(worker, "leader", f"head-consistency smoke failed: {e}")
+        msg = f"head-consistency TTA: consistency gap {gaps[0]:.3f} → {gaps[-1]:.3f} over {len(gaps)-1} steps (label-free, DiScoFormer)"
+        self.log(msg, kind="finding", recommendation="adapt any multi-head model to OOD at inference; supply a `relation` closure")
+        return self.done({"gap_before": gaps[0], "gap_after": gaps[-1], "steps": len(gaps) - 1}, msg)
+
+
+_WBF = WbfFusion(); _SNAP = SnapshotAverage(); _TTA = MultiTta(); _HCT = HeadConsistencyTta()
 
 
 def run_wbf(q, worker): return _WBF.run(q, worker)
 def run_snapshot(q, worker): return _SNAP.run(q, worker)
 def run_tta(q, worker): return _TTA.run(q, worker)
+def run_head_consistency(q, worker): return _HCT.run(q, worker)

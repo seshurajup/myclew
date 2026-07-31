@@ -73,6 +73,55 @@ def muon_update(grad, momentum_buf, lr=0.02, momentum=0.95, nesterov=True, ns_st
     return -lr * scale * O, buf
 
 
+def polargrad_update(grad, momentum_buf, lr=0.02, momentum=0.95, nesterov=True, ns_steps=5):
+    """One PolarGrad step for a 2D weight (NVIDIA Emerging-Optimizers, arXiv:2505.21799). Muon replaces the
+    update's singular values with ONES (LMO w.r.t. the spectral norm); PolarGrad instead orthogonalizes the
+    momentum and rescales by its NUCLEAR norm — steepest descent w.r.t. the spectral norm. Concretely the
+    Muon direction O=NS5(g) is kept but scaled by <O,g>=sum(O*g) (=||g||_* when O is the exact polar factor),
+    so the step magnitude tracks the momentum's own energy instead of being flattened to a constant. This
+    keeps Muon's conditioning-blindness while recovering a data-adaptive step size on top. Returns
+    (delta, new_buf); new_weight = weight + delta."""
+    g = np.asarray(grad, float); buf = momentum * np.asarray(momentum_buf, float) + g
+    upd = g + momentum * buf if nesterov else buf
+    O = newton_schulz5(upd, steps=ns_steps)
+    scale = float((O * upd).sum())                              # nuclear-norm-scaled (PolarGrad), not sqrt(fan)
+    return -lr * scale * O, buf
+
+
+def polar_factor(X, steps=25, eps=1e-12):
+    """Orthogonal polar factor (matrix sign) U V^T of X = U diag(s) V^T, via the cubic Newton-Schulz iteration
+    Y <- 1.5 Y - 0.5 Y (Y^T Y). SVD-free (tensor-core friendly). We first divide by the Frobenius norm (an
+    upper bound on the spectral norm) so every singular value lands in (0, 1], the convergence basin of the
+    cubic map, which then drives them ACCURATELY to 1 (unlike Muon's fixed 5-step quintic which only
+    approximates). Handles tall/wide by contracting the small dimension."""
+    X = np.asarray(X, float)
+    transpose = X.shape[0] > X.shape[1]
+    if transpose:
+        X = X.T
+    Y = X / (np.linalg.norm(X) + eps)
+    for _ in range(int(steps)):
+        Y = 1.5 * Y - 0.5 * (Y @ (Y.T @ Y))
+    return Y.T if transpose else Y
+
+
+def spectral_hardcap(X, beta=1.0, ns_steps=25):
+    """Spectral hardcap: return X with every singular value clipped ABOVE to <= beta, leaving smaller ones
+    untouched (leloykun.github.io/ponder/spectral-clipping, ported from Emerging-Optimizers). Bounds the
+    spectral norm of an update/weight for stability WITHOUT an SVD — uses only Newton-Schulz matrix-sign
+    (polar-factor) iterations, so it runs on tensor cores. For X = U diag(s) V^T it computes
+    U diag(min(s, beta)) V^T. Returns an array the same shape as X."""
+    X = np.asarray(X, float)
+    transpose = X.shape[0] > X.shape[1]
+    if transpose:
+        X = X.T
+    OX = polar_factor(X, steps=ns_steps)                       # polar factor U V^T (matrix sign)
+    aX = beta * OX - X
+    result = beta * OX + X
+    result = result - aX @ (polar_factor(aX, steps=ns_steps).T @ OX)
+    result = result * 0.5
+    return result.T if transpose else result
+
+
 def per_head_muon_update(grad, momentum_buf, n_heads, lr=0.02, momentum=0.95, nesterov=True, ns_steps=5):
     """Kimi-K3 "Per-Head Muon": orthogonalize an attention projection weight ONE HEAD AT A TIME instead of
     as a single fused matrix. An attention weight has shape (n_heads*head_dim, in_dim) (q/k/v/o proj); the
@@ -177,8 +226,156 @@ if _HAS_TORCH:
                     else:
                         p.add_(buf, alpha=-grp["lr"])
             return loss
+    def _newton_schulz5_torch(G, steps=5, eps=1e-7):
+        """Torch quintic Newton-Schulz orthogonalization (device-native; keeps the update on GPU). Same
+        (a,b,c) as the numpy core; pushes every singular value of G toward 1 (semi-orthogonal / polar factor)."""
+        a, b, c = 3.4445, -4.7750, 2.0315
+        X = G.to(torch.float32)
+        transpose = X.shape[0] > X.shape[1]
+        if transpose:
+            X = X.T
+        X = X / (X.norm() + eps)
+        for _ in range(int(steps)):
+            A = X @ X.T
+            B = b * A + c * (A @ A)
+            X = a * X + B @ X
+        return (X.T if transpose else X).to(G.dtype)
+
+    class AdaptiveMuon(torch.optim.Optimizer):
+        """Adaptive Muon (NVIDIA Emerging-Optimizers / AdaMuon arXiv:2507.11005): Muon's Newton-Schulz
+        orthogonalized momentum, then an AdamW-style ELEMENTWISE second-moment normalization on the
+        orthogonalized update before the sqrt(fan) Muon scale. Plain Muon gives every direction a
+        unit-magnitude step; AdaMuon adds a per-parameter adaptive learning rate on top (divide by
+        sqrt(EMA of squared orthogonalized grad) + eps), which stabilizes noisy/heavy-tailed gradients and
+        makes the step far less LR-sensitive. 2D params are orthogonalized; 1D params fall back to Adam.
+
+            opt = AdaptiveMuon(model.parameters(), lr=0.02, momentum=0.95, beta2=0.95)
+            loss.backward(); opt.step(); opt.zero_grad()
+        """
+        def __init__(self, params, lr=0.02, momentum=0.95, beta2=0.95, nesterov=True, ns_steps=5,
+                     eps=1e-8, weight_decay=0.0):
+            super().__init__(params, dict(lr=lr, momentum=momentum, beta2=beta2, nesterov=nesterov,
+                                          ns_steps=ns_steps, eps=eps, weight_decay=weight_decay))
+
+        @torch.no_grad()
+        def step(self, closure=None):
+            loss = closure() if closure is not None else None
+            for grp in self.param_groups:
+                b2, eps = grp["beta2"], grp["eps"]
+                for p in grp["params"]:
+                    if p.grad is None:
+                        continue
+                    g = p.grad
+                    if grp["weight_decay"]:
+                        g = g.add(p, alpha=grp["weight_decay"])
+                    st = self.state[p]
+                    if "buf" not in st:
+                        st["buf"] = torch.zeros_like(p); st["v"] = torch.zeros_like(p)
+                    buf = st["buf"]; buf.mul_(grp["momentum"]).add_(g)
+                    upd = g.add(buf, alpha=grp["momentum"]) if grp["nesterov"] else buf
+                    v = st["v"]
+                    if p.ndim >= 2:
+                        G2 = upd.reshape(upd.shape[0], -1)
+                        O = _newton_schulz5_torch(G2, steps=grp["ns_steps"]).reshape_as(p)
+                        v.mul_(b2).addcmul_(O, O, value=1 - b2)            # EMA of squared orthogonalized grad
+                        step_dir = O / (v.sqrt() + eps)
+                        scale = max(1.0, G2.shape[0] / G2.shape[1]) ** 0.5
+                        p.add_(step_dir, alpha=-grp["lr"] * scale)
+                    else:                                                   # 1D → Adam-style fallback
+                        v.mul_(b2).addcmul_(upd, upd, value=1 - b2)
+                        p.add_(upd / (v.sqrt() + eps), alpha=-grp["lr"])
+            return loss
 else:  # pragma: no cover
     Muon = None
+    AdaptiveMuon = None
+
+
+# ---------------------------------------------------------------- Nested Learning (NeurIPS 2025) adds
+# Behrouz, Razaviyayn, Zhong & Mirrokni, "Nested Learning: The Illusion of Deep Learning Architecture",
+# NeurIPS 2025 — paper: https://alibehrouz.com/files/NL.pdf
+# local: docs/papers/nested-learning/nested-learning.md · lessons: learning/annotated/nl*.learning
+# They read an optimizer as an ASSOCIATIVE MEMORY over gradients, which turns two of its knobs
+# into design choices rather than folklore (lessons `nl04`/`nl07`, every step proved in PyTorch):
+#   • the momentum's DECAY is the retention gate of an L2-regression objective → make it depend on the
+#     gradient (eq. 49, "Delta Momentum") instead of being a constant low-pass filter;
+#   • one momentum is one TIME-SCALE. With beta=0.9 the last ~6 gradients hold ~47% of the buffer and
+#     ~43 hold ~99% (measured), so nothing older than ~43 steps survives — which is why an optimizer has
+#     no record of the gradient subspace it should avoid (§4.3). M3 (Algorithm 1) adds a slow, chunked
+#     second memory and orthogonalises BOTH before aggregating.
+def delta_momentum_update(m, g, alpha=0.9, eta=0.1, precond=None):
+    """Delta Momentum (NL eq. 49): momentum whose decay is `alpha - eta*<g,g>` instead of a constant.
+
+    Standard momentum is gradient descent on a DOT-PRODUCT objective, so its update ignores its own
+    state; the L2-regression objective gives `m <- m (alpha - eta g^T g) - eta P g`, i.e. the memory
+    forgets exactly when the gradient is large (a real forget gate). MEASURED on the paper's own
+    time-varying-curvature landscape (eq. 53): comparable to standard momentum at its best-tuned step
+    size and markedly more ROBUST when the schedule is mistuned (worst case ~3x better) — so use it when
+    the schedule cannot be tuned per run, not as a free speed-up.
+
+    `g` is normalised as the paper's derivation assumes (`||x||=lambda`), keeping the decay in (0, alpha].
+    """
+    gn = g / (1.0 + np.linalg.norm(g.reshape(-1)))
+    decay = max(0.0, float(alpha) - float(eta) * float((gn.reshape(-1) ** 2).sum()))
+    step = gn if precond is None else precond @ gn
+    return m * decay - float(eta) * step, decay
+
+
+def m3_state(shape, xp=None):
+    """Fresh M3 state: fast memory, slow memory, second moment, and the chunk accumulator."""
+    xp = xp or np
+    z = xp.zeros(shape)
+    return {"M1": z.copy(), "M2": z.copy(), "V": z.copy(), "acc": z.copy(), "t": 0}
+
+
+def m3_update(state, g, lr=1e-3, beta1=1.0, beta2=1.0, beta3=1.0, alpha=0.3, freq=8, ns_steps=5):
+    """Multi-scale Momentum Muon (NL Algorithm 1) → (update, state).
+
+    Fast memory every step, slow memory every `freq` steps (a two-level Continuum Memory System inside
+    the optimizer), each orthogonalised by Newton-Schulz, then aggregated `O1 + alpha*O2` and scaled by
+    Adam's second moment.
+
+    TWO measured caveats, both from running it (lesson `nl07`):
+      1. Algorithm 1 divides by `sqrt(V)+eps` where V is a running SUM starting at zero, so the first
+         steps divide by ~0 and diverge. We normalise the denominator by its own mean — the smallest
+         guard that makes the pseudocode runnable. This deviation is deliberate and reported.
+      2. Cost: ~2x a Muon step (a second memory + a second Newton-Schulz). The paper says the same
+         (Fig. 12: slower than Muon, on par with AdaMuon) — do not adopt it for throughput.
+    """
+    xp = np
+    st = state
+    st["t"] += 1
+    st["M1"] = st["M1"] + beta1 * g
+    st["V"] = st["V"] + beta2 * (g * g)
+    st["acc"] = st["acc"] + g
+    if st["t"] % int(freq) == 0:                      # the SLOW memory: one write per chunk (NL eq. 75)
+        st["M2"] = st["M2"] + beta3 * st["acc"]
+        st["acc"] = xp.zeros_like(st["acc"])
+    two_d = g.ndim == 2
+    o1 = newton_schulz5(st["M1"], steps=ns_steps) if two_d else st["M1"] / (
+        xp.linalg.norm(st["M1"].reshape(-1)) + 1e-9)
+    o2 = newton_schulz5(st["M2"], steps=ns_steps) if two_d else st["M2"] / (
+        xp.linalg.norm(st["M2"].reshape(-1)) + 1e-9)
+    u = o1 + float(alpha) * o2
+    den = xp.sqrt(st["V"])
+    den = den / max(float(den.mean()), 1e-12) + 1e-2              # the guard (caveat 1 above)
+    return -float(lr) * u / den, st
+
+
+def momentum_horizon(beta=0.9, mass=(0.5, 0.99)):
+    """How much of the past a momentum buffer actually holds (NL §4.3), as a dict {mass: n_gradients}.
+
+    The contribution of the i-th previous gradient is `beta^i (1-beta)`. This is the number that makes
+    "the optimizer has no memory of the old gradient subspace" concrete: at beta=0.9 the 99% horizon is
+    43 steps, so a task learned 200 steps ago is invisible to the update direction.
+    """
+    xp = np
+    contrib = xp.array([beta ** i * (1 - beta) for i in range(5000)])
+    cum = xp.cumsum(contrib)
+    out = {}
+    for m in mass:
+        idx = int((cum < m).sum())
+        out[m] = idx + 1
+    return out
 
 
 # ---------------------------------------------------------------- agent

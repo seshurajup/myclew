@@ -74,6 +74,64 @@ else:  # pragma: no cover
     AttnResidual = uniform_vs_selective = None
 
 
+# ---------------------------------------------------------------- EDA (2026) adds: a SECOND address
+# "Erase-then-Delta Attention (EDA): Decoupling Erase and Write Addresses in Delta-Rule Linear Attention",
+# arXiv:2606.26560 — paper: https://arxiv.org/pdf/2606.26560
+# local: docs/papers/eda-delta-attention/eda-delta-attention.md · lessons: learning/annotated/eda*.learning
+#
+# AttnRes above chooses WHERE TO READ across depth. EDA is the same kind of move one level down, inside a
+# delta-rule memory: it chooses WHERE TO ERASE. Every model in that family (DeltaNet, gated DeltaNet, K3's
+# KDA) hard-wires the erase address to the write address — `(I − βkkᵀ)S + βkvᵀ` can only forget at the key
+# it is about to write, so stale content held at a DIFFERENT address can only decay, never be removed.
+#
+# Three facts we proved (lessons eda02/eda03), which is what makes this worth wiring in:
+#   • the erase is one gradient step on `½‖Ŝᵀe‖²` — forgetting gets an objective, like writing does;
+#   • its collateral damage on a query q is exactly `γ(qᵀe)Ŝᵀe`, so an orthogonal query is untouched;
+#   • interleaving the erase as a virtual token (value 0) makes EDA an ORDINARY gated-delta recurrence on a
+#     2T sequence — verified to 1e-5 — so it reuses the existing chunked kernel with no new CUDA.
+def eda_step(S, k, v, e, beta=1.0, gamma=1.0, decay=None):
+    """One Erase-then-Delta update (EDA eq. 8): decay → targeted erase at `e` → delta write at `k`.
+
+    `S` is (d_k, d_v); `k`, `e` unit vectors; `decay` an optional per-channel gate (K3-style `diag(α)`).
+    Reduces to gated DeltaNet when `e is k` or `gamma == 0`, so it is safe to swap in anywhere.
+    """
+    import torch
+    d = S.shape[0]
+    I = torch.eye(d, device=S.device, dtype=S.dtype)
+    Sh = (decay[:, None] * S) if decay is not None else S
+    St = (I - gamma * torch.outer(e, e)) @ Sh                    # erase where we choose
+    return (I - beta * torch.outer(k, k)) @ St + beta * torch.outer(k, v)
+
+
+def eda_interleave(keys, values, erase, betas, gammas, decays=None):
+    """EDA's doubling trick (eq. 17) → a length-2T ordinary gated-delta sequence.
+
+    Odd steps are the erase (key = `e_t`, value = 0, strength = `γ_t`, gate = the decay); even steps are
+    the real write. Feed the result to ANY gated-delta kernel and it computes EDA — that equivalence is
+    what makes the second address free at the kernel level.
+    """
+    import torch
+    T = len(keys)
+    out = []
+    for t in range(T):
+        g = decays[t] if decays is not None else torch.ones_like(keys[t])
+        out.append(dict(k=erase[t], v=torch.zeros_like(values[t]), beta=float(gammas[t]), gate=g))
+        out.append(dict(k=keys[t], v=values[t], beta=float(betas[t]),
+                        gate=torch.ones_like(keys[t])))
+    return out
+
+
+def eda_collateral(S_hat, q, e, gamma=1.0):
+    """The exact read-side cost of an erase (eq. 12): `γ (qᵀe) Ŝᵀe`.
+
+    Use it as a GUARD before erasing: if the queries you care about have a large overlap with the proposed
+    erase direction, the erase will damage them by precisely this much. Returns (damage_vector, norm).
+    """
+    import torch
+    dmg = gamma * float(q @ e) * (S_hat.T @ e)
+    return dmg, float(torch.linalg.vector_norm(dmg))
+
+
 # ---------------------------------------------------------------- agent
 class AttentionResidual(BaseAgent):
     name = "attention-residual"

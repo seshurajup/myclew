@@ -1265,3 +1265,57 @@ _AGENT = MathMaster()
 
 def run(q, worker):
     return _AGENT.run(q, worker)
+
+
+def knob_vertex(points, bounds=None):
+    """Govern a UNIMODAL 1D knob from measured (x, loss) points: parabolic (quadratic) fit -> analytic vertex
+    = the optimal knob value + its predicted loss, without a dense brute sweep. Falls back to the best measured
+    point if the fit is non-convex (opens downward) or degenerate. bounds=(lo,hi) clamps the vertex.
+    Returns dict(x_opt, loss_pred, curvature, method). Reusable for any scalar hyperparameter (gs-scale, lr, ...)."""
+    import numpy as _np
+    xs = _np.array([float(a) for a, _ in points], float); ys = _np.array([float(b) for _, b in points], float)
+    if len(xs) < 3:
+        i = int(_np.argmin(ys)); return {"x_opt": float(xs[i]), "loss_pred": float(ys[i]), "curvature": None, "method": "argmin(<3 pts)"}
+    a, b, c = _np.polyfit(xs, ys, 2)
+    if a <= 1e-12:  # not convex -> trust the best measured point
+        i = int(_np.argmin(ys)); return {"x_opt": float(xs[i]), "loss_pred": float(ys[i]), "curvature": float(a), "method": "argmin(non-convex)"}
+    xv = -b / (2 * a); yv = a * xv * xv + b * xv + c
+    if bounds: xv = min(max(xv, bounds[0]), bounds[1])
+    return {"x_opt": round(float(xv), 4), "loss_pred": round(float(yv), 4), "curvature": round(float(a), 4), "method": "parabolic-vertex"}
+
+
+def kalman_irw_mle(s, dt=1.0, iters=300, lr=0.1, device=None):
+    """EXACT MLE of the integrated-random-walk process noise (q_s position, q_v rate) from an observed state
+    trajectory s, via a DIFFERENTIABLE Kalman filter (pure PyTorch / GPU). Gold-standard vs the method-of-
+    moments autocovariance estimator (q_s=-γ₁(Δ²s), q_v=γ₀+2γ₁) — use to VALIDATE that MoM ≈ MLE. Model:
+        x=[s,v], F=[[1,dt],[0,1]], Q(dt)=q_s·[[dt,0],[0,0]] + q_v·[[dt³/3,dt²/2],[dt²/2,dt]], observe s.
+    Optimises log-variances (positivity) by Adam on the exact Gaussian innovation NLL. Returns dict(q_s,q_v,nll).
+    A math_master state-space / system-identification primitive."""
+    import torch, math
+    dev = device or ("cuda" if torch.cuda.is_available() else "cpu")
+    y = torch.as_tensor(s, dtype=torch.float64, device=dev).flatten()
+    n = y.numel(); dt = float(dt); TWO_PI = 2.0 * math.pi
+    F = torch.tensor([[1.0, dt], [0.0, 1.0]], dtype=torch.float64, device=dev)
+    H = torch.tensor([[1.0, 0.0]], dtype=torch.float64, device=dev)
+    Qs = torch.tensor([[dt, 0.0], [0.0, 0.0]], dtype=torch.float64, device=dev)
+    Qv = torch.tensor([[dt**3/3, dt**2/2], [dt**2/2, dt]], dtype=torch.float64, device=dev)
+    R = torch.tensor([[1e-6]], dtype=torch.float64, device=dev)          # position observed ~exactly
+    v0 = torch.log(torch.var(torch.diff(y)) + 1e-9)
+    lqs = v0.clone().detach().requires_grad_(True)
+    lqv = (v0 - 4.0).clone().detach().requires_grad_(True)
+    opt = torch.optim.Adam([lqs, lqv], lr=lr)
+    I = torch.eye(2, dtype=torch.float64, device=dev)
+    def nll():
+        Q = torch.exp(lqs) * Qs + torch.exp(lqv) * Qv
+        x = torch.stack([y[0], (y[1]-y[0])/dt]); P = I * 1.0; tot = y.new_zeros(())
+        for k in range(1, n):
+            x = F @ x; P = F @ P @ F.T + Q
+            Sm = (H @ P @ H.T + R)[0, 0]; innov = y[k] - (H @ x)[0]
+            tot = tot + 0.5*(torch.log(TWO_PI*Sm) + innov*innov/Sm)
+            K = (P @ H.T)[:, 0] / Sm
+            x = x + K * innov; P = (I - torch.outer(K, H[0])) @ P
+        return tot
+    for _ in range(iters):
+        opt.zero_grad(); L = nll(); L.backward(); opt.step()
+    return {"q_s": float(torch.exp(lqs).detach()), "q_v": float(torch.exp(lqv).detach()), "nll": float(L.detach())}
+

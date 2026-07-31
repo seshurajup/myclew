@@ -90,11 +90,12 @@ def run_particle_filter(hw, tw, n_particles=500, seed=42):
     return out_vals, log_lik
 
 
-def run_pf_ensemble_gpu(hw, tw, n_particles=500, n_seeds=128, scale=5.0):
+def run_pf_ensemble_gpu(hw, tw, n_particles=500, n_seeds=128, scale=5.0, return_per_seed=False, pn=None, vn=None, gs_scale=1.0, base_seed=0):
     """GPU (cupy) equivalent of run_pf_lik_ensemble: all n_seeds filters run as one
     (n_seeds, n_particles) tensor on the RTX 5090. Same measurement/process model & softmax-over-lik
     combine as the CPU path. Returns the full-length abs-TVT array (eval rows filled)."""
     import cupy as cp
+    pn = PN if pn is None else float(pn); vn = VN if vn is None else float(vn)
     tw_s = tw.sort_values("TVT")
     tw_tvt = cp.asarray(tw_s["TVT"].values, dtype=cp.float32)
     tw_gr = cp.asarray(tw_s["GR"].fillna(tw_s["GR"].mean()).values, dtype=cp.float32)
@@ -108,14 +109,14 @@ def run_pf_ensemble_gpu(hw, tw, n_particles=500, n_seeds=128, scale=5.0):
     last = kn.iloc[-1]
     last_tvt = float(last["TVT_input"]); last_Z = float(last["Z"]); last_MD = float(last["MD"])
     tw_at_k = np.interp(kn["TVT_input"].values, cp.asnumpy(tw_tvt), cp.asnumpy(tw_gr))
-    gs = float(np.clip(np.nanstd(kn["GR"].fillna(0).values - tw_at_k), 10.0, 60.0))
+    gs = float(np.clip(np.nanstd(kn["GR"].fillna(0).values - tw_at_k), 10.0, 60.0)) * gs_scale
     tail = kn.tail(30)
     dt = np.diff(tail["TVT_input"].values); dz = np.diff(tail["Z"].values); dm = np.diff(tail["MD"].values)
     m = dm > 0
     ir = float(np.median((dt + dz)[m] / dm[m])) if m.sum() >= 3 else 0.0
 
     S, N = int(n_seeds), int(n_particles)
-    rng = cp.random.default_rng(0)
+    rng = cp.random.default_rng(base_seed)
     ls = last_tvt + last_Z
     pos = (ls + 4.5 * rng.standard_normal((S, N))).astype(cp.float32)
     rate = (ir + 0.01 * rng.standard_normal((S, N))).astype(cp.float32)
@@ -131,8 +132,8 @@ def run_pf_ensemble_gpu(hw, tw, n_particles=500, n_seeds=128, scale=5.0):
     n_ev = len(ev); res = cp.empty((S, n_ev)); prev_MD = last_MD
     for i in range(n_ev):
         dm_step = max(md_v[i] - prev_MD, 1.0)
-        rate = MOM * rate + VN * rng.standard_normal((S, N))
-        pos = pos + rate * dm_step + PN * rng.standard_normal((S, N))
+        rate = MOM * rate + vn * rng.standard_normal((S, N))
+        pos = pos + rate * dm_step + pn * rng.standard_normal((S, N))
         tvt_p = cp.clip(pos - z_v[i], lo, hi); pos = tvt_p + z_v[i]
         eg = cp.interp(tvt_p, tw_tvt, tw_gr)
         d = (gr_v[i] - eg) / gs
@@ -161,6 +162,11 @@ def run_pf_ensemble_gpu(hw, tw, n_particles=500, n_seeds=128, scale=5.0):
     combined = (weights[:, None] * res).sum(axis=0)
     out_vals[list(ev.index)] = cp.asnumpy(combined)
     conf = _ensemble_confidence(cp.asnumpy(weights))
+    if return_per_seed:
+        # per-seed trajectories + log-likelihoods: seed-combination knobs (scale/weighting/selection) are then
+        # cheap re-weightings of THESE, needing NO PF re-run. eval-row order matches list(ev.index).
+        return out_vals, conf, {"res": cp.asnumpy(res), "log_lik": cp.asnumpy(log_lik),
+                                 "idx": np.asarray(list(ev.index), dtype=int)}
     return out_vals, conf
 
 
@@ -198,12 +204,42 @@ def _list_pairs(data_dir):
     return pairs
 
 
+
+def run_pf_multiseed(hw, tw, n_particles=500, n_seeds=128, scale=5.0, base_seeds=(0, 1, 2, 3),
+                     gs_scale=1.0, pn=None, vn=None):
+    """AVERAGE the PF over several BASE seeds to kill seed-luck / shakeup variance (Deotte's "no random is
+    like random"). Splits the base seeds across ALL visible GPUs (2xT4) via cupy device context, runs each,
+    and averages the eval-row predictions. Returns (avg_full, mean_conf)."""
+    import cupy as cp
+    ng = cp.cuda.runtime.getDeviceCount()
+    accum = None; confs = []
+    for i, bs in enumerate(base_seeds):
+        with cp.cuda.Device(i % max(ng, 1)):
+            full, conf = run_pf_ensemble_gpu(hw, tw, n_particles=n_particles, n_seeds=n_seeds, scale=scale,
+                                             gs_scale=gs_scale, pn=pn, vn=vn, base_seed=int(bs))
+        accum = full.copy() if accum is None else (accum + full)
+        confs.append(conf)
+    return accum / len(base_seeds), float(np.mean(confs))
+
 def trackB_oof(data_dir, out_path, training=True, n_particles=500, n_seeds=128, scale=5.0,
-               limit=None, gpu=False):
+               limit=None, gpu=False, noise_id=False, gs_scale=1.0, noise_mode="absolute", n_base_seeds=1):
     """Run Track-B over every well; emit per-row eval-region predictions aligned to `<well>_<rowidx>` ids."""
     pairs = _list_pairs(data_dir)
     if limit:
         pairs = pairs[:limit]
+    _rel = None
+    if noise_id and noise_mode == "relative":
+        from . import pf_noise_id as _nid
+        ests = []
+        for _wid, _hp, _tp in pairs:
+            try:
+                ests.append(_nid.identify(pd.read_csv(_hp), pd.read_csv(_tp)))
+            except Exception:  # noqa: BLE001 — robust estimation: skip an unreadable well, calibrate on the rest
+                pass
+        if ests:
+            _nid.calibrate(ests); _rel = _nid
+        else:                                   # every well failed → say so instead of calibrating on nothing
+            print("geology_trackB: noise-ID failed for ALL wells; relative mode disabled")
     rows = []
     for wid, hp, tp in pairs:
         hw = pd.read_csv(hp)
@@ -218,7 +254,18 @@ def trackB_oof(data_dir, out_path, training=True, n_particles=500, n_seeds=128, 
         ps = int(np.argmax(hw["TVT_input"].isna().to_numpy()))
         tvt_ps = float(hw["TVT"].iloc[ps - 1]) if training else float(hw["TVT_input"].iloc[max(ps - 1, 0)])
         _pf = run_pf_ensemble_gpu if gpu else run_pf_lik_ensemble
-        full, conf = _pf(hw, tw, n_particles=n_particles, n_seeds=n_seeds, scale=scale)
+        if noise_id and gpu:
+            from . import pf_noise_id as _nid
+            est = _rel.identify_relative(hw, tw) if (noise_mode == "relative" and _rel is not None) else _nid.identify(hw, tw)
+            full, conf = _pf(hw, tw, n_particles=n_particles, n_seeds=n_seeds, scale=scale,
+                             pn=est["pn"], vn=est["vn"], gs_scale=1.0)
+        elif gpu and n_base_seeds > 1:
+            full, conf = run_pf_multiseed(hw, tw, n_particles=n_particles, n_seeds=n_seeds, scale=scale,
+                                          base_seeds=tuple(range(n_base_seeds)), gs_scale=gs_scale)
+        elif gpu:
+            full, conf = _pf(hw, tw, n_particles=n_particles, n_seeds=n_seeds, scale=scale, gs_scale=gs_scale)
+        else:
+            full, conf = _pf(hw, tw, n_particles=n_particles, n_seeds=n_seeds, scale=scale)
         idx = np.where(pred_mask)[0]
         d = pd.DataFrame({
             "id": [f"{wid}_{i}" for i in idx],

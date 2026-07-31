@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+# gpu-statd — samples nvidia-smi into a cache file so the shell prompt can show
+# live GPU state without paying the ~30ms nvidia-smi cost on every redraw.
+#
+# One line per GPU: "util mem_used mem_total temp power_draw"
+# Exits on its own once no shell has touched the heartbeat for a while, so it
+# never outlives the session that started it.
+
+set -u
+
+RUNDIR="${XDG_RUNTIME_DIR:-/tmp}"
+CACHE="$RUNDIR/gpu-prompt.stat"
+BEAT="$RUNDIR/gpu-prompt.beat"
+LOCK="$RUNDIR/gpu-prompt.lock"
+
+INTERVAL=2
+IDLE_TIMEOUT=600   # seconds without a prompt redraw before we shut down
+
+# Only one daemon per user. flock returns non-zero if another holds the lock.
+exec 9>"$LOCK"
+flock -n 9 || exit 0
+
+trap 'rm -f "$CACHE"; exit 0' TERM INT
+
+while :; do
+  if [[ -f "$BEAT" ]]; then
+    age=$(( $(date +%s) - $(stat -c %Y "$BEAT") ))
+    (( age > IDLE_TIMEOUT )) && break
+  else
+    break
+  fi
+
+  nvidia-smi --query-gpu=utilization.gpu,memory.used,memory.total,temperature.gpu,power.draw \
+             --format=csv,noheader,nounits 2>/dev/null \
+    | tr -d ' ' | tr ',' ' ' > "$CACHE.tmp" && mv "$CACHE.tmp" "$CACHE"
+
+  sleep "$INTERVAL"
+done
+
+rm -f "$CACHE" "$CACHE.tmp"

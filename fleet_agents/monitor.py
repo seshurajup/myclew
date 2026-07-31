@@ -185,7 +185,10 @@ def _train_pids():
 def _kill(pids):
     for sig in ("-TERM", "-KILL"):
         for p in pids:
-            subprocess.run(["kill", sig, str(p)], capture_output=True)
+            try:
+                subprocess.run(["kill", sig, str(p)], capture_output=True, timeout=10)
+            except subprocess.TimeoutExpired:   # a wedged fork must not stall the watchdog itself
+                pass
         time.sleep(2)
 
 

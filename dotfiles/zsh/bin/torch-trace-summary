@@ -1,0 +1,89 @@
+#!/usr/bin/env python
+"""torch-trace-summary — read a Chrome/Perfetto trace produced by
+torch.profiler and summarise it in the terminal, so a trace can be triaged over
+SSH without ever opening a browser.
+
+    torch-trace-summary trace-train.py-20260728.json
+    torch-trace-summary --rows 40 --by cat trace.json
+
+Reports where GPU time actually went, how much of the wall clock the GPU was
+busy at all (the number that tells you whether you are input-bound), and the
+largest gaps between kernels.
+"""
+import argparse
+import collections
+import gzip
+import json
+import sys
+
+ap = argparse.ArgumentParser()
+ap.add_argument("trace")
+ap.add_argument("--rows", type=int, default=25)
+ap.add_argument("--by", default="name", choices=["name", "cat"])
+a = ap.parse_args()
+
+opener = gzip.open if a.trace.endswith(".gz") else open
+with opener(a.trace, "rt") as fh:
+    doc = json.load(fh)
+events = doc["traceEvents"] if isinstance(doc, dict) else doc
+
+# Complete events ("X") carry a duration; everything else is metadata/flow.
+kernels, cpu_ops = [], []
+for e in events:
+    if e.get("ph") != "X" or "dur" not in e:
+        continue
+    cat = (e.get("cat") or "").lower()
+    if "kernel" in cat or "gpu_memcpy" in cat or "gpu_memset" in cat:
+        kernels.append(e)
+    elif cat in ("cpu_op", "user_annotation", "python_function"):
+        cpu_ops.append(e)
+
+if not kernels:
+    print("no GPU kernel events in this trace — was it recorded with "
+          "ProfilerActivity.CUDA?", file=sys.stderr)
+
+def summarise(evs, label, key):
+    if not evs:
+        return
+    agg = collections.defaultdict(lambda: [0.0, 0])
+    for e in evs:
+        k = e.get(key) or e.get("name", "?")
+        agg[k][0] += e["dur"]
+        agg[k][1] += 1
+    total = sum(v[0] for v in agg.values())
+    print(f"\n\033[36m── {label} — {total/1000:.1f} ms across {len(evs)} events ──\033[0m")
+    print(f"  {'total ms':>10} {'%':>6} {'count':>7} {'avg us':>9}  name")
+    rows = sorted(agg.items(), key=lambda kv: kv[1][0], reverse=True)[:a.rows]
+    for name, (dur, n) in rows:
+        print(f"  {dur/1000:10.2f} {100*dur/total:6.1f} {n:7d} {dur/n:9.1f}  {name[:88]}")
+
+summarise(kernels, "GPU kernels / mem ops", a.by if a.by == "cat" else "name")
+summarise(cpu_ops, "CPU ops", a.by if a.by == "cat" else "name")
+
+# GPU occupancy: union of kernel intervals over the span they cover. A low
+# number here means the GPU is starved — dataloader, host sync, or small kernels.
+if kernels:
+    spans = sorted((e["ts"], e["ts"] + e["dur"]) for e in kernels)
+    merged, (cs, ce) = [], spans[0]
+    for s, e in spans[1:]:
+        if s <= ce:
+            ce = max(ce, e)
+        else:
+            merged.append((cs, ce)); cs, ce = s, e
+    merged.append((cs, ce))
+    busy = sum(e - s for s, e in merged)
+    span = spans[-1][1] - spans[0][0]
+
+    print(f"\n\033[36m── GPU occupancy ──\033[0m")
+    print(f"  traced span : {span/1000:.1f} ms")
+    print(f"  GPU busy    : {busy/1000:.1f} ms  ({100*busy/span:.1f}%)")
+    idle = 100 * (span - busy) / span
+    colour = "32" if idle < 20 else ("33" if idle < 50 else "31")
+    print(f"  GPU idle    : \033[{colour}m{idle:.1f}%\033[0m")
+
+    gaps = [(merged[i + 1][0] - merged[i][1], merged[i][1]) for i in range(len(merged) - 1)]
+    gaps.sort(reverse=True)
+    if gaps[:1] and gaps[0][0] > 100:
+        print(f"\n  largest idle gaps (us since trace start):")
+        for g, at in gaps[:8]:
+            print(f"    {g:10.1f} us  @ {(at - spans[0][0])/1000:.1f} ms")

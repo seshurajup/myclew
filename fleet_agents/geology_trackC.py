@@ -296,6 +296,9 @@ def trackC_oof(train_dir, test_dir, out_oof, out_test, params, log=print):
     for w in train:
         w["feats"] = (w["feats"] - mu) / sd
     Net = _build(params)
+    from .train_heartbeat import Heartbeat
+    _hb = Heartbeat(params.get("run_id", "trackC"), log=log)
+    _hb_stage = ["gate"]  # mutated at each train_eval call site: gate -> fold0..foldK -> final
 
     def make_batches(wells, shuffle):
         order = list(range(len(wells)))
@@ -325,10 +328,13 @@ def trackC_oof(train_dir, test_dir, out_oof, out_test, params, log=print):
         model = Net(F, d=d, L=L, dropout=dropout).to(dev)
         if use_fp8:
             model = _fp8_convert(model)
-        model = torch.compile(model)
+        # dynamic=True: batch time-dim varies per batch (pad to max well len); static compile
+        # recompiles per new shape and can stall the whole run on 773 variable-length wells
+        model = torch.compile(model, dynamic=True)
         opt = _make_optimizer(model, optimizer_name, wd)
         for ep in range(epochs):
             model.train()
+            ep_loss, ep_n = 0.0, 0
             for batch in make_batches(tr_wells, True):
                 Xb, Yb, Mb, Eb, lens = collate(tr_wells, batch)
                 Xt = torch.from_numpy(Xb).to(dev); Yt = torch.from_numpy(Yb / tstd).to(dev)
@@ -343,6 +349,8 @@ def trackC_oof(train_dir, test_dir, out_oof, out_test, params, log=print):
                     tv = dpred.sum() / (Et[:, 1:].sum() + 1e-6)
                     loss = mse + tv_lambda * tv
                 loss.backward(); opt.step()
+                ep_loss += float(loss.detach()); ep_n += 1
+            _hb.beat(step=ep, loss=ep_loss / max(ep_n, 1), stage=_hb_stage[0])
         model.eval()
         preds = {}
         with torch.no_grad():
@@ -410,7 +418,8 @@ def trackC_oof(train_dir, test_dir, out_oof, out_test, params, log=print):
         return (float(np.concatenate(v).std()) + 1e-6) if (do_tstd and v) else 1.0
 
     oof_rows = []
-    for tr_i, va_i in gkf.split(idx, groups=groups):
+    for fold_k, (tr_i, va_i) in enumerate(gkf.split(idx, groups=groups)):
+        _hb_stage[0] = f"fold{fold_k}"
         tr_wells = [train[i] for i in tr_i]; va_wells = [train[i] for i in va_i]
         pr, _ = train_eval(tr_wells, va_wells, use_fp8, tstd_of(tr_wells))
         for wi, w in enumerate(va_wells):
@@ -424,11 +433,13 @@ def trackC_oof(train_dir, test_dir, out_oof, out_test, params, log=print):
     valid = oof.dropna(subset=["dtvt_true"])
     cv = float(np.sqrt(np.mean((valid.dtvt_pred - valid.dtvt_true) ** 2)))
     log(f"[C] golden CV RMSE {cv:.4f} ({'fp8' if use_fp8 else fallback})")
+    _hb.done(cv=cv)
 
     # ---- retrain on ALL train, predict test ----
     test = _load_all(test_dir, False, limit)
     for w in test:
         w["feats"] = (w["feats"] - mu) / sd
+    _hb_stage[0] = "final"
     pr, _ = train_eval(train, test, use_fp8, tstd_of(train))
     trows = []
     for wi, w in enumerate(test):

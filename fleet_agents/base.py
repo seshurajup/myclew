@@ -195,7 +195,33 @@ class FunctionAgent(BaseAgent):
                    f"and re-run preflight before trusting this agent.")
             self.post(worker, "leader", msg, routine=False, kind="reason")
             return ("escalated", {"quarantined": self.name}, "leader", msg)
-        return self.fn(q, worker)
+        try:
+            return self.fn(q, worker)
+        except KeyError as e:
+            # A REQUIRED SPEC KEY IS MISSING. 122 agent run() bodies read spec keys with `spec["k"]`
+            # rather than `.get`, which is fine — but the raw KeyError reaches the board as
+            # `FAILED …: 'lr'`, which says nothing about what to supply. Naming the key and echoing the
+            # spec that WAS given turns every one of those into an actionable escalation, at the base
+            # layer, without touching (and risking) 122 working call sites.
+            key = (e.args[0] if e.args else "?")
+            spec = q.get("spec") if isinstance(q, dict) else None
+            # Only claim "missing spec key" when that is DEMONSTRABLY what happened. The exception alone
+            # cannot tell `spec["lr"]` from `some_other_dict["lr"]`, so read the FAILING SOURCE LINE from
+            # the traceback: it must actually subscript the spec. An internal KeyError keeps its real
+            # traceback and is reported as the failure it is, never mislabelled as a caller error.
+            import re as _re
+            import traceback as _tb
+            frames = _tb.extract_tb(e.__traceback__)
+            line = (frames[-1].line or "") if frames else ""
+            reads_spec = bool(_re.search(r"\b(spec|s|q|self\.spec\([^)]*\))\s*\[", line))
+            if not (isinstance(spec, dict) and isinstance(key, str) and key not in spec and reads_spec):
+                raise
+            given = sorted(spec)
+            msg = (f"[{worker}] agent `{self.name}` needs `spec.{key}` — it was not in the spec. "
+                   f"Given keys: {given}. Re-dispatch with that key set.")
+            self.post(worker, "leader", msg, routine=False, kind="reason")
+            return ("escalated", {"missing_spec_key": key, "given": given, "agent": self.name},
+                    "leader", msg)
 
 
 def build_agents(handlers: dict) -> dict:

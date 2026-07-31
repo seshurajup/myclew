@@ -56,7 +56,7 @@ def _kill_stragglers():
         for ln in out.splitlines():
             p = ln.split(None, 2)
             if len(p) == 3 and "python" in p[1] and "smoke_" in p[2] and "train" in p[2]:
-                subprocess.run(["kill", "-KILL", p[0]], capture_output=True)
+                subprocess.run(["kill", "-KILL", p[0]], capture_output=True, timeout=6)
     except Exception:  # noqa: BLE001
         pass
 
@@ -83,7 +83,9 @@ def smoke(q, worker):
         cap_s = CAP_S
     cmd = ["timeout", "-s", "KILL", str(cap_s), "bash", "start_train.sh", str(tiny.relative_to(COMP))]
     try:
-        proc = subprocess.run(cmd, cwd=str(COMP), capture_output=True, text=True)
+        # the run is already capped by `timeout -s KILL cap_s` at the shell; this python-side bound only
+        # guards the pathological case of the `timeout` binary itself wedging
+        proc = subprocess.run(cmd, cwd=str(COMP), capture_output=True, text=True, timeout=cap_s + 300)
     except Exception as e:  # noqa: BLE001 — could not launch smoke run → clean escalate, not a crash
         _kill_stragglers()
         return ("escalated", {"config": cfg, "err": str(e)[:120]}, "researcher",

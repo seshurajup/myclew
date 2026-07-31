@@ -310,7 +310,10 @@ def summary() -> dict:
     es = entries()
     cvs = [e.get("cv") for e in es if _finite(e.get("cv"))]
     return {"n": len(es), "kept": sum(1 for e in es if e.get("kept")),
-            "stages_touched": sorted({e.get("stage") for e in es if e.get("stage") is not None}),
+            # sort by str(): `stage` is free-form and the real ledger holds BOTH strings and ints, so a
+            # bare sorted() raises TypeError('<' not supported between 'str' and 'int') and takes the whole
+            # agent down on data it is supposed to summarise.
+            "stages_touched": sorted({e.get("stage") for e in es if e.get("stage") is not None}, key=str),
             "best_cv": max(cvs) if cvs else None, "table": str(_table_path())}
 
 

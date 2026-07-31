@@ -25,9 +25,42 @@ rsync -a "${RSYNC_EXCLUDES[@]}" --include '*/' --include '*.py' --include '*.yml
   --include '*.sh' --include '*.md' --exclude '*' \
   "$ROGII/" "$REPO/competitions/rogii-wellbore-geology-prediction/"
 
+# 2b) shell environment — the zsh/ML setup this box's work depends on.
+# Explicit file list, never a whole-directory rsync: ~/.zsh_history and the atuin
+# db live next to these and must never be pushed.
+mkdir -p "$REPO/dotfiles/zsh/rc.d" "$REPO/dotfiles/zsh/bin"
+cp -p "$HOME/.zshrc"            "$REPO/dotfiles/zsh/zshrc"
+cp -p "$HOME/.zshenv"           "$REPO/dotfiles/zsh/zshenv"
+cp -p "$HOME/.p10k.zsh"         "$REPO/dotfiles/zsh/p10k.zsh"
+rsync -a --delete "$HOME/.config/zsh/rc.d/" "$REPO/dotfiles/zsh/rc.d/"
+rsync -a --delete "$HOME/.config/zsh/bin/"  "$REPO/dotfiles/zsh/bin/"
+
 # 3) STABLE guard — every tracked .py must byte-compile, else abort the commit
 if ! python -m py_compile $(find "$REPO/fleet_agents" "$REPO/test_fleet_agents" "$REPO/competitions" -name '*.py') 2>/tmp/myclew_pycompile.err; then
   echo "[myclew] STABLE-GUARD FAILED — .py compile errors, NOT committing:"; cat /tmp/myclew_pycompile.err; exit 2
+fi
+
+# 3b) same guard for the shell config — a zshrc that fails to parse locks you
+# out of a working login shell, so it must never reach a "stable" snapshot.
+# `-n` only parses its first file argument, so check them one at a time.
+: >/tmp/myclew_zshparse.err
+ZSH_BAD=0
+for f in "$REPO/dotfiles/zsh/zshrc" "$REPO"/dotfiles/zsh/rc.d/*.zsh; do
+  zsh -n "$f" 2>>/tmp/myclew_zshparse.err || ZSH_BAD=1
+done
+# dotfiles/zsh/bin holds a mix of bash and python helpers — dispatch on shebang
+# rather than assuming shell, or `bash -n` silently mis-checks the .py ones.
+for f in "$REPO"/dotfiles/zsh/bin/*; do
+  [ -f "$f" ] || continue
+  case "$(head -1 "$f")" in
+    *python*) python -m py_compile "$f" 2>>/tmp/myclew_zshparse.err || ZSH_BAD=1 ;;
+    *zsh*)    zsh -n "$f"              2>>/tmp/myclew_zshparse.err || ZSH_BAD=1 ;;
+    *)        bash -n "$f"             2>>/tmp/myclew_zshparse.err || ZSH_BAD=1 ;;
+  esac
+done
+if [ "$ZSH_BAD" -ne 0 ]; then
+  echo "[myclew] STABLE-GUARD FAILED — shell config parse errors, NOT committing:"
+  cat /tmp/myclew_zshparse.err; exit 2
 fi
 
 # 4) commit only if there are pending changes

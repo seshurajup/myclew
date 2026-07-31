@@ -27,6 +27,189 @@ GPU_SECONDS = 12 * 3600 * 2                       # 2×T4, 12h
 DETECT_BUDGET_SPF = round(GPU_SECONDS / TEST_FRAMES * 0.9, 2)   # ~3.9 s/f (tracker Trackastra is ~0.1, cheap)
 
 
+# ---------------------------------------------------------------- HOPE (Mobahi & Bartlett, 2026) adds
+# Mobahi & Bartlett (Google DeepMind / UC Berkeley), "Hilbert Operator for Progressive Encoding (HOPE):
+# A Mathematical Framework for Deconstructing Learned Representations in Deep Networks", arXiv:2607.21366
+# paper: https://arxiv.org/pdf/2607.21366 · local: docs/papers/hope-hilbert/hope-hilbert.md
+# Its argument against every magnitude-style
+# heuristic we use above: importance scores computed on ISOLATED parameters are not well defined, because a
+# network has SCALE SYMMETRIES — you can multiply a neuron's incoming weights by c and divide its outgoing
+# weights by c and the function is unchanged, while every magnitude score changes. So HOPE
+#   (1) takes the whole NEURON as the unit (incoming weights + BN + activation + outgoing weights),
+#   (2) factors the symmetry out before scoring,
+#   (3) compares neurons by the FUNCTION they compute — each is a rank-1 Hilbert-Schmidt operator, and the
+#       inner product is an integral over the input distribution. Data-free, so the distribution is the
+#       maximum-entropy one (a Gaussian), which makes the integral analytic (the arc-cosine kernel),
+#   (4) scores prune / merge / block-eviction on ONE metric so decisions are comparable across layers and
+#       granularities, and picks by RATE-DISTORTION (cost per parameter saved), not by distortion alone.
+# Data-free and hyper-parameter-free — which is exactly the regime our training-free compression runs in.
+def scale_normalise_neuron(w_in, w_out, bn_gamma=None, bn_var=None, eps=1e-8):
+    """Factor a neuron's scale symmetry out (HOPE §3): return (w_in_unit, gain).
+
+    For a positively-homogeneous activation (ReLU/LeakyReLU), scaling `w_in` by c and `w_out` by 1/c leaves
+    the neuron's function unchanged, so any score computed on `w_in` alone is arbitrary. The invariant
+    parameterisation puts all the scale in ONE place: a unit-norm incoming direction plus a single gain
+    `‖w_in‖·γ/√var·‖w_out‖`. Compare neurons on (direction, gain) and the symmetry can no longer distort
+    the ranking. BN is folded in when given.
+    """
+    import numpy as np
+    w_in = np.asarray(w_in, float).reshape(-1)
+    w_out = np.asarray(w_out, float).reshape(-1)
+    n_in = float(np.linalg.norm(w_in))
+    bn = 1.0
+    if bn_gamma is not None:
+        bn = float(bn_gamma) / (float(np.sqrt(bn_var)) + eps if bn_var is not None else 1.0)
+    gain = n_in * abs(bn) * float(np.linalg.norm(w_out))
+    return (w_in / (n_in + eps)), gain
+
+
+def neuron_kernel(u, v, kind="relu"):
+    """⟨f_u, f_v⟩ under a maximum-entropy (Gaussian) input prior — HOPE §4–§5, in closed form.
+
+    For `f_w(x) = φ(wᵀx)` with `x ~ N(0, I)`, the expectation is analytic. ReLU gives the arc-cosine
+    kernel `E[φ(uᵀx)φ(vᵀx)] = ‖u‖‖v‖/(2π) · (sinθ + (π−θ)cosθ)`, and a linear unit gives `uᵀv`. This is
+    what lets two neurons be compared by the FUNCTION they compute with no data at all: two neurons whose
+    weights look different but whose kernel is ~1 are duplicates and can be merged.
+    """
+    import numpy as np
+    u = np.asarray(u, float).reshape(-1); v = np.asarray(v, float).reshape(-1)
+    nu, nv = float(np.linalg.norm(u)), float(np.linalg.norm(v))
+    if nu < 1e-12 or nv < 1e-12:
+        return 0.0
+    cos = float(np.clip(u @ v / (nu * nv), -1.0, 1.0))
+    if kind == "linear":
+        return nu * nv * cos
+    theta = float(np.arccos(cos))
+    return nu * nv / (2 * np.pi) * (np.sin(theta) + (np.pi - theta) * np.cos(theta))
+
+
+def hope_costs(neurons, kind="relu"):
+    """Projection costs on ONE metric (HOPE §5–§8): J_prune per neuron and J_merge per pair.
+
+    `neurons` = [{"w_in":…, "w_out":…, "bn_gamma"?, "bn_var"?, "params": int, "id"?}].
+      J_prune(i) = ‖f_i‖²                         — the energy lost by projecting the neuron to zero.
+      J_merge(i,j) = ‖f_i‖² + ‖f_j‖² − ‖f_i+f_j‖²/2 ... in the rank-1 realisable space this reduces to
+                     the residual after projecting the pair onto their best single parent, which for the
+                     Gaussian kernel is `(1 − |k_ij| / √(k_ii k_jj)) · (k_ii + k_jj)/2`: zero when the two
+                     neurons compute the same function up to scale, large when they are orthogonal.
+    Returns {"prune": [...], "merge": [(i, j, cost), ...]} with a `gain`-weighted energy, so a
+    high-gain duplicate is not treated like a dead unit.
+    """
+    import numpy as np
+    prep = []
+    for n in neurons:
+        d, gain = scale_normalise_neuron(n["w_in"], n["w_out"], n.get("bn_gamma"), n.get("bn_var"))
+        prep.append({"dir": d, "gain": gain, "params": int(n.get("params", d.size)), "id": n.get("id")})
+    kk = [neuron_kernel(p["dir"], p["dir"], kind) * p["gain"] ** 2 for p in prep]
+    prune = [{"i": i, "id": prep[i]["id"], "J": float(kk[i]), "dparams": prep[i]["params"]}
+             for i in range(len(prep))]
+    merge = []
+    for i in range(len(prep)):
+        for j in range(i + 1, len(prep)):
+            kij = neuron_kernel(prep[i]["dir"], prep[j]["dir"], kind) * prep[i]["gain"] * prep[j]["gain"]
+            denom = float(np.sqrt(max(kk[i] * kk[j], 1e-24)))
+            align = abs(kij) / denom if denom > 0 else 0.0
+            cost = float((1.0 - min(align, 1.0)) * (kk[i] + kk[j]) / 2.0)
+            merge.append({"i": i, "j": j, "J": cost, "align": round(align, 4),
+                          "dparams": prep[j]["params"]})
+    return {"prune": sorted(prune, key=lambda d: d["J"]), "merge": sorted(merge, key=lambda d: d["J"])}
+
+
+# ---------------------------------------------------------------- the RECURRENT companion to the above
+# "Task-Restricted Symmetries in Recurrent Weight Space", arXiv:2606.18457
+# paper: https://arxiv.org/pdf/2606.18457 · local: docs/papers/rnn-weight-symmetry/rnn-weight-symmetry.md
+# lessons: learning/annotated/rws*.learning (8/8 formulas proved)
+#
+# HOPE's kernel above handles a feedforward SCALE symmetry analytically. Recurrent redundancy cannot be
+# factored out that way: measured on a stable RNN, perturbations of IDENTICAL ‖ΔW‖_F differ in behavioural
+# damage by several times, and which directions are free depends on the TASK. So the recurrent case needs a
+# probe, not a formula. The paper's instrument:
+#   • work in the real Schur basis `W = QTQᵀ`, which splits `T = B + N` — `B` the spectral blocks (what the
+#     dynamics rotate/decay by) and `N` the directed nonnormal couplings (how activity is routed);
+#   • ablate a coupling BLOCK (a mechanism), rebuild `W̃ = QT̃Qᵀ`, and normalise the damage by the size of
+#     the edit: `S_ΔT = ΔFVU / (‖ΔT‖_F/‖T‖_F)` — damage per unit of relative change.
+# That ratio is the recurrent analogue of `rate_distortion_pick`'s J/Δparams: it makes interventions of
+# different sizes comparable. THE CAVEAT THAT MATTERS FOR THIS AGENT: the profile is task-restricted, so a
+# coupling that is free on one task distribution can be load-bearing on another — never reuse a recurrent
+# ablation decision across tasks without re-measuring.
+def schur_blocks(W, alpha=0.7, tol=1e-3):
+    """`W` → (Q, T, blocks) in ordered real Schur coordinates; `blocks` names the coupling submatrices.
+
+    Returns `blocks = {"T_RR": (rows, cols), "T_C->R": …, "T_CC": …}` where `R` is the retained mode set
+    (`|λ| ≥ alpha·ρ(W)`) and `C` its complement — so an ablation can be described as a mechanism
+    ("fast modes feeding slow ones") rather than as a set of weight indices.
+    """
+    import numpy as np
+    from scipy.linalg import schur as _schur
+    Wn = np.asarray(W.detach().cpu().numpy() if hasattr(W, "detach") else W, dtype=np.float64)
+    T, Q = _schur(Wn, output="real")
+    lam = np.abs(np.linalg.eigvals(Wn))
+    rho = float(lam.max()) if lam.size else 0.0
+    r = int((lam >= alpha * rho).sum()) if rho > 0 else 0
+    n = Wn.shape[0]
+    blocks = {"T_RR": (slice(0, r), slice(0, r)),
+              "T_C->R": (slice(0, r), slice(r, n)),
+              "T_CC": (slice(r, n), slice(r, n))}
+    return Q, T, blocks
+
+
+def schur_sensitivity(W, rollout, alpha=0.7):
+    """Damage per unit of edit for each coupling block — the probe of arXiv:2606.18457 eq. 8.
+
+    `rollout(W) -> array` must return the model's behaviour (any array-like) with the input and readout
+    maps held FIXED, so every measured change is attributable to the recurrent matrix. Returns rows sorted
+    ascending by `sensitivity`; the first row is the best approximate-stabilizer candidate.
+    """
+    import numpy as np
+    Q, T, blocks = schur_blocks(W, alpha=alpha)
+    base = np.asarray(rollout(W) if not hasattr(rollout(W), "detach") else rollout(W).detach().cpu().numpy(),
+                      dtype=np.float64)
+    var = float(((base - base.mean(axis=0)) ** 2).mean()) or 1.0
+    tnorm = float(np.linalg.norm(T)) or 1.0
+    rows = []
+    for name, (rs, cs) in blocks.items():
+        Tt = T.copy()
+        Tt[rs, cs] = 0.0
+        if np.allclose(Tt, T):
+            continue                                    # empty block (e.g. all modes retained)
+        Wt = Q @ Tt @ Q.T
+        out = rollout(_as_like(W, Wt))
+        out = np.asarray(out.detach().cpu().numpy() if hasattr(out, "detach") else out, dtype=np.float64)
+        d_fvu = float(((out - base) ** 2).mean() / var)
+        rel = float(np.linalg.norm(T - Tt) / tnorm)
+        rows.append({"coupling": name, "rel_dT": round(rel, 5), "dFVU": round(d_fvu, 6),
+                     "sensitivity": round(d_fvu / max(rel, 1e-12), 5)})
+    rows.sort(key=lambda r: r["sensitivity"])
+    return rows
+
+
+def _as_like(ref, arr):
+    """Return `arr` as the same type/device/dtype as `ref` (torch tensor or numpy array)."""
+    try:
+        import torch
+        if hasattr(ref, "detach"):
+            return torch.as_tensor(arr, dtype=ref.dtype, device=ref.device)
+    except Exception:  # noqa: BLE001
+        pass
+    return arr
+
+
+def rate_distortion_pick(actions, min_dparams=1):
+    """The encoding loop's criterion (HOPE §9–§10): pick the action with the lowest **J / Δparams**.
+
+    Distortion alone cannot rank actions of different sizes — evicting a whole block hurts more than
+    pruning one neuron but saves far more parameters. Ranking by cost per parameter saved is what makes a
+    neuron prune, a neuron merge and a block eviction comparable on one axis, and it is the reason HOPE
+    needs no per-layer ratios or hand-set thresholds.
+    """
+    ranked = []
+    for a in actions or []:
+        dp = max(int(a.get("dparams", 0)), min_dparams)
+        ranked.append({**a, "dparams": dp, "dr": float(a.get("J", 0.0)) / dp})
+    ranked.sort(key=lambda d: d["dr"])
+    return (ranked[0] if ranked else None), ranked
+
+
 def _choose(results, recall_bar=0.95, budget_spf=DETECT_BUDGET_SPF):
     """PURE decision (data-wise tested). results = {K: {"44b6":r,"6bba":r,"spf":s}}.
     Pick the SMALLEST K (fastest / most time-margin) whose MIN per-embryo recall ≥ recall_bar AND

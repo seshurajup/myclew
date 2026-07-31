@@ -9,101 +9,283 @@ Interface the framework expects:
   SEED     : list of (thread, kind, question, spec_dict)
   HANDLERS : dict  kind -> fn(question, worker) -> (status, result, to, message)
 """
-from . import (  # noqa: F401
-    adversarial, augfinder, best_config, block_synth, combo_search, config_ablate, config_gen, deep_sister, div_model, cv, dryrun, eda_stats, experiments, ext_label_stats, flow_gt_builder, fullconfig_search, arch_builder, arch_search as _asearch, box_sample as _boxs, sample_match as _smatch, combined_train as _ctrain, perf_choice as _perf, layer_grow as _lgrow, data_audit as _daudit2, gpu_best_practices as _gpu, paper_research as _paper, gnn_link_train as _glt, gnn_probe, xai as _xai, grandmaster, trick_extractor as _trick, trick_gate as _tgate, decision_audit as _daudit, prior_art as _prior, guard, heal as _heal, scoreboard as _sb, insights, journey, tracker_consensus, pipeline as _pipeline, recipe_adopt as _radopt, det_sweep as _dsweep, cv_lb_calibrate as _cvlb, submit_guard as _sguard, beat_bar as _bbar, improve_loop as _iloop, campaign as _camp, saliency_detect as _sdet, link_tune as _ltune, ext_transfer as _extf, domain_match as _dmatch, gan_train as _gan, detector_transfer as _dtrans, setup_env as _setupenv, gm_repo_distill as _gmdistill, pipeline_completeness as _pcomp, pattern_tune as _ptune, math_master as _mm, detector_arch_search as _das, deep_research as _dres, temporal_audit as _taud, lit_search as _lit, mh_ilp as _milp, detector_select as _dsel, tracker_select as _tsel, compress_select as _psel,
-    kaggle_scout, ledger, learner, metric, metrics_report, monitor, note, notebook_sync, orchestrator, plan_ingest,
-    postanalysis, pipeline_run, preanalysis, public_config, reproduce_score, runner, score_step, submission_build, scorer, smoke, split_build, stage1_div, stages, verify_cv,
-    nb_preflight as _nbp, submit_verify as _sv, research_search as _rs, lb_sync as _lbs, frozen_exploit as _fex,
-    distill as _dist, component_graft as _cg, keyframe as _kf, quantize as _qz, lowbit_qat as _lbq, paper_verify as _pverify,
-    lora_train as _lora, full_cv_baseline as _fcvb, lora_validate as _lval, detect_quality as _dq, stage_dynamics as _sdyn, official_score as _oscore, division_rescue as _drescue,
-    tracker_train as _ttrain, center_train as _cdtrain, tracker_predict as _tpredict, tracker_postproc as _tpostp,
-    official_conformance as _oconf, git_track as _gtrack, div_temporal_feas as _dtfeas,
-    metric_probe as _mprobe, lever_hunt as _lhunt, psf_deconv as _psfd,
-    feasibility_gate as _feas,
-    comp_onboard as _onboard,
-    tab_profile as _tabprof, tab_train as _tabtrain, tab_stack as _tabstack, tab_autobaseline as _tabauto,
-    tab_fe as _tabfe,
-    agent_env as _agenv, agent_policy as _agpol, agent_eval as _ageval,
-    gm_writeup_mine as _gmwm,
-    pseudo_label as _pseudo, blend_optimize as _blend, post_optimize as _postopt,
-    calibrate as _calib, target_transform as _ttrans,
-    solution_adopt as _soladopt,
-    prompt_skill_build as _skillb, prompt_agent_author as _agauth, prompt_agent_eval as _ageval2,
-    dspy_prompt_pack as _dspyp,
-    gap_pack as _gap,
-    github_solution_mine as _ghmine,
-    domain_feature_pack as _domfe,
-    tab_diversity_pack as _tabdiv,
-    forecast_sports_pack as _fsp,
-    optimization_pack as _opt,
-    training_head_pack as _thp,
-    inference_tricks_pack as _inf,
-    robustness_pack as _rob,
-    llm_inference_pack as _llmi,
-    mtp_speculative_pack as _mtp, kv_cache_pack as _kvc, moe_inference_pack as _moe,
-    moe_quantile_balance as _moeqb,
-    sparsity_metrics as _spm,
-    shap_emd as _shemd,
-    geometric_features as _geo,
-    flow_matching as _flow,
-    llm_backend as _llmb,
-    skill_optimizer as _skopt,
-    mup_scaling as _mup,
-    gpu_patterns as _gpp,
-    deck_builder as _deck,
-    video_builder as _vidb,
-    task_spec as _tspec,
-    turboquant as _tq,
-    attention_residual as _attnres,
-    latent_moe as _latmoe,
-    rswa_attention as _rswa,
-    embedding_retrieval as _emb,
-    nvfp4_loader as _nvl,
-    diffusion_sampler as _diff,
-    ui_component as _uic,
-    shopify_agent as _shop,
-    lightning_tricks as _ltricks,
-    santa_agent as _santa,
-    finance_pack as _fin,
-    reasoning_code_pack as _rcp,
-    misc_domain_pack as _misc,
-    final_pure_pack as _fpp,
-    tab_nn_train as _tabnn,
-    heavy_runnable_pack as _hrp,
-    llm_pack as _llmp,
-    heavy_runnable2_pack as _hr2,
-    reasoning_exec_pack as _rep,
-    scaffold_pack as _scaf,
-    train_tricks_pack as _tricks,
-    volumetric_detection_pack as _vdet,
-    masked_sequence_pack as _mseq,
-    imbalance_sampler_pack as _imbs,
-    sr_bf16_optimizer as _srbf,
-    quaternion_imu_features as _qimu,
-    muon_optimizer as _muon,
-    context_offload as _coff,
-    harness_opt_gate as _hgate,
-    conformal_prediction as _conf,
-    schedule_free as _sfree,
-    dora_adapter as _dora,
-    hardware_tune as _hwtune,
-    prompt_metric as _pmetric,
-    prompt_dataset as _pdataset,
-    style_fingerprint as _styfp,
-    audio_pack as _audio,
-    audio_train as _audiotrain,
-    audio_infer as _audioinfer,
-    graph_pack as _graph,
-    multimodal_pack as _mmf,
-    video_pack as _vid,
-    coverage_audit as _covaudit,
-    kaggle_modality as _kmod,
-    kaggle_submit as _ksubmit,
-    sub_journal as _subj,
-    onnx_tools as _onnx,
-    arc_onnx_golf as _arcgolf, arc_idioms as _arcidioms, arc_worker_context as _arcctx,
-    hf_kernels as _hfkernels,
-)
+# ---------------------------------------------------------------- guarded registry import
+# One broken module used to kill the ENTIRE fleet: this file did a single monolithic
+# `from . import (…223 modules…)`, so a missing dependency in ANY of them (e.g. `researchpapers`
+# absent from a venv) made all ~320 agents unimportable at once. Now each module loads guarded:
+# a failure costs ITS agents only, is recorded in BROKEN, and every attribute of the broken module
+# degrades to a handler that reports the import error loudly when dispatched.
+import importlib as _importlib
+import sys as _sys
+
+BROKEN = {}
+
+
+class _BrokenModule:
+    """Stand-in for an agent module whose import failed — the fleet stays up, this module's
+    agents return an actionable failure on dispatch instead of the registry dying at import."""
+
+    def __init__(self, name, err):
+        self._name, self._err = name, err
+
+    def __getattr__(self, attr):
+        name, err = self._name, self._err
+
+        def _broken(q=None, worker="cli", *a, **k):
+            return ("failed", {"import_error": err, "module": name}, "leader",
+                    f"[{worker}] agent module `{name}` failed to import: {err}. "
+                    f"Fix that module/venv; every other agent is unaffected.")
+        return _broken
+
+
+def _load(name, alias=None):
+    try:
+        mod = _importlib.import_module(f".{name}", __name__)
+    except Exception as e:  # noqa: BLE001 — a broken module must cost ITS agents, not the fleet
+        BROKEN[name] = f"{type(e).__name__}: {e}"
+        mod = _BrokenModule(name, BROKEN[name])
+    globals()[alias or name] = mod
+    return mod
+
+
+_MODULES = [
+    ("adversarial", None),
+    ("augfinder", None),
+    ("best_config", None),
+    ("block_synth", None),
+    ("combo_search", None),
+    ("config_ablate", None),
+    ("config_gen", None),
+    ("deep_sister", None),
+    ("div_model", None),
+    ("cv", None),
+    ("dryrun", None),
+    ("eda_stats", None),
+    ("experiments", None),
+    ("ext_label_stats", None),
+    ("flow_gt_builder", None),
+    ("fullconfig_search", None),
+    ("arch_builder", None),
+    ("arch_search", "_asearch"),
+    ("box_sample", "_boxs"),
+    ("sample_match", "_smatch"),
+    ("combined_train", "_ctrain"),
+    ("perf_choice", "_perf"),
+    ("layer_grow", "_lgrow"),
+    ("data_audit", "_daudit2"),
+    ("gpu_best_practices", "_gpu"),
+    ("paper_research", "_paper"),
+    ("gnn_link_train", "_glt"),
+    ("gnn_probe", None),
+    ("xai", "_xai"),
+    ("grandmaster", None),
+    ("trick_extractor", "_trick"),
+    ("trick_gate", "_tgate"),
+    ("decision_audit", "_daudit"),
+    ("prior_art", "_prior"),
+    ("guard", None),
+    ("heal", "_heal"),
+    ("scoreboard", "_sb"),
+    ("insights", None),
+    ("journey", None),
+    ("tracker_consensus", None),
+    ("pipeline", "_pipeline"),
+    ("recipe_adopt", "_radopt"),
+    ("det_sweep", "_dsweep"),
+    ("cv_lb_calibrate", "_cvlb"),
+    ("submit_guard", "_sguard"),
+    ("beat_bar", "_bbar"),
+    ("improve_loop", "_iloop"),
+    ("campaign", "_camp"),
+    ("saliency_detect", "_sdet"),
+    ("link_tune", "_ltune"),
+    ("ext_transfer", "_extf"),
+    ("domain_match", "_dmatch"),
+    ("gan_train", "_gan"),
+    ("detector_transfer", "_dtrans"),
+    ("setup_env", "_setupenv"),
+    ("gm_repo_distill", "_gmdistill"),
+    ("pipeline_completeness", "_pcomp"),
+    ("pattern_tune", "_ptune"),
+    ("math_master", "_mm"),
+    ("detector_arch_search", "_das"),
+    ("deep_research", "_dres"),
+    ("temporal_audit", "_taud"),
+    ("lit_search", "_lit"),
+    ("mh_ilp", "_milp"),
+    ("detector_select", "_dsel"),
+    ("tracker_select", "_tsel"),
+    ("compress_select", "_psel"),
+    ("kaggle_scout", None),
+    ("ledger", None),
+    ("learner", None),
+    ("metric", None),
+    ("metrics_report", None),
+    ("monitor", None),
+    ("note", None),
+    ("notebook_sync", None),
+    ("orchestrator", None),
+    ("plan_ingest", None),
+    ("postanalysis", None),
+    ("pipeline_run", None),
+    ("preanalysis", None),
+    ("public_config", None),
+    ("reproduce_score", None),
+    ("runner", None),
+    ("score_step", None),
+    ("submission_build", None),
+    ("scorer", None),
+    ("smoke", None),
+    ("split_build", None),
+    ("stage1_div", None),
+    ("stages", None),
+    ("verify_cv", None),
+    ("nb_preflight", "_nbp"),
+    ("submit_verify", "_sv"),
+    ("research_search", "_rs"),
+    ("lb_sync", "_lbs"),
+    ("frozen_exploit", "_fex"),
+    ("distill", "_dist"),
+    ("component_graft", "_cg"),
+    ("keyframe", "_kf"),
+    ("quantize", "_qz"),
+    ("lowbit_qat", "_lbq"),
+    ("paper_verify", "_pverify"),
+    ("paper_md", "_pmd"),
+    ("paper_learn", "_plearn"),
+    ("lora_train", "_lora"),
+    ("full_cv_baseline", "_fcvb"),
+    ("lora_validate", "_lval"),
+    ("detect_quality", "_dq"),
+    ("stage_dynamics", "_sdyn"),
+    ("official_score", "_oscore"),
+    ("division_rescue", "_drescue"),
+    ("tracker_train", "_ttrain"),
+    ("center_train", "_cdtrain"),
+    ("tracker_predict", "_tpredict"),
+    ("tracker_postproc", "_tpostp"),
+    ("official_conformance", "_oconf"),
+    ("git_track", "_gtrack"),
+    ("div_temporal_feas", "_dtfeas"),
+    ("metric_probe", "_mprobe"),
+    ("lever_hunt", "_lhunt"),
+    ("psf_deconv", "_psfd"),
+    ("feasibility_gate", "_feas"),
+    ("comp_onboard", "_onboard"),
+    ("tab_profile", "_tabprof"),
+    ("tab_train", "_tabtrain"),
+    ("tab_stack", "_tabstack"),
+    ("tab_autobaseline", "_tabauto"),
+    ("tab_fe", "_tabfe"),
+    ("agent_env", "_agenv"),
+    ("agent_policy", "_agpol"),
+    ("agent_eval", "_ageval"),
+    ("gm_writeup_mine", "_gmwm"),
+    ("pseudo_label", "_pseudo"),
+    ("blend_optimize", "_blend"),
+    ("post_optimize", "_postopt"),
+    ("calibrate", "_calib"),
+    ("target_transform", "_ttrans"),
+    ("solution_adopt", "_soladopt"),
+    ("prompt_skill_build", "_skillb"),
+    ("prompt_agent_author", "_agauth"),
+    ("prompt_agent_eval", "_ageval2"),
+    ("dspy_prompt_pack", "_dspyp"),
+    ("gap_pack", "_gap"),
+    ("github_solution_mine", "_ghmine"),
+    ("domain_feature_pack", "_domfe"),
+    ("tab_diversity_pack", "_tabdiv"),
+    ("forecast_sports_pack", "_fsp"),
+    ("optimization_pack", "_opt"),
+    ("training_head_pack", "_thp"),
+    ("inference_tricks_pack", "_inf"),
+    ("robustness_pack", "_rob"),
+    ("llm_inference_pack", "_llmi"),
+    ("mtp_speculative_pack", "_mtp"),
+    ("kv_cache_pack", "_kvc"),
+    ("moe_inference_pack", "_moe"),
+    ("moe_quantile_balance", "_moeqb"),
+    ("sparsity_metrics", "_spm"),
+    ("shap_emd", "_shemd"),
+    ("geometric_features", "_geo"),
+    ("flow_matching", "_flow"),
+    ("llm_backend", "_llmb"),
+    ("llm_tool_train", "_lltt"),
+    ("local_pilot", "_lpilot"),
+    ("skill_optimizer", "_skopt"),
+    ("mup_scaling", "_mup"),
+    ("gpu_patterns", "_gpp"),
+    ("deck_builder", "_deck"),
+    ("video_builder", "_vidb"),
+    ("shorts_builder", "_shorts"),
+    ("task_spec", "_tspec"),
+    ("turboquant", "_tq"),
+    ("attention_residual", "_attnres"),
+    ("latent_moe", "_latmoe"),
+    ("rswa_attention", "_rswa"),
+    ("embedding_retrieval", "_emb"),
+    ("nvfp4_loader", "_nvl"),
+    ("diffusion_sampler", "_diff"),
+    ("ui_component", "_uic"),
+    ("shopify_agent", "_shop"),
+    ("lightning_tricks", "_ltricks"),
+    ("santa_agent", "_santa"),
+    ("finance_pack", "_fin"),
+    ("reasoning_code_pack", "_rcp"),
+    ("misc_domain_pack", "_misc"),
+    ("final_pure_pack", "_fpp"),
+    ("tab_nn_train", "_tabnn"),
+    ("heavy_runnable_pack", "_hrp"),
+    ("llm_pack", "_llmp"),
+    ("heavy_runnable2_pack", "_hr2"),
+    ("reasoning_exec_pack", "_rep"),
+    ("scaffold_pack", "_scaf"),
+    ("train_tricks_pack", "_tricks"),
+    ("volumetric_detection_pack", "_vdet"),
+    ("masked_sequence_pack", "_mseq"),
+    ("imbalance_sampler_pack", "_imbs"),
+    ("sr_bf16_optimizer", "_srbf"),
+    ("quaternion_imu_features", "_qimu"),
+    ("muon_optimizer", "_muon"),
+    ("context_offload", "_coff"),
+    ("harness_opt_gate", "_hgate"),
+    ("conformal_prediction", "_conf"),
+    ("schedule_free", "_sfree"),
+    ("dora_adapter", "_dora"),
+    ("hardware_tune", "_hwtune"),
+    ("prompt_metric", "_pmetric"),
+    ("prompt_dataset", "_pdataset"),
+    ("style_fingerprint", "_styfp"),
+    ("audio_pack", "_audio"),
+    ("audio_train", "_audiotrain"),
+    ("audio_infer", "_audioinfer"),
+    ("graph_pack", "_graph"),
+    ("multimodal_pack", "_mmf"),
+    ("video_pack", "_vid"),
+    ("coverage_audit", "_covaudit"),
+    ("kaggle_modality", "_kmod"),
+    ("kaggle_submit", "_ksubmit"),
+    ("sub_journal", "_subj"),
+    ("onnx_tools", "_onnx"),
+    ("arc_onnx_golf", "_arcgolf"),
+    ("arc_idioms", "_arcidioms"),
+    ("arc_worker_context", "_arcctx"),
+    ("hf_kernels", "_hfkernels"),
+    ("llama2_infer", "_llama2"),
+    ("llmc_train", "_llmc"),
+    ("coworker_backend", "_cowork"),
+]
+for _n, _a in _MODULES:
+    _load(_n, _a)
+if BROKEN:
+    print(f"fleet_agents: {len(BROKEN)} of {len(_MODULES)} modules failed to import and are "
+          f"degraded (see fleet_agents.BROKEN): {sorted(BROKEN)}", file=_sys.stderr)
+
+
+def fleet_health():
+    """{loaded, broken:{module: error}} — the registry's own health, for the hub and tests."""
+    return {"modules": len(_MODULES), "loaded": len(_MODULES) - len(BROKEN), "broken": dict(BROKEN)}
+
 
 NAME = "biohub-cell-tracking"
 
@@ -162,6 +344,8 @@ SEED = [
     ("S7", "ensemble", "Ensemble LAST (fold/seed avg; reject regressive unions)", {}),
     ("S8", "post-proc", "Post-proc + submit-gate (CV-only; beat 0.885 bar)", {}),
     ("S", "learn", "Learner ready — capture new findings as Pattern-B .py + .learning lessons", {}),
+    ("S", "paper-md", "ANY paper PDF/URL → designed markdown + figures + a crop of EVERY formula", {}),
+    ("S", "paper-learn", "That paper → a taught lesson series with runnable PyTorch proofs (coverage-checked)", {}),
     ("S", "kaggle-scout", "Pull top public notebooks + leaderboard via the Kaggle CLI (don't miss)", {}),
     ("A", "pre-analysis", "Diagnose the current state → recommend the next lever (before experiments)", {}),
     ("A", "post-analysis", "Verdict after an experiment: delta, transfer, kept/rejected", {}),
@@ -194,6 +378,9 @@ SEED = [
     ("S", "train-tricks", "REUSABLE GM training-tricks pack (torch/CUDA): EMA·SWA·mixup·cutmix·label-smoothing·focal(bin+multi)·SAM·sub-center-ArcFace — the winner-standard training-loop primitives (from 179 repos)", {}),
     ("S", "pipeline-completeness", "PROVE self-sufficiency: for every comp modality, does an agent fill every onboard→submit stage? flags gaps that force ad-hoc code", {}),
     ("S", "gm-repo-distill", "REUSABLE self-improving loop over GM winner GitHub repos: clone→scan techniques→check fleet coverage→delete→manifest; finds capability GAPS to build", {}),
+    ("S", "llama2-infer", "REUSABLE minimal-transformer inference/int8-export planner (from karpathy/llama2.c): param-count·KV-cache·Q8_0 group-wise int8 sizing·VRAM-fit for a tiny in-house LM offline", {}),
+    ("S", "llmc-train", "REUSABLE GPT-2 training cost/MFU/precision planner (from karpathy/llm.c): FLOPs/token·tokens-per-sec·wall-clock·vocab-pad-128 across device+precision before launching a trainer", {}),
+    ("S", "coworker-backend", "REUSABLE multi-provider LLM routing + risk/approval gating (from andrewyng/openworker): provider:model resolve+fallback and WRITE_LOCAL/EXEC/EXTERNAL classify → auto-run vs human-approval", {}),
     ("S", "setup-env", "REUSABLE dependency manager for lib-gated agents (mast3r/autogluon/rdkit/nnunet...); ABI-safe install (numpy 2.4.6 + torch cu128 preserved); dry-run default", {}),
     ("S", "detector-transfer", "REUSABLE strong 3D-UNet detector + MULTI-SEED per-embryo transfer eval (mean±std, significance) + self-training; kills 1-seed noise verdicts", {}),
     ("A", "data-audit", "MEASURE + CORRECT the training data scale/outliers before training (per-embryo normalise)", {}),
@@ -332,6 +519,7 @@ SEED = [
     ("S", "wbf-fusion", "INFERENCE: Weighted Boxes Fusion — cluster boxes(IoU)/points(distance) from N models/TTA and confidence-weighted-average coords+conf (Lyft 1st; point-variant fuses cell detectors)", {}),
     ("S", "snapshot-average", "INFERENCE: average logits/probs across N snapshot/seed outputs (prob/logit/rank modes + per-model weights); raw reusable ensemble reducer", {}),
     ("S", "multi-tta", "INFERENCE: multi-transform test-time augmentation — apply invertible flips/rot90/scales, predict, invert, fuse (mean/WBF); 2D/3D", {}),
+    ("S", "head-consistency", "INFERENCE: LABEL-FREE test-time adaptation (DiScoFormer) — a differentiable identity between two heads (e.g. score==∇log-density) is a self-supervised loss; few grad steps adapt weights to OOD at inference, no labels; generic `relation` closure", {}),
     ("M", "shift-adapt", "ROBUSTNESS: adversarial train-vs-test discriminator → importance weights + shift-aligned holdout CV (s5e12)", {}),
     ("M", "geospatial-fe", "DOMAIN FE: grid-cell target-encoding + spatial-KNN class-fraction for lat/lon / RA-Dec (s6e6)", {}),
     ("M", "linear-constraint-projector", "POSTPROC: project predictions onto a known linear manifold Ax=b (mass-balance / Einthoven) — CSIRO/ECG", {}),
@@ -357,6 +545,7 @@ SEED = [
     ("M", "gpu-patterns", "GPU/KERNELS (srush/GPU-Puzzles): parallel primitives (scan/reduce/tiled-matmul reference) + roofline arithmetic-intensity model → compute- vs memory-bound classification and the right kernel/tiling lever", {"m": 4096}),
     ("S", "deck-builder", "REPORTING (hugohe3/ppt-master distilled): deterministic spec→.pptx (title/bullets/table) on python-pptx — turn an experiment ledger/CV summary into a shareable deck; no LLM/SVG", {}),
     ("S", "video-builder", "REPORTING (remotion alternative): Python-native frames→GIF/MP4 (overlay_points for tracking overlays) via imageio — no Node/Chromium; render tracking/training animations", {"n_frames": 12, "size": 64}),
+    ("S", "shorts-builder", "REPORTING (remotion-dev/remotion + facebook/astryx): tutorial (code, transcript, language) -> 1080x1920 YouTube Short with typing-code animation (Prism/astryx dark syntax, cursor, captions); Remotion render when Node present, pygments+PIL fallback offline", {"language": "python"}),
     ("S", "task-spec", "ORCHESTRATION (GeminiLight/MindOS): spec-driven task contract — goal/current-state/data-flow(readers+writers lint)/plan/impact/edge-cases/acceptance checklist; gate() makes 'done' objective and binds agents to a shared goal", {}),
     ("M", "turboquant", "RETRIEVAL/QUANT (Google TurboQuant / turbovec): data-oblivious vector quantizer — random rotation makes coords Beta-marginal, one Lloyd-Max codebook fixed by DIM (no training/rebuild); 8x embedding compression w/ graceful recall for RAG/dedup/NN", {"n": 2000, "dim": 64, "bits": 4}),
     ("M", "attention-residual", "ARCH (Kimi-K3 Attention Residuals): residual that SELECTIVELY retrieves across depth (learned gate over all prior layer states) instead of a uniform running sum — deep layers re-read a specific earlier depth; generalizes x=x+f(x)", {"dim": 16, "depth": 6}),
@@ -524,6 +713,9 @@ HANDLERS = {
     "train-tricks": _tricks.run,                        # REUSABLE GM training-tricks pack — EMA/SWA/mixup/cutmix/label-smoothing/focal/SAM/ArcFace (torch/CUDA)
     "pipeline-completeness": _pcomp.run,
     "gm-repo-distill": _gmdistill.run,
+    "llama2-infer": _llama2.run,                        # REUSABLE minimal-transformer inference/int8-export planner (karpathy/llama2.c)
+    "llmc-train": _llmc.run,                            # REUSABLE GPT-2 training cost/MFU/precision planner (karpathy/llm.c)
+    "coworker-backend": _cowork.run,                    # REUSABLE multi-provider LLM routing + risk/approval gating (andrewyng/openworker)
     "setup-env": _setupenv.run,
     "detector-transfer": _dtrans.run,                   # REUSABLE strong 3D detector + multi-seed per-embryo transfer eval (mean±std) + self-training — noise-robust GO/NO-GO
     "pattern-tune": _ptune.run,                        # autonomously tune box-sample until boxed external matches competition on ALL columns
@@ -574,6 +766,8 @@ HANDLERS = {
     "research-search": _rs.run,      # REUSABLE multi-source (HF/arXiv/bioimage/zenodo/github/kaggle+discussions/europepmc/figshare) model+paper search, BM25 index
     "lb-sync": _lbs.run,             # SNAPSHOT the official leaderboard → submission-recency/activity analytics (per-comp PG)
     "paper-verify": _pverify.run,    # PROVE Zebrahub(Cell 2024)+Ultrack(PMC12615266) claims vs our training data → verdict table (cached)
+    "paper-md": _pmd.run,            # ANY paper PDF → designed markdown + lossless figures + a crop of EVERY formula (equations.json)
+    "paper-learn": _plearn.run,      # that conversion → a taught Pattern-B lesson series with runnable PyTorch PROOFS + coverage report
     "official-conformance": _oconf.run,  # PROVE conformance w/ official baseline: metric-core identical + submission schema + division sandbox
     "git-track": _gtrack.run,            # COMMIT code (parent+official_repo) → hash; stamps ledger so experiments map to code state
     "metric-probe": _mprobe.run,         # REUSABLE adversarial metric-vulnerability prober: structural perturbations that move the score without improving correctness → ranked exploit report + bug class (LB-unreliability / CV-guard / bug-report, NOT to submit)
@@ -664,6 +858,7 @@ HANDLERS = {
     "wbf-fusion": _inf.run_wbf,                               # INFERENCE: Weighted Boxes/Points Fusion
     "snapshot-average": _inf.run_snapshot,                    # INFERENCE: snapshot/seed logit-prob-rank averaging
     "multi-tta": _inf.run_tta,                                # INFERENCE: invertible multi-transform TTA + fuse
+    "head-consistency": _inf.run_head_consistency,            # INFERENCE: DiScoFormer label-free head-consistency TTA
 
     "shift-adapt": _rob.run_shift,                     # ROBUSTNESS: shift importance weights + aligned CV
     "geospatial-fe": _rob.run_geo,                     # DOMAIN FE: grid-cell TE + spatial-KNN
@@ -686,10 +881,13 @@ HANDLERS = {
     "geometric-features": _geo.run_geomfeat,           # GEOMETRIC-DL: torchmd-net PhysNet RBF/cutoff point-cloud→edge featurizer (equivariant)
     "flow-matching": _flow.run_flowmatch,              # GENERATIVE: ppflow OT conditional flow-matching objective + Euler sampler
     "llm-backend": _llmb.run_llmbackend,               # INFRA: omnigent-pattern multi-provider LLM client (Ollama/OpenRouter/Claude/local/dummy)
+    "llm-tool-train": _lltt.run,
+    "local-pilot": _lpilot.run,                     # LOCAL model drives the fleet: state -> next agent               # TRAIN a local LM on the fleet's own two-tool protocol (4-bit LoRA by default)
     "mup-scaling": _mup.run_mup,                       # SCALING: ArchScale μP width-scaling rules (hyperparameter transfer across widths)
     "gpu-patterns": _gpp.run_gpupatterns,              # GPU/KERNELS: GPU-Puzzles parallel primitives + roofline compute/memory-bound cost model
     "deck-builder": _deck.run_deck,                    # REPORTING: ppt-master-distilled spec->pptx deck builder
     "video-builder": _vidb.run_video,                   # REPORTING: frames->GIF/MP4 assembler (remotion alternative, imageio)
+    "shorts-builder": _shorts.run_shorts,              # REPORTING: (code,transcript,language)->YouTube Short via Remotion+astryx (PIL fallback)
     "task-spec": _tspec.run_taskspec,                  # ORCHESTRATION: MindOS spec-driven acceptance-gated task contract
     "turboquant": _tq.run_turboquant,                  # RETRIEVAL/QUANT: TurboQuant data-oblivious embedding quantizer (8x, training-free)
     "attention-residual": _attnres.run_attnres,        # ARCH: Kimi-K3 AttnRes selective depth-retrieval residual

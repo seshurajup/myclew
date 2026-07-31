@@ -101,6 +101,65 @@ class ModelEMA:
         return self.ema.state_dict()
 
 
+# ══════════════════════════════════════════════════════════════════ 1b. CMS — per-block update FREQUENCIES
+# Behrouz, Razaviyayn, Zhong & Mirrokni, "Nested Learning: The Illusion of Deep Learning Architecture",
+# NeurIPS 2025 — paper: https://alibehrouz.com/files/NL.pdf  (§7.1, eqs. 70-71)
+# local: docs/papers/nested-learning/nested-learning.md · lessons: learning/annotated/nl07.learning
+#
+# The idea we can use today without changing an architecture: a Transformer is already a two-frequency
+# machine (attention updates per token, the MLP is frozen after pre-training) and the whole proposal is to
+# fill in the spectrum between those extremes. A "Continuum Memory System" is a chain of blocks whose
+# parameters are updated every C^(l) steps, so fast blocks adapt while slow blocks keep persistent
+# knowledge — and when a fast block forgets something, the slower blocks still hold it.
+#
+# MEASURED on the 5090 (lesson nl07): the average parameters written per step is exactly sum(n_l / C_l)
+# (matched the prediction to <2%), and the inference cost is UNCHANGED because the gate is on the
+# optimiser step, not on the forward pass.
+def cms_param_groups(named_modules, periods):
+    """Assign update PERIODS to parameter groups → [{"params": [...], "period": C, "name": …}].
+
+    `named_modules` = [(name, module), …] in depth order; `periods` = the period per group (e.g.
+    (1, 4, 16, 64) → the first group updates every step, the last every 64). Groups are cut evenly over
+    the modules given, so this works for any backbone without per-model wiring.
+    """
+    mods = [(n, m) for n, m in named_modules if any(p.requires_grad for p in m.parameters(recurse=False))
+            or list(m.parameters(recurse=False))]
+    if not mods or not periods:
+        return []
+    per = max(1, len(mods) // len(periods))
+    groups = []
+    for gi, C in enumerate(periods):
+        chunk = mods[gi * per: (gi + 1) * per] if gi < len(periods) - 1 else mods[gi * per:]
+        params = [p for _, m in chunk for p in m.parameters(recurse=False) if p.requires_grad]
+        if params:
+            groups.append({"params": params, "period": int(C), "name": f"f{gi + 1}",
+                           "modules": [n for n, _ in chunk],
+                           "n_params": int(sum(p.numel() for p in params))})
+    return groups
+
+
+def cms_step_gate(step, groups):
+    """Zero the grads of every group whose turn it is not (NL eq. 71). Call AFTER backward, BEFORE step.
+
+    Returns the number of parameters actually written this step, so a trainer can log the real update cost
+    (`sum(n_l / C_l)` on average) instead of assuming it.
+    """
+    written = 0
+    for g in groups:
+        if int(step) % int(g["period"]):
+            for p in g["params"]:
+                p.grad = None
+        else:
+            written += int(g.get("n_params", sum(p.numel() for p in g["params"])))
+    return written
+
+
+def cms_expected_cost(groups):
+    """The predicted average parameters-written-per-step, `sum(n_l / C_l)` — compare against the measured
+    value from `cms_step_gate` to catch a mis-wired schedule."""
+    return float(sum(g.get("n_params", 0) / g["period"] for g in groups))
+
+
 # ══════════════════════════════════════════════════════════════════ 2. SWA (Stochastic Weight Averaging)
 def swa_average_model(model):
     """Create an AveragedModel wrapper for SWA (~12 repos). After warmup, call `.update_parameters(model)`
