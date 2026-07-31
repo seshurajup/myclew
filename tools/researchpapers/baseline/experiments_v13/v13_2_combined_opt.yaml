@@ -1,0 +1,40 @@
+# Stage 3b v13-2: Full LOEO Combined Optimization (best-guess params)
+name: stage3_v13_2_combined_opt
+description: |
+  Combined optimization on full LOEO (199 datasets, 2-fold CV).
+  Best-guess parameters from v12 sweep design:
+    - gap_recovery_max_distance_um: 7.5 (relaxed from baseline 6.0)
+    - velocity_prediction: true (motion-aware re-linking)
+  Tests whether post-proc transformations close gap toward 0.8708 reference.
+
+input:
+  predictions_dir: /home/seshu/kaggle/2026/biohub-cell-tracking-during-development/tools/researchpapers/output/stage3/loeo_predictions_full
+
+postproc:
+  edge_length_max_um: 12.0
+  gap_recovery_enabled: false
+  gap_recovery_max_distance_um: 7.5      # Relaxed threshold
+  gap_recovery_max_gap_frames: 1
+  gap_recovery_velocity_weight: 0.8
+  gap_recovery_velocity_prediction: true # Motion-aware
+
+output:
+  predictions_dir: /home/seshu/kaggle/2026/biohub-cell-tracking-during-development/tools/researchpapers/output/stage3/v13_2_combined_opt
+
+evaluation:
+  split_file: /home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/ensemble_work/finetune/fleet_loeo_mini.json
+  eval_set: full_loeo  # Both folds
+  use_official_scorer: true
+  use_metric_anatomy: true
+
+tracking:
+  mlflow_enabled: true
+  run_name: stage3_v13_2_combined_opt_full_loeo
+  metrics_to_log:
+    - official_score
+    - adj_edge_jaccard
+    - R_node
+    - R_edge
+    - Q_link
+    - count_ratio
+    - delta_from_baseline

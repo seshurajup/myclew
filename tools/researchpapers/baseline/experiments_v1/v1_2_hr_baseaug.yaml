@@ -1,0 +1,50 @@
+# baseline_v1 / v1_2 — (1,2,2) HIGHER-RES detector, same augs as control (brightness + flip).
+# THE headline lever. A/B vs v1_1 (1,4,4) isolates RESOLUTION; vs v1_3 isolates AUGS.
+# Density-CHANGING (new/finer detector) -> golden-12 partly blind (Rule 1): also report detector
+# recall proxy + predicted-count vs density cap; flag detection gains as NEEDS-LB (human submits).
+name: baseline_v1_v1_2_hr_baseaug
+
+purpose: >
+  (1,2,2) higher-resolution UNet+transformer detector (~0.81um XY vs his 1.63um) with pilkwang's
+  minimal augs. Tests whether finer XY localization raises edge precision -> adj_edge on golden-12
+  vs the reproduced 0.8708 (1,4,4) baseline and vs the v1_1 control at equal budget.
+
+paths:
+  python:  research/cellmot_venv/bin/python
+  trainer: research/official_repo/scripts/train_unet_transformer.py
+  pythonpath:
+    - research/official_repo/src
+    - research/official_repo/scripts
+    - .
+  data_dir:  input/biohub-cell-tracking-during-development/train
+  splits:    learning/ensemble_work/finetune/splits_ft.json
+  cache_dir: research/cache/ds1x2x2      # fast fp16 cache we built (matches 1,2,2); trainer falls back
+                                         # to strided-zarr if this is removed -> no correctness dependency
+
+mlflow:
+  tracking_uri:  http://localhost:5000
+  experiment:    kaggle-biohub-cell-tracking
+  run_name:      baseline_v1_v1_2_hr_baseaug
+  log_artifacts: false
+
+gpu:
+  power_limit_w: 400
+
+train:
+  method:              baseline_v1_v1_2_hr_baseaug
+  split:               0
+  downsample:          "1,2,2"
+  epochs:              30
+  lr:                  1e-4
+  batch_size:          4              # (1,2,2)=4x voxels vs (1,4,4); memory-safe start on 32GB
+  num_workers:         8
+  det_loss_weight:     10.0
+  det_neg_weight:      0.01
+  window_size:         2
+  pool_kernel_um:      5.0            # grid-independent (microns)
+  max_iters:           300
+  early_stop_patience: 8
+
+augment:
+  - {name: brightness, p: 1.0, shift_range: 0.1}
+  - {name: flip,       p: 1.0, pz: 0.0, py: 0.5, px: 0.5}

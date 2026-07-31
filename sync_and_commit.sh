@@ -43,6 +43,18 @@ rsync -a --delete "${RSYNC_EXCLUDES[@]}" \
   --include '*.sh' --include '*.md' --include '*.learning' --include '*.json' --exclude '*' \
   "$BIOHUB/" "$REPO/competitions/biohub-cell-tracking-during-development/"
 
+# 2b2) the shared RUNTIME: :7777 knowledge hub (researchpapers/app.py) and :7788 runboard
+# (store.py, runtime_cli.py, fleet/) plus the training service. This is OUR code and serves every
+# competition, so it lives at the repo root rather than under one comp. research_refs/ and .venv/ are
+# third-party checkouts and stay out.
+mkdir -p "$REPO/tools/researchpapers"
+rsync -a --delete "${RSYNC_EXCLUDES[@]}" \
+  --exclude 'research_refs/' --exclude '.venv/' --exclude 'output/' --exclude 'logs/' \
+  --exclude 'data/' --exclude '.research-mvp-data/' --exclude '*token*.json' --exclude '*secret*' \
+  --include '*/' --include '*.py' --include '*.md' --include '*.yml' --include '*.yaml' \
+  --include '*.html' --include '*.css' --include '*.js' --include '*.sql' --exclude '*' \
+  "$BIOHUB/tools/researchpapers/" "$REPO/tools/researchpapers/"
+
 # 2c) the YouTube curriculum — lesson sources, props and the Remotion composition code. Rendered video
 # (gallery/), node_modules and the vendored checkout are regenerable/huge and never tracked here.
 mkdir -p "$REPO/youtube"

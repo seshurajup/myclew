@@ -1,0 +1,53 @@
+# baseline_v2 / v2_1 — (1,4,4) + richaug, LONG converged train.
+# Purpose: proper CONVERGED control at coarse resolution AND a direct test of "does richaug ALONE
+# (rot90_xy/gamma/contrast, proven +0.1833 in v1) beat pilkwang's fully-trained 0.8708?" — since
+# richaug is NEW vs his brightness+flip. Also the fair A/B partner for v2_2 (same budget+augs, only
+# resolution differs). Paths relative to the PARENT competition repo.
+name: baseline_v2_v2_1_ctrl_1x4x4_rich
+
+purpose: >
+  (1,4,4) isotropic detector with the v1-proven rich augmentation pipeline, trained to CONVERGENCE
+  (long budget, patience 12). Establishes the converged coarse-resolution reference and tests whether
+  richaug alone clears 0.8708. Same budget/augs as v2_2 so v2_2-vs-v2_1 isolates RESOLUTION fairly.
+
+paths:
+  python:  research/cellmot_venv/bin/python
+  trainer: research/official_repo/scripts/train_unet_transformer.py
+  pythonpath: [research/official_repo/src, research/official_repo/scripts, .]
+  data_dir:  input/biohub-cell-tracking-during-development/train
+  splits:    learning/ensemble_work/finetune/splits_ft.json   # golden-12 = fold 0
+  cache_dir: research/cache/ds1x4x4                            # per-config cache: (1,4,4)
+
+mlflow:
+  tracking_uri:  http://localhost:5000
+  experiment:    kaggle-biohub-cell-tracking
+  run_name:      baseline_v2_v2_1_ctrl_1x4x4_rich
+  log_artifacts: false
+
+gpu:
+  power_limit_w: 400
+
+train:
+  method:              baseline_v2_v2_1_ctrl_1x4x4_rich
+  split:               0
+  downsample:          "1,4,4"
+  epochs:              30
+  lr:                  1e-4
+  batch_size:          16             # (1,4,4) native, proven
+  num_workers:         4
+  det_loss_weight:     10.0
+  det_neg_weight:      0.01
+  window_size:         2
+  pool_kernel_um:      5.0
+  max_iters:           1000           # LONG: ~3.3x v1's 300 -> fair convergence (v1 starved at 300)
+  early_stop_patience: 12             # 8 -> 12: don't cut the resolution/aug benefit short
+  lr_schedule:         cosine         # PINNED in-config (v1 got cosine from job env; make v2 reproducible)
+  lr_warmup:           2              # epochs of linear warmup before cosine decay
+
+# v1-proven rich augmentation (rot90_xy/gamma/contrast on top of brightness+flip): +0.1833 official.
+augment:
+  - {name: brightness, p: 1.0, shift_range: 0.1}
+  - {name: flip,       p: 1.0, pz: 0.0, py: 0.5, px: 0.5}
+  - {name: rot90_xy,   p: 1.0}
+  - {name: gamma,      p: 0.5, range: 0.3}
+  - {name: contrast,   p: 0.5, range: 0.2}

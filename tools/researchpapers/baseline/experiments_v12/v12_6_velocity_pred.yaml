@@ -1,0 +1,21 @@
+name: stage3_v12_6_velocity_pred
+description: Velocity-aware re-linking (consistency with motion history)
+input:
+  predictions_dir: /home/seshu/kaggle/2026/biohub-cell-tracking-during-development/research/pilkwang_support_pack/repo/predictions/seshu/unet_transformer/split_0
+postproc:
+  edge_length_max_um: 12.0
+  gap_recovery_enabled: true
+  gap_recovery_max_distance_um: 6.0
+  gap_recovery_max_gap_frames: 1
+  gap_recovery_velocity_weight: 0.8
+  gap_recovery_velocity_prediction: true
+output:
+  predictions_dir: /home/seshu/kaggle/2026/biohub-cell-tracking-during-development/tools/researchpapers/output/stage3/v12_6_velocity_pred
+evaluation:
+  split_file: /home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/ensemble_work/finetune/fleet_loeo_mini.json
+  eval_set: golden_12
+  use_official_scorer: true
+  use_metric_anatomy: true
+tracking:
+  mlflow_enabled: true
+  run_name: stage3_v12_6_velocity_pred_golden12

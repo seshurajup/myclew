@@ -1,0 +1,50 @@
+# baseline_v1 / v1_1 — (1,4,4) CONTROL. Reproduce the proven ~0.8708 resolution as our
+# internal reference, so v1_2 (1,2,2 same augs) is a clean A/B isolating RESOLUTION only.
+# Trainer = research/official_repo/scripts/train_unet_transformer.py (the copy ALL config/*.yml use;
+# it is pilkwang's detector pipeline + config-driven augs + built-in MLflow + optional fast cache /
+# strided-zarr fallback). Paths relative to the PARENT competition repo.
+name: baseline_v1_v1_1_ctrl_1x4x4
+
+purpose: >
+  (1,4,4) isotropic control at our training budget. Establishes the internal reference the
+  (1,2,2) runs are A/B'd against on the golden-12 official metric. Same augs (brightness+flip)
+  and hyperparameters as v1_2 so the only difference vs v1_2 is downsample resolution.
+
+paths:
+  python:  research/cellmot_venv/bin/python
+  trainer: research/official_repo/scripts/train_unet_transformer.py
+  pythonpath:
+    - research/official_repo/src
+    - research/official_repo/scripts
+    - .
+  data_dir:  input/biohub-cell-tracking-during-development/train
+  splits:    learning/ensemble_work/finetune/splits_ft.json   # golden-12 = fold 0 (train 187 / test 12)
+  cache_dir: research/cache/ds1x4x4                            # existing fast fp16 cache (matches 1,4,4)
+
+mlflow:
+  tracking_uri:  http://localhost:5000
+  experiment:    kaggle-biohub-cell-tracking
+  run_name:      baseline_v1_v1_1_ctrl_1x4x4
+  log_artifacts: false
+
+gpu:
+  power_limit_w: 400
+
+train:
+  method:              baseline_v1_v1_1_ctrl_1x4x4
+  split:               0
+  downsample:          "1,4,4"
+  epochs:              30
+  lr:                  1e-4
+  batch_size:          16             # (1,4,4) fits his native batch on 32GB
+  num_workers:         8
+  det_loss_weight:     10.0
+  det_neg_weight:      0.01
+  window_size:         2
+  pool_kernel_um:      5.0
+  max_iters:           300            # bounded epoch for a tractable A/B (same cap as v1_2/v1_3)
+  early_stop_patience: 8
+
+augment:
+  - {name: brightness, p: 1.0, shift_range: 0.1}
+  - {name: flip,       p: 1.0, pz: 0.0, py: 0.5, px: 0.5}

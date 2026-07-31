@@ -1,0 +1,52 @@
+# baseline_v2 / v2_3 (OPTIONAL) — (1,2,2) + richaug + CONVERGENCE AIDS.
+# Insurance that the high-res model TRULY converges, so a negative v2_2-vs-v2_1 can't be blamed on
+# under-convergence. Aids (vs v2_2): larger batch 6 (measured max-safe on 32GB; 8 OOMs) for steadier
+# gradients + longer warmup (4) + more iters (1200) + more patience (15). Same richaug + resolution as v2_2.
+name: baseline_v2_v2_3_hr_1x2x2_rich_conv
+
+purpose: >
+  (1,2,2) + richaug with convergence-hardened optimization (batch 6, 4-epoch warmup, 1200 iters/epoch,
+  patience 15). If v2_2 still underperforms v2_1, v2_3 tells us whether it's optimization (v2_3 > v2_2)
+  or the (1,2,2) resolution genuinely not helping at this pipeline. Only run if v2_2's curve looks
+  under-converged; otherwise v2_1+v2_2 answer the resolution question.
+
+paths:
+  python:  research/cellmot_venv/bin/python
+  trainer: research/official_repo/scripts/train_unet_transformer.py
+  pythonpath: [research/official_repo/src, research/official_repo/scripts, .]
+  data_dir:  input/biohub-cell-tracking-during-development/train
+  splits:    learning/ensemble_work/finetune/splits_ft.json
+  cache_dir: research/cache/ds1x2x2
+
+mlflow:
+  tracking_uri:  http://localhost:5000
+  experiment:    kaggle-biohub-cell-tracking
+  run_name:      baseline_v2_v2_3_hr_1x2x2_rich_conv
+  log_artifacts: false
+
+gpu:
+  power_limit_w: 400
+
+train:
+  method:              baseline_v2_v2_3_hr_1x2x2_rich_conv
+  split:               0
+  downsample:          "1,2,2"
+  epochs:              35
+  lr:                  1e-4
+  batch_size:          6              # measured max-safe at (1,2,2) on 32GB (8 OOMs) — steadier gradients
+  num_workers:         4
+  det_loss_weight:     10.0
+  det_neg_weight:      0.01
+  window_size:         2
+  pool_kernel_um:      5.0
+  max_iters:           1200           # even longer than v2_2
+  early_stop_patience: 15
+  lr_schedule:         cosine
+  lr_warmup:           4              # longer warmup (convergence aid) vs v2_1/v2_2's 2
+
+augment:
+  - {name: brightness, p: 1.0, shift_range: 0.1}
+  - {name: flip,       p: 1.0, pz: 0.0, py: 0.5, px: 0.5}
+  - {name: rot90_xy,   p: 1.0}
+  - {name: gamma,      p: 0.5, range: 0.3}
+  - {name: contrast,   p: 0.5, range: 0.2}

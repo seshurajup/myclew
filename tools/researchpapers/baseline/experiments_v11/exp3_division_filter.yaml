@@ -1,0 +1,51 @@
+# Stage 2 exp#3: Division-Aware Edge Filtering (golden-12 pilot)
+# Target: Consistency + FP suppression near divisions
+# Configuration for post-processing pipeline
+
+name: stage2_exp3_division_filter
+description: |
+  Post-process pilkwang predictions: division-aware edge filtering.
+  Improves consistency of division events and suppresses FP edges near divisions.
+
+  Strategy:
+    1. Load pilkwang FIXED predictions (.geff)
+    2. Identify division events (parent → 2 daughters)
+    3. Filter edges that violate division geometry
+    4. Suppress FP edges near division nodes
+    5. Re-score vs ground truth
+
+input:
+  predictions_dir: /home/seshu/kaggle/2026/biohub-cell-tracking-during-development/research/pilkwang_support_pack/repo/predictions/seshu/unet_transformer/split_0
+
+postproc:
+  division_detection_enabled: true
+  division_geometry_filter_enabled: true
+
+  div_parent_distance_max_um: 10.5  # Max distance from parent to daughter
+  div_sister_distance_max_um: 8.0   # Max distance between sisters
+
+  division_fp_suppression_enabled: true
+  division_fp_radius_um: 12.0  # Search radius for edge filtering
+  division_fp_confidence_threshold: 0.7  # Min prob to keep edge near division
+
+output:
+  predictions_dir: /home/seshu/kaggle/2026/biohub-cell-tracking-during-development/tools/researchpapers/output/stage2/exp3_predictions
+  format: geff
+
+evaluation:
+  split_file: /home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/ensemble_work/finetune/fleet_loeo_mini.json
+  fold: 0  # golden-12 pilot uses fold 0 test set
+  use_official_scorer: true
+  use_metric_anatomy: true
+
+tracking:
+  mlflow_enabled: true
+  run_name: stage2_exp3_division_filter_golden12
+  metrics_to_log:
+    - official_score
+    - adj_edge_jaccard
+    - R_node
+    - R_edge
+    - Q_link
+    - div_J
+    - count_ratio

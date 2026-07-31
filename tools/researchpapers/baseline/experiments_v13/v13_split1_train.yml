@@ -1,0 +1,51 @@
+# v13 split_1 training — the MISSING fold for true 2-fold LOEO.
+# Trains pilk (U-Net detector + transformer edge predictor, JOINT) on 44b6 (fold1.train, 71 datasets),
+# holds out 6bba (fold1.test, 128 datasets) for prediction. Pairs with the existing split_0 (train 6bba /
+# test 44b6) to complete the embryo-disjoint 2-fold LOEO.
+#
+# RECIPE = the CORRECTED non-overfit recipe (cloned from config/aug_ablation/loeo_aug_uncap60.yml):
+#   (1) augment ON (crop_scale density-up + flip_xy) — regularizes cross-embryo transfer
+#   (2) max_iters OMITTED -> uncapped full epochs (NOT the loeo_129ep no-aug+max_iters=150 overfit trap)
+#   (3) epochs 60, ds 1,4,4 (pilk canonical per support-pack, NOT official_repo's 1,2,2 variant)
+# PARKED — dry-run-ready only. Do NOT launch until leader greenlights (gated behind fold0 mtl10 passing).
+name: v13_split1_uncap60
+paths:
+  python:  research/cellmot_venv/bin/python
+  trainer: research/official_repo/scripts/train_unet_transformer.py
+  pythonpath:
+    - research/official_repo/src
+    - research/official_repo/scripts
+    - .
+  data_dir: input/biohub-cell-tracking-during-development/train
+  splits:   learning/ensemble_work/finetune/fleet_loeo_mini.json
+  cache_dir: research/cache/ds1x4x4
+mlflow:
+  tracking_uri: http://localhost:5000
+  experiment:   kaggle-biohub-stagebridge
+  run_name:     v13_split1_uncap60
+  log_artifacts: false
+gpu:
+  power_limit_w: 400
+train:
+  method:          v13_split1_uncap60
+  split:           1            # <-- fold1: train=44b6 (71), test=6bba (128). THE split_1.
+  downsample:      "1,4,4"
+  epochs:          60           # aug regularizes -> 50-80ep uncapped, avoids the overfit tail
+  lr:              1e-4
+  batch_size:      8
+  num_workers:     6
+  det_loss_weight: 10.0
+  det_neg_weight:  0.01
+  window_size:     2
+  pool_kernel_um:  5.0
+  seed:            1234
+  # max_iters OMITTED on purpose -> no --max-iters flag -> trainer default None = UNCAPPED full epochs
+augment:
+  - name: crop_scale        # DENSITY-UP (zoom-out only): densify sparse 6bba toward dense 44b6
+    p: 0.5
+    smin: 0.5
+    smax: 1.0
+  - name: flip_xy           # in-plane mirror symmetry (cheap, label-preserving)
+    pz: 0.0
+    py: 0.5
+    px: 0.5

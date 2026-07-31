@@ -1,0 +1,1239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Research Runtime · Board</title>
+  <style>
+    /* ============================================================
+       DESIGN SYSTEM — dark-first, Linear/Vercel-grade. One accent,
+       restrained neutrals, hairline borders, tabular numerals.
+       ============================================================ */
+    :root {
+      /* light theme */
+      --bg: #f4f6fb;
+      --bg-soft: #eceff6;
+      --panel: #ffffff;
+      --panel-2: #f8fafc;
+      --line: #e6e9f1;
+      --line-2: #eef1f7;
+      --ink: #131926;
+      --muted: #5b6474;
+      --faint: #949cad;
+      --accent: #5a57e6;
+      --accent-soft: rgba(90,87,230,0.10);
+      --danger: #dc2626;
+      --ok: #16a34a;
+      --warn: #f59e0b;
+      --info: #6366f1;
+      /* role tints */
+      --human: #0f172a;
+      --human-soft: #eef2ff;
+      --leader: #e0e7ff;
+      --researcher: #d7f5e3;
+      --trainer: #ffe8d1;
+      --system: #eef1f7;
+      --shadow: 0 1px 2px rgba(16,22,38,.04), 0 8px 24px rgba(16,22,38,.06);
+      --shadow-sm: 0 1px 2px rgba(16,22,38,.05);
+      --radius: 14px;
+    }
+    :root[data-theme="dark"] {
+      --bg: #090b11;
+      --bg-soft: #0d1017;
+      --panel: #12151d;
+      --panel-2: #171b24;
+      --line: #232833;
+      --line-2: #1c212b;
+      --ink: #e7eaf1;
+      --muted: #8b93a5;
+      --faint: #5c6474;
+      --accent: #7c7bf7;
+      --accent-soft: rgba(124,123,247,0.14);
+      --danger: #f2555a;
+      --ok: #2ecc71;
+      --warn: #f7a936;
+      --info: #7c83ff;
+      --human: #e7eaf1;
+      --human-soft: #1b2233;
+      --leader: #1c2b52;
+      --researcher: #11331f;
+      --trainer: #3a2510;
+      --system: #1a2030;
+      --shadow: 0 1px 2px rgba(0,0,0,.5), 0 10px 30px rgba(0,0,0,.4);
+      --shadow-sm: 0 1px 2px rgba(0,0,0,.5);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --bg: #090b11; --bg-soft: #0d1017; --panel: #12151d; --panel-2: #171b24;
+        --line: #232833; --line-2: #1c212b; --ink: #e7eaf1; --muted: #8b93a5; --faint: #5c6474;
+        --accent: #7c7bf7; --accent-soft: rgba(124,123,247,0.14); --danger: #f2555a;
+        --ok: #2ecc71; --warn: #f7a936; --info: #7c83ff;
+        --human: #e7eaf1; --human-soft: #1b2233; --leader: #1c2b52; --researcher: #11331f;
+        --trainer: #3a2510; --system: #1a2030;
+        --shadow: 0 1px 2px rgba(0,0,0,.5), 0 10px 30px rgba(0,0,0,.4); --shadow-sm: 0 1px 2px rgba(0,0,0,.5);
+      }
+    }
+
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, "Helvetica Neue", Arial, sans-serif;
+      font-size: 14px;
+      color: var(--ink);
+      background: var(--bg);
+      -webkit-font-smoothing: antialiased;
+      line-height: 1.5;
+    }
+    button, textarea, select, input { font: inherit; color: inherit; }
+    a { color: var(--accent); text-decoration: none; }
+    .mono { font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace; }
+    .num { font-variant-numeric: tabular-nums; }
+
+    /* ---------- APP SHELL ---------- */
+    .app { display: grid; grid-template-columns: 232px 1fr; min-height: 100vh; transition: grid-template-columns .16s ease; }
+    .app.sidebar-hidden { grid-template-columns: 0 1fr; }
+    .app.sidebar-hidden .sidebar { display: none; }
+    .side-toggle {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 34px; height: 34px; margin-right: 12px; flex: 0 0 auto;
+      border-radius: 9px; border: 1px solid var(--line); background: var(--panel);
+      color: var(--muted); font-size: 16px; cursor: pointer; transition: color .14s, border-color .14s;
+    }
+    .side-toggle:hover { color: var(--accent); border-color: var(--accent); }
+    .sidebar {
+      position: sticky; top: 0; align-self: start; height: 100vh;
+      display: flex; flex-direction: column; gap: 4px;
+      padding: 18px 14px; border-right: 1px solid var(--line);
+      background: var(--bg-soft);
+    }
+    .brand {
+      display: flex; align-items: center; gap: 9px;
+      font-weight: 750; font-size: 14.5px; letter-spacing: -.01em;
+      padding: 6px 10px 16px; color: var(--ink);
+    }
+    .brand .mark {
+      width: 26px; height: 26px; border-radius: 8px; flex: 0 0 auto;
+      background: linear-gradient(135deg, var(--accent), #a78bfa);
+      display: grid; place-items: center; color: #fff; font-size: 14px; box-shadow: var(--shadow-sm);
+    }
+    .brand .mark::before { content: "◆"; }
+    .nav-sec { font-size: 10px; text-transform: uppercase; letter-spacing: .09em; color: var(--faint); font-weight: 700; padding: 12px 10px 5px; }
+    .side-nav a {
+      display: flex; align-items: center; gap: 10px;
+      padding: 8px 10px; border-radius: 9px; color: var(--muted);
+      font-weight: 550; font-size: 13.5px; transition: background .14s, color .14s;
+    }
+    .side-nav a:hover { background: var(--panel); color: var(--ink); }
+    .side-nav a.active { background: var(--accent-soft); color: var(--accent); font-weight: 650; }
+    .side-nav a .ic { width: 18px; text-align: center; opacity: .9; }
+    .side-foot { margin-top: auto; padding-top: 12px; border-top: 1px solid var(--line); display: grid; gap: 8px; }
+    #themeToggle {
+      display: flex; align-items: center; gap: 9px; width: 100%;
+      padding: 8px 10px; border-radius: 9px; border: 1px solid var(--line);
+      background: var(--panel); color: var(--muted); font-size: 13px; cursor: pointer;
+      transition: color .14s, border-color .14s;
+    }
+    #themeToggle:hover { color: var(--ink); border-color: var(--accent); }
+
+    /* ---------- MAIN ---------- */
+    .main { min-width: 0; display: flex; flex-direction: column; }
+    .topbar {
+      position: sticky; top: 0; z-index: 20;
+      display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+      padding: 15px 26px; border-bottom: 1px solid var(--line);
+      background: color-mix(in srgb, var(--bg) 82%, transparent);
+      backdrop-filter: saturate(140%) blur(10px);
+    }
+    .topbar .tt-l { min-width: 0; }
+    .eyebrow {
+      display: inline-flex; align-items: center; gap: 7px;
+      font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; font-weight: 700; color: var(--accent);
+    }
+    .eyebrow .pulse {
+      width: 7px; height: 7px; border-radius: 50%; background: var(--ok);
+      box-shadow: 0 0 0 0 rgba(46,204,113,.5); animation: pulse 2.4s infinite;
+    }
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(46,204,113,.5); }
+      70% { box-shadow: 0 0 0 7px rgba(46,204,113,0); }
+      100% { box-shadow: 0 0 0 0 rgba(46,204,113,0); }
+    }
+    .page-title { margin: 3px 0 0; font-size: 20px; font-weight: 720; letter-spacing: -.02em; line-height: 1.1; }
+    .context { display: flex; flex-wrap: wrap; gap: 6px; margin-left: auto; }
+    .chip {
+      display: inline-flex; align-items: center; gap: 6px; max-width: 260px;
+      padding: 4px 10px; border-radius: 999px; border: 1px solid var(--line);
+      background: var(--panel); color: var(--muted); font-size: 11.5px;
+    }
+    .chip .chip-k { color: var(--faint); font-size: 9.5px; text-transform: uppercase; letter-spacing: .06em; font-weight: 700; }
+    .chip .chip-v { font-family: ui-monospace, monospace; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    .scroll { flex: 1; overflow: auto; padding: 22px 26px 34px; }
+    .maxw { max-width: 1180px; margin: 0 auto; }
+
+    /* ---------- JOURNAL ACTIVITY (no-daemon comps) ---------- */
+    .journal-activity { margin-bottom: 20px; padding: 0 0 16px; }
+    .journal-activity .chat-head { padding: 13px 18px; }
+    .journal-activity .ja-note { margin-left: auto; font-size: 11px; color: var(--faint); font-style: italic; }
+    .ja-kpis { display: flex; flex-wrap: wrap; gap: 10px; padding: 12px 18px 4px; }
+    .ja-kpi { background: var(--panel-2); border: 1px solid var(--line); border-radius: 9px; padding: 7px 13px; min-width: 92px; }
+    .ja-kpi .ja-kv { font-size: 20px; font-weight: 740; letter-spacing: -.02em; font-variant-numeric: tabular-nums; color: var(--ink); line-height: 1.1; }
+    .ja-kpi .ja-kl { font-size: 10px; color: var(--faint); text-transform: uppercase; letter-spacing: .05em; margin-top: 3px; }
+    .ja-body { display: grid; grid-template-columns: 1.4fr 1fr; gap: 18px; padding: 10px 18px 0; }
+    @media (max-width: 900px) { .ja-body { grid-template-columns: 1fr; } }
+    .ja-h { font-size: 12px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin: 6px 0 8px; }
+    .ja-h small { text-transform: none; letter-spacing: 0; color: var(--faint); font-weight: 400; }
+    table.ja-tbl { border-collapse: collapse; width: 100%; font-size: 12.5px; }
+    table.ja-tbl th, table.ja-tbl td { text-align: left; padding: 5px 9px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+    table.ja-tbl th { font-size: 10px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }
+    table.ja-tbl td.ja-exp { font-family: ui-monospace, monospace; font-weight: 650; color: var(--ink); }
+    table.ja-tbl td.ja-num { font-variant-numeric: tabular-nums; color: var(--accent); font-family: ui-monospace, monospace; }
+    table.ja-tbl td.ja-desc { white-space: normal; color: var(--muted); max-width: 340px; }
+    table.ja-tbl tr:hover td { background: color-mix(in srgb, var(--accent) 10%, transparent); }
+    .ja-dec { border-bottom: 1px solid var(--line); padding: 7px 0; }
+    .ja-dec .ja-dag { font-family: ui-monospace, monospace; font-size: 10.5px; font-weight: 650; color: var(--accent); }
+    .ja-dec .ja-dsum { font-size: 12px; color: var(--ink); margin-top: 2px; }
+    .ja-dec .ja-drec { font-size: 11.5px; color: var(--muted); margin-top: 2px; }
+    .ja-empty { color: var(--faint); font-size: 12px; padding: 8px 0; }
+
+    /* ---------- KPI METRIC CARDS ---------- */
+    .kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 20px; }
+    .metric {
+      background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius);
+      padding: 15px 17px; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; gap: 11px;
+      min-width: 0; transition: border-color .16s, transform .16s, box-shadow .16s;
+    }
+    .metric:hover { border-color: color-mix(in srgb, var(--accent) 40%, var(--line)); box-shadow: var(--shadow); }
+    .metric-top { display: flex; align-items: center; gap: 8px; }
+    .metric-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); }
+    .metric-ic { font-size: 14px; line-height: 1; filter: grayscale(.1); }
+    .metric-act, .metric-note { margin-left: auto; font-size: 11px; color: var(--faint); }
+    .metric-act:hover { color: var(--accent); }
+    .metric-main { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; }
+    .metric-value { font-size: 27px; font-weight: 760; letter-spacing: -.02em; font-variant-numeric: tabular-nums; line-height: 1; color: var(--ink); }
+    .metric-cap { font-size: 10.5px; color: var(--faint); text-transform: uppercase; letter-spacing: .05em; margin-top: 5px; }
+    .metric-vwrap { min-width: 0; }
+    .spark { width: 118px; height: 34px; display: block; color: var(--accent); flex: 0 0 auto; }
+    .segbar { display: flex; height: 8px; width: 100%; border-radius: 5px; overflow: hidden; background: var(--line); }
+    .segbar span { display: block; height: 100%; }
+    .metric-foot { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 11.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
+    .metric-foot .mf-ok { color: var(--ok); font-weight: 650; }
+    .metric-foot .mf-fail { color: var(--danger); font-weight: 650; }
+    .metric-foot .mf-q { color: var(--info); }
+    .metric-foot .mono { color: var(--muted); }
+    #fbCount { color: var(--muted); }
+    .fb-kinds { display: flex; flex-wrap: wrap; gap: 5px; max-height: 46px; overflow: auto; }
+    .fb-kind {
+      font-size: 10.5px; color: var(--muted); background: var(--panel-2);
+      border: 1px solid var(--line); border-radius: 6px; padding: 1px 7px; font-family: ui-monospace, monospace;
+    }
+    .fb-kind b { color: var(--ok); }
+
+    /* ---------- CONTENT GRID: chat + rail ---------- */
+    .grid { display: grid; grid-template-columns: minmax(0, 1fr) 350px; gap: 18px; align-items: start; }
+    .panel { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow-sm); }
+
+    /* ---------- CHAT ---------- */
+    .chat { display: flex; flex-direction: column; overflow: hidden; }
+    .chat-head {
+      display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+      padding: 13px 16px; border-bottom: 1px solid var(--line);
+    }
+    .chat-title { font-weight: 680; font-size: 14px; display: flex; align-items: center; gap: 8px; }
+    .chat-title .live-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--ok); animation: pulse 2.4s infinite; }
+    .chat-controls { margin-left: auto; display: flex; gap: 7px; flex-wrap: wrap; }
+    .thread {
+      display: flex; flex-direction: column; gap: 10px;
+      padding: 16px; max-height: 64vh; overflow: auto; min-height: 220px;
+    }
+    .thread::-webkit-scrollbar, .fm-list::-webkit-scrollbar, .fb-kinds::-webkit-scrollbar { width: 9px; }
+    .thread::-webkit-scrollbar-thumb, .fm-list::-webkit-scrollbar-thumb { background: var(--line); border-radius: 8px; }
+
+    /* living agent card */
+    .msg-card {
+      display: flex; gap: 12px; align-items: flex-start;
+      padding: 12px 13px; border: 1px solid var(--line); border-left: 3px solid var(--line);
+      border-radius: 12px; background: var(--panel-2);
+      transition: box-shadow .3s, border-color .3s;
+    }
+    .msg-card.human { border-left-color: var(--accent); }
+    .msg-card.leader { border-left-color: #6b8afd; }
+    .msg-card.researcher { border-left-color: #34d39a; }
+    .msg-card.trainer { border-left-color: #f7a936; }
+    .msg-card.fleet { border-left-color: #22c8a6; }
+    .msg-card.system { border-left-color: var(--faint); }
+    .msg-card.just-updated { animation: cardpulse 1.8s ease-out; }
+    @keyframes cardpulse {
+      0% { box-shadow: 0 0 0 0 var(--accent-soft), inset 3px 0 0 -1px var(--accent); border-color: color-mix(in srgb, var(--accent) 55%, var(--line)); }
+      100% { box-shadow: none; }
+    }
+    .avatar {
+      width: 34px; height: 34px; border-radius: 10px; flex: 0 0 auto;
+      display: grid; place-items: center; font-size: 10.5px; font-weight: 800; letter-spacing: .04em;
+      text-transform: uppercase; background: var(--system); color: var(--ink); border: 1px solid var(--line);
+    }
+    .avatar.human { background: var(--human-soft); color: var(--human); }
+    .avatar.leader { background: var(--leader); color: #3556c9; }
+    .avatar.researcher { background: var(--researcher); color: #159a63; }
+    .avatar.trainer { background: var(--trainer); color: #b06a10; }
+    .avatar.system { background: var(--system); color: var(--muted); }
+    .avatar.fleet { background: color-mix(in srgb, #22c8a6 20%, var(--panel)); color: #12a58a; }
+    .mc-body { min-width: 0; flex: 1; }
+    .mc-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 5px; font-size: 12px; }
+    .mc-name { font-weight: 700; color: var(--ink); }
+    .mc-to { color: var(--faint); font-size: 11.5px; }
+    .mc-time { color: var(--faint); font-size: 11px; font-variant-numeric: tabular-nums; }
+    .upd {
+      display: inline-flex; align-items: center; gap: 4px; margin-left: 2px;
+      font-size: 10px; font-weight: 700; color: var(--ok); text-transform: uppercase; letter-spacing: .04em;
+    }
+    .upd::before { content: "●"; animation: blink 1.2s infinite; }
+    @keyframes blink { 50% { opacity: .3; } }
+    .grp-count { color: var(--faint); font-size: 10.5px; }
+    .bubble {
+      color: var(--ink); font-size: 13px; line-height: 1.55;
+      white-space: pre-wrap; overflow-wrap: anywhere; word-break: break-word;
+    }
+    .bubble.clamp { max-height: 5.2em; overflow: hidden; -webkit-mask-image: linear-gradient(180deg,#000 60%,transparent); }
+    .bubble.open { max-height: none; -webkit-mask-image: none; }
+    .bubble.muted { opacity: .62; }
+    .bubble code { background: var(--accent-soft); padding: 0 5px; border-radius: 5px; font-family: ui-monospace, SFMono-Regular, monospace; font-size: .86em; color: var(--accent); }
+    .bubble .md-h { display: block; font-size: 12.5px; margin: 2px 0; font-weight: 700; color: var(--ink); }
+    .bubble .agtag { color: var(--muted); font-weight: 700; }
+    .bubble table.md { border-collapse: collapse; width: 100%; margin: 4px 0; font-size: 11.5px; background: var(--panel); border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+    .bubble table.md td { border-bottom: 1px solid var(--line); padding: 3px 8px; text-align: left; }
+    .bubble table.md tr:first-child td { background: var(--panel-2); font-weight: 700; color: var(--muted); }
+    .msg-link { color: var(--accent); text-decoration: underline; }
+    .more-toggle, .hist-toggle {
+      cursor: pointer; color: var(--accent); font-size: 11.5px; font-weight: 600;
+      display: inline-block; margin-top: 5px; user-select: none;
+    }
+    .hist-toggle { color: var(--muted); margin-left: 10px; }
+    .hist-toggle:hover { color: var(--accent); }
+    .hist { margin-top: 7px; border-top: 1px dashed var(--line); padding-top: 6px; display: flex; flex-direction: column; gap: 6px; }
+    .hist-item { font-size: 12px; color: var(--muted); padding-left: 10px; border-left: 2px solid var(--line); }
+    .hist-item .hist-t { display: block; font-size: 10px; color: var(--faint); font-variant-numeric: tabular-nums; margin-bottom: 1px; }
+    .task-chip {
+      display: inline-block; margin-bottom: 6px; padding: 2px 8px; border-radius: 999px;
+      border: 1px solid var(--line); background: var(--panel); color: var(--muted); font-size: 10.5px;
+    }
+
+    .empty { color: var(--faint); font-size: 13px; text-align: center; padding: 30px 10px; }
+
+    /* ---------- COMPOSE ---------- */
+    /* compose sits at the TOP of the thread (above the newest-first cards) */
+    .compose { padding: 14px 16px 14px; border-bottom: 1px solid var(--line); display: grid; gap: 10px; background: var(--panel-2); }
+    .compose .compose-row textarea { min-height: 60px; }
+    .compose-row { display: grid; grid-template-columns: 150px 1fr auto; gap: 10px; align-items: start; }
+    textarea, select, .fm-search {
+      width: 100%; border: 1px solid var(--line); border-radius: 10px;
+      background: var(--bg-soft); color: var(--ink); padding: 10px 12px; transition: border-color .14s, box-shadow .14s;
+    }
+    textarea:focus, select:focus, .fm-search:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+    textarea { min-height: 88px; resize: vertical; line-height: 1.5; }
+    button {
+      border: 1px solid transparent; border-radius: 10px; padding: 9px 15px;
+      background: var(--accent); color: #fff; cursor: pointer; font-weight: 600; font-size: 13px;
+      transition: filter .14s, background .14s, border-color .14s;
+    }
+    button:hover { filter: brightness(1.06); }
+    button.secondary {
+      background: var(--panel); color: var(--muted); border-color: var(--line); font-weight: 550; padding: 7px 12px; font-size: 12.5px;
+    }
+    button.secondary:hover { color: var(--ink); border-color: var(--accent); filter: none; }
+    .error { color: var(--danger); font-size: 12.5px; min-height: 1px; }
+
+    /* ---------- RIGHT RAIL ---------- */
+    .rail { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+    .card { border: 1px solid var(--line); border-radius: var(--radius); background: var(--panel); padding: 14px; box-shadow: var(--shadow-sm); }
+    .card > h2, .card > h3 { margin: 0 0 4px; font-size: 13px; font-weight: 700; letter-spacing: -.01em; display: flex; align-items: center; gap: 7px; }
+    .card > h3 a { margin-left: auto; font-size: 11.5px; font-weight: 600; }
+    .rail-lead { font-size: 12px; color: var(--muted); line-height: 1.45; }
+    .small { font-size: 12px; color: var(--muted); line-height: 1.45; white-space: pre-wrap; overflow-wrap: anywhere; }
+    .agent-card { display: grid; gap: 7px; margin-top: 10px; }
+    .agent-card:first-of-type { margin-top: 0; }
+    .agent-top { display: flex; justify-content: space-between; gap: 10px; align-items: center; }
+    .role-pill { display: inline-flex; align-items: center; gap: 7px; border-radius: 999px; padding: 4px 11px; border: 1px solid var(--line); font-size: 12px; font-weight: 600; background: var(--panel-2); }
+    .role-pill .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex: 0 0 auto; }
+    .role-pill .dot.on { background: var(--ok); box-shadow: 0 0 0 3px color-mix(in srgb, var(--ok) 22%, transparent); }
+    .role-pill .dot.off { background: var(--faint); }
+    .status { font-size: 12px; color: var(--muted); font-weight: 600; }
+    .status.online { color: var(--ok); } .status.offline { color: var(--danger); }
+    /* toggle switch */
+    .switch { position: relative; display: inline-block; width: 42px; height: 24px; flex: 0 0 auto; }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .switch .slider { position: absolute; cursor: pointer; inset: 0; background: var(--line); border-radius: 24px; transition: .2s; }
+    .switch .slider::before { content: ""; position: absolute; height: 18px; width: 18px; left: 3px; bottom: 3px; background: #fff; border-radius: 50%; transition: .2s; box-shadow: 0 1px 3px rgba(0,0,0,.3); }
+    .switch input:checked + .slider { background: var(--ok); }
+    .switch input:checked + .slider::before { transform: translateX(18px); }
+    .switch input:disabled + .slider { opacity: .5; cursor: wait; }
+    .pyrow { display: flex; align-items: center; gap: 8px; padding: 5px 0; border-bottom: 1px solid var(--line-2); font-size: 12px; }
+    .pyrow:last-child { border-bottom: 0; }
+    .pyrow .pyname { font-family: ui-monospace, monospace; font-weight: 600; color: var(--ink); flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .pyrow .pystate { color: var(--muted); font-size: 11px; }
+    .pyrow .pynums { font-family: ui-monospace, monospace; color: var(--ok); font-size: 11px; min-width: 42px; text-align: right; }
+
+    /* ---------- FLEET MANAGER ---------- */
+    .fleet-mgr { border: 1px solid var(--line); border-radius: var(--radius); background: var(--panel); box-shadow: var(--shadow-sm); overflow: hidden; }
+    .fleet-mgr > summary { cursor: pointer; list-style: none; padding: 13px 15px; display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 13px; }
+    .fleet-mgr > summary::-webkit-details-marker { display: none; }
+    .fleet-mgr > summary::before { content: "▸"; color: var(--faint); font-size: 11px; }
+    .fleet-mgr[open] > summary::before { content: "▾"; }
+    .fm-meta { margin-left: auto; font-size: 11px; color: var(--muted); font-weight: 500; font-family: ui-monospace, monospace; }
+    .fm-body { padding: 0 15px 14px; }
+    .fm-controls { display: flex; gap: 8px; margin-bottom: 9px; }
+    .fm-controls .fm-search { flex: 1; margin: 0; }
+    .fm-modality { flex: 0 0 auto; max-width: 47%; border: 1px solid var(--line); border-radius: 10px; background: var(--bg-soft); color: var(--ink); padding: 9px 10px; font-size: 12.5px; cursor: pointer; }
+    .fm-grp { border: 1px solid var(--line-2); border-radius: 9px; margin: 5px 0; overflow: hidden; background: var(--panel); }
+    .fm-grp > summary { cursor: pointer; list-style: none; display: flex; align-items: center; gap: 8px; padding: 7px 10px; font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+    .fm-grp > summary::-webkit-details-marker { display: none; }
+    .fm-grp > summary::before { content: "▸"; color: var(--faint); font-size: 10px; }
+    .fm-grp[open] > summary::before { content: "▾"; }
+    .fm-gname { color: var(--ink); }
+    .fm-gcount { margin-left: auto; color: var(--faint); font-weight: 600; font-variant-numeric: tabular-nums; text-transform: none; letter-spacing: 0; }
+    .fm-gcount b { color: var(--ok); }
+    .fm-grp .fm-row { padding: 6px 10px; }
+    .fm-dom { font-size: 9.5px; color: var(--accent); background: var(--accent-soft); border-radius: 6px; padding: 1px 6px; font-family: ui-monospace, monospace; flex: 0 0 auto; max-width: 128px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .fm-msg { font-size: 11.5px; color: var(--muted); margin: 0 0 8px; }
+    .fm-msg.err { color: var(--danger); }
+    .fm-list { max-height: 330px; overflow: auto; display: flex; flex-direction: column; gap: 1px; }
+    .fm-row { display: flex; align-items: center; gap: 10px; padding: 6px 7px; border-radius: 8px; }
+    .fm-row:hover { background: var(--accent-soft); }
+    .fm-row .dot { width: 8px; height: 8px; border-radius: 50%; flex: 0 0 auto; }
+    .fm-row .dot.on { background: var(--ok); box-shadow: 0 0 0 3px color-mix(in srgb, var(--ok) 20%, transparent); }
+    .fm-row .dot.q { background: var(--warn); }
+    .fm-row .dot.off { background: var(--faint); }
+    .fm-name { font-family: ui-monospace, monospace; font-size: 12.5px; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--ink); }
+    .fm-tag { font-size: 10px; color: var(--muted); background: var(--panel-2); border: 1px solid var(--line); border-radius: 6px; padding: 1px 6px; font-family: ui-monospace, monospace; flex: 0 0 auto; }
+    .fm-state { font-size: 10.5px; color: var(--muted); font-variant-numeric: tabular-nums; min-width: 56px; text-align: right; }
+    .fm-switch { transform: scale(.78); flex: 0 0 auto; }
+    .fm-hint { font-size: 11.5px; color: var(--faint); margin-top: 8px; }
+
+    /* ---------- RESPONSIVE ---------- */
+    @media (max-width: 1120px) { .grid { grid-template-columns: 1fr; } .thread { max-height: 56vh; } }
+    @media (max-width: 900px) { .kpis { grid-template-columns: 1fr; } }
+    @media (max-width: 820px) {
+      .app { grid-template-columns: 1fr; }
+      .sidebar { position: static; height: auto; flex-direction: row; align-items: center; overflow-x: auto; padding: 10px 14px; border-right: 0; border-bottom: 1px solid var(--line); }
+      .brand { padding: 0 14px 0 4px; }
+      .nav-sec { display: none; }
+      .side-nav { display: flex; gap: 4px; }
+      .side-foot { margin: 0 0 0 auto; border: 0; padding: 0; }
+      #themeToggle { white-space: nowrap; }
+      .compose-row { grid-template-columns: 1fr; }
+      .context { margin-left: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="brand"><span class="mark"></span>Research Runtime</div>
+      <div class="nav-sec">Workspace</div>
+      <nav class="side-nav">
+        <a class="active" href="/runtime"><span class="ic">▤</span> Board</a>
+        <a id="navExperiments" data-base="/experiments" href="/experiments" target="_blank"><span class="ic">🧪</span> Experiments</a>
+        <a id="navJournal" data-base="/journal" href="/journal" target="_blank"><span class="ic">📓</span> Journal</a>
+        <a id="navInsights" data-base="/insights" href="/insights" target="_blank"><span class="ic">🧠</span> Insights</a>
+        <a href="/prompts" target="_blank"><span class="ic">🗒</span> Prompts</a>
+        <a href="#agentsSection"><span class="ic">🤖</span> Agents</a>
+      </nav>
+      <div class="side-foot">
+        <button id="themeToggle" title="Toggle light / dark"><span>◐</span> Theme</button>
+      </div>
+    </aside>
+
+    <!-- MAIN -->
+    <div class="main">
+      <header class="topbar">
+        <button id="sideToggle" class="side-toggle" title="Hide / show the left sidebar" aria-label="Toggle sidebar">☰</button>
+        <div class="tt-l">
+          <div class="eyebrow"><span class="pulse"></span>Research Runtime · live</div>
+          <h1 class="page-title">Discussion Board</h1>
+        </div>
+        <div class="context" id="metaRow"></div>
+      </header>
+
+      <div class="scroll">
+        <div class="maxw">
+          <!-- KPI METRIC CARDS -->
+          <section class="kpis">
+            <article class="metric" id="spendBar" title="Real Claude API spend by the researchpapers agents (from tokendb, Opus-4.8 pricing)">
+              <div class="metric-top"><span class="metric-ic">💰</span><span class="metric-label">Claude spend</span>
+                <a class="metric-act" href="/" onclick="event.preventDefault();window.open((location.protocol+'//'+location.hostname+':7777/tokens'),'_blank')">details →</a></div>
+              <div class="metric-main">
+                <div class="metric-vwrap"><div class="metric-value" id="sbTotal">—</div><div class="metric-cap">total spend</div></div>
+                <svg class="spark" id="spendSpark" viewBox="0 0 118 34" preserveAspectRatio="none" aria-hidden="true"></svg>
+              </div>
+              <div class="metric-foot"><span id="sbLast60">last 60m —</span><span id="sbToday">today —</span></div>
+            </article>
+
+            <article class="metric" id="jobBar" title="Training jobs on the GPU queue (train-service :7799). Runs one at a time.">
+              <div class="metric-top"><span class="metric-ic">🏋</span><span class="metric-label">Training jobs</span>
+                <span class="metric-note mono" id="jbLatest"></span></div>
+              <div class="metric-main">
+                <div class="metric-vwrap"><div class="metric-value" id="jbRunning">—</div><div class="metric-cap">running now</div></div>
+              </div>
+              <div class="segbar" id="jobSeg"></div>
+              <div class="metric-foot"><span id="jbQueued" class="mf-q">queued —</span><span id="jbOk" class="mf-ok">✓ —</span><span id="jbFail" class="mf-fail">✗ —</span></div>
+            </article>
+
+            <article class="metric" id="fleetBar" title="Deterministic Python agents (the fleet). Pure-Python workers that do the grunt research and post into this thread.">
+              <div class="metric-top"><span class="metric-ic">🐍</span><span class="metric-label">Python agents</span>
+                <span class="metric-note num" id="fbCount">—</span></div>
+              <div class="metric-main">
+                <div class="metric-vwrap"><div class="metric-value" id="faBig">—</div><div class="metric-cap">active kinds</div></div>
+              </div>
+              <div class="fb-kinds" id="fbKinds"></div>
+            </article>
+          </section>
+
+          <!-- JOURNAL ACTIVITY (comps with NO local daemon — driven from Postgres experiment_journal) -->
+          <section class="panel journal-activity" id="journalPanel" style="display:none">
+            <div class="chat-head">
+              <div class="chat-title" id="journalTitle">Experiment activity</div>
+              <div class="ja-note">no live daemon — showing journal (Postgres)</div>
+            </div>
+            <div class="ja-kpis" id="journalKpis"></div>
+            <div class="ja-body">
+              <div class="ja-col">
+                <h3 class="ja-h">Recent experiments <small>(newest first)</small></h3>
+                <div id="journalExps"></div>
+              </div>
+              <div class="ja-col">
+                <h3 class="ja-h">Decisions &amp; findings</h3>
+                <div id="journalDecisions"></div>
+              </div>
+            </div>
+          </section>
+
+          <!-- CHAT + RAIL -->
+          <div class="grid">
+            <section class="panel chat">
+              <div class="chat-head">
+                <div class="chat-title"><span class="live-dot"></span> Activity — one living card per agent</div>
+                <div class="chat-controls">
+                  <button type="button" class="secondary" id="refreshBtn">Refresh</button>
+                  <button type="button" class="secondary" id="scrollBtn">↑ Latest</button>
+                  <button type="button" class="secondary" id="showAllBtn" title="Toggle routine status chatter (findings always show)">Show all</button>
+                  <button type="button" class="secondary" id="toggleLogBtn" title="Hide/show the message log">Hide log</button>
+                </div>
+              </div>
+              <form class="compose" id="composeForm">
+                <div class="compose-row">
+                  <select id="recipient" aria-label="Recipient"></select>
+                  <textarea id="content" placeholder="Message leader or any agent — appended to the shared thread and queued in that agent's inbox."></textarea>
+                  <button type="submit">Send</button>
+                </div>
+                <div class="error" id="error"></div>
+              </form>
+              <div class="thread" id="thread"></div>
+            </section>
+
+            <aside class="rail">
+              <section class="card" id="agentsSection">
+                <h2>🤖 Claude agents</h2>
+                <div class="rail-lead">Leader &amp; researcher run in tmux. Toggle to power each on / off.</div>
+                <div id="agents"></div>
+              </section>
+
+              <details class="fleet-mgr" id="fleetMgr">
+                <summary>🐍 Manage fleet agents <span class="fm-meta" id="fmMeta">…</span></summary>
+                <div class="fm-body">
+                  <div class="fm-controls">
+                    <select id="fmModality" class="fm-modality" title="Pick your active Kaggle competition → shows only the agents routed for its modality"><option value="">All agents (no competition)</option></select>
+                    <input id="fmSearch" class="fm-search" placeholder="filter by name or domain…" autocomplete="off">
+                  </div>
+                  <div class="fm-msg" id="fmMsg"></div>
+                  <div class="fm-list" id="fmList"></div>
+                  <div class="fm-hint" id="fmHint"></div>
+                </div>
+              </details>
+
+              <section class="card">
+                <h3>🧪 Live experiments <a href="/experiments" target="_blank">open →</a></h3>
+                <div class="small" id="expRunning">Loading experiment status…</div>
+                <div id="expFindings" style="margin-top:8px"></div>
+              </section>
+
+              <section class="card">
+                <h3>🐍 Fleet activity <span class="small num" id="pyCount" style="color:var(--ok);font-weight:700"></span></h3>
+                <div id="pyagents" style="margin-top:6px"></div>
+              </section>
+
+              <section class="card">
+                <h3>Workflow</h3>
+                <div class="small mono" id="workflowState">No workflow state yet.</div>
+              </section>
+
+              <section class="card">
+                <h3>Tasks</h3>
+                <div class="small" id="taskSummary">No tasks yet.</div>
+                <div id="tasks" style="margin-top:8px"></div>
+              </section>
+            </aside>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const state = {
+      board: null,
+      pollHandle: null,
+      visibleCount: 14,      // number of living agent-cards shown; +14 per "show more"
+      spendHandle: null, jobHandle: null, fleetHandle: null, expHandle: null, faHandle: null,
+      fleetAgentsData: null,
+      spendHist: [],         // client-accumulated last-60m spend series → sparkline
+      agentLast: null,       // {author: normalizedLatestContent} for "just updated" pulse
+      expanded: new Set(),   // authors whose long latest message is expanded
+      histOpen: new Set(),   // authors whose history expander is open
+      showAll: false,        // false = hide routine status chatter
+    };
+
+    const roleColorClass = (name) => {
+      if (["human", "leader", "researcher", "trainer", "system"].includes(name)) return name;
+      return "fleet";        // every other author = a python fleet agent (kind)
+    };
+    const isRoutine = (c) => /picked up|holding|READY \(|dry-run mode|no scored runs|already delivered|queue busy/i.test(c || "");
+    const escapeHtml = (value) => String(value || "")
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+      .replace(/\"/g, "&quot;").replace(/'/g, "&#39;");
+    const normContent = (s) => String(s || "").replace(/\s+/g, " ").trim().toLowerCase();
+
+    function formatTime(value) {
+      if (!value) return "";
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return value;
+      return date.toLocaleString();
+    }
+    function relTime(value) {
+      if (!value) return "";
+      const t = new Date(value).getTime();
+      if (Number.isNaN(t)) return value;
+      const s = Math.max(0, (Date.now() - t) / 1000);
+      if (s < 8) return "just now";
+      if (s < 60) return Math.floor(s) + "s ago";
+      if (s < 3600) return Math.floor(s / 60) + "m ago";
+      if (s < 86400) return Math.floor(s / 3600) + "h ago";
+      return new Date(value).toLocaleDateString();
+    }
+    function short(text, limit = 140) {
+      const value = String(text || "").trim();
+      if (value.length <= limit) return value || "No messages yet";
+      return value.slice(0, limit - 1) + "…";
+    }
+
+    function renderMeta(board) {
+      const el = document.getElementById("metaRow");
+      const base = (p) => { const parts = String(p || "").split("/").filter(Boolean); return parts.length ? parts[parts.length - 1] : (p || "—"); };
+      const chip = (k, v, title) =>
+        `<div class="chip" title="${escapeHtml(title || v)}"><span class="chip-k">${k}</span><span class="chip-v">${escapeHtml(v)}</span></div>`;
+      el.innerHTML =
+        chip("session", board.session_name || "—") +
+        chip("workdir", base(board.workdir), board.workdir) +
+        chip("thread", base(board.thread_path), board.thread_path);
+    }
+
+    // ── minimal CSP-safe markdown (shared) ──
+    const mdInline = (s) => s.replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>').replace(/`([^`]+)`/g, '<code>$1</code>');
+    function renderMd(text) {
+      const linkify = (e) => e.replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" rel="noopener" class="msg-link">$1</a>');
+      let s = escapeHtml(text).replace(/[ \t]+\n/g, '\n').replace(/\n{2,}/g, '\n').trim();
+      s = s.replace(/(?:^\|.*\|[ \t]*\n?)+/gm, (block) => {
+        let html = '<table class="md">';
+        block.trim().split('\n').filter(r => r.trim().startsWith('|')).forEach((r) => {
+          const cells = r.trim().replace(/^\||\|$/g, '').split('|').map(c => c.trim());
+          if (cells.every(c => /^:?-{2,}:?$/.test(c.replace(/\s/g, '')))) return;
+          html += '<tr>' + cells.map(c => `<td>${mdInline(c)}</td>`).join('') + '</tr>';
+        });
+        return html + '</table>';
+      });
+      s = s.replace(/^###\s+(.*)$/gm, '<b class="md-h">$1</b>');
+      s = mdInline(s);
+      s = s.replace(/^\[([^\]]+)\]/gm, '<b class="agtag">[$1]</b>');
+      s = s.replace(/(^|[\s(>])(\d\.\d{3,4})(?![\d<])/g, '$1<code>$2</code>');
+      s = s.replace(/(^|[\s(>])(\d{1,3}\/\d{1,3})\b/g, '$1<code>$2</code>');
+      s = linkify(s);
+      s = s.replace(/\n/g, '<br>');
+      return s.replace(/(<br>\s*)+(<table)/g, '$2').replace(/(<\/table>)(\s*<br>)+/g, '$1');
+    }
+
+    // ── LIVING CARDS: one card per agent = its latest message, updated in place ──
+    function renderMessages(board) {
+      const container = document.getElementById("thread");
+      const LIMIT = 320;
+      const firstRender = state.agentLast === null;
+      const prev = state.agentLast || {};
+      const nowMap = {};
+
+      const msgs = (board.messages || []).filter((m) => state.showAll || !m.routine);
+      // group chronologically by author
+      const byAuthor = new Map();
+      msgs.forEach((m) => {
+        const a = m.from || "system";
+        if (!byAuthor.has(a)) byAuthor.set(a, []);
+        byAuthor.get(a).push(m);
+      });
+
+      // build one living card per author (latest = current, prior distinct = collapsed history)
+      const cards = [];
+      byAuthor.forEach((list, author) => {
+        const latest = list[list.length - 1];
+        const latestNorm = normContent(latest.content || latest.message);
+        const seen = new Set([latestNorm]);
+        const hist = [];
+        for (let i = list.length - 2; i >= 0; i--) {              // newest-first, dedupe near-identical
+          const nc = normContent(list[i].content || list[i].message);
+          if (!nc || seen.has(nc)) continue;
+          seen.add(nc); hist.push(list[i]);
+        }
+        cards.push({ author, latest, latestNorm, hist, ts: latest.timestamp, count: list.length });
+      });
+      cards.sort((a, b) => new Date(b.ts || 0) - new Date(a.ts || 0));   // most-recent activity first
+
+      if (!cards.length) {
+        container.innerHTML = `<div class="empty">${state.showAll ? "No messages yet." : "No findings yet — agents post here as they work. Toggle “Show all” for routine chatter."}</div>`;
+        state.agentLast = nowMap;
+        return;
+      }
+
+      const atTop = container.scrollTop < 40;
+      const prevScroll = container.scrollTop;
+      const shown = cards.slice(0, state.visibleCount);
+      const remaining = cards.length - shown.length;
+
+      const html = shown.map((card) => {
+        const author = card.author;
+        nowMap[author] = card.latestNorm;
+        const changed = !firstRender && prev[author] !== undefined && prev[author] !== card.latestNorm;
+        const roleCls = roleColorClass(author);
+        const label = author === "human" ? "HU" : author.slice(0, 2).toUpperCase();
+        const content = card.latest.content || card.latest.message || "";
+        const long = content.length > LIMIT;
+        const open = state.expanded.has(author);
+        const histOpen = state.histOpen.has(author);
+        const task = card.latest.task_id ? `<div class="task-chip">task ${escapeHtml(card.latest.task_id)}</div>` : "";
+        let histHtml = "";
+        if (card.hist.length) {
+          histHtml = `<span class="hist-toggle" data-author="${escapeHtml(author)}">${histOpen ? "⌃ hide history" : "▾ history (" + card.hist.length + ")"}</span>`;
+          if (histOpen) {
+            histHtml += `<div class="hist">` + card.hist.map((h) =>
+              `<div class="hist-item"><span class="hist-t">${escapeHtml(relTime(h.timestamp))}</span>${renderMd(h.content || h.message || "")}</div>`
+            ).join("") + `</div>`;
+          }
+        }
+        return `
+          <article class="msg-card ${roleCls}${changed ? " just-updated" : ""}">
+            <div class="avatar ${roleCls}">${escapeHtml(label)}</div>
+            <div class="mc-body">
+              <div class="mc-head">
+                <span class="mc-name">${escapeHtml(author)}</span>
+                <span class="mc-to">→ ${escapeHtml(card.latest.to || "all")}</span>
+                <span class="mc-time" title="${escapeHtml(formatTime(card.ts))}">${escapeHtml(relTime(card.ts))}</span>
+                ${changed ? '<span class="upd">updating</span>' : ""}
+                ${card.count > 1 ? `<span class="grp-count">${card.count} updates</span>` : ""}
+              </div>
+              ${task}
+              <div class="bubble${long && !open ? " clamp" : ""}${open ? " open" : ""}${isRoutine(content) ? " muted" : ""}">${renderMd(content)}</div>
+              ${long ? `<span class="more-toggle" data-eid="${escapeHtml(author)}">${open ? "⌃ less" : "⌄ more"}</span>` : ""}
+              ${histHtml}
+            </div>
+          </article>`;
+      }).join("");
+
+      const moreBtn = remaining > 0
+        ? `<button type="button" id="showMore" class="secondary" style="width:100%;margin-top:4px">Show ${Math.min(14, remaining)} more agents (${remaining})</button>`
+        : "";
+      container.innerHTML = html + moreBtn;
+      container.scrollTop = atTop ? 0 : prevScroll;
+      state.agentLast = nowMap;
+    }
+
+    function renderAgents(board) {
+      const container = document.getElementById("agents");
+      container.innerHTML = board.agents.map((agent) => {
+        const online = agent.status === "online";
+        return `
+        <section class="agent-card">
+          <div class="agent-top">
+            <div class="role-pill"><span class="dot ${online ? "on" : "off"}"></span>${escapeHtml(agent.name)}</div>
+            <label class="switch" title="Power this Claude agent on / off">
+              <input type="checkbox" class="pw" data-agent="${escapeHtml(agent.name)}" ${online ? "checked" : ""}>
+              <span class="slider"></span>
+            </label>
+          </div>
+          <div class="small">status: <b class="status ${escapeHtml(agent.status)}">${escapeHtml(agent.status)}</b> · inbox ${escapeHtml(agent.pending_inbox)} · ${escapeHtml(agent.last_event || "-")}</div>
+          <div class="small">latest: ${escapeHtml(short(agent.last_message && agent.last_message.content, 110))}</div>
+          <div><button type="button" class="secondary" data-recipient="${escapeHtml(agent.name)}">Message ${escapeHtml(agent.name)}</button></div>
+        </section>
+      `;}).join("");
+      container.querySelectorAll("button[data-recipient]").forEach((button) => {
+        button.addEventListener("click", () => {
+          document.getElementById("recipient").value = button.dataset.recipient;
+          document.getElementById("content").focus();
+        });
+      });
+    }
+
+    // power On/Off the Claude agents — delegated
+    document.getElementById("agents").addEventListener("change", async (event) => {
+      const box = event.target;
+      if (!box.classList.contains("pw")) return;
+      const agent = box.dataset.agent, on = box.checked;
+      box.disabled = true; document.getElementById("error").textContent = "";
+      try {
+        const res = await jsonFetch(`/api/runtime/agents/${encodeURIComponent(agent)}/${on ? "start" : "stop"}`, { method: "POST" });
+        if (!res.ok) { document.getElementById("error").textContent = `${agent}: ${res.error || "power toggle failed"}`; box.checked = !on; }
+      } catch (err) { document.getElementById("error").textContent = `${agent}: ${err.message || err}`; box.checked = !on; }
+      finally { box.disabled = false; loadBoard().catch(() => {}); }
+    });
+
+    // power On/Off the PYTHON fleet agents — delegated
+    document.getElementById("fleetMgr").addEventListener("change", async (event) => {
+      const box = event.target;
+      if (!box.classList.contains("fapw")) return;
+      const agent = box.dataset.agent, on = box.checked;
+      const msg = document.getElementById("fmMsg");
+      box.disabled = true; msg.className = "fm-msg"; msg.textContent = `${agent}: ${on ? "dispatching…" : "cancelling…"}`;
+      try {
+        const res = await jsonFetch(`/api/runtime/fleet_agents/${encodeURIComponent(agent)}/${on ? "start" : "stop"}`, { method: "POST" });
+        if (!res.ok) { msg.className = "fm-msg err"; msg.textContent = `${agent}: ${res.error || "toggle failed"}`; box.checked = !on; }
+        else { msg.className = "fm-msg"; msg.textContent = `${agent}: ${res.note || res.status}`; }
+      } catch (err) { msg.className = "fm-msg err"; msg.textContent = `${agent}: ${err.message || err}`; box.checked = !on; }
+      finally { box.disabled = false; loadFleetAgents().catch(() => {}); }
+    });
+    // ── COMPETITION SELECTOR — one selection drives ALL data views (journal/experiments/insights + hub) ──
+    function getCookie(k){const m=document.cookie.match('(^|;)\\s*'+k+'\\s*=\\s*([^;]+)');return m?decodeURIComponent(m.pop()):'';}
+    function activeComp(){return new URLSearchParams(location.search).get('comp')||getCookie('rp_comp')||'';}
+    function applyActiveComp(slug){
+      if(slug){document.cookie='rp_comp='+encodeURIComponent(slug)+';path=/;max-age=31536000';}
+      const s=slug?('?comp='+encodeURIComponent(slug)):'';
+      ['navJournal','navExperiments','navInsights'].forEach((id)=>{const a=document.getElementById(id);if(a)a.href=a.dataset.base+s;});
+      const hub=document.getElementById('navHub'); if(hub&&slug){hub.href='//'+location.hostname+':7777/c/'+encodeURIComponent(slug);}
+    }
+    document.getElementById("fmSearch").addEventListener("input", renderFleetAgents);
+    document.getElementById("fmModality").addEventListener("change", (e) => {
+      renderFleetAgents();
+      const opt = e.target.selectedOptions && e.target.selectedOptions[0];
+      const slug = opt && opt.dataset ? (opt.dataset.slug || "") : "";
+      applyActiveComp(slug);                                    // set active comp → journal/experiments/insights/hub follow
+    });
+    document.getElementById("fleetMgr").addEventListener("toggle", (e) => {
+      if (e.target.open && !state.fleetAgentsData) loadFleetAgents();
+    });
+
+    function renderWorkflow(board) {
+      document.getElementById("workflowState").textContent =
+        JSON.stringify(board.workflow_state || {}, null, 2) || "No workflow state yet.";
+    }
+    function renderTasks(board) {
+      const summary = board.task_summary || {};
+      const counts = summary.counts || {};
+      const countText = Object.keys(counts).length
+        ? Object.entries(counts).map(([k, v]) => `${k}: ${v}`).join(" · ")
+        : "No active task counts.";
+      document.getElementById("taskSummary").textContent = `${countText}\nmarker: ${summary.current_task_marker || "-"}`;
+      const container = document.getElementById("tasks");
+      const tasks = summary.tasks || [];
+      container.innerHTML = tasks.map((task) => `
+        <section class="agent-card">
+          <div class="agent-top">
+            <div class="role-pill">${escapeHtml(task.owner || "-")}</div>
+            <div class="status ${escapeHtml(task.status || "unknown")}">${escapeHtml(task.status || "unknown")}</div>
+          </div>
+          <div class="small">${escapeHtml(task.title || "-")} · id ${escapeHtml(task.id || "-")}</div>
+          <div class="small">assigned ${escapeHtml(formatTime(task.assigned_at))} · stalls ${escapeHtml(task.stall_count || 0)}</div>
+        </section>
+      `).join("") || `<div class="small">No task records for the current human request.</div>`;
+    }
+
+    function syncRecipientOptions(board) {
+      const select = document.getElementById("recipient");
+      const current = select.value;
+      select.innerHTML = board.agents.map((a) => `<option value="${escapeHtml(a.name)}">${escapeHtml(a.name)}</option>`).join("");
+      if (board.agents.some((a) => a.name === current)) select.value = current;
+      else if (board.agents.some((a) => a.name === "leader")) select.value = "leader";
+    }
+
+    const HOME_SLUG = "biohub-cell-tracking-during-development";   // the comp this board lives in
+    async function jsonFetch(url, options) {
+      // scope EVERY board API read to the active competition (?comp=<slug>) so KPIs / fleet / thread
+      // reflect ONLY that comp — the server reads it via _active_comp(request).
+      try {
+        if (typeof url === "string" && url.indexOf("/api/") === 0) {
+          const c = activeComp();
+          if (c && url.indexOf("comp=") < 0) url += (url.indexOf("?") >= 0 ? "&" : "?") + "comp=" + encodeURIComponent(c);
+        }
+      } catch (_) {}
+      const response = await fetch(url, options);
+      if (!response.ok) {
+        let detail = response.statusText;
+        try { const p = await response.json(); detail = p.detail || detail; } catch (_) {}
+        throw new Error(detail);
+      }
+      return response.json();
+    }
+
+    async function loadBoard() {
+      const board = await jsonFetch("/api/runtime/board?limit=160");
+      state.board = board;
+      renderMeta(board); syncRecipientOptions(board); renderMessages(board);
+      renderAgents(board); renderWorkflow(board); renderTasks(board);
+      renderJournalActivity(board);
+      document.getElementById("error").textContent = "";
+    }
+
+    // ── JOURNAL FALLBACK: comps with no local tmux/fleet daemon render their Postgres journal here ──
+    function fmtScore(v) { return (typeof v === "number") ? v.toFixed(3) : "—"; }
+    function renderJournalActivity(board) {
+      const panel = document.getElementById("journalPanel");
+      if (!panel) return;
+      // Home comp (biohub) HAS a live daemon → never show this panel; its live board is unchanged.
+      const noDaemon = board && board.has_local_runtime === false;
+      // Keep the chatbot (message composer) + agents panels ALWAYS visible (the user talks to agents here).
+      // We ADD the journal panel for a no-daemon comp; we do NOT hide the chat/agents/rail.
+      const exps = (board && board.journal_activity) || [];
+      if (!noDaemon || !exps.length) { panel.style.display = "none"; return; }
+      panel.style.display = "";
+      const comp = board.session_name || activeComp() || "";
+      document.getElementById("journalTitle").textContent = "Experiment activity" + (comp ? ` (${comp})` : "");
+
+      const k = board.journal_kpis || {};
+      const kpi = (v, l) => `<div class="ja-kpi"><div class="ja-kv">${escapeHtml(v)}</div><div class="ja-kl">${escapeHtml(l)}</div></div>`;
+      document.getElementById("journalKpis").innerHTML =
+        kpi(exps.length, "experiments") +
+        kpi(fmtScore(k.best_private), "best private") +
+        kpi(fmtScore(k.best_public), "best public") +
+        kpi(fmtScore(k.best_cv), "best CV") +
+        kpi(k.latest_exp || "—", "latest exp");
+
+      const rows = exps.map((e) => `<tr>
+        <td class="ja-exp">${escapeHtml(e.exp || "—")}</td>
+        <td class="ja-num">${fmtScore(e.cv)}</td>
+        <td class="ja-num">${fmtScore(e.public)}</td>
+        <td class="ja-num">${fmtScore(e.private)}</td>
+        <td class="ja-desc">${escapeHtml(e.description || "")}</td>
+      </tr>`).join("");
+      document.getElementById("journalExps").innerHTML =
+        `<div style="overflow-x:auto"><table class="ja-tbl"><thead><tr>
+           <th>exp</th><th>CV</th><th>public</th><th>private</th><th>description</th>
+         </tr></thead><tbody>${rows}</tbody></table></div>`;
+
+      const dec = (board.decisions_feed || []);
+      document.getElementById("journalDecisions").innerHTML = dec.length
+        ? dec.map((d) => `<div class="ja-dec">
+             <span class="ja-dag">${escapeHtml(d.agent || "agent")}</span>
+             <span style="font-size:10px;color:var(--faint)"> · ${escapeHtml(relTime(d.ts))}</span>
+             <div class="ja-dsum">${renderMd(d.summary || "")}</div>
+             ${d.recommendation ? `<div class="ja-drec">→ ${renderMd(d.recommendation)}</div>` : ""}
+           </div>`).join("")
+        : `<div class="ja-empty">No decisions logged yet.</div>`;
+    }
+
+    // ── inline SVG data-viz (offline, no libs) ──
+    function drawSpark(el, series) {
+      if (!el) return;
+      const n = series.length, W = 118, H = 34;
+      if (n < 2) { el.innerHTML = ""; return; }
+      const max = Math.max(...series), min = Math.min(...series), rng = (max - min) || 1;
+      const pts = series.map((v, i) => [(i / (n - 1)) * W, H - 2 - ((v - min) / rng) * (H - 5)]);
+      const d = "M" + pts.map((p) => p[0].toFixed(1) + "," + p[1].toFixed(1)).join(" L");
+      el.innerHTML = `<path d="${d} L${W},${H} L0,${H} Z" fill="currentColor" opacity="0.13"/>`
+        + `<path d="${d}" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round"/>`
+        + `<circle cx="${pts[n-1][0].toFixed(1)}" cy="${pts[n-1][1].toFixed(1)}" r="2.1" fill="currentColor"/>`;
+    }
+    function drawSeg(el, segs) {
+      if (!el) return;
+      const total = segs.reduce((a, s) => a + s.v, 0) || 1;
+      const parts = segs.filter((s) => s.v > 0)
+        .map((s) => `<span style="width:${(s.v / total * 100).toFixed(1)}%;background:${s.c}" title="${s.label}: ${s.v}"></span>`).join("");
+      el.innerHTML = parts || `<span style="width:100%;background:var(--line)"></span>`;
+    }
+
+    const money = (v) => "$" + Number(v || 0).toFixed(2);
+    const ktok = (v) => { v = Number(v || 0); return v >= 1e6 ? (v/1e6).toFixed(1)+"M" : v >= 1e3 ? (v/1e3).toFixed(0)+"k" : String(v); };
+    async function loadSpend() {
+      try {
+        const s = await jsonFetch("/api/runtime/spend");
+        if (!s.ok) { document.getElementById("sbTotal").textContent = "n/a"; return; }
+        document.getElementById("sbTotal").textContent = money(s.total_cost);
+        document.getElementById("sbLast60").textContent = `60m ${money(s.last60_cost)} · ${ktok(s.last60_tokens)} tok`;
+        document.getElementById("sbToday").textContent = `today ${money(s.today_cost)}`;
+        const _scoped = activeComp() && activeComp() !== HOME_SLUG;   // spend is session-global; label it when a comp is picked
+        const _sl = document.querySelector("#spendBar .metric-label");
+        if (_sl) _sl.textContent = _scoped ? "Claude spend (global)" : "Claude spend";
+        state.spendHist.push(Number(s.last60_cost || 0));
+        if (state.spendHist.length > 40) state.spendHist.shift();
+        drawSpark(document.getElementById("spendSpark"), state.spendHist);
+      } catch (_) {}
+    }
+    async function loadJobs() {
+      try {
+        const j = await jsonFetch("/api/runtime/trainjobs");
+        const note = document.getElementById("jbLatest");
+        if (!j.ok) { note.textContent = "queue unreachable"; return; }
+        document.getElementById("jbRunning").textContent = String(j.running);
+        const _jscoped = activeComp() && activeComp() !== HOME_SLUG;   // one shared GPU queue → session-global
+        const _jl = document.querySelector("#jobBar .metric-label");
+        if (_jl) _jl.textContent = _jscoped ? "Training jobs (global)" : "Training jobs";
+        document.getElementById("jbQueued").textContent = `queued ${j.queued}`;
+        document.getElementById("jbOk").textContent = `✓ ${j.succeeded}`;
+        document.getElementById("jbFail").textContent = `✗ ${j.failed}`;
+        drawSeg(document.getElementById("jobSeg"), [
+          { v: j.succeeded, c: "var(--ok)", label: "succeeded" },
+          { v: j.failed, c: "var(--danger)", label: "failed" },
+          { v: j.running, c: "var(--warn)", label: "running" },
+          { v: j.queued, c: "var(--info)", label: "queued" },
+        ]);
+        const r = (j.recent || [])[0];
+        note.textContent = r ? `${r.id} · ${r.status}` : "";
+      } catch (_) {}
+    }
+    async function loadFleet() {
+      try {
+        const f = await jsonFetch("/api/runtime/fleet");
+        const cnt = document.getElementById("fbCount"), kd = document.getElementById("fbKinds"), big = document.getElementById("faBig");
+        if (!f.ok) { cnt.textContent = "off"; big.textContent = "—"; kd.textContent = ""; return; }
+        const kinds = Object.entries(f.kinds || {});
+        const active = kinds.filter(([k, s]) => (s.claimed || 0) > 0).length;
+        big.textContent = String(active);
+        cnt.textContent = `${f.n_workers} workers`;
+        kd.innerHTML = kinds.map(([k, s]) => {
+          const done = (s.done || 0), esc = (s.escalated || 0), open = (s.open || 0), act = (s.claimed || 0);
+          return `<span class="fb-kind">${k}: <b>${done}</b>✓${esc ? " "+esc+"→" : ""}${open ? " "+open+"·" : ""}${act ? " ⟳"+act : ""}</span>`;
+        }).join("");
+        const pc = document.getElementById("pyCount"), pa = document.getElementById("pyagents");
+        if (pc) pc.textContent = `(${kinds.length} types · ${f.n_workers} workers)`;
+        if (pa) pa.innerHTML = kinds.map(([k, s]) => {
+          const done = (s.done || 0), esc = (s.escalated || 0), act = (s.claimed || 0);
+          const st = act ? "⟳ working" : (done ? "✓ done" : (esc ? "→ escalated" : "idle"));
+          return `<div class="pyrow"><span class="pyname">${k}</span><span class="pystate">${st}</span><span class="pynums">${done}✓${esc ? " "+esc+"→" : ""}</span></div>`;
+        }).join("");
+      } catch (_) {}
+    }
+
+    async function loadExperiments() {
+      try {
+        const x = await jsonFetch("/api/runtime/experiments");
+        const rEl = document.getElementById("expRunning"), fEl = document.getElementById("expFindings");
+        if (!rEl) return;
+        if (!x.ok) { rEl.textContent = "experiments n/a"; return; }
+        const run = x.running || [];
+        rEl.innerHTML = run.length
+          ? `<span style="color:var(--ok);font-weight:700">▶ ${run.length} running</span> · `
+            + run.map(r => `<span class="mono">pid ${escapeHtml(r.pid)} (${escapeHtml(r.etime)})</span>`).join(", ")
+          : `<span style="color:var(--faint)">■ no experiment process running</span>`;
+        fEl.innerHTML = (x.findings || []).map(f =>
+          `<div class="pyrow"><span class="pyname" style="color:var(--accent)">${escapeHtml(f.label)}</span><span class="pystate">${escapeHtml(f.mtime)}</span></div>`
+        ).join("") || `<div class="small" style="color:var(--faint)">No findings written yet.</div>`;
+      } catch (_) {}
+    }
+
+    // ── Python fleet-agent manager — grouped BY DOMAIN, filtered by the SELECTED KAGGLE COMPETITION ──
+    // Kaggle competition-modality taxonomy (matches comp_config / comp-onboard).
+    const prettyMod = (m) => ({
+      tabular: "Tabular", sequence: "Sequence", image: "Image", video: "Video", pointcloud: "Point cloud",
+      "volume-time": "Volume + time (3D+t)", text: "Text / NLP", "agent-env": "Agent env",
+      "agent-config": "Agent config (prompt)", "grid-reasoning": "Grid reasoning",
+    }[m] || m);
+
+    function renderFleetAgents() {
+      const data = state.fleetAgentsData;
+      const listEl = document.getElementById("fmList");
+      if (!listEl) return;
+      const metaEl = document.getElementById("fmMeta"), hintEl = document.getElementById("fmHint"), modSel = document.getElementById("fmModality");
+      if (!data || !data.ok) {
+        metaEl.textContent = (data && data.error) ? "unavailable" : "…";
+        listEl.innerHTML = ""; hintEl.textContent = (data && data.error) ? data.error : "";
+        return;
+      }
+      const agents = data.agents || [];
+      // populate the COMPETITION dropdown once (your active Kaggle projects; value = the comp's Kaggle modality)
+      if (modSel && modSel.dataset.filled !== "1" && ((data.competitions || []).length || (data.modalities || []).length)) {
+        const cur = modSel.value;
+        const comps = data.competitions || [];
+        const compOpts = comps.map((c) =>
+          `<option value="${escapeHtml(c.modality || "")}" data-slug="${escapeHtml(c.slug)}" title="Kaggle modality: ${escapeHtml(c.comp_modality || "unknown")}">`
+          + `${escapeHtml(c.slug)}${c.modality ? ` · ${escapeHtml(prettyMod(c.modality))}` : "  (unknown → all)"}</option>`).join("");
+        // fall back to raw modalities if no competitions were resolved
+        const modOpts = (data.modalities || []).map((m) => `<option value="${escapeHtml(m)}">— any ${escapeHtml(prettyMod(m))} comp</option>`).join("");
+        modSel.innerHTML = `<option value="">All agents (no competition)</option>`
+          + (compOpts ? `<optgroup label="Your active Kaggle projects">${compOpts}</optgroup>` : "")
+          + (modOpts ? `<optgroup label="Any competition of modality">${modOpts}</optgroup>` : "");
+        if (cur) modSel.value = cur;
+        modSel.dataset.filled = "1";
+        // Restore the active competition (cookie/URL) into the selector + nav links (one comp → all views).
+        const act = activeComp();
+        if (act) {
+          const opt = [...modSel.options].find((o) => o.dataset.slug === act);
+          if (opt) modSel.value = opt.value;
+        }
+        applyActiveComp(act);
+      }
+      const nActive = agents.filter((a) => a.running || a.queued > 0).length;
+      metaEl.innerHTML = `${data.n} agents · <b style="color:${nActive ? "var(--ok)" : "inherit"}">${nActive} active</b> · daemon `
+        + (data.fleet_running ? `<span style="color:var(--ok)">●on</span>` : `<span style="color:var(--faint)">○off</span>`);
+
+      const q = (document.getElementById("fmSearch").value || "").trim().toLowerCase();
+      const mod = modSel ? modSel.value : "";
+      const filtering = !!q || !!mod;
+      const rows = agents.filter((a) =>
+        (!q || a.name.toLowerCase().includes(q) || (a.domain || "").toLowerCase().includes(q))
+        && (!mod || (a.modalities || []).includes(mod)));
+
+      // group by domain, in the routing order the backend provides
+      const order = (data.domains || []).map((d) => d.name);
+      const grp = new Map();
+      rows.forEach((a) => { const d = a.domain || "UNCLASSIFIED"; if (!grp.has(d)) grp.set(d, []); grp.get(d).push(a); });
+      const domKeys = [...grp.keys()].sort((x, y) => {
+        const ix = order.indexOf(x), iy = order.indexOf(y);
+        return (ix < 0 ? 999 : ix) - (iy < 0 ? 999 : iy) || x.localeCompare(y);
+      });
+      const rank = (a) => a.running ? 0 : (a.queued > 0 ? 1 : 2);
+
+      listEl.innerHTML = domKeys.map((d) => {
+        const items = grp.get(d).sort((x, y) => rank(x) - rank(y) || x.name.localeCompare(y.name));
+        const anyActive = items.some((a) => a.running || a.queued > 0);
+        const open = filtering || anyActive;              // auto-open when filtering or a group has active work
+        const rowsHtml = items.map((a) => {
+          const on = a.running || a.queued > 0;
+          const dot = a.running ? "on" : (a.queued > 0 ? "q" : "off");
+          const st = a.running ? "running" : (a.queued > 0 ? `queued ${a.queued}` : (a.done ? `done ${a.done}` : "idle"));
+          const modTitle = (a.modalities || []).map(prettyMod).join(", ") || "no competition modality";
+          return `<div class="fm-row">
+            <span class="dot ${dot}"></span>
+            <span class="fm-name" title="${escapeHtml(a.name)}">${escapeHtml(a.name)}</span>
+            <span class="fm-dom" title="domain · used by: ${escapeHtml(modTitle)}">${escapeHtml(a.domain || "?")}</span>
+            <span class="fm-state">${escapeHtml(st)}</span>
+            <label class="switch fm-switch" title="dispatch (on) / cancel (off) this fleet agent">
+              <input type="checkbox" class="fapw" data-agent="${escapeHtml(a.name)}" ${on ? "checked" : ""}>
+              <span class="slider"></span>
+            </label></div>`;
+        }).join("");
+        return `<details class="fm-grp"${open ? " open" : ""}><summary>`
+          + `<span class="fm-gname">${escapeHtml(d)}</span>`
+          + `<span class="fm-gcount">${items.length}${anyActive ? ' · <b>active</b>' : ''}</span></summary>`
+          + rowsHtml + `</details>`;
+      }).join("") || `<div class="fm-hint" style="padding:10px 2px">No agents match this filter.</div>`;
+
+      hintEl.textContent = filtering
+        ? `${rows.length} agent${rows.length !== 1 ? "s" : ""} across ${domKeys.length} domain${domKeys.length !== 1 ? "s" : ""}`
+          + (mod ? ` · leader/researcher's working-set for ${prettyMod(mod)}` : "")
+        : `${agents.length} agents · ${(data.domains || []).length} domains · pick a modality to see a competition's working-set`;
+    }
+    async function loadFleetAgents() {
+      try { state.fleetAgentsData = await jsonFetch("/api/runtime/fleet_agents"); }
+      catch (err) { state.fleetAgentsData = { ok: false, error: err.message || String(err) }; }
+      renderFleetAgents();
+    }
+
+    async function sendMessage(event) {
+      event.preventDefault();
+      const recipient = document.getElementById("recipient").value;
+      const content = document.getElementById("content").value.trim();
+      if (!content) { document.getElementById("error").textContent = "Message cannot be empty."; return; }
+      try {
+        const payload = await jsonFetch("/api/runtime/messages", {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ sender: "human", recipient, content }),
+        });
+        document.getElementById("content").value = "";
+        state.board = payload.board;
+        renderMeta(payload.board); syncRecipientOptions(payload.board); renderMessages(payload.board);
+        renderAgents(payload.board); renderWorkflow(payload.board); renderTasks(payload.board);
+      } catch (error) { document.getElementById("error").textContent = error.message || String(error); }
+    }
+
+    function startPolling() {
+      if (state.pollHandle) clearInterval(state.pollHandle);
+      state.pollHandle = setInterval(() => {
+        loadBoard().catch((e) => { document.getElementById("error").textContent = e.message || String(e); });
+      }, 2000);
+      if (state.spendHandle) clearInterval(state.spendHandle);
+      state.spendHandle = setInterval(loadSpend, 30000);
+      if (state.jobHandle) clearInterval(state.jobHandle);
+      state.jobHandle = setInterval(loadJobs, 5000);
+      if (state.fleetHandle) clearInterval(state.fleetHandle);
+      state.fleetHandle = setInterval(loadFleet, 5000);
+      if (state.expHandle) clearInterval(state.expHandle);
+      state.expHandle = setInterval(loadExperiments, 8000);
+      if (state.faHandle) clearInterval(state.faHandle);
+      state.faHandle = setInterval(() => { const m = document.getElementById("fleetMgr"); if (m && m.open) loadFleetAgents(); }, 10000);
+    }
+
+    // theme toggle: explicit choice persists; else follow the OS
+    (function () {
+      const root = document.documentElement, btn = document.getElementById("themeToggle");
+      const saved = localStorage.getItem("rp-theme");
+      if (saved) root.setAttribute("data-theme", saved);
+      btn.addEventListener("click", () => {
+        const cur = root.getAttribute("data-theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+        const next = cur === "dark" ? "light" : "dark";
+        root.setAttribute("data-theme", next); localStorage.setItem("rp-theme", next);
+      });
+    })();
+
+    document.getElementById("composeForm").addEventListener("submit", sendMessage);
+    document.getElementById("content").addEventListener("keydown", (event) => {
+      if (event.key === "Enter" && !event.shiftKey) { event.preventDefault(); document.getElementById("composeForm").requestSubmit(); }
+    });
+    document.getElementById("refreshBtn").addEventListener("click", () => loadBoard());
+    // sidebar hide/show toggle (persisted across reloads)
+    (function () {
+      const appEl = document.querySelector(".app"), sideBtn = document.getElementById("sideToggle");
+      const apply = () => appEl.classList.toggle("sidebar-hidden", localStorage.getItem("rp-hide-sidebar") === "1");
+      if (sideBtn) sideBtn.addEventListener("click", () => {
+        localStorage.setItem("rp-hide-sidebar", localStorage.getItem("rp-hide-sidebar") === "1" ? "0" : "1");
+        apply();
+      });
+      apply();
+    })();
+    const _thread = document.getElementById("thread");
+    const _logBtn = document.getElementById("toggleLogBtn");
+    const _applyLog = () => {
+      const hidden = localStorage.getItem("hideLog") === "1";
+      _thread.style.display = hidden ? "none" : "";
+      _logBtn.textContent = hidden ? "Show log" : "Hide log";
+    };
+    _logBtn.addEventListener("click", () => {
+      localStorage.setItem("hideLog", localStorage.getItem("hideLog") === "1" ? "0" : "1"); _applyLog();
+    });
+    _applyLog();
+    document.getElementById("showAllBtn").addEventListener("click", (e) => {
+      state.showAll = !state.showAll;
+      e.target.textContent = state.showAll ? "Only findings" : "Show all";
+      if (state.board) renderMessages(state.board);
+    });
+    document.getElementById("scrollBtn").addEventListener("click", () => {
+      state.visibleCount = 14;
+      if (state.board) renderMessages(state.board);
+      document.getElementById("thread").scrollTop = 0;
+    });
+    // delegated: "show more agents", per-card "more" clamp, and per-agent "history" expander
+    document.getElementById("thread").addEventListener("click", (event) => {
+      const t = event.target;
+      if (t && t.id === "showMore") {
+        state.visibleCount += 14;
+        if (state.board) renderMessages(state.board);
+      } else if (t && t.classList.contains("more-toggle")) {
+        const a = t.dataset.eid;
+        if (state.expanded.has(a)) state.expanded.delete(a); else state.expanded.add(a);
+        if (state.board) renderMessages(state.board);
+      } else if (t && t.classList.contains("hist-toggle")) {
+        const a = t.dataset.author;
+        if (state.histOpen.has(a)) state.histOpen.delete(a); else state.histOpen.add(a);
+        if (state.board) renderMessages(state.board);
+      }
+    });
+
+    applyActiveComp(activeComp());   // set cookie + nav from ?comp BEFORE the first XHR so all reads are comp-scoped
+    loadBoard().catch((e) => { document.getElementById("error").textContent = e.message || String(e); });
+    loadSpend(); loadJobs(); loadFleet(); loadExperiments();
+    startPolling();
+  </script>
+</body>
+</html>

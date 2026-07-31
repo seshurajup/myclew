@@ -1,0 +1,20 @@
+name: stage3_v12_2_distance_5
+description: Tighter distance threshold (5.0um) to test precision trade-off
+input:
+  predictions_dir: /home/seshu/kaggle/2026/biohub-cell-tracking-during-development/research/pilkwang_support_pack/repo/predictions/seshu/unet_transformer/split_0
+postproc:
+  edge_length_max_um: 12.0
+  gap_recovery_enabled: true
+  gap_recovery_max_distance_um: 5.0
+  gap_recovery_max_gap_frames: 1
+  gap_recovery_velocity_weight: 0.5
+output:
+  predictions_dir: /home/seshu/kaggle/2026/biohub-cell-tracking-during-development/tools/researchpapers/output/stage3/v12_2_distance_5
+evaluation:
+  split_file: /home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/ensemble_work/finetune/fleet_loeo_mini.json
+  eval_set: golden_12
+  use_official_scorer: true
+  use_metric_anatomy: true
+tracking:
+  mlflow_enabled: true
+  run_name: stage3_v12_2_distance_5_golden12

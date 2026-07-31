@@ -1,0 +1,15 @@
+# Successive-halving bracket — MULTI-FIDELITY on data + epochs (+ resolution via the configs).
+# GPU hours go to promising configs only, instead of full-training every idea (hours each).
+#   round 0: mini leak-free split (20/9) + 5 epochs   -> screen all, keep top half
+#   round 1: mini leak-free split + 15 epochs         -> promote survivors, halve again
+#   round 2: FULL golden-12 + 40 epochs               -> confirm finalist on the LB proxy
+# splits = the DATA-fidelity knob (paths resolve against the parent competition repo).
+# golden-12 stays the FINAL judge; the mini split is leak-free (embryo-holdout, zero shared cells).
+configs:
+  - baseline/experiments_v1/v1_1_ctrl_1x4x4.yaml
+  - baseline/experiments_v1/v1_2_hr_baseaug.yaml
+  - baseline/experiments_v1/v1_3_hr_richaug.yaml
+rungs:
+  - {epochs: 5,  keep: 0.5, splits: learning/ensemble_work/finetune/splits_screen_mini.json}
+  - {epochs: 15, keep: 0.5, splits: learning/ensemble_work/finetune/splits_screen_mini.json}
+  - {epochs: 40, keep: 1.0, splits: learning/ensemble_work/finetune/splits_ft.json}

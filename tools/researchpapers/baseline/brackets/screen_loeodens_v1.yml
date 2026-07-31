@@ -1,0 +1,49 @@
+# DRAFT — post-gate idea-screening bracket on the EMBRYO-DISJOINT DENSITY CV.
+# ---------------------------------------------------------------------------------------------
+# DO NOT RUN until EXP-CVGATE PASSES (pilkwang mean-official > canqiang on splits_loeo_density).
+# Per human directive: no idea arms are designed/launched until the gate passes. The `configs:`
+# list below is a PLACEHOLDER (incumbent control only); idea arms get appended ONLY post-gate.
+# ---------------------------------------------------------------------------------------------
+#
+# WHY this bracket differs from brackets/screen_v1.yml:
+#   screen_v1.yml's FINAL rung is golden-12 (splits_ft.json). The CV-gate (EXP-CVGATE) exists
+#   precisely because golden-12 RANKS WRONG (canqiang 0.903 > pilkwang 0.870, opposite the LB).
+#   So here the faithful judge is the DENSITY CV itself — every rung screens on
+#   splits_loeo_density.json, and the final judge is the density CV over BOTH folds, NOT golden-12.
+#
+# HOW the driver uses each rung (baseline/successive_halving.py):
+#   run_config() sets cfg.paths.splits = <rung splits>, trains on that fold's TRAIN embryos, then
+#   mini_official() predicts on the fold's TEST embryos and scores the FULL official metric
+#   (predict -> pilk_post -> src.metric). Ranking is on that mini-official adjJ (acc*recall is BLIND).
+#
+# FIDELITY LADDER (few->many epochs; data fidelity is fixed = the faithful density CV):
+#   round 0:  6 epochs  -> screen ALL configs on density fold, keep top half   (cheap triage)
+#   round 1: 18 epochs  -> promote survivors, halve again
+#   round 2: 45 epochs  -> converge finalist(s) on the density fold (keep all)
+#
+# SINGLE-FOLD LIMITATION + the final judge:
+#   the driver runs ONE --fold per invocation. Screen on fold 0 (cost triage), then the FINAL
+#   JUDGE for any survivor is the mean official across BOTH density folds:
+#     bash baseline/run_screen.sh baseline/brackets/screen_loeodens_v1.yml --fold 0   # screen
+#     # then confirm each survivor on fold 1 (predict+score_v1 --split-file ... --fold 1)
+#   DECISION (leader, 2026-07-05, task_id=CVGATE): the final judge MUST be a BOTH-FOLD AGGREGATED
+#   rung = mean official_score over fold0+fold1 (match the gate's OWN criterion; screen-fold0-then-
+#   confirm-fold1 would reintroduce a single-fold faithfulness hole). The small SH-driver change to
+#   support a both-fold final rung is APPROVED IN PRINCIPLE but HELD — do NOT implement it (or design
+#   any idea arms) until EXP-CVGATE PASSES. If the gate FAILS (pilkwang<=canqiang), the density-CV
+#   design itself is in question — escalate to the human before building on it.
+#
+# NOTE ON DENSITY-CHANGING IDEAS: any idea that raises count_ratio (denser detector) inflates the
+#   official score on sparse GT (score_v1.py caveat). Such gains stay NEEDS-LB (human submits),
+#   even when they win on the density CV — the CV ranks *ordering*, the LB confirms *magnitude*.
+
+configs:
+  # PLACEHOLDER — incumbent control only (the pilkwang-faithful baseline arm).
+  # Idea arms (aug / lr / det-loss / window / pool / gating / postproc) are appended here
+  # ONLY after EXP-CVGATE passes and each gets its own pre-registered EXP-<id>.md first.
+  - baseline/experiments_v1/v1_1_ctrl_1x4x4.yaml
+
+rungs:
+  - {epochs: 6,  keep: 0.5, splits: learning/ensemble_work/finetune/splits_loeo_density.json}
+  - {epochs: 18, keep: 0.5, splits: learning/ensemble_work/finetune/splits_loeo_density.json}
+  - {epochs: 45, keep: 1.0, splits: learning/ensemble_work/finetune/splits_loeo_density.json}

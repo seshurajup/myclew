@@ -1,0 +1,34 @@
+# Stage 3b v13-1: Full LOEO Baseline (control, no transformation)
+name: stage3_v13_1_baseline
+description: |
+  Control baseline on full LOEO (199 datasets, 2-fold CV).
+  Uses Stage 1 pilkwang frozen detections without post-proc transformation.
+  Validates data consistency and scorer pipeline on full set.
+
+input:
+  predictions_dir: /home/seshu/kaggle/2026/biohub-cell-tracking-during-development/tools/researchpapers/output/stage3/loeo_predictions_full
+
+postproc:
+  # No transformation (control)
+  edge_length_max_um: 12.0
+  gap_recovery_enabled: false
+
+output:
+  predictions_dir: /home/seshu/kaggle/2026/biohub-cell-tracking-during-development/tools/researchpapers/output/stage3/v13_1_baseline
+
+evaluation:
+  split_file: /home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/ensemble_work/finetune/fleet_loeo_mini.json
+  eval_set: full_loeo  # Both folds
+  use_official_scorer: true
+  use_metric_anatomy: true
+
+tracking:
+  mlflow_enabled: true
+  run_name: stage3_v13_1_baseline_full_loeo
+  metrics_to_log:
+    - official_score
+    - adj_edge_jaccard
+    - R_node
+    - R_edge
+    - Q_link
+    - delta_from_baseline

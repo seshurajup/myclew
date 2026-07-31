@@ -1,0 +1,50 @@
+# Stage 2 exp#2: Centroid Refinement + Motion Smoothing (golden-12 pilot)
+# Target: Linking precision & stability (FP-edge suppression)
+# Configuration for post-processing pipeline
+
+name: stage2_exp2_centroid_refine_smooth
+description: |
+  Post-process pilkwang predictions: centroid refinement + motion smoothing.
+  Improves edge precision (edge_P 0.9408 → target 0.96+) and links stability.
+
+  Strategy:
+    1. Load pilkwang FIXED predictions (.geff)
+    2. Refine node centroids via cluster statistics
+    3. Smooth trajectories via motion model (velocity consistency)
+    4. Remove kinematically impossible edges
+    5. Re-score vs ground truth
+
+input:
+  predictions_dir: /home/seshu/kaggle/2026/biohub-cell-tracking-during-development/research/pilkwang_support_pack/repo/predictions/seshu/unet_transformer/split_0
+
+postproc:
+  centroid_refinement_enabled: true
+  centroid_refinement_window: 3  # Frames to use for refinement
+  centroid_refinement_max_shift_um: 2.5
+
+  motion_smoothing_enabled: true
+  motion_smoothing_velocity_weight: 0.6
+  motion_smoothing_max_accel_um_per_frame2: 8.0  # Kinematic constraint
+
+output:
+  predictions_dir: /home/seshu/kaggle/2026/biohub-cell-tracking-during-development/tools/researchpapers/output/stage2/exp2_predictions
+  format: geff
+
+evaluation:
+  split_file: /home/seshu/kaggle/2026/biohub-cell-tracking-during-development/learning/ensemble_work/finetune/fleet_loeo_mini.json
+  fold: 0  # golden-12 pilot uses fold 0 test set
+  use_official_scorer: true
+  use_metric_anatomy: true
+
+tracking:
+  mlflow_enabled: true
+  run_name: stage2_exp2_centroid_refine_smooth_golden12
+  metrics_to_log:
+    - official_score
+    - adj_edge_jaccard
+    - R_node
+    - R_edge
+    - Q_link
+    - edge_P
+    - count_ratio
+    - div_J
