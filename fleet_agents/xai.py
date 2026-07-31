@@ -461,6 +461,134 @@ def _protopnet(torch, model, vol, layer):
 
 
 # ───────────────────────── FEATURE family (SHAP/LIME/IG/perm) ─────────────────────────
+# ─────────────────────────────────────────────────────────────────────────────────────────────────────
+# CROSS-MODEL / CROSS-VIEW XAI — the class of question single-model attribution CANNOT ask.
+#
+# Every other method in this file takes ONE model and answers "why did it predict that?". None of them can
+# express "where do two models DISAGREE, and is the disagreement region worth a second look?" — so a whole
+# family of levers (selective/disagreement-gated fusion) was structurally invisible to us. The one time we
+# compared detectors by hand we reduced a per-dataset table to the verdict "union fails", while that same
+# table had union at 1.000 vs .909/.826 on one dataset and neutral on others: a CONDITIONAL signal collapsed
+# into a global yes/no.
+#
+# These functions are prediction-set based, so they work for ANY task (detections, links, labels, rows) and
+# any number of views — models, seeds, temporal windows, augmentations.
+# ─────────────────────────────────────────────────────────────────────────────────────────────────────
+
+def disagreement_partition(preds):
+    """Partition items into the AGREEMENT core and the per-view exclusive sets.
+
+    `preds`: {view_name: iterable of hashable item ids}. Returns counts plus the actual id sets, because the
+    disagreement set is the thing a gating lever would operate on — it must be inspectable, not just counted.
+    """
+    sets = {k: set(v) for k, v in preds.items()}
+    names = sorted(sets)
+    if not names:
+        return {"views": [], "n_views": 0}
+    core = set.intersection(*sets.values()) if len(sets) > 1 else set(sets[names[0]])
+    union = set.union(*sets.values())
+    contested = union - core
+    excl = {n: sets[n] - set.union(*[sets[m] for m in names if m != n]) if len(names) > 1 else set(sets[n])
+            for n in names}
+    return {"views": names, "n_views": len(names),
+            "n_union": len(union), "n_core": len(core), "n_contested": len(contested),
+            "contested_frac": round(len(contested) / max(len(union), 1), 4),
+            "core": core, "contested": contested,
+            "exclusive": {n: len(v) for n, v in excl.items()}, "_exclusive_sets": excl,
+            "per_view_n": {n: len(sets[n]) for n in names}}
+
+
+def selective_oracle(preds, truth):
+    """THE diagnostic that reveals whether a gating lever exists at all.
+
+    Compares four policies against ground truth on the SAME items:
+      per-view      — each view alone (the baseline you already have)
+      union         — take everything any view proposes (recall up, precision down)
+      core          — keep only unanimous items (precision up, recall down)
+      ORACLE-gated  — keep the core, then add a contested item only when it is actually correct.
+
+    The oracle is an upper bound, not a method: it says how much heaqroom a disagreement-gated policy could
+    win. If oracle ≈ best single view there is NO lever here and you stop; if oracle >> union and >> core,
+    the contested region carries real recoverable signal and a learned gate is worth building.
+    """
+    T = set(truth)
+    out = {}
+    for n, v in preds.items():
+        v = set(v)
+        out[n] = _prf(v, T)
+    part = disagreement_partition(preds)
+    out["union"] = _prf(set.union(*[set(v) for v in preds.values()]), T)
+    out["core"] = _prf(part["core"], T)
+    out["oracle_gated"] = _prf(part["core"] | (part["contested"] & T), T)
+    best_single = max((out[n]["f1"] for n in preds), default=0.0)
+    out["_summary"] = {
+        "best_single_f1": round(best_single, 4),
+        "union_f1": out["union"]["f1"], "core_f1": out["core"]["f1"],
+        "oracle_gated_f1": out["oracle_gated"]["f1"],
+        "oracle_headroom_over_best_single": round(out["oracle_gated"]["f1"] - best_single, 4),
+        "oracle_headroom_over_union": round(out["oracle_gated"]["f1"] - out["union"]["f1"], 4),
+        "contested_items": part["n_contested"],
+        "contested_that_are_correct": len(part["contested"] & T),
+        "contested_precision": round(len(part["contested"] & T) / max(part["n_contested"], 1), 4),
+        "verdict": None}
+    s = out["_summary"]
+    # WHICH DIRECTION the gain comes from matters more than its size. A gate that ADDS contested items and a
+    # gate that DROPS them are opposite mechanisms, and the headroom number alone cannot tell them apart:
+    # when 0% of contested items are correct, `oracle_gated` collapses to `core` and the "gain" is entirely
+    # from EXCLUDING false positives. Saying "gating could add X" there would send someone to build exactly
+    # the wrong thing.
+    add_gain = round(out["oracle_gated"]["f1"] - out["core"]["f1"], 4)      # value of ADDING right ones
+    drop_gain = round(out["core"]["f1"] - out["union"]["f1"], 4)            # value of DROPPING wrong ones
+    s["gain_from_adding_correct_contested"] = add_gain
+    s["gain_from_dropping_wrong_contested"] = drop_gain
+    hr = s["oracle_headroom_over_best_single"]
+    if hr <= 0.001:
+        s["verdict"] = "NO LEVER — oracle gating cannot beat the best single view"
+    elif add_gain <= 0.001:
+        s["verdict"] = (f"LEVER IS EXCLUSION, not fusion: none of the {s['contested_items']} contested items "
+                        f"are correct ({s['contested_precision']:.1%}); the {hr:+.4f} F1 comes from DROPPING "
+                        f"them (core beats union by {drop_gain:+.4f}). Build a precision filter, not a gate.")
+    else:
+        s["verdict"] = (f"LEVER: gating the {s['contested_items']} contested items could add {hr:+.4f} F1 "
+                        f"over the best single view ({s['contested_precision']:.1%} of contested are "
+                        f"correct; +{add_gain:.4f} from adding the right ones, {drop_gain:+.4f} from "
+                        f"dropping the wrong ones)")
+    return out
+
+
+def _prf(pred, truth):
+    tp = len(pred & truth)
+    p = tp / max(len(pred), 1)
+    r = tp / max(len(truth), 1)
+    return {"n": len(pred), "tp": tp, "precision": round(p, 4), "recall": round(r, 4),
+            "f1": round(2 * p * r / max(p + r, 1e-9), 4)}
+
+
+def conditional_breakdown(per_unit_preds, per_unit_truth):
+    """Run `selective_oracle` PER UNIT (dataset/embryo/stage) and expose the spread.
+
+    This is the guard against the mistake that hid this lever: an aggregate said "union fails" while the
+    per-dataset table showed union winning decisively on some datasets and being neutral on others. Any
+    cross-view claim must be reported conditionally, with the flip count made explicit.
+    """
+    rows, winners = {}, {}
+    for unit, preds in per_unit_preds.items():
+        truth = per_unit_truth.get(unit)
+        if truth is None:
+            continue
+        r = selective_oracle(preds, truth)
+        rows[unit] = r["_summary"]
+        views = {n: r[n]["f1"] for n in preds}
+        winners[unit] = max(views, key=views.get) if views else None
+    flips = len(set(w for w in winners.values() if w))
+    n_lever = sum(1 for v in rows.values() if v["oracle_headroom_over_best_single"] > 0.001)
+    return {"per_unit": rows, "best_view_per_unit": winners,
+            "distinct_winners": flips, "units": len(rows), "units_with_lever": n_lever,
+            "note": ("the best single view FLIPS across units — an aggregate verdict would hide it; "
+                     "a per-unit/gated policy is justified" if flips > 1 else
+                     "one view wins everywhere — a global choice is adequate")}
+
+
 def _feature_methods(np, torch, net, X, Y, feat, method):
     from sklearn.metrics import average_precision_score
     from sklearn.linear_model import Ridge
@@ -749,7 +877,32 @@ def label_explain(spec):
     return out
 
 
+def _cross_model_report(spec):
+    """Agent mode `cross_model` — the spec-driven entry point for cross-view XAI.
+
+    spec: {"mode": "cross_model",
+           "preds": {view: [ids]}, "truth": [ids]}                    single unit, or
+          {"mode": "cross_model",
+           "per_unit_preds": {unit: {view: [ids]}}, "per_unit_truth": {unit: [ids]}}
+    Always returns the CONDITIONAL breakdown when given per-unit input, because an aggregate verdict is what
+    hid this lever class in the first place.
+    """
+    if spec.get("per_unit_preds"):
+        cb = conditional_breakdown(spec["per_unit_preds"], spec.get("per_unit_truth", {}))
+        lines = [f"cross-model XAI: {cb['units']} units, {cb['distinct_winners']} distinct best-views, "
+                 f"{cb['units_with_lever']} with headroom — {cb['note']}"]
+        return cb, lines
+    r = selective_oracle(spec.get("preds", {}), spec.get("truth", []))
+    return r, [f"cross-model XAI: {r['_summary']['verdict']}"]
+
+
 def report(q, worker):
+    # CROSS-MODEL mode needs no torch at all (it is set algebra over prediction ids), so dispatch it before
+    # the torch import — otherwise a box without torch could not ask the cross-view question.
+    _spec0 = (q.get("spec") or {}) if isinstance(q, dict) else {}
+    if _spec0.get("mode") == "cross_model":
+        data, lines = _cross_model_report(_spec0)
+        return ("done", data, "all", f"[{worker}] " + " | ".join(lines))
     try:
         import numpy as np
         import torch

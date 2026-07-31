@@ -21,6 +21,8 @@ import os
 import subprocess
 from pathlib import Path
 from .base import BaseAgent, COMP
+
+ROOT = '/home/seshu/kaggle/2026'
 from . import comp_config as CC
 
 KAGGLE = os.environ.get("KAGGLE_BIN", "/home/seshu/miniconda3/envs/llm/bin/kaggle")
@@ -77,9 +79,15 @@ _METRIC_KEYWORDS = [
 ]
 _AGENTIC_KEYWORDS = ("environment", "simulator", "agent", "episode", "reward", "opponent", "battle",
                      "self-play", "tool call", "policy", "action space")
-_REASONING_KEYWORDS = ("reasoning", "program synthesis", "abstraction", "puzzle", "grid", "arc-agi",
-                       "few-shot generalization", "novel task")
-_ATTACK_KEYWORDS = ("attack", "exfil", "jailbreak", "adversarial prompt", "security", "red team", "tool-attack")
+# "grid" alone was here and is far too generic — ANY board game describes a grid, so reading the full
+# official pages made a farming sim fingerprint as `reasoning` (kaggriculture has a 10x10 farm board).
+# Reasoning must be evidenced by the abstraction/puzzle vocabulary, not by board geometry.
+_REASONING_KEYWORDS = ("reasoning", "program synthesis", "abstraction", "puzzle", "grid-reasoning",
+                       "arc-agi", "few-shot generalization", "novel task")
+# Likewise "attack" alone fired on ordinary competitive-game wording. A SECURITY comp names an attack
+# SURFACE (exfiltration, jailbreak, red-team); a two-player sim just happens to say "attack"/"opponent".
+_ATTACK_KEYWORDS = ("exfil", "jailbreak", "adversarial prompt", "red team", "tool-attack",
+                    "prompt injection", "attack surface")
 
 
 def _pick_modality(files, text):
@@ -92,6 +100,17 @@ def _pick_modality(files, text):
     if any(k in joined for k in _AGENTCFG_FILE_KEYS) or \
        (("agent.yaml" in t or "adk" in t or ("agent config" in t)) and ("skill" in t or "prompt" in t or "tool" in t)):
         return "agent-config"
+    # AGENT-ENV from the MANIFEST, before extension matching. An `AGENTS.md` shipped as a competition file
+    # is a direct statement that the deliverable is an authored agent, and a manifest that is ONLY docs means
+    # there is no dataset to fingerprint at all. Measured miss: kaggriculture ships exactly
+    # [AGENTS.md, README.md] and was fingerprinted `unknown/predictive/tab` — the keyword path never fired
+    # because it only reads the Evaluation/Overview TEXT, which was empty here. Judge the manifest too.
+    doc_exts = {".md", ".txt", ".pdf", ""}
+    if "agents.md" in joined or "agent.md" in joined:
+        return "agent-env"
+    if files and exts and exts <= doc_exts and any(k in joined for k in ("agent", "env", "game", "sim")):
+        return "agent-env"
+
     for group, mod in _EXT_MODALITY:
         if any(e in exts for e in group) or any(g in joined for g in group):
             return mod
@@ -99,6 +118,9 @@ def _pick_modality(files, text):
     if any(k in t for k in _REASONING_KEYWORDS):
         return "grid-reasoning"
     if any(k in t for k in _AGENTIC_KEYWORDS):
+        return "agent-env"
+    # a doc-only manifest with no dataset is still NOT a predictive comp — say so rather than defaulting
+    if files and exts and exts <= doc_exts:
         return "agent-env"
     return "unknown"
 
@@ -236,12 +258,17 @@ def _cli(args, timeout=45):
         return ""
 
 
-def _pull(slug):
-    """Best-effort: file manifest + Evaluation/Overview page text + sample-submission header. Empty on offline."""
-    files_raw = _cli(["competitions", "files", slug, "--csv"])
-    files = [ln.split(",")[0].strip().strip('"') for ln in files_raw.splitlines()[1:] if ln.strip()]
-    eval_text = _cli(["competitions", "pages", slug, "--content", "--page-name", "Evaluation"])
-    overview = _cli(["competitions", "pages", slug, "--content", "--page-name", "Overview"])
+def _pull(slug, save_dir=None):
+    """File manifest + ALL official page text. Delegates to the SHARED `kaggle_cli` layer.
+
+    This used to carry its own CLI wrapper, and that private copy is exactly why the `pages` bug survived:
+    ten other agents shell the same CLI and none of their tests could see it. Plumbing lives in one place now.
+    """
+    from . import kaggle_cli as KC
+    files = KC.files(slug)
+    pages = KC.all_pages(slug, save_dir=save_dir)
+    eval_text = "\n".join(v for k, v in pages.items() if k.lower().startswith("eval"))
+    overview = "\n".join(v for k, v in pages.items() if not k.lower().startswith("eval"))
     return files, eval_text, overview
 
 
@@ -261,7 +288,9 @@ class CompOnboard(BaseAgent):
         overview = spec.get("overview_text", "")
         sample_header = spec.get("sample_header")
         if files is None and not eval_text and not spec.get("offline"):
-            files, eval_text, overview = _pull(slug)
+            files, eval_text, overview = _pull(
+                slug, save_dir=os.path.join(ROOT, slug, 'docs', 'official_pages')
+                if 'ROOT' in globals() else None)
         cfg = infer_config(slug, files=files or [], eval_text=eval_text, overview_text=overview,
                            sample_header=sample_header, hints=spec.get("hints"))
         pack = cfg.pack()

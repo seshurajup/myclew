@@ -88,6 +88,24 @@ def _run():
                                        "sample_header": ["id", "target"]}}, "test")
     checks["run_tab_done"] = (st == "done") and res.get("pack") == "tab"
 
+    # DOC-ONLY MANIFEST = AGENT COMP. Measured miss: kaggriculture ships exactly [AGENTS.md, README.md]
+    # (a two-player farming sim on kaggle-environments) and fingerprinted as unknown/predictive/tab, because
+    # the agentic keywords are only read from the Evaluation/Overview TEXT and that was empty. An AGENTS.md
+    # in the manifest states the deliverable is an authored agent; a docs-only manifest means there is no
+    # dataset to fingerprint at all. Neither may silently fall through to "predictive".
+    agc = A.infer_config("kaggriculture", files=["AGENTS.md", "README.md"], eval_text="", overview_text="")
+    checks["AGENTS.md manifest -> agent-env"] = agc.modality == "agent-env"
+    checks["and paradigm agentic, not predictive"] = agc.paradigm == "agentic"
+    checks["and routes to the agent pack"] = agc.pack() == "agent"
+    # NOTE: "docs-only => never predictive" is deliberately NOT asserted. A `.txt` in the manifest legitimately
+    # means a TEXT competition, and a docs-only manifest can also mean the data arrives via an API. The
+    # defensible signal is an explicit agent marker in the filenames, so that is all this pins.
+    doconly = A.infer_config("some-game", files=["README.md", "game_env.md"], eval_text="", overview_text="")
+    checks["docs manifest naming a game/env -> agent-env"] = doconly.modality == "agent-env"
+    # the new rule must NOT hijack a real dataset comp
+    tabg = A.infer_config("t", files=["train.csv", "test.csv", "sample_submission.csv"], eval_text="RMSE")
+    checks["a real tabular manifest still routes to tab"] = tabg.pack() == "tab"
+
     for k, v in checks.items():
         print(f"  {'OK' if v else 'X'} {k}")
     ok = all(checks.values())

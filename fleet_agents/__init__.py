@@ -144,6 +144,7 @@ _MODULES = [
     ("submit_verify", "_sv"),
     ("research_search", "_rs"),
     ("lb_sync", "_lbs"),
+    ("lb_replays", "_lbrep"),
     ("frozen_exploit", "_fex"),
     ("distill", "_dist"),
     ("component_graft", "_cg"),
@@ -426,6 +427,8 @@ SEED = [
       "competition": "biohub-cell-tracking-during-development"}),
     ("S", "lb-sync", "Snapshot the official leaderboard → submission-recency/activity + per-comp PG (know the bar)",
      {"competition": "biohub-cell-tracking-during-development"}),
+    ("S", "lb-replays", "AGENT LADDERS: download top opponents' EPISODE REPLAYS (+logs) — every ranked episode is a recorded game against a strong opponent, i.e. free supervision for imitation/opponent-modelling",
+     {"comp": "kaggriculture", "top_n": 10, "max_episodes_per_team": 5, "dry_run": True}),
     ("S", "feasibility-gate", "ORCHESTRATION: chain xai-diagnose (name the failing bucket) → run the lever → math-master (per-embryo paired Δ + significance) → official-score (patched metric) → ledger (kept+verdict+mechanism) → insights; every GO/NO-GO gate becomes a durable Lever Feasibility Map insight so we never re-run a killed lever. mode='backfill' records this session's gates", {"mode": "backfill"}),
     ("S", "feasibility-map", "Render the LEVER FEASIBILITY MAP — the ranked GO/NO-GO table (verdict · patched-metric Δ · significance · one-line mechanism · evidence) derived from the ledger → shown on /insights (docs/INSIGHTS.md), auto-refreshed on ledger write", {}),
     ("V", "paper-verify", "PROVE the source papers (Zebrahub Cell 2024 + Ultrack PMC12615266) match our training data — per-claim MATCH/PARTIAL verdict table, cached", {}),
@@ -764,6 +767,7 @@ HANDLERS = {
     "feasibility-map": _feas.run_map,  # render the Lever Feasibility Map (GO/NO-GO table + mechanisms) → /insights (docs/INSIGHTS.md)
     "division-rescue": _drescue.run,   # add geometry-consistent rate-capped 2nd-child forks → lift division_jaccard (the geometry lever)
     "research-search": _rs.run,      # REUSABLE multi-source (HF/arXiv/bioimage/zenodo/github/kaggle+discussions/europepmc/figshare) model+paper search, BM25 index
+    "lb-replays": _lbrep.run,   # MINE opponents' episode replays on an agent ladder (the LB is a corpus, not a number)
     "lb-sync": _lbs.run,             # SNAPSHOT the official leaderboard → submission-recency/activity analytics (per-comp PG)
     "paper-verify": _pverify.run,    # PROVE Zebrahub(Cell 2024)+Ultrack(PMC12615266) claims vs our training data → verdict table (cached)
     "paper-md": _pmd.run,            # ANY paper PDF → designed markdown + lossless figures + a crop of EVERY formula (equations.json)
