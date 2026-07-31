@@ -26,7 +26,7 @@ for f in $STAGED; do
   [ -f "$f" ] || continue
   # skip the hooks themselves: this file NAMES the markers it searches for, so it
   # matched itself and blocked its own commit (the classic self-match trap).
-  case "$f" in .githooks/*|githooks/*|*/.githooks/*|*/githooks/*) continue ;; esac
+  case "$f" in .githooks/*|githooks/*) continue ;; esac
   if head -c 8000 "$f" 2>/dev/null | grep -qE '"refresh_token"|"client_secret"|BEGIN (RSA|OPENSSH) PRIVATE KEY|ghp_[A-Za-z0-9]{30}|AKIA[0-9A-Z]{16}'; then
     echo "[pre-commit] BLOCKED: '$f' contains a credential marker (refresh_token/client_secret/private key)"
     exit 1

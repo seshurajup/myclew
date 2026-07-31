@@ -32,7 +32,7 @@ mkdir -p "$REPO/competitions/biohub-cell-tracking-during-development"
 # rsync: FIRST matching rule wins, so every --exclude must precede the --include filters or files
 # inside an excluded dir match '*.py' first and get copied anyway.
 rsync -a --delete "${RSYNC_EXCLUDES[@]}" \
-  --exclude 'tools/' --exclude 'learning/public_pull/' --exclude 'public_notebooks/' \
+  --exclude 'tools/' --exclude 'learning/' --exclude 'public_notebooks/' \
   --exclude 'docs/public_nb_lineage/' --exclude 'scratchpad/' --exclude 'scratch_ksubmit/' \
   --exclude 'docs/gm_writeups/_github/' --exclude '*_notebook_raw.py' --exclude '*notebook_code.py' \
   --exclude 'config/_auto/' --exclude '*token*.json' --exclude '*secret*' --exclude '*credential*' \
@@ -42,6 +42,17 @@ rsync -a --delete "${RSYNC_EXCLUDES[@]}" \
   --include '*/' --include '*.py' --include '*.yml' --include '*.yaml' \
   --include '*.sh' --include '*.md' --include '*.learning' --include '*.json' --exclude '*' \
   "$BIOHUB/" "$REPO/competitions/biohub-cell-tracking-during-development/"
+
+# 2a2) the LEARNING library at the repo root, NOT under a competition. These are paper packs and
+# lesson files (.learning) that the :7777 hub serves across every competition — they are a library, not
+# biohub content. public_pull/ is downloaded Kaggle notebooks (third-party, does not compile) and stays out.
+mkdir -p "$REPO/learning"
+rsync -a --delete "${RSYNC_EXCLUDES[@]}" \
+  --exclude 'public_pull/' --exclude '__pycache__/' --exclude '*.pyc' \
+  --exclude '*_notebook_raw.py' --exclude '*notebook_code.py' \
+  --include '*/' --include '*.py' --include '*.learning' --include '*.yml' --include '*.yaml' \
+  --include '*.md' --include '*.json' --exclude '*' \
+  "$BIOHUB/learning/" "$REPO/learning/"
 
 # 2b2) the shared RUNTIME: :7777 knowledge hub (researchpapers/app.py) and :7788 runboard
 # (store.py, runtime_cli.py, fleet/) plus the training service. This is OUR code and serves every
@@ -107,7 +118,9 @@ if git diff --cached --quiet; then
   echo "[myclew] no pending changes — nothing to commit ($(date '+%F %T'))"; exit 0
 fi
 N=$(git diff --cached --name-only | wc -l)
-git -c user.name="SeshurajuP" -c user.email="seshurajup@gmail.com" \
-  commit -q -m "stable snapshot $(date '+%F %H:%M') — ${N} files"
+if ! git -c user.name="SeshurajuP" -c user.email="seshurajup@gmail.com" \
+     commit -q -m "stable snapshot $(date '+%F %H:%M') — ${N} files"; then
+  echo "[myclew] COMMIT REJECTED (hook or guard) — nothing pushed"; exit 4
+fi
 git push -q origin HEAD 2>&1 | tail -2 || { echo "[myclew] push failed"; exit 3; }
 echo "[myclew] committed + pushed ${N} changed files ($(date '+%F %T'))"
